@@ -16,6 +16,7 @@ import com.auraplayer.ui.components.OledSaverDialog
 import com.auraplayer.ui.components.RelaxAmbienceDialog
 import com.auraplayer.ui.components.ShimmerListPlaceholder
 import com.auraplayer.ui.components.StemMixerDialog
+import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.ui.components.StoryCardDialog
 import com.auraplayer.ui.components.ViralAudioStudioDialog
 import kotlinx.coroutines.launch
@@ -230,6 +231,8 @@ fun MusicScreen(
     onRefreshLibrary: () -> Unit = {},
     onShuffleAll: (List<MediaModel>) -> Unit = {},
     onSearchOnline: (String) -> Unit = {},
+    currentAccent: String = "MYSTIC_OBSIDIAN",
+    onAccentChange: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -247,6 +250,7 @@ fun MusicScreen(
     var selectedSortMode by rememberSaveable { mutableIntStateOf(0) } // 0: Recién Descargadas, 1: Título, 2: Artista, 3: Duración, 4: Más Escuchadas
     var showSortMenu by remember { mutableStateOf(false) }
     var showToolsMenu by remember { mutableStateOf(false) }
+    var showMysteriousThemeDialog by remember { mutableStateOf(false) }
     var showRelaxDialog by remember { mutableStateOf(false) }
     var showRadarDialog by remember { mutableStateOf(false) }
     var showViralStudio by remember { mutableStateOf(false) }
@@ -531,6 +535,17 @@ fun MusicScreen(
                         onDismissRequest = { showToolsMenu = false },
                         modifier = Modifier.background(Color(0xFF0F172A))
                     ) {
+                        Text(
+                            text = "ATMÓSFERA & PERSONALIZACIÓN",
+                            color = Color(0xFFB388FF),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                        )
+                        DropdownMenuItem(
+                            text = { Text("🔮 Colores & Temas Misteriosos", color = Color(0xFFB388FF), fontWeight = FontWeight.Bold) },
+                            onClick = { showToolsMenu = false; showMysteriousThemeDialog = true }
+                        )
                         Text(
                             text = "AUDIO",
                             color = Color(0xFF94A3B8),
@@ -852,7 +867,7 @@ fun MusicScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Ajustes",
-                        tint = Color(0xFF38BDF8),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -866,13 +881,13 @@ fun MusicScreen(
                 .padding(horizontal = 14.dp, vertical = 6.dp)
                 .height(48.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF13182E))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 .border(
                     1.dp,
                     Brush.horizontalGradient(
                         listOf(
-                            Color(0xFF8B5CF6).copy(alpha = 0.5f),
-                            Color(0xFF38BDF8).copy(alpha = 0.4f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
                         )
                     ),
                     RoundedCornerShape(24.dp)
@@ -887,7 +902,7 @@ fun MusicScreen(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Buscar canciones",
-                    tint = Color(0xFF38BDF8),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(22.dp)
                 )
 
@@ -914,7 +929,7 @@ fun MusicScreen(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF38BDF8)),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -2497,6 +2512,18 @@ fun MusicScreen(
         )
     }
 
+    // Mysterious Themes & Colors Dialog
+    if (showMysteriousThemeDialog) {
+        MysteriousThemeDialog(
+            currentAccent = currentAccent,
+            onAccentChange = { newAccent ->
+                playlistManager.setThemeAccent(newAccent)
+                onAccentChange(newAccent)
+            },
+            onDismiss = { showMysteriousThemeDialog = false }
+        )
+    }
+
     // Relax Ambience Dialog
     if (showRelaxDialog) {
         RelaxAmbienceDialog(
@@ -2898,22 +2925,22 @@ fun SongListItem(
                         if (isSelected) {
                             Brush.linearGradient(
                                 listOf(
-                                    Color(0xFF8B5CF6).copy(alpha = 0.35f),
-                                    Color(0xFF38BDF8).copy(alpha = 0.35f)
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)
                                 )
                             )
                         } else {
                             Brush.linearGradient(
                                 listOf(
-                                    Color(0xFF13182E),
-                                    Color(0xFF0F172A)
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
                                 )
                             )
                         }
                     )
                     .border(
                         1.dp,
-                        if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.6f) else Color(0xFF8B5CF6).copy(alpha = 0.2f),
+                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                         RoundedCornerShape(14.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -2921,7 +2948,7 @@ fun SongListItem(
                 Icon(
                     imageVector = Icons.Default.MusicNote,
                     contentDescription = null,
-                    tint = if (isSelected) Color(0xFF38BDF8) else Color(0xFF8B5CF6).copy(alpha = 0.6f),
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                     modifier = Modifier.size(24.dp)
                 )
                 if (song.artworkUri != null) {
@@ -2963,7 +2990,7 @@ fun SongListItem(
                     )
                     if (isSelected) {
                         Spacer(modifier = Modifier.width(6.dp))
-                        LiveEqualizerIndicator(barColor = Color(0xFF38BDF8))
+                        LiveEqualizerIndicator(barColor = MaterialTheme.colorScheme.primary)
                     }
                     if (isFavorite) {
                         val heartScale by animateFloatAsState(

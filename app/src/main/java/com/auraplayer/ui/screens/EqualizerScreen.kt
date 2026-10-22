@@ -716,9 +716,13 @@ fun EqualizerScreen(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 val accents = listOf(
+                    Triple("MYSTIC_OBSIDIAN", "Misterio 🔮", Color(0xFFB388FF)),
+                    Triple("MIDNIGHT_ECLIPSE", "Eclipse 🌑", Color(0xFFFF2A55)),
+                    Triple("PHANTOM_SPECTER", "Espectro 👁️", Color(0xFF00FF9D)),
+                    Triple("NEBULA_ENIGMA", "Nebulosa 🌌", Color(0xFFE040FB)),
                     Triple("AMOLED", "AMOLED 🖤", Color(0xFF38BDF8)),
                     Triple("CYBERPUNK", "Cyberpunk ⚡", Color(0xFF00F0FF)),
-                    Triple("SUNSET_GOLD", "Sunset Gold 👑", Color(0xFFFFD700)),
+                    Triple("SUNSET_GOLD", "Sunset 👑", Color(0xFFFFD700)),
                     Triple("PURPLE", "Velvet 💜", Color(0xFFA855F7)),
                     Triple("CYAN", "Matrix 💎", Color(0xFF06B6D4)),
                     Triple("MAGENTA", "Magenta 🌸", Color(0xFFF43F5E)),

@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.auraplayer.ui.components.bounceClick
+import com.auraplayer.audio.AuraHaptic
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Explore
@@ -256,6 +257,7 @@ fun AuraApp(
     onAccentChange: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val view = androidx.compose.ui.platform.LocalView.current
     val scope = rememberCoroutineScope()
     val mediaRepository = remember { MediaRepository(context) }
     val queueStore = remember { QueueStore(context) }
@@ -1969,13 +1971,35 @@ fun AuraApp(
                     }
                 )
 
+                // Mysterious subtle luminous gradient border
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+
                 // Aesthetic Navigation Bar
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface
                 ) {
                     NavigationBarItem(
                         selected = selectedNavTab == 0,
-                        onClick = { selectedNavTab = 0 },
+                        onClick = {
+                            if (selectedNavTab != 0) {
+                                AuraHaptic.click(view)
+                                selectedNavTab = 0
+                            }
+                        },
                         icon = { Icon(Icons.Default.MusicNote, contentDescription = null) },
                         label = { Text("Música") },
                         colors = NavigationBarItemDefaults.colors(
@@ -1985,7 +2009,12 @@ fun AuraApp(
                     )
                     NavigationBarItem(
                         selected = selectedNavTab == 1,
-                        onClick = { selectedNavTab = 1 },
+                        onClick = {
+                            if (selectedNavTab != 1) {
+                                AuraHaptic.click(view)
+                                selectedNavTab = 1
+                            }
+                        },
                         icon = { Icon(Icons.Default.Explore, contentDescription = null) },
                         label = { Text("Explorar") },
                         colors = NavigationBarItemDefaults.colors(
@@ -1995,7 +2024,12 @@ fun AuraApp(
                     )
                     NavigationBarItem(
                         selected = selectedNavTab == 2,
-                        onClick = { selectedNavTab = 2 },
+                        onClick = {
+                            if (selectedNavTab != 2) {
+                                AuraHaptic.click(view)
+                                selectedNavTab = 2
+                            }
+                        },
                         icon = { Icon(Icons.Default.VideoLibrary, contentDescription = null) },
                         label = { Text("Videos") },
                         colors = NavigationBarItemDefaults.colors(
@@ -2005,7 +2039,12 @@ fun AuraApp(
                     )
                     NavigationBarItem(
                         selected = selectedNavTab == 3,
-                        onClick = { selectedNavTab = 3 },
+                        onClick = {
+                            if (selectedNavTab != 3) {
+                                AuraHaptic.click(view)
+                                selectedNavTab = 3
+                            }
+                        },
                         icon = { Icon(Icons.Default.Equalizer, contentDescription = null) },
                         label = { Text("Ecualizador") },
                         colors = NavigationBarItemDefaults.colors(
@@ -2318,6 +2357,8 @@ fun AuraApp(
                         pendingDiscoverQuery = query
                         selectedNavTab = 1
                     },
+                    currentAccent = currentAccent,
+                    onAccentChange = onAccentChange,
                     modifier = Modifier.fillMaxSize()
                 )
             }
