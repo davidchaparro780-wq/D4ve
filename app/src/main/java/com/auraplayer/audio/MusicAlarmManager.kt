@@ -160,7 +160,11 @@ class MusicAlarmReceiver : BroadcastReceiver() {
             .setFullScreenIntent(pendingIntent, true)
             .build()
 
-        notificationManager?.notify(1001 + intent.getIntExtra("alarm_id", 0), notification)
+        try {
+            notificationManager?.notify(1001 + intent.getIntExtra("alarm_id", 0), notification)
+        } catch (e: Exception) {
+            AppLog.w(TAG, "No se pudo emitir la notificación de alarma", e)
+        }
 
         // Reproducir suavemente si el reproductor está activo
         try {

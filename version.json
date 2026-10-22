@@ -1,7 +1,7 @@
 {
-  "versionCode": 107,
-  "versionName": "4.9.7",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.7/app-debug.apk",
-  "changelog": "🔊 DaVE Player v4.9.7 (Build 107):\n• 🔊 Las teclas de volumen del celular ya NO cambian de canción: subir o bajar volumen ahora solo ajusta el volumen, sin saltos de pista.\n• 🌈 Material You, 🧰 menú Herramientas Pro por secciones y ⚡ mejoras de rendimiento incluidas desde 4.9.6.",
+  "versionCode": 109,
+  "versionName": "4.9.9",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.9/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.9 (Build 109):\n• 🛡️ Widget sin fallos: prevención de TransactionTooLarge y Hardware Bitmaps en RemoteViews.\n• ⚡ Optimización Coil y extracción de calidad de audio compatible con Scoped Storage.\n• 🔒 Sin fugas de memoria ni descriptores de archivo en Stories, descargas, recorte de audio y letras.\n• 📶 Mayor estabilidad en Party Link con MulticastLock y reconexión rápida.",
   "fileSizeMb": 24.5
 }

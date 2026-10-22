@@ -21,7 +21,8 @@ class AbLooperManager private constructor() {
 
     fun setPointA(posMs: Long) {
         pointAMs = posMs
-        if (pointBMs != null && pointBMs!! <= posMs) {
+        val b = pointBMs
+        if (b != null && b <= posMs) {
             pointBMs = null
         }
         isEnabled = pointAMs != null && pointBMs != null
@@ -52,7 +53,7 @@ class AbLooperManager private constructor() {
         val a = pointAMs ?: return
         val b = pointBMs ?: return
 
-        if (currentPosMs >= b || currentPosMs < a) {
+        if (b > a && (currentPosMs >= b || currentPosMs < a)) {
             seekTo(a)
         }
     }

@@ -12,6 +12,7 @@ import org.json.JSONObject
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.InetSocketAddress
 
 /**
  * Gestor de Silent Disco & Sincronización Multi-Teléfono por Wi-Fi Local (Party Link).
@@ -34,6 +35,7 @@ class PartyLinkManager private constructor(private val context: Context) {
 
     private var broadcastJob: Job? = null
     private var listenJob: Job? = null
+    private var multicastLock: WifiManager.MulticastLock? = null
     private val PORT = 8844
 
     fun getLocalIpAddress(): String {
@@ -94,11 +96,23 @@ class PartyLinkManager private constructor(private val context: Context) {
         stopAll()
         isJoined = true
 
+        try {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            multicastLock = wifiManager?.createMulticastLock("PartyLinkLock")?.apply {
+                setReferenceCounted(true)
+                acquire()
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "No se pudo adquirir el MulticastLock", e)
+        }
+
         listenJob = scope.launch(Dispatchers.IO) {
             var socket: DatagramSocket? = null
             try {
-                socket = DatagramSocket(PORT).apply {
+                socket = DatagramSocket(null).apply {
+                    reuseAddress = true
                     broadcast = true
+                    bind(InetSocketAddress(PORT))
                 }
                 val buffer = ByteArray(1024)
                 val packet = DatagramPacket(buffer, buffer.size)
@@ -130,6 +144,12 @@ class PartyLinkManager private constructor(private val context: Context) {
         broadcastJob = null
         listenJob?.cancel()
         listenJob = null
+        try {
+            if (multicastLock?.isHeld == true) {
+                multicastLock?.release()
+            }
+        } catch (_: Exception) {}
+        multicastLock = null
     }
 
     companion object {

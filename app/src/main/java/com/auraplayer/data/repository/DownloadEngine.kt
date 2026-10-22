@@ -751,9 +751,9 @@ class DownloadEngine(
             savedPath = targetFile.absolutePath
             savedUri = Uri.fromFile(targetFile)
 
-            val outputStream = FileOutputStream(targetFile)
-            streamWithProgress(inputStream, outputStream, contentLength, downloadId)
-            outputStream.close()
+            FileOutputStream(targetFile).use { outputStream ->
+                streamWithProgress(inputStream, outputStream, contentLength, downloadId)
+            }
 
             MediaScannerConnection.scanFile(
                 context,

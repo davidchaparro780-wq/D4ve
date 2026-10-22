@@ -283,10 +283,24 @@ private fun shareStoryCard(
         // Save to cache and share
         val cachePath = File(context.cacheDir, "story_cards")
         cachePath.mkdirs()
+        // Clean up story cards older than 24 hours to prevent cache accumulation
+        try {
+            val oneDayAgo = System.currentTimeMillis() - 86400000L
+            cachePath.listFiles()?.forEach { oldFile ->
+                if (oldFile.lastModified() < oneDayAgo) {
+                    oldFile.delete()
+                }
+            }
+        } catch (_: Exception) {}
+
         val file = File(cachePath, "story_card_${System.currentTimeMillis()}.png")
         FileOutputStream(file).use { out ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
+
+        try {
+            bitmap.recycle()
+        } catch (_: Exception) {}
 
         val contentUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
         val shareIntent = Intent(Intent.ACTION_SEND).apply {

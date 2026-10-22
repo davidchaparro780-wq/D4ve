@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -209,10 +210,15 @@ class DaVEAppWidgetProvider : AppWidgetProvider() {
                     val src = ImageDecoder.createSource(context.contentResolver, uri)
                     ImageDecoder.decodeBitmap(src) { decoder, _, _ ->
                         decoder.setTargetSize(128, 128)
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
                     }
                 } else {
-                    @Suppress("DEPRECATION")
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                    context.contentResolver.openInputStream(uri)?.use { stream ->
+                        val original = BitmapFactory.decodeStream(stream) ?: return null
+                        val scaled = Bitmap.createScaledBitmap(original, 128, 128, true)
+                        if (scaled != original) original.recycle()
+                        scaled
+                    }
                 }
             } catch (_: Exception) {
                 null

@@ -1,6 +1,8 @@
 package com.auraplayer.data.repository
 
+import android.content.Context
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import com.auraplayer.data.model.MediaModel
 import com.auraplayer.util.AppLog
 import kotlinx.coroutines.Dispatchers
@@ -22,10 +24,25 @@ object AudioQualityAnalyzer {
 
     private const val TAG = "AudioQualityAnalyzer"
 
-    suspend fun analyze(song: MediaModel): AudioQualityInfo = withContext(Dispatchers.IO) {
+    suspend fun analyze(song: MediaModel, context: Context? = null): AudioQualityInfo = withContext(Dispatchers.IO) {
         val retriever = MediaMetadataRetriever()
         return@withContext try {
-            retriever.setDataSource(song.path)
+            var dataSourceLoaded = false
+            if (song.path.isNotBlank() && File(song.path).exists()) {
+                try {
+                    retriever.setDataSource(song.path)
+                    dataSourceLoaded = true
+                } catch (_: Exception) {}
+            }
+            if (!dataSourceLoaded && context != null && song.uri != Uri.EMPTY) {
+                try {
+                    retriever.setDataSource(context, song.uri)
+                    dataSourceLoaded = true
+                } catch (_: Exception) {}
+            }
+            if (!dataSourceLoaded && song.path.isNotBlank()) {
+                retriever.setDataSource(song.path)
+            }
 
             val bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
                 ?.toLongOrNull()?.div(1000)?.toInt() ?: estimateBitrateFromFile(song)
@@ -43,7 +60,15 @@ object AudioQualityAnalyzer {
                 else -> "Audio"
             }
 
-            val fileSizeMb = try { File(song.path).length().toFloat() / (1024f * 1024f) } catch (_: Exception) { 0f }
+            val fileSizeMb = try {
+                if (song.path.isNotBlank() && File(song.path).exists()) {
+                    File(song.path).length().toFloat() / (1024f * 1024f)
+                } else if (song.size > 0L) {
+                    song.size.toFloat() / (1024f * 1024f)
+                } else 0f
+            } catch (_: Exception) {
+                if (song.size > 0L) song.size.toFloat() / (1024f * 1024f) else 0f
+            }
             val durationMs = song.duration
 
             val (label, color) = when {
@@ -74,9 +99,15 @@ object AudioQualityAnalyzer {
 
     private fun estimateBitrateFromFile(song: MediaModel): Int {
         return try {
-            val sizeBytes = File(song.path).length()
+            val sizeBytes = if (song.path.isNotBlank() && File(song.path).exists()) {
+                File(song.path).length()
+            } else {
+                song.size
+            }
             val durationSec = (song.duration / 1000L).coerceAtLeast(1L)
-            ((sizeBytes * 8L) / durationSec / 1000L).toInt()
+            if (sizeBytes > 0L) {
+                ((sizeBytes * 8L) / durationSec / 1000L).toInt()
+            } else 128
         } catch (_: Exception) { 128 }
     }
 }

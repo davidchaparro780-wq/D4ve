@@ -180,7 +180,15 @@ fun DaveRadarDialog(
                     isSearchingHumming = true
                     val res = DaveRadarManager.searchHummingOrQuery(spoken)
                     isSearchingHumming = false
-                    res.onSuccess { hummingResults = it }
+                    res.onSuccess {
+                        hummingResults = it
+                        if (it.isEmpty()) {
+                            Toast.makeText(context, "No se encontraron coincidencias para la melodía", Toast.LENGTH_SHORT).show()
+                        }
+                    }.onFailure {
+                        hummingResults = emptyList()
+                        Toast.makeText(context, "No se encontraron coincidencias para la melodía", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -575,7 +583,15 @@ fun DaveRadarDialog(
                                         isSearchingHumming = true
                                         val res = DaveRadarManager.searchHummingOrQuery(hummingQuery)
                                         isSearchingHumming = false
-                                        res.onSuccess { hummingResults = it }
+                                        res.onSuccess {
+                                            hummingResults = it
+                                            if (it.isEmpty()) {
+                                                Toast.makeText(context, "No se encontraron resultados para '$hummingQuery'", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }.onFailure {
+                                            hummingResults = emptyList()
+                                            Toast.makeText(context, "No se encontraron resultados para '$hummingQuery'", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 }
                             },

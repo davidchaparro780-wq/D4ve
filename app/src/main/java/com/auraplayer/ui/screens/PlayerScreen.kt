@@ -349,9 +349,10 @@ fun PlayerScreen(
     var isPlayerTranslating by remember { mutableStateOf(false) }
 
     LaunchedEffect(isPlayerTranslationEnabled, lyrics) {
-        if (isPlayerTranslationEnabled && lyrics?.lines?.isNotEmpty() == true && playerLyricsTranslations.isEmpty()) {
+        val currentLyrics = lyrics
+        if (isPlayerTranslationEnabled && currentLyrics?.lines?.isNotEmpty() == true && playerLyricsTranslations.isEmpty()) {
             isPlayerTranslating = true
-            val uniqueLines = lyrics!!.lines.map { it.text }.distinct().take(40)
+            val uniqueLines = currentLyrics.lines.map { it.text }.distinct().take(40)
             playerLyricsTranslations = com.auraplayer.data.repository.LyricsTranslatorService.batchTranslate(uniqueLines)
             isPlayerTranslating = false
         }
@@ -443,9 +444,9 @@ fun PlayerScreen(
     var showPartyLinkDialog by remember { mutableStateOf(false) }
     var isBubbleActive by remember { mutableStateOf(FloatingBubbleService.isRunning) }
 
-    var qualityInfo by remember(currentMedia.path) { mutableStateOf<com.auraplayer.data.repository.AudioQualityInfo?>(null) }
-    LaunchedEffect(currentMedia.path) {
-        qualityInfo = com.auraplayer.data.repository.AudioQualityAnalyzer.analyze(currentMedia)
+    var qualityInfo by remember(currentMedia.id, currentMedia.path) { mutableStateOf<com.auraplayer.data.repository.AudioQualityInfo?>(null) }
+    LaunchedEffect(currentMedia.id, currentMedia.path) {
+        qualityInfo = com.auraplayer.data.repository.AudioQualityAnalyzer.analyze(currentMedia, context)
     }
 
     var dynamicArtworkColor by remember { mutableStateOf<Color?>(null) }
@@ -454,7 +455,7 @@ fun PlayerScreen(
         if (uri != null) {
             withContext(Dispatchers.IO) {
                 try {
-                    val loader = coil.ImageLoader(context)
+                    val loader = coil.Coil.imageLoader(context)
                     val req = coil.request.ImageRequest.Builder(context)
                         .data(uri)
                         .allowHardware(false)
@@ -1736,7 +1737,11 @@ fun PlayerScreen(
                                 } else if (abLoopB == null) {
                                     var targetB = currentPositionMs
                                     if (targetB <= abLoopA!! + 1500L) {
-                                        targetB = (abLoopA!! + 3000L).coerceAtMost(effectiveDurationMs)
+                                        targetB = if (effectiveDurationMs > abLoopA!! + 1500L) {
+                                            (abLoopA!! + 3000L).coerceAtMost(effectiveDurationMs)
+                                        } else {
+                                            abLoopA!! + 3000L
+                                        }
                                     }
                                     abLoopB = targetB
                                     isAbLoopActive = true

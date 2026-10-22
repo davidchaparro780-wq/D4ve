@@ -1075,8 +1075,8 @@ fun AuraApp(
                     val d = mediaCtrl.duration
                     if (d > 0L) {
                         durationMs = d
-                    } else if ((currentMedia?.duration ?: 0L) > 0L) {
-                        durationMs = currentMedia!!.duration
+                    } else {
+                        currentMedia?.duration?.let { if (it > 0L) durationMs = it }
                     }
                 }
 
@@ -1181,8 +1181,8 @@ fun AuraApp(
                 val d = it.duration
                 if (d > 0L) {
                     durationMs = d
-                } else if (durationMs <= 0L && (currentMedia?.duration ?: 0L) > 0L) {
-                    durationMs = currentMedia!!.duration
+                } else if (durationMs <= 0L) {
+                    currentMedia?.duration?.let { if (it > 0L) durationMs = it }
                 }
                 if (positionState.value < 800L && durationMs > 20_000L && silenceTrimmerManager.isEnabled) {
                     val trimStart = silenceTrimmerManager.getTrimmedStartPositionMs(durationMs)

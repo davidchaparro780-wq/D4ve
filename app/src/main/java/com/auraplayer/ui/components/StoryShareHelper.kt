@@ -158,10 +158,14 @@ object StoryShareHelper {
 
             // Save Bitmap to cache directory
             val storyFile = File(context.cacheDir, "dave_story.png")
-            val fos = FileOutputStream(storyFile)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 95, fos)
-            fos.flush()
-            fos.close()
+            FileOutputStream(storyFile).use { fos ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 95, fos)
+                fos.flush()
+            }
+
+            try {
+                bitmap.recycle()
+            } catch (_: Exception) {}
 
             val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", storyFile)
 

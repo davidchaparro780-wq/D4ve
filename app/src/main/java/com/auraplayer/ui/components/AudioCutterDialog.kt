@@ -557,23 +557,24 @@ private fun trimAudioFile(
         extractor.selectTrack(trackIndex)
         val format = extractor.getTrackFormat(trackIndex)
 
-        val muxer = MediaMuxer(dstFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-        val muxerTrack = muxer.addTrack(format)
-        muxer.start()
-
-        val maxInput = if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
-            try { format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE) } catch (_: Exception) { 64 * 1024 }
-        } else 64 * 1024
-        val bufferSize = maxOf(64 * 1024, maxInput)
-        val buffer = ByteBuffer.allocate(bufferSize)
-        val bufferInfo = MediaCodec.BufferInfo()
-
-        extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
-
-        var lastPresentationTimeUs = 0L
-        var isFirstSample = true
-
+        var muxer: MediaMuxer? = null
         try {
+            muxer = MediaMuxer(dstFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+            val muxerTrack = muxer.addTrack(format)
+            muxer.start()
+
+            val maxInput = if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
+                try { format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE) } catch (_: Exception) { 64 * 1024 }
+            } else 64 * 1024
+            val bufferSize = maxOf(64 * 1024, maxInput)
+            val buffer = ByteBuffer.allocate(bufferSize)
+            val bufferInfo = MediaCodec.BufferInfo()
+
+            extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+
+            var lastPresentationTimeUs = 0L
+            var isFirstSample = true
+
             while (true) {
                 val sampleSize = extractor.readSampleData(buffer, 0)
                 if (sampleSize < 0) break
@@ -601,12 +602,12 @@ private fun trimAudioFile(
             }
         } finally {
             try {
-                muxer.stop()
+                muxer?.stop()
             } catch (e: Exception) {
                 AppLog.d(TAG, "No se pudo detener el muxer al finalizar el corte", e)
             }
             try {
-                muxer.release()
+                muxer?.release()
             } catch (e: Exception) {
                 AppLog.d(TAG, "No se pudo liberar el muxer al finalizar el corte", e)
             }

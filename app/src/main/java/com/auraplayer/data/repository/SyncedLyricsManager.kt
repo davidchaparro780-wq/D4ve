@@ -127,31 +127,38 @@ class SyncedLyricsManager(private val context: Context) {
 
             val urlString = "https://lrclib.net/api/get?track_name=$encTitle&artist_name=$encArtist&duration=$durSec"
             val url = URL(urlString)
-            val conn = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 6000
-                readTimeout = 6000
-                setRequestProperty("User-Agent", "DaVEPlayer/3.0 (Android)")
-            }
-
-            if (conn.responseCode == 200) {
-                val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
-                val obj = JSONObject(jsonStr)
-                if (obj.has("syncedLyrics") && !obj.isNull("syncedLyrics")) {
-                    val syncedText = obj.getString("syncedLyrics")
-                    if (syncedText.isNotBlank()) {
-                        if (songId != null) {
-                            saveSyncedLyrics(songId, syncedText)
-                        }
-                        return parseLrc(syncedText)
-                    }
-                } else if (obj.has("plainLyrics") && !obj.isNull("plainLyrics")) {
-                    val plain = obj.getString("plainLyrics")
-                    // Convertir texto plano en líneas simples espaciadas si no hay LRC
-                    val pseudoLines = plain.lines().filter { it.isNotBlank() }.mapIndexed { idx, txt ->
-                        LrcLine(idx * 3500L, txt)
-                    }
-                    return pseudoLines
+            var conn: HttpURLConnection? = null
+            try {
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    setRequestProperty("User-Agent", "DaVEPlayer/3.0 (Android)")
                 }
+
+                if (conn.responseCode == 200) {
+                    val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
+                    val obj = JSONObject(jsonStr)
+                    if (obj.has("syncedLyrics") && !obj.isNull("syncedLyrics")) {
+                        val syncedText = obj.getString("syncedLyrics")
+                        if (syncedText.isNotBlank()) {
+                            if (songId != null) {
+                                saveSyncedLyrics(songId, syncedText)
+                            }
+                            return parseLrc(syncedText)
+                        }
+                    } else if (obj.has("plainLyrics") && !obj.isNull("plainLyrics")) {
+                        val plain = obj.getString("plainLyrics")
+                        // Convertir texto plano en líneas simples espaciadas si no hay LRC
+                        val pseudoLines = plain.lines().filter { it.isNotBlank() }.mapIndexed { idx, txt ->
+                            LrcLine(idx * 3500L, txt)
+                        }
+                        return pseudoLines
+                    }
+                }
+            } finally {
+                try {
+                    conn?.disconnect()
+                } catch (_: Exception) {}
             }
         } catch (_: Exception) {
             // Error de red ignorado limpiamente
