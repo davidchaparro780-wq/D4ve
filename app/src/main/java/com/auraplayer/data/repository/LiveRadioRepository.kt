@@ -31,9 +31,10 @@ class LiveRadioRepository {
 
     private fun fetchFromRadioApi(urlString: String): List<OnlineTrack> {
         val list = mutableListOf<OnlineTrack>()
+        var conn: HttpURLConnection? = null
         try {
             val url = URL(urlString)
-            val conn = (url.openConnection() as HttpURLConnection).apply {
+            conn = (url.openConnection() as HttpURLConnection).apply {
                 connectTimeout = 7000
                 readTimeout = 7000
                 requestMethod = "GET"
@@ -73,6 +74,8 @@ class LiveRadioRepository {
             }
         } catch (e: Exception) {
             AppLog.e(TAG, "Fallo al consultar la API de Radio Browser", e)
+        } finally {
+            try { conn?.disconnect() } catch (_: Throwable) {}
         }
         return list
     }

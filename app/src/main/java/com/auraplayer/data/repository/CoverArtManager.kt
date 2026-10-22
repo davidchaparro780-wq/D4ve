@@ -208,44 +208,53 @@ class CoverArtManager(private val context: Context) {
             if (query.length < 2) return null
 
             val urlString = "https://itunes.apple.com/search?term=${URLEncoder.encode(query, "UTF-8")}&entity=song&limit=1"
-            val connection = URL(urlString).openConnection() as HttpURLConnection
-            connection.connectTimeout = 6000
-            connection.readTimeout = 6000
-            connection.requestMethod = "GET"
-            connection.setRequestProperty("User-Agent", "AuraPlayer/1.0")
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL(urlString).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    requestMethod = "GET"
+                    setRequestProperty("User-Agent", "AuraPlayer/1.0")
+                }
 
-            if (connection.responseCode == 200) {
-                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(responseText)
-                val results = json.optJSONArray("results")
-                if (results != null && results.length() > 0) {
-                    val first = results.getJSONObject(0)
-                    var artUrl = first.optString("artworkUrl100")
-                    if (artUrl.isNotEmpty()) {
-                        // Upgrade to 600x600 high quality artwork
-                        artUrl = artUrl.replace("100x100bb.jpg", "600x600bb.jpg")
-                        val targetFile = File(coversDir, "$id.jpg")
-                        downloadImageToFile(artUrl, targetFile)
-                        if (targetFile.exists() && targetFile.length() > 0) {
-                            val cleanKey = sanitize("${artist}_${title}")
-                            val namedFile = File(coversDir, "$cleanKey.jpg")
-                            if (!namedFile.exists()) {
-                                targetFile.copyTo(namedFile, overwrite = true)
+                if (connection.responseCode == 200) {
+                    val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                    val json = JSONObject(responseText)
+                    val results = json.optJSONArray("results")
+                    if (results != null && results.length() > 0) {
+                        val first = results.getJSONObject(0)
+                        var artUrl = first.optString("artworkUrl100")
+                        if (artUrl.isNotEmpty()) {
+                            // Upgrade to 600x600 high quality artwork
+                            artUrl = artUrl.replace("100x100bb.jpg", "600x600bb.jpg")
+                            val targetFile = File(coversDir, "$id.jpg")
+                            downloadImageToFile(artUrl, targetFile)
+                            if (targetFile.exists() && targetFile.length() > 0) {
+                                val cleanKey = sanitize("${artist}_${title}")
+                                val namedFile = File(coversDir, "$cleanKey.jpg")
+                                if (!namedFile.exists()) {
+                                    targetFile.copyTo(namedFile, overwrite = true)
+                                }
+                                try { coil.Coil.imageLoader(context).memoryCache?.clear() } catch (_: Exception) {}
+                                return Uri.parse("file://${targetFile.absolutePath}?t=${System.currentTimeMillis()}")
                             }
-                            return Uri.fromFile(targetFile)
                         }
                     }
                 }
+            } finally {
+                try { connection?.disconnect() } catch (_: Throwable) {}
             }
 
             // Fallback: Deezer API (covers Latin, Pop, Urban with 1000x1000 HD artwork)
+            var dConn: HttpURLConnection? = null
             try {
                 val deezerUrl = "https://api.deezer.com/search?q=${URLEncoder.encode(query, "UTF-8")}&limit=1"
-                val dConn = URL(deezerUrl).openConnection() as HttpURLConnection
-                dConn.connectTimeout = 6000
-                dConn.readTimeout = 6000
-                dConn.requestMethod = "GET"
-                dConn.setRequestProperty("User-Agent", "AuraPlayer/1.0")
+                dConn = (URL(deezerUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    requestMethod = "GET"
+                    setRequestProperty("User-Agent", "AuraPlayer/1.0")
+                }
                 if (dConn.responseCode == 200) {
                     val dText = dConn.inputStream.bufferedReader().use { it.readText() }
                     val dJson = JSONObject(dText)
@@ -265,13 +274,16 @@ class CoverArtManager(private val context: Context) {
                                 if (!namedFile.exists()) {
                                     targetFile.copyTo(namedFile, overwrite = true)
                                 }
-                                return Uri.fromFile(targetFile)
+                                try { coil.Coil.imageLoader(context).memoryCache?.clear() } catch (_: Exception) {}
+                                return Uri.parse("file://${targetFile.absolutePath}?t=${System.currentTimeMillis()}")
                             }
                         }
                     }
                 }
             } catch (de: Exception) {
                 AppLog.d(TAG, "Deezer cover fetch fallback omitido: ${de.message}")
+            } finally {
+                try { dConn?.disconnect() } catch (_: Throwable) {}
             }
             null
         } catch (e: Exception) {
@@ -282,28 +294,68 @@ class CoverArtManager(private val context: Context) {
     /**
      * Saves a custom user-selected image from gallery persistently for this song ID.
      */
-    fun saveCustomCoverFromUri(id: Long, sourceUri: Uri): Uri? {
+    fun saveCustomCoverFromUri(
+        id: Long,
+        sourceUri: Uri,
+        title: String? = null,
+        artist: String? = null,
+        path: String? = null
+    ): Uri? {
         try {
             val targetFile = File(coversDir, "$id.jpg")
-            context.contentResolver.openInputStream(sourceUri)?.use { input ->
-                FileOutputStream(targetFile).use { output ->
-                    input.copyTo(output)
+            val bytes: ByteArray? = when (sourceUri.scheme) {
+                "file" -> {
+                    val f = File(sourceUri.path ?: "")
+                    if (f.exists()) f.readBytes() else null
+                }
+                else -> {
+                    if (sourceUri.scheme == null && sourceUri.path?.startsWith("/") == true) {
+                        val f = File(sourceUri.path ?: "")
+                        if (f.exists()) f.readBytes() else null
+                    } else {
+                        context.contentResolver.openInputStream(sourceUri)?.use { it.readBytes() }
+                    }
                 }
             }
-            if (targetFile.exists() && targetFile.length() > 0) {
-                return Uri.fromFile(targetFile)
+
+            if (bytes != null && bytes.isNotEmpty()) {
+                FileOutputStream(targetFile).use { it.write(bytes) }
+
+                if (!title.isNullOrBlank() && !artist.isNullOrBlank()) {
+                    val cleanKey = sanitize("${artist}_${title}")
+                    val namedFile = File(coversDir, "$cleanKey.jpg")
+                    FileOutputStream(namedFile).use { it.write(bytes) }
+                    prefs.edit().putString("cover_id_$id", targetFile.absolutePath).apply()
+                }
+
+                if (!path.isNullOrBlank()) {
+                    val nameNoExt = File(path).nameWithoutExtension
+                    if (nameNoExt.isNotBlank()) {
+                        val directFile = File(coversDir, "$nameNoExt.jpg")
+                        FileOutputStream(directFile).use { it.write(bytes) }
+                        prefs.edit().putString("cover_file_${nameNoExt.lowercase().trim()}", directFile.absolutePath).apply()
+                    }
+                }
+
+                try {
+                    coil.Coil.imageLoader(context).memoryCache?.clear()
+                } catch (_: Exception) {}
+
+                return Uri.parse("file://${targetFile.absolutePath}?t=${System.currentTimeMillis()}")
             }
         } catch (e: Exception) {
-            AppLog.e(TAG, "No se pudo guardar la carátula personalizada desde la galería", e)
+            AppLog.e(TAG, "No se pudo guardar la carátula personalizada", e)
         }
         return null
     }
 
     private fun downloadImageToFile(imageUrl: String, targetFile: File) {
+        var conn: HttpURLConnection? = null
         try {
-            val conn = URL(imageUrl).openConnection() as HttpURLConnection
-            conn.connectTimeout = 6000
-            conn.readTimeout = 6000
+            conn = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 6000
+                readTimeout = 6000
+            }
             if (conn.responseCode == 200) {
                 conn.inputStream.use { input ->
                     FileOutputStream(targetFile).use { output ->
@@ -313,6 +365,8 @@ class CoverArtManager(private val context: Context) {
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "No se pudo descargar la carátula desde la API en línea", e)
+        } finally {
+            try { conn?.disconnect() } catch (_: Throwable) {}
         }
     }
 

@@ -1208,17 +1208,33 @@ fun AuraApp(
         }
     }
 
+    val applyTagOverride: (MediaModel) -> MediaModel = { s ->
+        val override = playlistManager.getTagOverride(s.id)
+        if (override != null) {
+            val customCover = if (override.customCoverPath.isNotBlank()) {
+                val f = File(Uri.parse(override.customCoverPath).path ?: "")
+                if (f.exists() && f.length() > 0) Uri.parse(override.customCoverPath) else s.artworkUri
+            } else s.artworkUri
+            s.copy(
+                title = override.title.ifBlank { s.title },
+                artist = override.artist.ifBlank { s.artist },
+                album = override.album.ifBlank { s.album },
+                artworkUri = customCover
+            )
+        } else {
+            val persistentCover = mediaRepository.coverArtManager.getLocalCoverUri(s.id, s.artist, s.title, s.path)
+            if (persistentCover != null) {
+                s.copy(artworkUri = persistentCover)
+            } else s
+        }
+    }
+
     // Load media files once permission is granted and auto-fetch cover art
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
             isLoading = true
             val rawSongs = mediaRepository.loadAudioFiles()
-            songs = rawSongs.map { s ->
-                val override = playlistManager.getTagOverride(s.id)
-                if (override != null) {
-                    s.copy(title = override.title, artist = override.artist, album = override.album)
-                } else s
-            }
+            songs = rawSongs.map(applyTagOverride)
             videos = mediaRepository.loadVideoFiles()
             isLoading = false
 
@@ -1235,12 +1251,7 @@ fun AuraApp(
                     }
                     if (updated) {
                         val reloaded = mediaRepository.loadAudioFiles()
-                        val reloadedSongs = reloaded.map { s ->
-                            val override = playlistManager.getTagOverride(s.id)
-                            if (override != null) {
-                                s.copy(title = override.title, artist = override.artist, album = override.album)
-                            } else s
-                        }
+                        val reloadedSongs = reloaded.map(applyTagOverride)
                         withContext(Dispatchers.Main) {
                             songs = reloadedSongs
                         }
@@ -1258,10 +1269,7 @@ fun AuraApp(
                     mediaRepository.rescanDownloadDirectories()
                     val freshSongs = mediaRepository.loadAudioFiles()
                     if (freshSongs.size != songs.size || (freshSongs.isNotEmpty() && songs.isNotEmpty() && freshSongs.first().id != songs.first().id)) {
-                        songs = freshSongs.map { s ->
-                            val override = playlistManager.getTagOverride(s.id)
-                            if (override != null) s.copy(title = override.title, artist = override.artist, album = override.album) else s
-                        }
+                        songs = freshSongs.map(applyTagOverride)
                     }
                 }
             }
@@ -1277,10 +1285,7 @@ fun AuraApp(
             mediaRepository.rescanDownloadDirectories()
             kotlinx.coroutines.delay(350)
             val freshSongs = mediaRepository.loadAudioFiles()
-            songs = freshSongs.map { s ->
-                val override = playlistManager.getTagOverride(s.id)
-                if (override != null) s.copy(title = override.title, artist = override.artist, album = override.album) else s
-            }
+            songs = freshSongs.map(applyTagOverride)
             isLoading = false
             Toast.makeText(context, "Biblioteca actualizada: ${freshSongs.size} canciones", Toast.LENGTH_SHORT).show()
         }
@@ -2111,14 +2116,26 @@ fun AuraApp(
                         }
                     },
                     onSaveTags = { song, newTitle, newArtist, newAlbum, newCoverUri ->
-                        playlistManager.saveTagOverride(song.id, newTitle, newArtist, newAlbum)
                         var finalCoverUri = song.artworkUri
                         if (newCoverUri != null) {
-                            val savedUri = mediaRepository.coverArtManager.saveCustomCoverFromUri(song.id, newCoverUri)
+                            val savedUri = mediaRepository.coverArtManager.saveCustomCoverFromUri(
+                                id = song.id,
+                                sourceUri = newCoverUri,
+                                title = newTitle,
+                                artist = newArtist,
+                                path = song.path
+                            )
                             if (savedUri != null) {
                                 finalCoverUri = savedUri
                             }
                         }
+                        playlistManager.saveTagOverride(
+                            songId = song.id,
+                            title = newTitle,
+                            artist = newArtist,
+                            album = newAlbum,
+                            customCoverPath = finalCoverUri?.toString() ?: ""
+                        )
                         songs = songs.map {
                             if (it.id == song.id) it.copy(title = newTitle, artist = newArtist, album = newAlbum, artworkUri = finalCoverUri)
                             else it
@@ -2152,14 +2169,19 @@ fun AuraApp(
                     },
                     onFetchCover = { song ->
                         scope.launch(Dispatchers.IO) {
-                            mediaRepository.coverArtManager.autoFetchAndSaveCover(song)
-                            val reloaded = mediaRepository.loadAudioFiles()
-                            val updatedSongs = reloaded.map { s ->
-                                val override = playlistManager.getTagOverride(s.id)
-                                if (override != null) {
-                                    s.copy(title = override.title, artist = override.artist, album = override.album)
-                                } else s
+                            val saved = mediaRepository.coverArtManager.autoFetchAndSaveCover(song)
+                            if (saved != null) {
+                                val currentOverride = playlistManager.getTagOverride(song.id)
+                                playlistManager.saveTagOverride(
+                                    songId = song.id,
+                                    title = currentOverride?.title ?: song.title,
+                                    artist = currentOverride?.artist ?: song.artist,
+                                    album = currentOverride?.album ?: song.album,
+                                    customCoverPath = saved.toString()
+                                )
                             }
+                            val reloaded = mediaRepository.loadAudioFiles()
+                            val updatedSongs = reloaded.map(applyTagOverride)
                             withContext(Dispatchers.Main) {
                                 songs = updatedSongs
                                 if (currentMedia?.id == song.id) {
@@ -2374,12 +2396,7 @@ fun AuraApp(
                     scope.launch(Dispatchers.IO) {
                         kotlinx.coroutines.delay(400)
                         val reloaded = mediaRepository.loadAudioFiles()
-                        val updatedSongs = reloaded.map { s ->
-                            val override = playlistManager.getTagOverride(s.id)
-                            if (override != null) {
-                                s.copy(title = override.title, artist = override.artist, album = override.album)
-                            } else s
-                        }
+                        val updatedSongs = reloaded.map(applyTagOverride)
                         val reloadedVideos = mediaRepository.loadVideoFiles()
                         withContext(Dispatchers.Main) {
                             songs = updatedSongs
@@ -2388,12 +2405,7 @@ fun AuraApp(
 
                         // Secondary refresh after MediaScanner finishes background indexing
                         kotlinx.coroutines.delay(1200)
-                        val secondReload = mediaRepository.loadAudioFiles().map { s ->
-                            val override = playlistManager.getTagOverride(s.id)
-                            if (override != null) {
-                                s.copy(title = override.title, artist = override.artist, album = override.album)
-                            } else s
-                        }
+                        val secondReload = mediaRepository.loadAudioFiles().map(applyTagOverride)
                         val secondVideos = mediaRepository.loadVideoFiles()
                         withContext(Dispatchers.Main) {
                             songs = secondReload

@@ -18,7 +18,8 @@ data class TagOverride(
     val artist: String,
     val album: String,
     val genre: String = "",
-    val year: String = ""
+    val year: String = "",
+    val customCoverPath: String = ""
 )
 
 class PlaylistManager(context: Context) {
@@ -164,13 +165,24 @@ class PlaylistManager(context: Context) {
 
     // --- TAG EDITOR PERSISTENCE (Pulsar / Musicolet Style) ---
 
-    fun saveTagOverride(songId: Long, title: String, artist: String, album: String, genre: String = "", year: String = "") {
+    fun saveTagOverride(
+        songId: Long,
+        title: String,
+        artist: String,
+        album: String,
+        genre: String = "",
+        year: String = "",
+        customCoverPath: String = ""
+    ) {
         val obj = JSONObject().apply {
             put("title", title)
             put("artist", artist)
             put("album", album)
             put("genre", genre)
             put("year", year)
+            if (customCoverPath.isNotBlank()) {
+                put("cover", customCoverPath)
+            }
         }
         prefs.edit().putString("tag_$songId", obj.toString()).apply()
     }
@@ -184,7 +196,8 @@ class PlaylistManager(context: Context) {
                 artist = obj.optString("artist", ""),
                 album = obj.optString("album", ""),
                 genre = obj.optString("genre", ""),
-                year = obj.optString("year", "")
+                year = obj.optString("year", ""),
+                customCoverPath = obj.optString("cover", "")
             )
         } catch (e: Exception) {
             null

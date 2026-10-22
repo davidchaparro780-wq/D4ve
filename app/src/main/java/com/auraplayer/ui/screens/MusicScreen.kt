@@ -17,7 +17,6 @@ import com.auraplayer.ui.components.RelaxAmbienceDialog
 import com.auraplayer.ui.components.ShimmerListPlaceholder
 import com.auraplayer.ui.components.StemMixerDialog
 import com.auraplayer.ui.components.StoryCardDialog
-import com.auraplayer.ui.components.TikTokDownloaderDialog
 import com.auraplayer.ui.components.ViralAudioStudioDialog
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -249,7 +248,6 @@ fun MusicScreen(
     var showSortMenu by remember { mutableStateOf(false) }
     var showToolsMenu by remember { mutableStateOf(false) }
     var showRelaxDialog by remember { mutableStateOf(false) }
-    var showTikTokDialog by remember { mutableStateOf(false) }
     var showRadarDialog by remember { mutableStateOf(false) }
     var showViralStudio by remember { mutableStateOf(false) }
     var showOledSaver by remember { mutableStateOf(false) }
@@ -642,10 +640,6 @@ fun MusicScreen(
                         DropdownMenuItem(
                             text = { Text("📻 Silent Disco (Party Link)", color = Color(0xFF8B5CF6), fontWeight = FontWeight.Bold) },
                             onClick = { showToolsMenu = false; onOpenPartyLink() }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("🎬 TikTok Video Sin Marca", color = Color(0xFF00F2FE), fontWeight = FontWeight.Bold) },
-                            onClick = { showToolsMenu = false; showTikTokDialog = true }
                         )
                         DropdownMenuItem(
                             text = { Text("✂️ Story & Reel Maker (WhatsApp)", color = Color(0xFFEC4899), fontWeight = FontWeight.Bold) },
@@ -2507,14 +2501,6 @@ fun MusicScreen(
     if (showRelaxDialog) {
         RelaxAmbienceDialog(
             onDismiss = { showRelaxDialog = false }
-        )
-    }
-
-    // TikTok No-Watermark Downloader Dialog
-    if (showTikTokDialog) {
-        TikTokDownloaderDialog(
-            onDismiss = { showTikTokDialog = false },
-            onDownloadCompleted = { _, _ -> }
         )
     }
 

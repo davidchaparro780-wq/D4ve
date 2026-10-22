@@ -1,7 +1,7 @@
 {
-  "versionCode": 110,
-  "versionName": "4.9.10",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.10/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.10 (Build 110):\n• 🖼️ Miniaturas de vídeo optimizadas: reescalado nativo y prevención de OOM con vídeos 4K.\n• 🔐 Restauración garantizada en Bóveda/Vault: soporte completo de Scoped Storage vía MediaStore.\n• 🎛️ Motor de Audio y Ecualizador tolerante a fallos: aislamiento por efecto de hardware DSP.\n• 🧹 Limpieza automática de carátulas temporales y prevención de fugas de sockets en Radar y Letras.\n• ⏯️ Corrección en eliminación de pista única y protección de gestos en reproductor de vídeo.",
+  "versionCode": 111,
+  "versionName": "4.9.11",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.11/app-debug.apk",
+  "changelog": "🛡️ DaVE Player v4.9.11 (Build 111):\n• 🖼️ Persistencia definitiva de miniaturas y carátulas personalizadas: soporte completo de file:// y content:// con invalidación de caché en caliente.\n• 📱 Descargador de TikTok unificado: acceso exclusivo y rápido en la pestaña de descargas online, eliminando duplicados en vídeos y herramientas.\n• 🎵 Fallback nativo a carátulas de MediaStore para canciones locales sin carátula previa.\n• 🌐 Cierre estricto de conexiones HTTP en TikTokDownloader, LiveRadio y CoverArtManager para evitar fugas de memoria y sockets.",
   "fileSizeMb": 24.5
 }

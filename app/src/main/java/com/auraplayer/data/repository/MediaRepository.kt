@@ -35,7 +35,8 @@ class MediaRepository(private val context: Context) {
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.SIZE,
-            MediaStore.Audio.Media.DATE_ADDED
+            MediaStore.Audio.Media.DATE_ADDED,
+            MediaStore.Audio.Media.ALBUM_ID
         )
 
         val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} DESC"
@@ -50,11 +51,13 @@ class MediaRepository(private val context: Context) {
             val dataCol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA)
             val sizeCol = cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)
             val dateAddedCol = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
+            val albumIdCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)
 
             while (cursor.moveToNext()) {
                 val id = if (idCol >= 0) cursor.getLong(idCol) else 0L
                 if (id == 0L) continue
 
+                val albumId = if (albumIdCol >= 0) cursor.getLong(albumIdCol) else -1L
                 val rawTitle = if (titleCol >= 0) cursor.getString(titleCol) ?: "Unknown Title" else "Unknown Title"
                 val rawArtist = if (artistCol >= 0) cursor.getString(artistCol) ?: "Unknown Artist" else "Unknown Artist"
                 val rawAlbum = if (albumCol >= 0) cursor.getString(albumCol) ?: "Unknown Album" else "Unknown Album"
@@ -110,9 +113,14 @@ class MediaRepository(private val context: Context) {
 
                 val contentUri = ContentUris.withAppendedId(collection, id)
                 
+                val mediaStoreArtUri = if (albumId > 0) {
+                    ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)
+                } else null
+
                 // Check local saved persistent cover art first (by ID, parsed artist/title, raw title, path, etc.)
                 val localCoverUri = coverArtManager.getLocalCoverUri(id, finalArtist, finalTitle, data)
                     ?: coverArtManager.getLocalCoverUri(id, rawArtist, rawTitle, data)
+                    ?: mediaStoreArtUri
 
                 val folderName = try {
                     if (data.isNotBlank()) File(data).parentFile?.name ?: "Música" else "Música"

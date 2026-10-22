@@ -60,10 +60,11 @@ object TikTokDownloader {
         }
 
         // 1. Intento primario: TikWM API
+        var conn1: HttpURLConnection? = null
         try {
             val encoded = URLEncoder.encode(cleanUrl, "UTF-8")
             val tikWmApi = "https://www.tikwm.com/api/?url=$encoded&hd=1"
-            val conn = (URL(tikWmApi).openConnection() as HttpURLConnection).apply {
+            conn1 = (URL(tikWmApi).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 12000
                 readTimeout = 15000
                 requestMethod = "GET"
@@ -71,8 +72,8 @@ object TikTokDownloader {
                 setRequestProperty("Accept", "application/json")
             }
 
-            if (conn.responseCode == 200) {
-                val responseText = conn.inputStream.bufferedReader().use { it.readText() }
+            if (conn1.responseCode == 200) {
+                val responseText = conn1.inputStream.bufferedReader().use { it.readText() }
                 val root = JSONObject(responseText)
                 if (root.optInt("code", -1) == 0) {
                     val data = root.optJSONObject("data")
@@ -110,13 +111,16 @@ object TikTokDownloader {
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "TikWM API falló, probando motor alternativo...", e)
+        } finally {
+            try { conn1?.disconnect() } catch (_: Throwable) {}
         }
 
         // 2. Intento secundario: Tiklydown API
+        var conn2: HttpURLConnection? = null
         try {
             val encoded = URLEncoder.encode(cleanUrl, "UTF-8")
             val tiklyApi = "https://api.tiklydown.eu.org/api/download/v5?url=$encoded"
-            val conn = (URL(tiklyApi).openConnection() as HttpURLConnection).apply {
+            conn2 = (URL(tiklyApi).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 12000
                 readTimeout = 15000
                 requestMethod = "GET"
@@ -124,8 +128,8 @@ object TikTokDownloader {
                 setRequestProperty("Accept", "application/json")
             }
 
-            if (conn.responseCode == 200) {
-                val responseText = conn.inputStream.bufferedReader().use { it.readText() }
+            if (conn2.responseCode == 200) {
+                val responseText = conn2.inputStream.bufferedReader().use { it.readText() }
                 val root = JSONObject(responseText)
                 val resultObj = root.optJSONObject("result")
                 val videoObj = resultObj?.optJSONObject("video")
@@ -159,6 +163,8 @@ object TikTokDownloader {
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "Tiklydown API falló: ${e.message}", e)
+        } finally {
+            try { conn2?.disconnect() } catch (_: Throwable) {}
         }
 
         Result.failure(Exception("No se pudo obtener el video sin marca de agua. Verifica que el enlace sea público e intenta de nuevo."))
@@ -175,6 +181,8 @@ object TikTokDownloader {
         asAudioOnly: Boolean = false,
         onProgress: (Int) -> Unit
     ): Result<Uri> = withContext(Dispatchers.IO) {
+        var connection: HttpURLConnection? = null
+        var inputStream: java.io.InputStream? = null
         try {
             val isVideo = !asAudioOnly
             val extension = if (isVideo) ".mp4" else ".mp3"
@@ -185,12 +193,11 @@ object TikTokDownloader {
             val fileName = "TikTok - ${safeAuthor}_$safeTitle$extension"
 
             var currentUrl = downloadUrl
-            var connection: HttpURLConnection
             var redirects = 0
 
             while (true) {
                 val urlObj = URL(currentUrl)
-                connection = (urlObj.openConnection() as HttpURLConnection).apply {
+                val conn = (urlObj.openConnection() as HttpURLConnection).apply {
                     connectTimeout = 20000
                     readTimeout = 25000
                     requestMethod = "GET"
@@ -199,26 +206,29 @@ object TikTokDownloader {
                     setRequestProperty("Accept", "*/*")
                     setRequestProperty("Connection", "keep-alive")
                 }
-                val code = connection.responseCode
+                connection = conn
+                val code = conn.responseCode
                 if ((code in 301..303 || code == 307 || code == 308) && redirects < 6) {
-                    val location = connection.getHeaderField("Location")
+                    val location = conn.getHeaderField("Location")
                     if (!location.isNullOrBlank()) {
                         currentUrl = location
                         redirects++
-                        connection.disconnect()
+                        conn.disconnect()
+                        connection = null
                         continue
                     }
                 }
                 break
             }
 
-            if (connection.responseCode !in 200..299) {
-                connection.disconnect()
-                return@withContext Result.failure(Exception("Error del servidor: HTTP ${connection.responseCode}"))
+            val finalConn = connection ?: return@withContext Result.failure(Exception("Fallo al conectar con el servidor"))
+            if (finalConn.responseCode !in 200..299) {
+                return@withContext Result.failure(Exception("Error del servidor: HTTP ${finalConn.responseCode}"))
             }
 
-            val contentLength = connection.getHeaderField("Content-Length")?.toLongOrNull() ?: connection.contentLength.toLong()
-            val inputStream = connection.inputStream
+            val contentLength = finalConn.getHeaderField("Content-Length")?.toLongOrNull() ?: finalConn.contentLength.toLong()
+            val stream = finalConn.inputStream
+            inputStream = stream
 
             var finalUri: Uri? = null
             var finalPath: String? = null
@@ -356,15 +366,15 @@ object TikTokDownloader {
                 )
             }
 
-            inputStream.close()
-            connection.disconnect()
-
             val resultUri = finalUri ?: return@withContext Result.failure(Exception("No se pudo obtener el URI del archivo guardado"))
             AppLog.i(TAG, "Descarga completada con compatibilidad WhatsApp: $fileName ($resultUri)")
             Result.success(resultUri)
         } catch (e: Exception) {
             AppLog.e(TAG, "Error durante la descarga de TikTok", e)
             Result.failure(e)
+        } finally {
+            try { inputStream?.close() } catch (_: Throwable) {}
+            try { connection?.disconnect() } catch (_: Throwable) {}
         }
     }
 
