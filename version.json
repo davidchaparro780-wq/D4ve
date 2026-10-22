@@ -1,7 +1,7 @@
 {
-  "versionCode": 113,
-  "versionName": "4.9.13",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.13/app-debug.apk",
-  "changelog": "🔮 DaVE Player v4.9.13 (Build 113):\n• 🎨 Reactividad total y corrección de temas: al seleccionar cualquier tema o color misterioso ('Eclipse', 'Espectro Abisal', 'Nebulosa', etc.) los colores se aplican instantáneamente en toda la aplicación sin ser anulados por Material You.\n• 🌌 Fondo atmosférico con aura radiante: resplandor etéreo sutil en la parte superior de la biblioteca según la paleta elegida.\n• 🏷️ Pestañas y barra indicadora luminosa ('Canciones', 'Playlists', 'Favoritos') adaptadas a tu atmósfera activa.\n• ⚡ Botones principales ('Mezclar Todo', filtros rápidos, 'Refrescar', 'Ordenar', temporizador) sincronizados con los colores primario y secundario del tema.\n• 🔔 Confirmación inmediata con respuesta háptica y aviso en pantalla al cambiar de tema.",
+  "versionCode": 114,
+  "versionName": "4.9.14",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.14/app-debug.apk",
+  "changelog": "🔮 DaVE Player v4.9.14 (Build 114):\n• 🎨 Reactividad total y corrección de temas: al seleccionar cualquier tema o color misterioso ('Eclipse', 'Espectro Abisal', 'Nebulosa', etc.) los colores se aplican instantáneamente en toda la aplicación sin ser anulados por Material You.\n• 🌌 Fondo atmosférico con aura radiante: resplandor etéreo sutil en la parte superior de la biblioteca según la paleta elegida.\n• 🏷️ Pestañas y barra indicadora luminosa ('Canciones', 'Playlists', 'Favoritos') adaptadas a tu atmósfera activa.\n• ⚡ Botones principales ('Mezclar Todo', filtros rápidos, 'Refrescar', 'Ordenar', temporizador) sincronizados con los colores primario y secundario del tema.\n• 🔔 Confirmación inmediata con respuesta háptica y aviso en pantalla al cambiar de tema.",
   "fileSizeMb": 24.5
 }
