@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import java.io.File
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager

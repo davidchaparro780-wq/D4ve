@@ -278,7 +278,6 @@ fun VideoScreen(
                     }
                 }
             }
-        }
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
