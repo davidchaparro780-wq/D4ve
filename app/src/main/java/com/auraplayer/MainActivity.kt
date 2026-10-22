@@ -961,7 +961,8 @@ fun AuraApp(
     val handleDeleteSong: (MediaModel) -> Unit = { song ->
         val removeSongFromPlayer = {
             if (currentMedia?.id == song.id) {
-                if (songs.isNotEmpty()) {
+                val remainingCount = songs.count { it.id != song.id }
+                if (remainingCount > 0) {
                     controller?.seekToNextMediaItem()
                 } else {
                     controller?.stop()

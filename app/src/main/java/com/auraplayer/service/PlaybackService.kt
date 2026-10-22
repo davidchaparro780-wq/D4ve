@@ -281,11 +281,15 @@ class PlaybackService : MediaSessionService() {
             activePlayer = null
         }
         serviceScope.cancel()
-        com.auraplayer.audio.RealtimeVisualizerManager.instance.release()
-        EqualizerManager.instance.release()
+        try { com.auraplayer.audio.RealtimeVisualizerManager.instance.release() } catch (_: Exception) {}
+        try { EqualizerManager.instance.release() } catch (_: Exception) {}
+        try {
+            if (::player.isInitialized) {
+                player.release()
+            }
+        } catch (_: Exception) {}
         mediaSession?.run {
-            player.release()
-            release()
+            try { release() } catch (_: Exception) {}
             mediaSession = null
         }
         super.onDestroy()

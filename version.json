@@ -1,7 +1,7 @@
 {
-  "versionCode": 109,
-  "versionName": "4.9.9",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.9/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.9 (Build 109):\n• 🛡️ Widget sin fallos: prevención de TransactionTooLarge y Hardware Bitmaps en RemoteViews.\n• ⚡ Optimización Coil y extracción de calidad de audio compatible con Scoped Storage.\n• 🔒 Sin fugas de memoria ni descriptores de archivo en Stories, descargas, recorte de audio y letras.\n• 📶 Mayor estabilidad en Party Link con MulticastLock y reconexión rápida.",
+  "versionCode": 110,
+  "versionName": "4.9.10",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.10/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.10 (Build 110):\n• 🖼️ Miniaturas de vídeo optimizadas: reescalado nativo y prevención de OOM con vídeos 4K.\n• 🔐 Restauración garantizada en Bóveda/Vault: soporte completo de Scoped Storage vía MediaStore.\n• 🎛️ Motor de Audio y Ecualizador tolerante a fallos: aislamiento por efecto de hardware DSP.\n• 🧹 Limpieza automática de carátulas temporales y prevención de fugas de sockets en Radar y Letras.\n• ⏯️ Corrección en eliminación de pista única y protección de gestos en reproductor de vídeo.",
   "fileSizeMb": 24.5
 }

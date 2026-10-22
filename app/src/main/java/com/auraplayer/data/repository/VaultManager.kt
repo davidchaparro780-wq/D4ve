@@ -2,6 +2,7 @@ package com.auraplayer.data.repository
 
 import android.app.PendingIntent
 import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
@@ -821,21 +822,73 @@ class VaultManager(private val context: Context) {
 
     suspend fun restoreMedia(item: VaultItem): Boolean = withContext(Dispatchers.IO) {
         try {
-            val publicDir = if (item.isVideo) {
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-            } else {
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-            }
-            if (!publicDir.exists()) publicDir.mkdirs()
+            var restoredSuccessfully = false
+            var restoredFilePath: String? = null
 
-            val destFile = File(publicDir, item.file.name)
-            FileInputStream(item.file).use { input ->
-                FileOutputStream(destFile).use { output ->
-                    input.copyTo(output)
+            // 1. Try direct file write if hasAllFilesAccess or legacy storage
+            try {
+                val publicDir = if (item.isVideo) {
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+                } else {
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                }
+                if (!publicDir.exists()) publicDir.mkdirs()
+
+                val destFile = File(publicDir, item.file.name)
+                FileInputStream(item.file).use { input ->
+                    FileOutputStream(destFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                if (destFile.exists() && destFile.length() > 0) {
+                    restoredSuccessfully = true
+                    restoredFilePath = destFile.absolutePath
+                }
+            } catch (e: Exception) {
+                AppLog.d(TAG, "Direct file restore failed, falling back to MediaStore insert", e)
+            }
+
+            // 2. Scoped Storage fallback via MediaStore insert
+            if (!restoredSuccessfully) {
+                try {
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, item.file.name)
+                        val mimeType = if (item.isVideo) "video/*" else "image/*"
+                        put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            put(
+                                MediaStore.MediaColumns.RELATIVE_PATH,
+                                if (item.isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
+                            )
+                            put(MediaStore.MediaColumns.IS_PENDING, 1)
+                        }
+                    }
+                    val targetCollection = if (item.isVideo) {
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    } else {
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    }
+                    val insertedUri = context.contentResolver.insert(targetCollection, contentValues)
+                    if (insertedUri != null) {
+                        context.contentResolver.openOutputStream(insertedUri)?.use { out ->
+                            FileInputStream(item.file).use { input ->
+                                input.copyTo(out)
+                            }
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val updateValues = ContentValues().apply {
+                                put(MediaStore.MediaColumns.IS_PENDING, 0)
+                            }
+                            context.contentResolver.update(insertedUri, updateValues, null, null)
+                        }
+                        restoredSuccessfully = true
+                    }
+                } catch (e: Exception) {
+                    AppLog.e(TAG, "MediaStore fallback restore failed", e)
                 }
             }
 
-            if (destFile.exists()) {
+            if (restoredSuccessfully) {
                 item.file.delete()
                 val persistentCopy = if (item.isVideo) File(persistentVideoVaultDir, item.file.name) else File(persistentPhotoVaultDir, item.file.name)
                 try { persistentCopy.delete() } catch (e: Exception) {
@@ -846,10 +899,11 @@ class VaultManager(private val context: Context) {
                     AppLog.e(TAG, "Fallo al eliminar la copia externa al restaurar", e)
                 }
 
-                unmarkPathAsHidden(destFile.absolutePath)
+                if (restoredFilePath != null) {
+                    unmarkPathAsHidden(restoredFilePath)
+                    MediaScannerConnection.scanFile(context, arrayOf(restoredFilePath), null, null)
+                }
                 unmarkPathAsHidden(item.file.name)
-                // Force MediaScanner to index restored file so it shows in phone Gallery
-                MediaScannerConnection.scanFile(context, arrayOf(destFile.absolutePath), null, null)
                 true
             } else {
                 false

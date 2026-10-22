@@ -378,9 +378,10 @@ fun TagEditorDialog(
                     val cleanArtist = artist.trim().ifEmpty { song.artist }
                     val cleanAlbum = album.trim().ifEmpty { song.album }
 
-                    if (selectedWebCoverUrl != null) {
+                    val webUrl = selectedWebCoverUrl
+                    if (webUrl != null) {
                         scope.launch {
-                            val localUri = downloadCoverToLocal(context, selectedWebCoverUrl!!, song.id)
+                            val localUri = downloadCoverToLocal(context, webUrl, song.id)
                             onSave(cleanTitle, cleanArtist, cleanAlbum, localUri ?: customCoverUri)
                             onDismiss()
                         }
@@ -404,8 +405,9 @@ fun TagEditorDialog(
 }
 
 private suspend fun downloadCoverToLocal(context: Context, imageUrl: String, songId: Long): Uri? = withContext(Dispatchers.IO) {
+    var conn: HttpURLConnection? = null
     try {
-        val conn = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
+        conn = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
             connectTimeout = 12000
             readTimeout = 15000
             requestMethod = "GET"
@@ -414,12 +416,22 @@ private suspend fun downloadCoverToLocal(context: Context, imageUrl: String, son
         if (conn.responseCode == 200) {
             val dir = File(context.filesDir, "custom_covers")
             if (!dir.exists()) dir.mkdirs()
+            // Clean up old cached covers for this specific song
+            try {
+                dir.listFiles { f -> f.name.startsWith("cover_${songId}_") }?.forEach { it.delete() }
+            } catch (_: Exception) {}
+
             val file = File(dir, "cover_${songId}_${System.currentTimeMillis()}.jpg")
             file.outputStream().use { out ->
                 conn.inputStream.use { inp -> inp.copyTo(out) }
             }
             return@withContext Uri.fromFile(file)
         }
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+    } finally {
+        try {
+            conn?.disconnect()
+        } catch (_: Throwable) {}
+    }
     null
 }

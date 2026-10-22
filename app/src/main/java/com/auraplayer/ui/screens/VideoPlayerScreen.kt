@@ -302,7 +302,7 @@ fun VideoPlayerScreen(
                         val startY = down.position.y
                         val startBrightness = brightness
                         val startVolume = volume.toFloat()
-                        val fullDrag = size.height * 0.7f
+                        val fullDrag = (size.height * 0.7f).coerceAtLeast(100f)
                         val touchSlop = viewConfiguration.touchSlop
                         var dragStarted = false
                         while (true) {
@@ -340,7 +340,7 @@ fun VideoPlayerScreen(
                             val fraction = (totalDy / fullDrag).coerceIn(-1f, 1f)
                             if (isLeftSide) {
                                 val newBrightness = (startBrightness - fraction).coerceIn(0.01f, 1f)
-                                if (newBrightness != brightness) {
+                                if (!newBrightness.isNaN() && newBrightness != brightness) {
                                     brightness = newBrightness
                                     activity?.let { act ->
                                         val lp = act.window.attributes

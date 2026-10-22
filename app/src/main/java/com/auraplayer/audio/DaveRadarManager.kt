@@ -148,11 +148,12 @@ object DaveRadarManager {
         file: File,
         onProgress: (Float) -> Unit
     ): RadarRecognizedSong? = withContext(Dispatchers.IO) {
+        var conn: HttpURLConnection? = null
         try {
             onProgress(0.15f)
             val boundary = "==DaVERadar${System.currentTimeMillis()}=="
             val url = URL("https://api.audd.io/")
-            val conn = (url.openConnection() as HttpURLConnection).apply {
+            conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "POST"
                 doOutput = true
                 connectTimeout = 12000
@@ -234,6 +235,10 @@ object DaveRadarManager {
             }
         } catch (e: Exception) {
             AppLog.e(TAG, "Fallo al consultar servicio de reconocimiento acústico", e)
+        } finally {
+            try {
+                conn?.disconnect()
+            } catch (_: Throwable) {}
         }
         null
     }
@@ -242,10 +247,11 @@ object DaveRadarManager {
      * Búsqueda complementaria en iTunes para obtener carátula HD y preview.
      */
     private fun fetchItunesMetadata(title: String, artist: String): RadarRecognizedSong? {
+        var conn: HttpURLConnection? = null
         return try {
             val query = URLEncoder.encode("$title $artist", "UTF-8")
             val apiUrl = "https://itunes.apple.com/search?term=$query&entity=song&limit=1"
-            val conn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
+            conn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 4000
                 readTimeout = 4000
                 requestMethod = "GET"
@@ -272,6 +278,10 @@ object DaveRadarManager {
             } else null
         } catch (_: Exception) {
             null
+        } finally {
+            try {
+                conn?.disconnect()
+            } catch (_: Throwable) {}
         }
     }
 
@@ -279,10 +289,11 @@ object DaveRadarManager {
      * Búsqueda fonética o por tarareo a través del motor unificado.
      */
     suspend fun searchHummingOrQuery(query: String): Result<List<RadarRecognizedSong>> = withContext(Dispatchers.IO) {
+        var conn: HttpURLConnection? = null
         try {
             val encoded = URLEncoder.encode(query.trim(), "UTF-8")
             val apiUrl = "https://itunes.apple.com/search?term=$encoded&entity=song&limit=6"
-            val conn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
+            conn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 8000
                 readTimeout = 8000
                 requestMethod = "GET"
@@ -326,6 +337,10 @@ object DaveRadarManager {
             Result.failure(Exception("No se encontraron coincidencias para la melodía"))
         } catch (e: Exception) {
             Result.failure(e)
+        } finally {
+            try {
+                conn?.disconnect()
+            } catch (_: Throwable) {}
         }
     }
 }

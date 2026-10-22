@@ -116,9 +116,37 @@ private suspend fun loadVideoThumbnail(context: Context, video: MediaModel): Bit
         } else {
             retriever.setDataSource(context, video.uri)
         }
-        val frame = retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-            ?: retriever.frameAtTime
-        if (frame != null) return@withContext frame
+        val rawFrame: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            try {
+                retriever.getScaledFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, 512, 384)
+            } catch (e: Exception) {
+                null
+            } ?: retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC) ?: retriever.frameAtTime
+        } else {
+            retriever.getFrameAtTime(1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC) ?: retriever.frameAtTime
+        }
+
+        if (rawFrame != null) {
+            val maxDimension = 512
+            if (rawFrame.width > maxDimension || rawFrame.height > maxDimension) {
+                val ratio = rawFrame.width.toFloat() / rawFrame.height.toFloat()
+                val targetW: Int
+                val targetH: Int
+                if (ratio > 1f) {
+                    targetW = maxDimension
+                    targetH = (maxDimension / ratio).toInt().coerceAtLeast(1)
+                } else {
+                    targetH = maxDimension
+                    targetW = (maxDimension * ratio).toInt().coerceAtLeast(1)
+                }
+                val scaled = Bitmap.createScaledBitmap(rawFrame, targetW, targetH, true)
+                if (scaled !== rawFrame) {
+                    rawFrame.recycle()
+                }
+                return@withContext scaled
+            }
+            return@withContext rawFrame
+        }
     } catch (e: Exception) {
         AppLog.d(TAG, "MediaMetadataRetriever no pudo extraer un fotograma", e)
     } finally {

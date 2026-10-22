@@ -99,41 +99,61 @@ class EqualizerManager private constructor() {
             equalizer = Equalizer(0, audioSessionId).apply {
                 enabled = isEnabled
             }
+        } catch (e: Exception) {
+            AppLog.e(TAG, "No se pudo inicializar Equalizer en sesión $audioSessionId", e)
+            equalizer = null
+        }
+
+        try {
             bassBoost = BassBoost(0, audioSessionId).apply {
                 enabled = isEnabled
                 if (strengthSupported) {
                     setStrength(bassStrength)
                 }
             }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "BassBoost no soportado en esta sesión", e)
+            bassBoost = null
+        }
+
+        try {
             virtualizer = Virtualizer(0, audioSessionId).apply {
                 enabled = isEnabled
                 if (strengthSupported) {
                     setStrength(if (isKaraokeMode || isSpatial8DEnabled) 1000.toShort() else virtualizerStrength)
                 }
             }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Virtualizer no soportado en esta sesión", e)
+            virtualizer = null
+        }
+
+        try {
+            presetReverb = PresetReverb(0, audioSessionId).apply {
+                enabled = isEnabled && isSpatial8DEnabled
+                if (isSpatial8DEnabled) {
+                    preset = 6 // PresetReverb.PRESET_CONCERTHALL (Concert Hall)
+                }
+            }
+        } catch (e: Exception) {
+            presetReverb = null
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             try {
-                presetReverb = PresetReverb(0, audioSessionId).apply {
-                    enabled = isEnabled && isSpatial8DEnabled
-                    if (isSpatial8DEnabled) {
-                        preset = 6 // PresetReverb.PRESET_CONCERTHALL (Concert Hall)
-                    }
+                loudnessEnhancer = LoudnessEnhancer(audioSessionId).apply {
+                    enabled = isEnabled
+                    setTargetGain(loudnessGain)
                 }
             } catch (e: Exception) {
-                presetReverb = null
+                loudnessEnhancer = null
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                try {
-                    loudnessEnhancer = LoudnessEnhancer(audioSessionId).apply {
-                        enabled = isEnabled
-                        setTargetGain(loudnessGain)
-                    }
-                } catch (e: Exception) {
-                    loudnessEnhancer = null
-                }
-            }
+        }
+
+        try {
             applyBandsToHardware()
         } catch (e: Exception) {
-            AppLog.e(TAG, "El ecualizador no se pudo aplicar a la sesión de audio", e)
+            AppLog.w(TAG, "No se pudieron aplicar las bandas al hardware del ecualizador", e)
         }
     }
 
@@ -416,20 +436,15 @@ class EqualizerManager private constructor() {
 
 
     fun release() {
-        try {
-            equalizer?.release()
-            bassBoost?.release()
-            virtualizer?.release()
-            loudnessEnhancer?.release()
-            presetReverb?.release()
-        } catch (e: Exception) {
-            AppLog.d(TAG, "No se pudo liberar algún efecto del ecualizador", e)
-        } finally {
-            presetReverb = null
-            equalizer = null
-            bassBoost = null
-            virtualizer = null
-            loudnessEnhancer = null
-        }
+        try { equalizer?.release() } catch (e: Exception) { AppLog.d(TAG, "Error liberando equalizer", e) }
+        try { bassBoost?.release() } catch (e: Exception) { AppLog.d(TAG, "Error liberando bassBoost", e) }
+        try { virtualizer?.release() } catch (e: Exception) { AppLog.d(TAG, "Error liberando virtualizer", e) }
+        try { loudnessEnhancer?.release() } catch (e: Exception) { AppLog.d(TAG, "Error liberando loudnessEnhancer", e) }
+        try { presetReverb?.release() } catch (e: Exception) { AppLog.d(TAG, "Error liberando presetReverb", e) }
+        presetReverb = null
+        equalizer = null
+        bassBoost = null
+        virtualizer = null
+        loudnessEnhancer = null
     }
 }

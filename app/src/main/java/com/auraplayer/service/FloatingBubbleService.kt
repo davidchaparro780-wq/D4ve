@@ -267,7 +267,11 @@ class FloatingBubbleService : Service() {
                     }
                     params.x = initialX + dx
                     params.y = initialY + dy
-                    windowManager?.updateViewLayout(container, params)
+                    try {
+                        windowManager?.updateViewLayout(container, params)
+                    } catch (e: Exception) {
+                        AppLog.d(TAG, "Error al actualizar la posición de la vista flotante", e)
+                    }
                     true
                 }
                 MotionEvent.ACTION_UP -> {

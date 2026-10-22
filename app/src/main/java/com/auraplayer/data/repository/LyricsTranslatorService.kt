@@ -123,7 +123,7 @@ object LyricsTranslatorService {
                                 sb.append(part.optString(0))
                             }
                         }
-                        val translatedAll = sb.toString().split("\n")
+                        val translatedAll = sb.toString().lines()
                         for (i in chunk.indices) {
                             val orig = chunk[i]
                             val trans = translatedAll.getOrNull(i)?.trim()
