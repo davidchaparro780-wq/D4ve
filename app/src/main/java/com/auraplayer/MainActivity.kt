@@ -225,13 +225,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val playlistManager = remember { PlaylistManager(context) }
+            val settingsManager = remember { SettingsManager.getInstance(context) }
             var currentAccent by remember { mutableStateOf(playlistManager.getThemeAccent()) }
 
-            AuraTheme(accent = currentAccent, dynamicColor = SettingsManager.getInstance(context).isDynamicColor) {
+            AuraTheme(accent = currentAccent, dynamicColor = settingsManager.isDynamicColorEnabled()) {
                 AuraApp(
                     playlistManager = playlistManager,
                     currentAccent = currentAccent,
-                    onAccentChange = { currentAccent = it }
+                    onAccentChange = { newAccent ->
+                        playlistManager.setThemeAccent(newAccent)
+                        currentAccent = newAccent
+                        settingsManager.setDynamicColorEnabled(false)
+                    }
                 )
             }
         }

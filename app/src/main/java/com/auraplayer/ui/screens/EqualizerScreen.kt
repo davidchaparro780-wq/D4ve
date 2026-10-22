@@ -68,6 +68,8 @@ fun EqualizerScreen(
     onAccentChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val view = androidx.compose.ui.platform.LocalView.current
     val eqManager = remember { EqualizerManager.instance }
     var isEqEnabled by remember { mutableStateOf(eqManager.isEnabled) }
     var selectedPreset by remember { mutableIntStateOf(0) }
@@ -740,8 +742,10 @@ fun EqualizerScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .clickable {
+                                    com.auraplayer.audio.AuraHaptic.click(view)
                                     playlistManager.setThemeAccent(key)
                                     onAccentChange(key)
+                                    android.widget.Toast.makeText(context, "Tema activado: $label", android.widget.Toast.LENGTH_SHORT).show()
                                 }
                                 .padding(4.dp)
                         ) {

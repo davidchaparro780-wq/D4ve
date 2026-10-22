@@ -128,6 +128,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -406,7 +407,24 @@ fun MusicScreen(
         if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
     }
 
-    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    val themePrimary = MaterialTheme.colorScheme.primary
+    val themeSecondary = MaterialTheme.colorScheme.secondary
+    val themeTertiary = MaterialTheme.colorScheme.tertiary
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        themePrimary.copy(alpha = 0.16f),
+                        themeSecondary.copy(alpha = 0.07f),
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
+    ) {
         // Top Header Bar: Branding & Quick Action Controls
         Row(
             modifier = Modifier
@@ -428,7 +446,7 @@ fun MusicScreen(
                     text = "Player",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = themePrimary
                 )
             }
 
@@ -443,8 +461,8 @@ fun MusicScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF13182E))
-                            .border(1.dp, Color(0xFFA855F7).copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                            .border(1.dp, themeTertiary.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
                             .clickable {
                                 AuraHaptic.click(view)
                                 showSortMenu = true
@@ -454,7 +472,7 @@ fun MusicScreen(
                         Icon(
                             imageVector = Icons.Default.Sort,
                             contentDescription = "Ordenar",
-                            tint = Color(0xFFA855F7),
+                            tint = themeTertiary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -465,23 +483,23 @@ fun MusicScreen(
                         modifier = Modifier.background(Color(0xFF0F172A))
                     ) {
                         DropdownMenuItem(
-                            text = { Text("📥 Recién Descargadas", color = if (selectedSortMode == 0) Color(0xFF38BDF8) else Color.White, fontWeight = if (selectedSortMode == 0) FontWeight.Bold else FontWeight.Normal) },
+                            text = { Text("📥 Recién Descargadas", color = if (selectedSortMode == 0) themePrimary else Color.White, fontWeight = if (selectedSortMode == 0) FontWeight.Bold else FontWeight.Normal) },
                             onClick = { selectedSortMode = 0; showSortMenu = false }
                         )
                         DropdownMenuItem(
-                            text = { Text("🔤 Título (A-Z)", color = if (selectedSortMode == 1) Color(0xFF38BDF8) else Color.White, fontWeight = if (selectedSortMode == 1) FontWeight.Bold else FontWeight.Normal) },
+                            text = { Text("🔤 Título (A-Z)", color = if (selectedSortMode == 1) themePrimary else Color.White, fontWeight = if (selectedSortMode == 1) FontWeight.Bold else FontWeight.Normal) },
                             onClick = { selectedSortMode = 1; showSortMenu = false }
                         )
                         DropdownMenuItem(
-                            text = { Text("👤 Artista", color = if (selectedSortMode == 2) Color(0xFF38BDF8) else Color.White, fontWeight = if (selectedSortMode == 2) FontWeight.Bold else FontWeight.Normal) },
+                            text = { Text("👤 Artista", color = if (selectedSortMode == 2) themePrimary else Color.White, fontWeight = if (selectedSortMode == 2) FontWeight.Bold else FontWeight.Normal) },
                             onClick = { selectedSortMode = 2; showSortMenu = false }
                         )
                         DropdownMenuItem(
-                            text = { Text("⏱️ Mayor Duración", color = if (selectedSortMode == 3) Color(0xFF38BDF8) else Color.White, fontWeight = if (selectedSortMode == 3) FontWeight.Bold else FontWeight.Normal) },
+                            text = { Text("⏱️ Mayor Duración", color = if (selectedSortMode == 3) themePrimary else Color.White, fontWeight = if (selectedSortMode == 3) FontWeight.Bold else FontWeight.Normal) },
                             onClick = { selectedSortMode = 3; showSortMenu = false }
                         )
                         DropdownMenuItem(
-                            text = { Text("🔥 Más Reproducidas", color = if (selectedSortMode == 4) Color(0xFF38BDF8) else Color.White, fontWeight = if (selectedSortMode == 4) FontWeight.Bold else FontWeight.Normal) },
+                            text = { Text("🔥 Más Reproducidas", color = if (selectedSortMode == 4) themePrimary else Color.White, fontWeight = if (selectedSortMode == 4) FontWeight.Bold else FontWeight.Normal) },
                             onClick = { selectedSortMode = 4; showSortMenu = false }
                         )
                     }
@@ -492,8 +510,8 @@ fun MusicScreen(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF13182E))
-                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                        .border(1.dp, themeSecondary.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
                         .clickable {
                             AuraHaptic.click(view)
                             onOpenSleepTimer()
@@ -503,7 +521,7 @@ fun MusicScreen(
                     Icon(
                         imageVector = Icons.Default.Timer,
                         contentDescription = "Temporizador",
-                        tint = Color(0xFF38BDF8),
+                        tint = themeSecondary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -514,8 +532,8 @@ fun MusicScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF13182E))
-                            .border(1.dp, Color(0xFFFFD700).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                            .border(1.dp, themePrimary.copy(alpha = 0.55f), RoundedCornerShape(12.dp))
                             .clickable {
                                 AuraHaptic.click(view)
                                 showToolsMenu = true
@@ -525,7 +543,7 @@ fun MusicScreen(
                         Icon(
                             imageVector = Icons.Default.Whatshot,
                             contentDescription = "Herramientas Pro",
-                            tint = Color(0xFFFFD700),
+                            tint = themePrimary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -824,10 +842,10 @@ fun MusicScreen(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF13182E))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
                         .border(
                             1.dp,
-                            if (activeUser != null) Color(0xFFFFD700).copy(alpha = 0.6f) else Color(0xFF8B5CF6).copy(alpha = 0.4f),
+                            if (activeUser != null) Color(0xFFFFD700).copy(alpha = 0.6f) else themePrimary.copy(alpha = 0.45f),
                             RoundedCornerShape(12.dp)
                         )
                         .clickable {
@@ -841,7 +859,7 @@ fun MusicScreen(
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = "Iniciar Sesión",
-                            tint = Color(0xFF8B5CF6),
+                            tint = themePrimary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -852,10 +870,10 @@ fun MusicScreen(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF13182E))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
                         .border(
                             1.dp,
-                            Color(0xFF38BDF8).copy(alpha = 0.4f),
+                            themeSecondary.copy(alpha = 0.45f),
                             RoundedCornerShape(12.dp)
                         )
                         .clickable {
@@ -867,7 +885,7 @@ fun MusicScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Ajustes",
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = themeSecondary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -1045,26 +1063,43 @@ fun MusicScreen(
             }
         }
 
-        // Tab Row with Aesthetic Neon Accent
+        // Tab Row with Dynamic Theme Accent Indicator
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
             edgePadding = 16.dp,
             containerColor = Color.Transparent,
             divider = {},
+            indicator = { tabPositions ->
+                if (selectedTab < tabPositions.size) {
+                    Box(
+                        Modifier
+                            .tabIndicatorOffset(tabPositions[selectedTab])
+                            .height(3.dp)
+                            .padding(horizontal = 14.dp)
+                            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(themePrimary, themeSecondary)
+                                )
+                            )
+                    )
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = selectedTab == index,
                     onClick = {
+                        AuraHaptic.tick(view)
                         selectedTab = index
                         selectedPlaylistForView = null
                     },
                     text = {
                         Text(
                             text = title,
-                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selectedTab == index) Color(0xFF38BDF8) else Color(0xFF94A3B8),
+                            fontWeight = if (selectedTab == index) FontWeight.ExtraBold else FontWeight.Medium,
+                            color = if (selectedTab == index) themePrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             fontSize = 14.sp
                         )
                     }
@@ -1089,17 +1124,20 @@ fun MusicScreen(
                             .background(
                                 if (isSelected) {
                                     Brush.horizontalGradient(
-                                        listOf(Color(0xFF8B5CF6), Color(0xFF3B82F6))
+                                        listOf(themePrimary, themeSecondary)
                                     )
                                 } else {
                                     Brush.linearGradient(
-                                        listOf(Color(0xFF13182E), Color(0xFF0F172A))
+                                        listOf(
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                                        )
                                     )
                                 }
                             )
                             .border(
                                 1.dp,
-                                if (isSelected) Color.Transparent else Color(0xFF8B5CF6).copy(alpha = 0.25f),
+                                if (isSelected) Color.Transparent else themePrimary.copy(alpha = 0.25f),
                                 RoundedCornerShape(16.dp)
                             )
                             .clickable {
@@ -1113,7 +1151,7 @@ fun MusicScreen(
                             text = label,
                             fontSize = 11.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else Color(0xFF94A3B8)
+                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -1292,7 +1330,7 @@ fun MusicScreen(
                                                     Icon(
                                                         imageVector = Icons.Default.Checklist,
                                                         contentDescription = "Seleccionar canciones",
-                                                        tint = Color(0xFFA855F7),
+                                                        tint = themePrimary,
                                                         modifier = Modifier.size(20.dp)
                                                     )
                                                 }
@@ -1327,7 +1365,7 @@ fun MusicScreen(
                                                     style = MaterialTheme.typography.labelSmall,
                                                     fontSize = 10.sp,
                                                     fontWeight = FontWeight.SemiBold,
-                                                    color = Color(0xFF38BDF8)
+                                                    color = themeSecondary
                                                 )
                                             }
 
@@ -1336,8 +1374,8 @@ fun MusicScreen(
                                                 Box(
                                                     modifier = Modifier
                                                         .clip(RoundedCornerShape(12.dp))
-                                                        .background(Color(0xFF13182E))
-                                                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                                                        .border(1.dp, themePrimary.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                                                         .clickable {
                                                             AuraHaptic.click(view)
                                                             onRefreshLibrary()
@@ -1349,7 +1387,7 @@ fun MusicScreen(
                                                         Icon(
                                                             imageVector = Icons.Default.Refresh,
                                                             contentDescription = "Refrescar canciones",
-                                                            tint = Color(0xFF38BDF8),
+                                                            tint = themePrimary,
                                                             modifier = Modifier.size(13.dp)
                                                         )
                                                         Spacer(modifier = Modifier.width(4.dp))
@@ -1357,7 +1395,7 @@ fun MusicScreen(
                                                             text = "Refrescar",
                                                             fontSize = 10.sp,
                                                             fontWeight = FontWeight.SemiBold,
-                                                            color = Color(0xFF38BDF8)
+                                                            color = themePrimary
                                                         )
                                                     }
                                                 }
@@ -1370,7 +1408,7 @@ fun MusicScreen(
                                                         .clip(RoundedCornerShape(12.dp))
                                                         .background(
                                                             Brush.horizontalGradient(
-                                                                listOf(Color(0xFF8B5CF6), Color(0xFF06B6D4))
+                                                                listOf(themePrimary, themeSecondary)
                                                             )
                                                         )
                                                         .clickable {

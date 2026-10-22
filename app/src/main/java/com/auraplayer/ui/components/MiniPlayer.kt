@@ -410,9 +410,9 @@ fun MiniPlayer(
                                     .background(
                                         Brush.horizontalGradient(
                                             listOf(
-                                                Color(0xFF8B5CF6),
-                                                Color(0xFF38BDF8),
-                                                Color(0xFF00F0FF)
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.secondary,
+                                                MaterialTheme.colorScheme.tertiary
                                             )
                                         )
                                     )

@@ -67,7 +67,9 @@ fun MysteriousThemeDialog(
     onAccentChange: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val view = LocalView.current
+    var selectedAccent by remember(currentAccent) { mutableStateOf(currentAccent) }
 
     val allThemes = listOf(
         // --- 🔮 TEMAS MISTERIOSOS & ENIGMÁTICOS ---
@@ -251,13 +253,15 @@ fun MysteriousThemeDialog(
                 }
 
                 items(allThemes.filter { it.isMysterious }) { theme ->
-                    val isSelected = currentAccent.equals(theme.key, ignoreCase = true)
+                    val isSelected = selectedAccent.equals(theme.key, ignoreCase = true)
                     ThemeCardItem(
                         theme = theme,
                         isSelected = isSelected,
                         onClick = {
+                            selectedAccent = theme.key
                             AuraHaptic.heavy(view)
                             onAccentChange(theme.key)
+                            android.widget.Toast.makeText(context, "🔮 Tema activado: ${theme.title}", android.widget.Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -275,13 +279,15 @@ fun MysteriousThemeDialog(
                 }
 
                 items(allThemes.filter { !it.isMysterious }) { theme ->
-                    val isSelected = currentAccent.equals(theme.key, ignoreCase = true)
+                    val isSelected = selectedAccent.equals(theme.key, ignoreCase = true)
                     ThemeCardItem(
                         theme = theme,
                         isSelected = isSelected,
                         onClick = {
+                            selectedAccent = theme.key
                             AuraHaptic.heavy(view)
                             onAccentChange(theme.key)
+                            android.widget.Toast.makeText(context, "⚡ Tema activado: ${theme.title}", android.widget.Toast.LENGTH_SHORT).show()
                         }
                     )
                 }

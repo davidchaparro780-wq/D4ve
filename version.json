@@ -1,7 +1,7 @@
 {
-  "versionCode": 112,
-  "versionName": "4.9.12",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.12/app-debug.apk",
-  "changelog": "🔮 DaVE Player v4.9.12 (Build 112):\n• 🌌 Nuevos Temas & Colores Misteriosos: 'Misterio Arcano', 'Eclipse Enigmático', 'Espectro Abisal' y 'Nebulosa Misteriosa' con fondos negros obsidian y vacíos profundos.\n• 🎨 Diálogo interactivo de temas accesible directamente desde el menú de herramientas de Música y Ecualizador con previsualización triple swatch.\n• 📳 Retroalimentación háptica táctil en la barra de navegación para una experiencia fluida y gratificante.\n• 💫 Búsqueda y lista de canciones adaptadas con bordes de luz reactivos y colores sincronizados con la paleta misteriosa activa.\n• ✨ Divisor luminoso con gradiente etéreo en la barra inferior de navegación.",
+  "versionCode": 113,
+  "versionName": "4.9.13",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.13/app-debug.apk",
+  "changelog": "🔮 DaVE Player v4.9.13 (Build 113):\n• 🎨 Reactividad total y corrección de temas: al seleccionar cualquier tema o color misterioso ('Eclipse', 'Espectro Abisal', 'Nebulosa', etc.) los colores se aplican instantáneamente en toda la aplicación sin ser anulados por Material You.\n• 🌌 Fondo atmosférico con aura radiante: resplandor etéreo sutil en la parte superior de la biblioteca según la paleta elegida.\n• 🏷️ Pestañas y barra indicadora luminosa ('Canciones', 'Playlists', 'Favoritos') adaptadas a tu atmósfera activa.\n• ⚡ Botones principales ('Mezclar Todo', filtros rápidos, 'Refrescar', 'Ordenar', temporizador) sincronizados con los colores primario y secundario del tema.\n• 🔔 Confirmación inmediata con respuesta háptica y aviso en pantalla al cambiar de tema.",
   "fileSizeMb": 24.5
 }
