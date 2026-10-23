@@ -382,8 +382,10 @@ fun PlayerScreen(
         com.auraplayer.audio.ABRepeatManager.instance.clear()
     }
 
-    if (isAbLoopActive && abLoopA != null && abLoopB != null && isPlaying && currentPositionMs >= abLoopB!!) {
-        onSeek(abLoopA!!)
+    LaunchedEffect(currentPositionMs, isAbLoopActive, abLoopA, abLoopB, isPlaying) {
+        if (isAbLoopActive && abLoopA != null && abLoopB != null && isPlaying && currentPositionMs >= abLoopB!!) {
+            onSeek(abLoopA!!)
+        }
     }
 
     LaunchedEffect(showSeekBadge) {
@@ -602,7 +604,7 @@ fun PlayerScreen(
         }
     }
 
-    // Anti-Gravity Levitation Oscillation (Evaluated in Layout phase to eliminate 120 FPS recompositions)
+    // Anti-Gravity Levitation Oscillation (Organic Floating)
     val infiniteTransition = rememberInfiniteTransition(label = "player_infinite")
     val levitationPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -613,6 +615,7 @@ fun PlayerScreen(
         ),
         label = "levitationPhase"
     )
+    val levitationOffsetDp = (kotlin.math.sin(levitationPhase) * 6f).dp
 
     val audioBadgeText = remember(currentMedia.path) {
         val ext = File(currentMedia.path).extension.lowercase()
@@ -1082,7 +1085,7 @@ fun PlayerScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset { IntOffset(0, (kotlin.math.sin(levitationPhase) * 6.dp.toPx()).roundToInt()) }
+                                        .offset(y = levitationOffsetDp)
                                         .padding(vertical = 4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -1135,7 +1138,7 @@ fun PlayerScreen(
                                     modifier = Modifier
                                         .width(maxArtSize)
                                         .height(maxArtSize * 0.65f)
-                                        .offset { IntOffset(0, (kotlin.math.sin(levitationPhase) * 6.dp.toPx()).roundToInt()) }
+                                        .offset(y = levitationOffsetDp)
                                         .pointerInput(Unit) {
                                             detectTapGestures(
                                                 onTap = {
@@ -1150,7 +1153,7 @@ fun PlayerScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset { IntOffset(0, (kotlin.math.sin(levitationPhase) * 6.dp.toPx()).roundToInt()) }
+                                        .offset(y = levitationOffsetDp)
                                         .clip(RoundedCornerShape(28.dp))
                                         .background(
                                             Brush.verticalGradient(

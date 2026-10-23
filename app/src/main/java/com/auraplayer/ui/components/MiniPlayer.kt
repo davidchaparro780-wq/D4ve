@@ -78,8 +78,7 @@ import kotlin.math.roundToInt
 fun MiniPlayer(
     currentMedia: MediaModel?,
     isPlaying: Boolean,
-    progress: Float = 0f,
-    progressProvider: () -> Float = { progress },
+    progress: Float,
     onPlayPauseClick: () -> Unit,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit = {},
@@ -383,7 +382,7 @@ fun MiniPlayer(
                         }
 
                         // Ultra Neon Liquid Progress Bar with Ambient Glow
-                        val currentProgress = progressProvider().coerceIn(0f, 1f)
+                        val safeProgress = if (progress.isNaN() || progress.isInfinite()) 0f else progress.coerceIn(0f, 1f)
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -391,23 +390,25 @@ fun MiniPlayer(
                                 .background(Color.White.copy(alpha = 0.08f))
                                 .semantics {
                                     contentDescription = "Progreso de reproducción"
-                                    progressBarRangeInfo = ProgressBarRangeInfo(currentProgress, 0f..1f)
+                                    progressBarRangeInfo = ProgressBarRangeInfo(safeProgress, 0f..1f)
                                 }
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(currentProgress)
-                                    .fillMaxHeight()
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.secondary,
-                                                MaterialTheme.colorScheme.tertiary
+                            if (safeProgress > 0f) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(safeProgress)
+                                        .fillMaxHeight()
+                                        .background(
+                                            Brush.horizontalGradient(
+                                                listOf(
+                                                    MaterialTheme.colorScheme.primary,
+                                                    MaterialTheme.colorScheme.secondary,
+                                                    MaterialTheme.colorScheme.tertiary
+                                                )
                                             )
                                         )
-                                    )
-                            )
+                                )
+                            }
                         }
                     }
                 }

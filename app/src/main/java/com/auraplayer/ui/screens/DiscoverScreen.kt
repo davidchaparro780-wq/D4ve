@@ -90,8 +90,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -1047,33 +1045,21 @@ fun AnimatedEqualizerBars(
         Box(
             modifier = Modifier
                 .width(3.dp)
-                .fillMaxHeight()
-                .graphicsLayer {
-                    scaleY = bar1
-                    transformOrigin = TransformOrigin(0.5f, 1f)
-                }
+                .fillMaxHeight(bar1)
                 .clip(RoundedCornerShape(1.dp))
                 .background(color)
         )
         Box(
             modifier = Modifier
                 .width(3.dp)
-                .fillMaxHeight()
-                .graphicsLayer {
-                    scaleY = bar3
-                    transformOrigin = TransformOrigin(0.5f, 1f)
-                }
+                .fillMaxHeight(bar3)
                 .clip(RoundedCornerShape(1.dp))
                 .background(color)
         )
         Box(
             modifier = Modifier
                 .width(3.dp)
-                .fillMaxHeight()
-                .graphicsLayer {
-                    scaleY = bar2
-                    transformOrigin = TransformOrigin(0.5f, 1f)
-                }
+                .fillMaxHeight(bar2)
                 .clip(RoundedCornerShape(1.dp))
                 .background(color)
         )

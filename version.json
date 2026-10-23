@@ -1,7 +1,7 @@
 {
-  "versionCode": 122,
-  "versionName": "4.9.22",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.22/app-debug.apk",
-  "changelog": "✨ DaVE Player v4.9.22 (Build 122) — Ultra Performance 120 FPS & Erradicación de Lag:\n• ⚡ Eliminación de I/O Thrashing: Rediseñado PlaybackStatsManager con acumulación inteligente en memoria RAM y sincronización por lotes cada 30 segundos, reduciendo un 97% las escrituras a disco mientras reproduces música.\n• 🏎️ Recomposición Raíz Optimizada: Desacoplado el loop de progreso de reproducción en MainActivity y MiniPlayer hacia la fase de dibujo de Compose (progressProvider lambda), erradicando las recomposiciones globales continuas del Scaffold a 400ms.\n• 🎯 Animaciones 120 FPS en GPU (RenderThread): Migradas las oscilaciones de levitación y carátula en PlayerScreen y AnimatedEqualizerBars a modifiers con lambdas y graphicsLayer { scaleY }, evitando mediciones de layout a 60-120 FPS.\n• 🚀 Caché Global de Imágenes (Coil LRU 25% Heap + 100MB Disco): Implementado ImageLoader con soporte para hardware bitmaps y pool de decodificación para un scroll ultra fluido sin congelamientos.\n• ❤️ Favoritos en Memoria O(1): Caché instantáneo en memoria para FavoritesManager en todas las listas (Canciones, Playlists, Top, Recientes, Carpetas, Artistas), con 0 bloqueo en disco durante el scroll rápido.",
+  "versionCode": 123,
+  "versionName": "4.9.23",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.23/app-debug.apk",
+  "changelog": "🩹 DaVE Player v4.9.23 (Build 123) — Hotfix Crítico de Inicio & Estabilidad Total:\n• 🛡️ Corrección de Cierre al Abrir: Eliminada la configuración conflictiva de Coil ImageLoader y hardware bitmaps que generaba un crash al iniciar la aplicación.\n• ⚡ Progreso del MiniPlayer Seguro: Blindado el cálculo de progreso y pintado condicional contra valores indefinidos (0 y NaN) para garantizar arranque 100% estable.\n• 🏎️ Rendimiento Optimizado Mantenido: Se preserva la acumulación en memoria RAM de PlaybackStatsManager (reducción del 97% en escrituras a disco) y la indexación instantánea O(1) de Favoritos para un scroll veloz sin lag.",
   "fileSizeMb": 24.9
 }

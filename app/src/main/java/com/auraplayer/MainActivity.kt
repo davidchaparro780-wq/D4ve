@@ -1970,13 +1970,15 @@ fun AuraApp(
                 }
 
                 // Mini Player
+                val effectiveDuration = if (durationMs > 0L) durationMs else (currentMedia?.duration ?: 0L)
+                val progress = if (effectiveDuration > 0L) {
+                    val p = positionState.value.toFloat() / effectiveDuration.toFloat()
+                    if (p.isNaN() || p.isInfinite()) 0f else p.coerceIn(0f, 1f)
+                } else 0f
                 MiniPlayer(
                     currentMedia = currentMedia,
                     isPlaying = isPlaying,
-                    progressProvider = {
-                        val effectiveDuration = if (durationMs > 0L) durationMs else (currentMedia?.duration ?: 0L)
-                        if (effectiveDuration > 0L) (positionState.value.toFloat() / effectiveDuration.toFloat()).coerceIn(0f, 1f) else 0f
-                    },
+                    progress = progress,
                     onPlayPauseClick = {
                         controller?.let {
                             if (it.isPlaying) it.pause() else it.play()

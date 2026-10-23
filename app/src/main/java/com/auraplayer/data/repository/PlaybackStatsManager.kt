@@ -78,7 +78,7 @@ class PlaybackStatsManager(context: Context) {
             }
 
             editor.apply()
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
 
         pendingTodaySecs = 0
         pendingTotalSecs = 0
