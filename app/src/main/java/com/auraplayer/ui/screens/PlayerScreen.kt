@@ -3611,11 +3611,12 @@ fun PlayerScreen(
 
     // Mysterious Themes & Colors In-Player Dialog
     if (showMysteriousThemeDialog) {
-        val playlistManager = remember { PlaylistManager.getInstance(context) }
-        val currentAccent by playlistManager.themeAccent.collectAsState()
+        val playlistManager = remember { PlaylistManager(context) }
+        var currentAccent by remember { mutableStateOf(playlistManager.getThemeAccent()) }
         MysteriousThemeDialog(
             currentAccent = currentAccent,
             onAccentChange = { newAccent ->
+                currentAccent = newAccent
                 playlistManager.setThemeAccent(newAccent)
                 onAccentChange(newAccent)
             },
