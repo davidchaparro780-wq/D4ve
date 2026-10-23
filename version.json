@@ -1,7 +1,7 @@
 {
-  "versionCode": 115,
-  "versionName": "4.9.15",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.15/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.15 (Build 115):\n• 🖼️ Miniaturas & Carátulas 100% Persistentes: Solucionado el problema donde al seleccionar una carátula no se aplicaba o se eliminaba. Ahora los bytes se copian inmediatamente al almacenamiento privado seguro con compresión optimizada y botón para quitarla si lo deseas.\n• 🎬 Descargador de TikTok Unificado: Eliminada la opción redundante de video; ahora hay un único botón inteligente 'Descargar Video Sin Marca (HD 1080p)' que elige automáticamente la mejor resolución compatible con WhatsApp y redes, manteniendo la descarga de audio MP3.\n• 🎵 Acceso TikTok en Música: Acceso directo a descargas de TikTok disponible en el menú de herramientas mágicas de la pestaña Música.\n• 🔮 Atmósfera & Temas Misteriosos Visibles: El aura y gradiente misterioso ahora fluye por toda la pantalla de canciones, explorar y videos sin ser ocultada.\n• ⚡ Presets Virales de 1 Toque: En el control de tono/velocidad se añadieron accesos rápidos (Slowed, Nightcore, Ardilla, Voz Grave, Rápido y Normal).",
+  "versionCode": 116,
+  "versionName": "4.9.16",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.16/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.16 (Build 116):\n• 🔮 Selector Directo de Aura en el Reproductor: Nueva píldora '🔮 Aura' en la cabecera del reproductor a pantalla completa para alternar instantáneamente entre los temas misteriosos (Misterio Arcano, Eclipse Enigmático, Espectro Abisal, Nebulosa, AMOLED, Cyberpunk) sin salir de tu música.\n• 🌌 Fondos y Efectos Reactivos Dinámicos: Cuando una canción no tiene carátula o se usan fondos ambientales, el aura se genera armoniosamente con los colores primario y secundario de tu tema misterioso elegido.\n• ✨ Chispas Táctiles, Ondas Supernova y Forma de Onda Sincronizadas: Los destellos táctiles (AuraTouchSparks), la onda de choque Supernova y la barra de progreso de audio ahora vibran con los acentos secundarios y terciarios del tema misterioso.\n• 🎛️ Ecualizador Atmosférico: El panel de ecualización ahora cuenta con un fondo degradado ambiental reactivo y bordes luminosos que sumergen la experiencia sonora.",
   "fileSizeMb": 24.5
 }

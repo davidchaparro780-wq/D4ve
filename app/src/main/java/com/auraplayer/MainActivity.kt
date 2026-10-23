@@ -2718,6 +2718,7 @@ fun AuraApp(
                     pendingDiscoverQuery = query
                     selectedNavTab = 1
                 },
+                onAccentChange = onAccentChange,
                 onDismiss = { showPlayerScreen = false },
                 modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             )

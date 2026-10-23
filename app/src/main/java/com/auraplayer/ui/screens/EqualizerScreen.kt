@@ -99,10 +99,24 @@ fun EqualizerScreen(
     var loudness by remember { mutableFloatStateOf(eqManager.loudnessGain / 10f) }
     var crossfadeSeconds by remember { mutableIntStateOf(playlistManager.getCrossfadeSeconds()) }
 
+    val themePrimary = MaterialTheme.colorScheme.primary
+    val themeSecondary = MaterialTheme.colorScheme.secondary
+    val themeBackground = MaterialTheme.colorScheme.background
+    val atmosphericGradient = remember(themePrimary, themeSecondary, themeBackground) {
+        Brush.verticalGradient(
+            listOf(
+                themePrimary.copy(alpha = 0.20f),
+                themeSecondary.copy(alpha = 0.10f),
+                themeBackground,
+                themeBackground
+            )
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(atmosphericGradient)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -414,7 +428,18 @@ fun EqualizerScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    1.dp,
+                    Brush.horizontalGradient(
+                        listOf(
+                            themePrimary.copy(alpha = 0.35f),
+                            themeSecondary.copy(alpha = 0.20f)
+                        )
+                    ),
+                    RoundedCornerShape(20.dp)
+                ),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
         ) {

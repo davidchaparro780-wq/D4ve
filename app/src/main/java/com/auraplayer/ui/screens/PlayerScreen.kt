@@ -133,6 +133,8 @@ import com.auraplayer.ui.components.CanvasLoopsOverlay
 import com.auraplayer.ui.components.CanvasLoopTheme
 import com.auraplayer.ui.components.AudioQualityDialog
 import com.auraplayer.ui.components.WaveformVisualizer
+import com.auraplayer.ui.components.MysteriousThemeDialog
+import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -265,6 +267,7 @@ fun PlayerScreen(
     onOpenHeadphones: () -> Unit = {},
     isHeadphonesConnected: Boolean = false,
     onSearchOnline: (String) -> Unit = {},
+    onAccentChange: (String) -> Unit = {},
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -298,6 +301,7 @@ fun PlayerScreen(
     var showSongHunterDialog by remember { mutableStateOf(false) }
     var showMoodAuraDialog by remember { mutableStateOf(false) }
     var showVolumeBoosterDialog by remember { mutableStateOf(false) }
+    var showMysteriousThemeDialog by remember { mutableStateOf(false) }
     val boostPercent by com.auraplayer.audio.VolumeBoosterManager.instance.boostPercent.collectAsState()
     val hapticIntensity by com.auraplayer.audio.BassHapticManager.instance.intensity.collectAsState()
     val abPointA by com.auraplayer.audio.ABRepeatManager.instance.pointA.collectAsState()
@@ -513,8 +517,11 @@ fun PlayerScreen(
 
     val activeAccent = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary
 
+    val themePrimary = MaterialTheme.colorScheme.primary
+    val themeSecondary = MaterialTheme.colorScheme.secondary
+
     // Dynamic Atmospheric Gradient Background (100% Opaque, zero bleed-through)
-    val dynamicBg = remember(currentMedia.id, dynamicArtworkColor) {
+    val dynamicBg = remember(currentMedia.id, dynamicArtworkColor, themePrimary, themeSecondary) {
         val baseColor = dynamicArtworkColor
         if (baseColor != null) {
             val topColor = Color(
@@ -529,12 +536,19 @@ fun PlayerScreen(
                 Color(0xFF070A12)
             )
         } else {
-            val hash = Math.abs((currentMedia.artist + currentMedia.title).hashCode())
-            val hue = (hash % 360).toFloat()
-            val col1 = Color.hsl(hue, 0.45f, 0.12f)
-            val col2 = Color.hsl((hue + 45) % 360, 0.30f, 0.08f)
-            val col3 = Color(0xFF070A12)
-            listOf(col1, col2, col3)
+            val topColor = Color(
+                red = (themePrimary.red * 0.35f + 0.04f).coerceIn(0f, 1f),
+                green = (themePrimary.green * 0.35f + 0.05f).coerceIn(0f, 1f),
+                blue = (themePrimary.blue * 0.35f + 0.08f).coerceIn(0f, 1f),
+                alpha = 1.0f
+            )
+            val midColor = Color(
+                red = (themeSecondary.red * 0.20f + 0.03f).coerceIn(0f, 1f),
+                green = (themeSecondary.green * 0.20f + 0.04f).coerceIn(0f, 1f),
+                blue = (themeSecondary.blue * 0.20f + 0.07f).coerceIn(0f, 1f),
+                alpha = 1.0f
+            )
+            listOf(topColor, midColor, Color(0xFF070A12))
         }
     }
 
@@ -687,7 +701,7 @@ fun PlayerScreen(
     ) {
         AuraTouchSparks(
             accentColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary,
-            secondaryColor = Color(0xFFEC4899)
+            secondaryColor = MaterialTheme.colorScheme.secondary
         ) {
                 val comfortBackground = when (eyeComfortMode) {
                     1 -> Brush.verticalGradient(listOf(Color(0xFF191108), Color(0xFF0D0804)))
@@ -714,8 +728,8 @@ fun PlayerScreen(
                     EdgeAuroraGlow(
                         isPlaying = isPlaying,
                         primaryColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary,
-                        secondaryColor = Color(0xFF8B5CF6),
-                        tertiaryColor = Color(0xFFEC4899)
+                        secondaryColor = MaterialTheme.colorScheme.secondary,
+                        tertiaryColor = MaterialTheme.colorScheme.tertiary
                     )
                 } else if (eyeComfortMode == 1) {
                     Box(
@@ -858,6 +872,25 @@ fun PlayerScreen(
                                         2 -> Color(0xFFE2E8F0)
                                         else -> Color.White
                                     },
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+
+                            // Pill Aura Misteriosa (Selector In-Player)
+                            Surface(
+                                onClick = {
+                                    AuraHaptic.click(view)
+                                    showMysteriousThemeDialog = true
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f))
+                            ) {
+                                Text(
+                                    text = "🔮 Aura",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
@@ -1070,7 +1103,7 @@ fun PlayerScreen(
                                     SupernovaShockwave(
                                         trigger = supernovaTrigger,
                                         accentColor = activeAccent,
-                                        secondaryColor = Color(0xFFEC4899)
+                                        secondaryColor = MaterialTheme.colorScheme.secondary
                                     )
 
                                     VinylTurntableSkin(
@@ -1620,7 +1653,7 @@ fun PlayerScreen(
                             onSeek(targetMs)
                         },
                         activeColor = activeAccent,
-                        secondaryColor = Color(0xFFEC4899)
+                        secondaryColor = MaterialTheme.colorScheme.secondary
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -3573,6 +3606,20 @@ fun PlayerScreen(
                 Toast.makeText(context, "📻 Sincronizando con Party Link: $title", Toast.LENGTH_SHORT).show()
             },
             onDismiss = { showPartyLinkDialog = false }
+        )
+    }
+
+    // Mysterious Themes & Colors In-Player Dialog
+    if (showMysteriousThemeDialog) {
+        val playlistManager = remember { PlaylistManager.getInstance(context) }
+        val currentAccent by playlistManager.themeAccent.collectAsState()
+        MysteriousThemeDialog(
+            currentAccent = currentAccent,
+            onAccentChange = { newAccent ->
+                playlistManager.setThemeAccent(newAccent)
+                onAccentChange(newAccent)
+            },
+            onDismiss = { showMysteriousThemeDialog = false }
         )
     }
 }
