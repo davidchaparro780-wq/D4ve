@@ -150,17 +150,17 @@ class YouTubeMusicRepository {
     }
 
     private var cobaltMirrors = listOf(
-        "https://cobalt-api.kwiatekm.pl",
         "https://api.cobalt.tools",
+        "https://cobalt-api.kwiatekm.pl",
         "https://cobalt.api.sciter.io"
     )
 
     private var invidiousMirrors = listOf(
-        "https://invidious.nerdvpn.de",
         "https://inv.nadeko.net",
+        "https://invidious.nerdvpn.de",
         "https://invidious.tiekoetter.com",
-        "https://invidious.f5.si",
-        "https://yt.chocolatemoo53.com"
+        "https://yt.chocolatemoo53.com",
+        "https://invidious.f5.si"
     )
 
     var onYouTubeApiChangedDetected: (() -> Unit)? = null
@@ -202,48 +202,79 @@ class YouTubeMusicRepository {
         if (videoId.isBlank()) return@withContext null
         refreshRemoteConfigIfNeeded()
 
-        // 1. Primary: InnerTube ANDROID player (Instant ~200ms, direct ratebypass URL, no cipher)
-        try {
-            val androidUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "ANDROID",
-                clientVersion = "20.10.38",
-                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
-                isVideo = false
-            )
-            if (!androidUrl.isNullOrBlank()) {
-                return@withContext androidUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID para videoId=$videoId", e)
-        }
-
-        // 2. Secondary: InnerTube IOS player
+        // 1. Primary: InnerTube IOS player (Bypasses PO-Tokens & bot restrictions)
         try {
             val iosUrl = queryInnerTube(
                 videoId = videoId,
                 clientName = "IOS",
-                clientVersion = "20.10.1",
-                userAgent = "com.google.ios.youtube/20.10.1 (iPhone16,2; U; CPU iOS 18_2 like Mac OS X; en_US)",
+                clientVersion = "19.45.4",
+                userAgent = "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)",
                 deviceModel = "iPhone16,2",
                 isVideo = false
             )
             if (!iosUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube IOS")
                 return@withContext iosUrl
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "Fallo en endpoint InnerTube IOS para videoId=$videoId", e)
         }
 
-        // 3. Fallback: Fast Invidious dynamic mirror (max 2 mirrors, 2.5s timeout)
-        for (mirror in invidiousMirrors.take(2)) {
+        // 2. Secondary: InnerTube TVHTML5 player (Smart TV client, zero botguard requirement)
+        try {
+            val tvUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "TVHTML5",
+                clientVersion = "7.20250101.12.00",
+                userAgent = "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1",
+                deviceModel = null,
+                isVideo = false
+            )
+            if (!tvUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube TVHTML5")
+                return@withContext tvUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en endpoint InnerTube TVHTML5 para videoId=$videoId", e)
+        }
+
+        // 3. Tertiary: InnerTube ANDROID player
+        try {
+            val androidUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID",
+                clientVersion = "20.10.38",
+                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14)",
+                isVideo = false
+            )
+            if (!androidUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube ANDROID")
+                return@withContext androidUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID para videoId=$videoId", e)
+        }
+
+        // 4. Quaternary: Cobalt High-Speed API Gateway (Dedicated anti-blocking server)
+        try {
+            val cobaltUrl = queryCobaltApi(videoId, isVideo = false)
+            if (!cobaltUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía Cobalt API")
+                return@withContext cobaltUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en Cobalt API para videoId=$videoId", e)
+        }
+
+        // 5. Quinquenary: Active Invidious mirrors
+        for (mirror in invidiousMirrors.take(3)) {
             try {
                 val invUrl = "$mirror/api/v1/videos/$videoId"
                 val conn = (URL(invUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 2500
-                    readTimeout = 2500
+                    connectTimeout = 3000
+                    readTimeout = 3000
                     requestMethod = "GET"
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
                 }
                 if (conn.responseCode == 200) {
                     val resp = conn.inputStream.bufferedReader().use { it.readText() }
@@ -265,7 +296,7 @@ class YouTubeMusicRepository {
             }
         }
 
-        // 4. Fallback: NewPipeExtractor
+        // 6. Fallback: NewPipeExtractor
         try {
             initNewPipe()
             val watchUrl = "https://www.youtube.com/watch?v=$videoId"
@@ -301,31 +332,79 @@ class YouTubeMusicRepository {
     suspend fun resolveVideoStream(videoId: String): String? = withContext(Dispatchers.IO) {
         if (videoId.isBlank()) return@withContext null
 
-        // 1. Primary: InnerTube ANDROID player (Instant ~200ms, direct muxed MP4 720p/360p with ratebypass=yes)
+        // 1. Primary: InnerTube IOS player (Bypasses PO-Tokens & bot restrictions)
+        try {
+            val iosUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "IOS",
+                clientVersion = "19.45.4",
+                userAgent = "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)",
+                deviceModel = "iPhone16,2",
+                isVideo = true
+            )
+            if (!iosUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube IOS")
+                return@withContext iosUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en InnerTube IOS de video para videoId=$videoId", e)
+        }
+
+        // 2. Secondary: InnerTube TVHTML5 player (Smart TV client, zero botguard requirement)
+        try {
+            val tvUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "TVHTML5",
+                clientVersion = "7.20250101.12.00",
+                userAgent = "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1",
+                deviceModel = null,
+                isVideo = true
+            )
+            if (!tvUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube TVHTML5")
+                return@withContext tvUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en InnerTube TVHTML5 de video para videoId=$videoId", e)
+        }
+
+        // 3. Tertiary: InnerTube ANDROID player
         try {
             val androidUrl = queryInnerTube(
                 videoId = videoId,
                 clientName = "ANDROID",
                 clientVersion = "20.10.38",
-                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14)",
                 isVideo = true
             )
             if (!androidUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube ANDROID")
                 return@withContext androidUrl
             }
         } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en InnerTube ANDROID de vídeo para videoId=$videoId", e)
+            AppLog.w(TAG, "Fallo en InnerTube ANDROID de video para videoId=$videoId", e)
         }
 
-        // 2. Secondary: Fast Invidious formatStreams (muxed MP4 video+audio)
-        for (mirror in invidiousMirrors.take(2)) {
+        // 4. Quaternary: Cobalt High-Speed API Gateway
+        try {
+            val cobaltUrl = queryCobaltApi(videoId, isVideo = true)
+            if (!cobaltUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía Cobalt API")
+                return@withContext cobaltUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en Cobalt API de video para videoId=$videoId", e)
+        }
+
+        // 5. Quinquenary: Fast Invidious formatStreams (muxed MP4 video+audio)
+        for (mirror in invidiousMirrors.take(3)) {
             try {
                 val invUrl = "$mirror/api/v1/videos/$videoId"
                 val conn = (URL(invUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 2500
-                    readTimeout = 2500
+                    connectTimeout = 3000
+                    readTimeout = 3000
                     requestMethod = "GET"
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
                 }
                 if (conn.responseCode == 200) {
                     val resp = conn.inputStream.bufferedReader().use { it.readText() }
@@ -347,7 +426,7 @@ class YouTubeMusicRepository {
             }
         }
 
-        // 3. Fallback: NewPipeExtractor
+        // 6. Fallback: NewPipeExtractor
         try {
             initNewPipe()
             val watchUrl = "https://www.youtube.com/watch?v=$videoId"
@@ -372,21 +451,95 @@ class YouTubeMusicRepository {
         null
     }
 
+    /**
+     * Resolves stream URL via Cobalt distributed microservice API (Bypasses Google 403 blocks)
+     */
+    fun queryCobaltApi(videoId: String, isVideo: Boolean): String? {
+        val targets = cobaltMirrors.ifEmpty {
+            listOf(
+                "https://api.cobalt.tools",
+                "https://cobalt-api.kwiatekm.pl",
+                "https://cobalt.api.sciter.io",
+                "https://api.wuk.sh"
+            )
+        }
+        val videoUrl = "https://www.youtube.com/watch?v=$videoId"
+
+        for (host in targets) {
+            try {
+                val cleanHost = host.trimEnd('/')
+                val url = URL(cleanHost)
+                val conn = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 4000
+                    readTimeout = 8000
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type", "application/json")
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                    doOutput = true
+                }
+
+                val payload = JSONObject().apply {
+                    put("url", videoUrl)
+                    if (isVideo) {
+                        put("downloadMode", "auto")
+                        put("videoQuality", "720")
+                    } else {
+                        put("downloadMode", "audio")
+                        put("audioFormat", "m4a")
+                    }
+                }
+
+                conn.outputStream.use { it.write(payload.toString().toByteArray()) }
+
+                if (conn.responseCode in 200..299) {
+                    val resp = conn.inputStream.bufferedReader().use { it.readText() }
+                    val root = JSONObject(resp)
+                    val status = root.optString("status")
+                    var resultUrl = root.optString("url")
+                    if (resultUrl.isBlank() && status == "picker") {
+                        val picker = root.optJSONArray("picker")
+                        if (picker != null && picker.length() > 0) {
+                            resultUrl = picker.getJSONObject(0).optString("url")
+                        }
+                    }
+                    if (resultUrl.isNotBlank() && (status == "stream" || status == "tunnel" || status == "redirect" || status == "success" || status == "picker")) {
+                        AppLog.d(TAG, "Cobalt API exitoso ($host) para videoId=$videoId: ${resultUrl.take(60)}...")
+                        return resultUrl
+                    }
+                }
+            } catch (e: Exception) {
+                AppLog.d(TAG, "Cobalt mirror $host no disponible: ${e.message}")
+            }
+        }
+        return null
+    }
+
     private fun queryInnerTube(
         videoId: String,
         clientName: String = "ANDROID",
         clientVersion: String = "20.10.38",
-        userAgent: String = "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+        userAgent: String = "com.google.android.youtube/20.10.38 (Linux; U; Android 14)",
         deviceModel: String? = null,
         isVideo: Boolean = false
     ): String? {
         val url = URL("https://www.youtube.com/youtubei/v1/player")
+        val clientNumber = when (clientName) {
+            "IOS" -> "5"
+            "TVHTML5" -> "85"
+            "ANDROID" -> "3"
+            else -> "1"
+        }
         val conn = (url.openConnection() as HttpURLConnection).apply {
             connectTimeout = 5000
-            readTimeout = 5000
+            readTimeout = 6000
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("User-Agent", userAgent)
+            setRequestProperty("X-YouTube-Client-Name", clientNumber)
+            setRequestProperty("X-YouTube-Client-Version", clientVersion)
+            setRequestProperty("Origin", "https://www.youtube.com")
+            setRequestProperty("Accept", "*/*")
             doOutput = true
         }
 
@@ -395,16 +548,37 @@ class YouTubeMusicRepository {
             put("clientVersion", clientVersion)
             put("hl", "es")
             put("gl", "US")
-            if (deviceModel != null) {
-                put("deviceModel", deviceModel)
+            when (clientName) {
+                "IOS" -> {
+                    put("deviceMake", "Apple")
+                    put("deviceModel", deviceModel ?: "iPhone16,2")
+                    put("osName", "iOS")
+                    put("osVersion", "18.1.1.22B91")
+                    put("platform", "MOBILE")
+                }
+                "TVHTML5" -> {
+                    put("theme", "CLASSIC")
+                    put("platform", "TV")
+                }
+                "ANDROID" -> {
+                    put("androidSdkVersion", 34)
+                    put("osName", "Android")
+                    put("osVersion", "14")
+                    put("platform", "MOBILE")
+                }
             }
         }
 
         val payload = JSONObject().apply {
             put("context", JSONObject().apply {
                 put("client", clientObj)
+                put("user", JSONObject().apply {
+                    put("lockedSafetyMode", false)
+                })
             })
             put("videoId", videoId)
+            put("racyCheckOk", true)
+            put("contentCheckOk", true)
         }
 
         conn.outputStream.use { it.write(payload.toString().toByteArray()) }

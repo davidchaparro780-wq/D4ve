@@ -284,9 +284,9 @@ class DownloadEngine(
                 AppLog.d(TAG, "La URL ya es un stream directo, se omite re-resolución: ${resolvedAudioUrl.take(80)}...")
             }
 
-            // 2. Download with retry (max 2 attempts for transient network failures)
+            // 2. Download with retry (max 3 attempts for network / 403 anti-block recovery)
             var lastException: Exception? = null
-            for (attempt in 1..2) {
+            for (attempt in 1..3) {
                 try {
                     performDownload(resolvedAudioUrl, track, safeArtist, safeTitle)
 
@@ -301,22 +301,33 @@ class DownloadEngine(
                     lastException = e
                     AppLog.w(TAG, "Intento de descarga $attempt falló: ${e.message}", e)
 
-                    // On first failure for YouTube tracks, try re-resolving the stream URL
-                    if (attempt == 1 && (track.source == "YouTube" || track.id.startsWith("yt_"))) {
-                        val videoId = if (track.id.startsWith("yt_")) track.id.removePrefix("yt_") else ""
+                    // On failure (especially 403 / 410 / connection errors), re-resolve stream with anti-blocking tiers
+                    if (attempt < 3 && (track.source == "YouTube" || track.id.startsWith("yt_") || resolvedAudioUrl.contains("googlevideo.com"))) {
+                        val videoId = if (track.id.startsWith("yt_")) {
+                            track.id.removePrefix("yt_")
+                        } else if (resolvedAudioUrl.contains("v=")) {
+                            resolvedAudioUrl.substringAfter("v=").substringBefore("&")
+                        } else {
+                            ""
+                        }
                         if (videoId.isNotBlank()) {
-                            val freshUrl = youtubeRepo.resolveAudioStream(videoId)
+                            // On attempt 2, query Cobalt API directly to bypass local IP restrictions
+                            val freshUrl = if (attempt == 2) {
+                                youtubeRepo.queryCobaltApi(videoId, isVideo = false) ?: youtubeRepo.resolveAudioStream(videoId)
+                            } else {
+                                youtubeRepo.resolveAudioStream(videoId)
+                            }
                             if (!freshUrl.isNullOrBlank() && freshUrl != resolvedAudioUrl) {
                                 resolvedAudioUrl = freshUrl
-                                AppLog.d(TAG, "Stream de YouTube re-resuelto para el reintento")
+                                AppLog.d(TAG, "Stream de audio re-resuelto exitosamente para intento ${attempt + 1}")
                                 continue
                             }
                         }
-                        // Also try Deezer fallback on retry
+                        // Also try Deezer fallback on failure
                         val deezerUrl = searchFallbackAudioUrl(track.artist, track.title)
-                        if (!deezerUrl.isNullOrBlank()) {
+                        if (!deezerUrl.isNullOrBlank() && deezerUrl != resolvedAudioUrl) {
                             resolvedAudioUrl = deezerUrl
-                            AppLog.d(TAG, "Usando fallback de Deezer para el reintento")
+                            AppLog.d(TAG, "Usando fallback HQ de Deezer para el reintento ${attempt + 1}")
                             continue
                         }
                     }
@@ -357,10 +368,17 @@ class DownloadEngine(
         while (true) {
             val url = URL(currentUrl)
             val isGoogleVideo = currentUrl.contains("googlevideo.com", ignoreCase = true)
-            val ua = if (isGoogleVideo) {
-                "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip"
-            } else {
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            val ua = when {
+                isGoogleVideo && currentUrl.contains("c=IOS", ignoreCase = true) ->
+                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                isGoogleVideo && currentUrl.contains("c=TVHTML5", ignoreCase = true) ->
+                    "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1"
+                isGoogleVideo && currentUrl.contains("c=ANDROID", ignoreCase = true) ->
+                    "com.google.android.youtube/20.10.38 (Linux; U; Android 14)"
+                isGoogleVideo ->
+                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                else ->
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
             }
 
             connection = (url.openConnection() as HttpURLConnection).apply {
@@ -371,6 +389,7 @@ class DownloadEngine(
                 setRequestProperty("User-Agent", ua)
                 setRequestProperty("Accept", "*/*")
                 setRequestProperty("Accept-Language", "en-US,en;q=0.9")
+                setRequestProperty("Accept-Encoding", "identity;q=1, *;q=0")
                 setRequestProperty("Connection", "keep-alive")
                 if (useRangeHeader) {
                     // Range header helps resume and tells server we want the full body
@@ -694,14 +713,38 @@ class DownloadEngine(
             val safeTitle = sanitize(track.title).ifBlank { "DaVE_Video_${System.currentTimeMillis()}" }
             val fileName = "$safeTitle.mp4"
 
-            performVideoDownload(videoStreamUrl, downloadId, fileName, track.title)
+            var lastVideoException: Exception? = null
+            for (attempt in 1..3) {
+                try {
+                    performVideoDownload(videoStreamUrl, downloadId, fileName, track.title)
 
-            updateState(downloadId, DownloadStatus.Completed)
-            showDownloadCompletedNotification(track.title, "Video MP4")
-            onDownloadCompleted?.invoke(track)
-            withContext(Dispatchers.Main) {
-                onComplete?.invoke()
+                    updateState(downloadId, DownloadStatus.Completed)
+                    showDownloadCompletedNotification(track.title, "Video MP4")
+                    onDownloadCompleted?.invoke(track)
+                    withContext(Dispatchers.Main) {
+                        onComplete?.invoke()
+                    }
+                    return@withContext
+                } catch (e: Exception) {
+                    lastVideoException = e
+                    AppLog.w(TAG, "Intento de descarga de video $attempt falló: ${e.message}", e)
+
+                    if (attempt < 3 && videoId.isNotBlank()) {
+                        // On retry, re-resolve with Cobalt API or secondary player
+                        val freshVideoUrl = if (attempt == 2) {
+                            youtubeRepo.queryCobaltApi(videoId, isVideo = true) ?: youtubeRepo.resolveVideoStream(videoId)
+                        } else {
+                            youtubeRepo.resolveVideoStream(videoId)
+                        }
+                        if (!freshVideoUrl.isNullOrBlank() && freshVideoUrl != videoStreamUrl) {
+                            videoStreamUrl = freshVideoUrl
+                            AppLog.d(TAG, "Stream de video re-resuelto para intento ${attempt + 1}")
+                            continue
+                        }
+                    }
+                }
             }
+            throw lastVideoException ?: IllegalStateException("Error al descargar el video")
         } catch (e: Exception) {
             AppLog.e(TAG, "No se pudo descargar el video ${track.title}", e)
             val userMsg = e.localizedMessage ?: "Error al descargar el video"
@@ -726,10 +769,17 @@ class DownloadEngine(
         while (true) {
             val url = URL(currentUrl)
             val isGoogleVideo = currentUrl.contains("googlevideo.com", ignoreCase = true)
-            val ua = if (isGoogleVideo) {
-                "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip"
-            } else {
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            val ua = when {
+                isGoogleVideo && currentUrl.contains("c=IOS", ignoreCase = true) ->
+                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                isGoogleVideo && currentUrl.contains("c=TVHTML5", ignoreCase = true) ->
+                    "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1"
+                isGoogleVideo && currentUrl.contains("c=ANDROID", ignoreCase = true) ->
+                    "com.google.android.youtube/20.10.38 (Linux; U; Android 14)"
+                isGoogleVideo ->
+                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                else ->
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
             }
 
             connection = (url.openConnection() as HttpURLConnection).apply {
@@ -738,6 +788,10 @@ class DownloadEngine(
                 requestMethod = "GET"
                 instanceFollowRedirects = true
                 setRequestProperty("User-Agent", ua)
+                setRequestProperty("Accept", "*/*")
+                setRequestProperty("Accept-Language", "en-US,en;q=0.9")
+                setRequestProperty("Accept-Encoding", "identity;q=1, *;q=0")
+                setRequestProperty("Connection", "keep-alive")
                 if (useRangeHeader) {
                     setRequestProperty("Range", "bytes=0-")
                 }

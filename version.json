@@ -1,7 +1,7 @@
 {
-  "versionCode": 118,
-  "versionName": "4.9.18",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.18/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.18 (Build 118) — Corrección Integral de Bugs:\n• 🛡️ Solución Crítica en Videos Locales: Eliminado el borrado accidental en Scoped Storage (Android 10+) que hacía desaparecer videos de la biblioteca.\n• ⚡ Descargas Ligeras y Ultra Rápidas: El motor de audio ahora selecciona streams de audio puro (M4A/Opus ~3MB) en lugar de videos de 70MB, eliminando esperas y tiempos de carga excesivos.\n• 📥 Pantalla de Descargas Interactiva: Reproduce tus canciones y videos completados tocando directamente la fila; nuevo botón 'Limpiar' y opción de descartar descargas individuales con '✕'.\n• 🔄 Auto-Refresco Inmediato de Videos: Los videos descargados ahora refrescan automáticamente la galería sin necesidad de reiniciar la app.\n• 🔍 Búsqueda Multi-Sección & Metadatos Reales: Búsqueda de YouTube que no omite canciones por chips o estantes iniciales, y extracción precisa de títulos y duraciones vía InnerTube.\n• 🩹 Auto-Curación de Streaming Mejorada: Si un stream online falla, se regenera con audio HQ automáticamente; en local, avanza limpiamente sin bloquear el reproductor.",
-  "fileSizeMb": 24.5
+  "versionCode": 119,
+  "versionName": "4.9.19",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.19/app-debug.apk",
+  "changelog": "🛡️ DaVE Player v4.9.19 (Build 119) — Arquitectura Anti-Bloqueo de YouTube Multi-Capa:\n• 🚀 Bye-Bye Error 403 Forbidden: Implementada la arquitectura multi-capa de clientes InnerTube (iOS 19.45.4 & Smart TV TVHTML5) que no exigen PO-Tokens ni verificaciones BotGuard de Google.\n• 🌐 Cobalt API Gateway Integrado: Microservicio distribuido de alta velocidad que resuelve streams de audio y video desde servidores proxy externos cuando hay restricciones de IP local.\n• 🔄 Sincronización Dinámica de User-Agent: Descargas de googlevideo con User-Agent exacto según el cliente de origen (iOS/TV/Android) y sin compresión gzip corrupta, eliminando rechazos en streams por rangos.\n• 🔁 Auto-Recuperación Inteligente con 3 Reintentos: Si una descarga de audio o video encuentra un enlace temporal bloqueado o expirado, se re-resuelve en caliente al instante con fallback HQ a Deezer.\n• 🎬 Descargas de Video MP4 Robustas: Descarga videos musicales completos muxed (audio + video 720p/360p) directamente a tu galería Movies/DaVEPlayer sin fallos ni bloqueos.",
+  "fileSizeMb": 24.6
 }
