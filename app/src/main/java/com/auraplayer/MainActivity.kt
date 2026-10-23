@@ -597,6 +597,27 @@ fun AuraApp(
         }
     }
 
+    val applyTagOverride: (MediaModel) -> MediaModel = { s ->
+        val override = playlistManager.getTagOverride(s.id)
+        if (override != null) {
+            val customCover = if (override.customCoverPath.isNotBlank()) {
+                val f = File(Uri.parse(override.customCoverPath).path ?: "")
+                if (f.exists() && f.length() > 0) Uri.parse(override.customCoverPath) else s.artworkUri
+            } else s.artworkUri
+            s.copy(
+                title = override.title.ifBlank { s.title },
+                artist = override.artist.ifBlank { s.artist },
+                album = override.album.ifBlank { s.album },
+                artworkUri = customCover
+            )
+        } else {
+            val persistentCover = mediaRepository.coverArtManager.getLocalCoverUri(s.id, s.artist, s.title, s.path)
+            if (persistentCover != null) {
+                s.copy(artworkUri = persistentCover)
+            } else s
+        }
+    }
+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -1210,27 +1231,6 @@ fun AuraApp(
                 lastStatsTime = now
             }
             delay(400)
-        }
-    }
-
-    val applyTagOverride: (MediaModel) -> MediaModel = { s ->
-        val override = playlistManager.getTagOverride(s.id)
-        if (override != null) {
-            val customCover = if (override.customCoverPath.isNotBlank()) {
-                val f = File(Uri.parse(override.customCoverPath).path ?: "")
-                if (f.exists() && f.length() > 0) Uri.parse(override.customCoverPath) else s.artworkUri
-            } else s.artworkUri
-            s.copy(
-                title = override.title.ifBlank { s.title },
-                artist = override.artist.ifBlank { s.artist },
-                album = override.album.ifBlank { s.album },
-                artworkUri = customCover
-            )
-        } else {
-            val persistentCover = mediaRepository.coverArtManager.getLocalCoverUri(s.id, s.artist, s.title, s.path)
-            if (persistentCover != null) {
-                s.copy(artworkUri = persistentCover)
-            } else s
         }
     }
 
@@ -2161,7 +2161,7 @@ fun AuraApp(
                         var finalCoverUri = song.artworkUri
                         if (newCoverUri == Uri.EMPTY) {
                             // Usuario solicitó explícitamente quitar la carátula personalizada
-                            mediaRepository.coverArtManager.cleanupSongCache(song)
+                            mediaRepository.coverArtManager.removeCover(song.id, song.artist, song.title, song.path)
                             playlistManager.removeCustomCover(song.id)
                             finalCoverUri = null
                         } else if (newCoverUri != null) {

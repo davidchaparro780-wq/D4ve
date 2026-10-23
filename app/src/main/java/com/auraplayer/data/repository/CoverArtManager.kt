@@ -383,6 +383,36 @@ class CoverArtManager(private val context: Context) {
         return null
     }
 
+    fun removeCover(id: Long, artist: String? = null, title: String? = null, path: String? = null) {
+        try {
+            val targetFile = File(coversDir, "$id.jpg")
+            if (targetFile.exists()) targetFile.delete()
+            prefs.edit().remove("cover_id_$id").apply()
+
+            if (!artist.isNullOrBlank() && !title.isNullOrBlank()) {
+                val cleanKey = sanitize("${artist}_${title}")
+                val namedFile = File(coversDir, "$cleanKey.jpg")
+                if (namedFile.exists()) namedFile.delete()
+            }
+
+            if (!path.isNullOrBlank()) {
+                val nameNoExt = File(path).nameWithoutExtension
+                if (nameNoExt.isNotBlank()) {
+                    val directFile = File(coversDir, "$nameNoExt.jpg")
+                    if (directFile.exists()) directFile.delete()
+                    prefs.edit().remove("cover_file_${nameNoExt.lowercase().trim()}").apply()
+                }
+            }
+
+            val loader = coil.Coil.imageLoader(context)
+            loader.memoryCache?.clear()
+            loader.diskCache?.remove(Uri.fromFile(targetFile).toString())
+            loader.diskCache?.remove(targetFile.absolutePath)
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Error al eliminar carátula personalizada", e)
+        }
+    }
+
     private fun downloadImageToFile(imageUrl: String, targetFile: File) {
         var conn: HttpURLConnection? = null
         try {
