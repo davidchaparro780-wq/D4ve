@@ -1171,6 +1171,7 @@ fun PlayerScreen(
                     val maxArtSize = minOf(maxWidth * 0.90f, maxHeight * 0.92f)
                     if (isVideoMode) {
                         // Video Player Screen
+                        val activeExo = PlaybackService.activePlayer
                         val isVideoSource = currentMedia.isVideo ||
                             currentMedia.path.endsWith(".mp4", ignoreCase = true) ||
                             currentMedia.path.endsWith(".mkv", ignoreCase = true) ||
