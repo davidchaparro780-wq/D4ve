@@ -36,6 +36,10 @@ class PlaybackService : MediaSessionService() {
         @Volatile
         var activePlayer: ExoPlayer? = null
             private set
+
+        @Volatile
+        var isCurrentlyPlaying: Boolean = false
+            internal set
     }
 
     @OptIn(UnstableApi::class)
@@ -120,6 +124,7 @@ class PlaybackService : MediaSessionService() {
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                isCurrentlyPlaying = isPlaying
                 com.auraplayer.widget.DaVEAppWidgetProvider.updateWidgetFromPlayer(this@PlaybackService, player)
             }
 
@@ -291,6 +296,7 @@ class PlaybackService : MediaSessionService() {
         if (activePlayer == player) {
             activePlayer = null
         }
+        isCurrentlyPlaying = false
         serviceScope.cancel()
         try { com.auraplayer.audio.RealtimeVisualizerManager.instance.release() } catch (_: Exception) {}
         try { EqualizerManager.instance.release() } catch (_: Exception) {}

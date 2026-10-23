@@ -17,8 +17,10 @@ private const val TAG = "FlashlightBeatManager"
 class FlashlightBeatManager(private val context: Context) {
 
     private val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as? CameraManager
-    private var strobeJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val exceptionHandler = kotlinx.coroutines.CoroutineExceptionHandler { _, throwable ->
+        AppLog.e(TAG, "Uncaught error en FlashlightBeatManager", throwable)
+    }
+    private val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
 
     var isEnabled: Boolean = false
         private set
@@ -46,7 +48,7 @@ class FlashlightBeatManager(private val context: Context) {
             var lastFlashTime = 0L
             try {
                 while (isActive && isEnabled) {
-                    val isPlaying = com.auraplayer.service.PlaybackService.activePlayer?.isPlaying == true
+                    val isPlaying = com.auraplayer.service.PlaybackService.isCurrentlyPlaying
                     if (!isPlaying) {
                         try { cameraManager?.setTorchMode(camId, false) } catch (_: Exception) {}
                         delay(200)
@@ -54,7 +56,11 @@ class FlashlightBeatManager(private val context: Context) {
                     }
 
                     val now = System.currentTimeMillis()
-                    val bass = RealtimeVisualizerManager.instance.getBassEnergy(true)
+                    val bass = try {
+                        RealtimeVisualizerManager.instance.getBassEnergy(true)
+                    } catch (_: Throwable) {
+                        0.5f
+                    }
 
                     // Destello reactivo al impacto de bombo/bajo (< 100 Hz)
                     if (bass > 0.68f && (now - lastFlashTime) > 120L) {

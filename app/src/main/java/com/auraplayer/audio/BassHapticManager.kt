@@ -2,11 +2,12 @@ package com.auraplayer.audio
 
 import android.content.Context
 import android.os.Build
-import android.os.CombinedVibration
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import com.auraplayer.util.AppLog
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,7 +33,10 @@ class BassHapticManager private constructor() {
     }
 
     private var vibrator: Vibrator? = null
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        AppLog.e(TAG, "Uncaught error en BassHapticManager", throwable)
+    }
+    private val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     private var hapticJob: Job? = null
 
     private val _intensity = MutableStateFlow(HapticIntensity.OFF)
@@ -40,12 +44,17 @@ class BassHapticManager private constructor() {
 
     fun init(context: Context) {
         if (vibrator == null) {
-            vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                vm?.defaultVibrator
-            } else {
-                @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            try {
+                val appCtx = context.applicationContext ?: context
+                vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val vm = appCtx.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                    vm?.defaultVibrator
+                } else {
+                    @Suppress("DEPRECATION")
+                    appCtx.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                }
+            } catch (t: Throwable) {
+                AppLog.e(TAG, "Error inicializando vibrador", t)
             }
         }
     }
@@ -59,7 +68,10 @@ class BassHapticManager private constructor() {
         }
     }
 
-    fun toggle() {
+    fun toggle(context: Context? = null) {
+        if (vibrator == null && context != null) {
+            init(context)
+        }
         val next = when (_intensity.value) {
             HapticIntensity.OFF -> HapticIntensity.MEDIUM
             HapticIntensity.LIGHT -> HapticIntensity.MEDIUM
@@ -75,35 +87,54 @@ class BassHapticManager private constructor() {
         hapticJob = scope.launch {
             var lastHitTime = 0L
             val vib = vibrator ?: return@launch
+            val hasVib = try { vib.hasVibrator() } catch (_: Throwable) { false }
+            if (!hasVib) return@launch
+
+            val hasAmp = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) vib.hasAmplitudeControl() else false
+            } catch (_: Throwable) { false }
 
             while (isActive && _intensity.value != HapticIntensity.OFF) {
-                val isPlaying = com.auraplayer.service.PlaybackService.activePlayer?.isPlaying == true
-                if (!isPlaying) {
-                    delay(150)
-                    continue
-                }
-
-                val current = _intensity.value
-                val now = System.currentTimeMillis()
-                val bass = RealtimeVisualizerManager.instance.getBassEnergy(true)
-
-                // Trigger punch when sub-bass drops (> 0.62f threshold) and at least 110ms spaced
-                if (bass > 0.62f && (now - lastHitTime) > 115L) {
-                    lastHitTime = now
-                    try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            if (vib.hasAmplitudeControl()) {
-                                vib.vibrate(VibrationEffect.createOneShot(current.ms, current.amplitude))
-                            } else {
-                                vib.vibrate(VibrationEffect.createOneShot(current.ms, VibrationEffect.DEFAULT_AMPLITUDE))
-                            }
-                        } else {
-                            @Suppress("DEPRECATION")
-                            vib.vibrate(current.ms)
-                        }
-                    } catch (e: Exception) {
-                        AppLog.w(TAG, "Vibración de bajo háptico falló", e)
+                try {
+                    // Check thread-safe playback status from PlaybackService without calling ExoPlayer on wrong thread
+                    val isPlaying = com.auraplayer.service.PlaybackService.isCurrentlyPlaying
+                    if (!isPlaying) {
+                        delay(150)
+                        continue
                     }
+
+                    val current = _intensity.value
+                    if (current == HapticIntensity.OFF) break
+
+                    val now = System.currentTimeMillis()
+                    val bass = try {
+                        RealtimeVisualizerManager.instance.getBassEnergy(true)
+                    } catch (_: Throwable) {
+                        0.5f
+                    }
+
+                    // Trigger punch when sub-bass drops (> 0.62f threshold) and at least 110ms spaced
+                    if (bass > 0.62f && (now - lastHitTime) > 115L) {
+                        lastHitTime = now
+                        try {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                val effect = if (hasAmp && current.amplitude in 1..255) {
+                                    VibrationEffect.createOneShot(current.ms.coerceAtLeast(1L), current.amplitude)
+                                } else {
+                                    VibrationEffect.createOneShot(current.ms.coerceAtLeast(1L), VibrationEffect.DEFAULT_AMPLITUDE)
+                                }
+                                vib.vibrate(effect)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                vib.vibrate(current.ms.coerceAtLeast(1L))
+                            }
+                        } catch (t: Throwable) {
+                            AppLog.w(TAG, "Vibración de bajo háptico falló", t)
+                        }
+                    }
+                } catch (t: Throwable) {
+                    if (t is CancellationException) throw t
+                    AppLog.w(TAG, "Error en ciclo de vibración", t)
                 }
                 delay(30)
             }
@@ -111,7 +142,10 @@ class BassHapticManager private constructor() {
     }
 
     private fun stopLoop() {
-        hapticJob?.cancel()
-        hapticJob = null
+        try {
+            hapticJob?.cancel()
+            hapticJob = null
+            vibrator?.cancel()
+        } catch (_: Throwable) {}
     }
 }

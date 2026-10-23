@@ -1,7 +1,7 @@
 {
-  "versionCode": 126,
-  "versionName": "4.9.26",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.26/app-debug.apk",
-  "changelog": "✨ DaVE Player v4.9.26 (Build 126) — Calibración Tipográfica & Corrección de Bugs:\n• 📏 Tipografía Equilibrada y Elegante: Reducción del tamaño excesivo en los títulos de canciones al seleccionarlas en la lista (14.5sp) y en el reproductor principal (17sp bold centrado hasta 2 líneas), evitando recortes agresivos o desbordamientos.\n• 🏷️ Subtítulos y Badges Protegidos: Protección contra desbordamiento en nombres largos de artistas para que los badges [FLAC], [NUEVA] y [🎬 VIDEO] siempre permanezcan visibles.\n• 🔄 Corrección del Modo Video: Resuelto el bug donde el reproductor mantenía el estado de video al pasar a una canción de solo audio.\n• ⚡ Detección y Orden de Videos Descargados: Los videos descargados en Movies/DaVEPlayer y Music/DaVEPlayer ahora ordenan correctamente por fecha reciente incluso si MediaStore tarda en indexar.",
+  "versionCode": 127,
+  "versionName": "4.9.27",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.27/app-debug.apk",
+  "changelog": "✨ DaVE Player v4.9.27 (Build 127) — Hotfix Subwoofer Háptico & Estabilidad Thread-Safe:\n• 📳 Subwoofer Háptico Blindado: Solucionado el crash crítico que cerraba la app al presionar 'Subwoofer Háptico'. El motor de vibración y análisis de graves ahora consulta el estado de reproducción de forma 100% segura y thread-safe fuera del hilo principal de ExoPlayer.\n• 🛡️ Estabilidad en Efectos Hápticos y Estrobo: Sincronización háptica defensiva en HapticBassManager y FlashlightBeatManager con manejo de excepciones y validación de hardware.\n• ⚡ Rendimiento Fluido: Prevención de bloqueos o excepciones de hilo en bucles de background de visualización de audio.",
   "fileSizeMb": 24.9
 }

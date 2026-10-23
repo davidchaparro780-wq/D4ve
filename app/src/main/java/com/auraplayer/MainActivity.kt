@@ -514,6 +514,12 @@ fun AuraApp(
     var isHapticBass by remember { mutableStateOf(hapticBassManager.isEnabled) }
     var vibeMode by remember { mutableStateOf(com.auraplayer.audio.VibeModeManager.currentVibe) }
 
+    LaunchedEffect(Unit) {
+        try {
+            com.auraplayer.audio.BassHapticManager.instance.init(context)
+        } catch (_: Throwable) {}
+    }
+
     var activeVideo by remember { mutableStateOf<MediaModel?>(null) }
     var showVaultScreen by remember { mutableStateOf(false) }
     val vaultManager = remember { VaultManager(context) }
@@ -2716,11 +2722,15 @@ fun AuraApp(
                 },
                 isHapticBass = isHapticBass,
                 onToggleHapticBass = {
-                    isHapticBass = !isHapticBass
-                    hapticBassManager.isEnabled = isHapticBass
-                    if (isHapticBass) hapticBassManager.triggerBassPulse()
-                    val msg = if (isHapticBass) "📳 Bajos Hápticos: ACTIVADO" else "Bajos Hápticos: DESACTIVADO"
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    try {
+                        isHapticBass = !isHapticBass
+                        hapticBassManager.isEnabled = isHapticBass
+                        if (isHapticBass) hapticBassManager.triggerBassPulse()
+                        val msg = if (isHapticBass) "📳 Bajos Hápticos: ACTIVADO" else "Bajos Hápticos: DESACTIVADO"
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    } catch (t: Throwable) {
+                        com.auraplayer.util.AppLog.e("MainActivity", "Error toggling haptic bass", t)
+                    }
                 },
                 onAudioFxChange = { speed, pitch ->
                     playbackSpeed = speed

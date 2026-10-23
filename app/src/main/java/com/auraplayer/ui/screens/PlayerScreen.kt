@@ -2260,10 +2260,14 @@ fun PlayerScreen(
                     FilterChip(
                         selected = hapticIntensity != com.auraplayer.audio.HapticIntensity.OFF,
                         onClick = {
-                            com.auraplayer.audio.BassHapticManager.instance.toggle()
-                            val curr = com.auraplayer.audio.BassHapticManager.instance.intensity.value
-                            val msg = if (curr != com.auraplayer.audio.HapticIntensity.OFF) "📳 Subwoofer: ${curr.label}" else "Subwoofer Háptico: Apagado"
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            try {
+                                com.auraplayer.audio.BassHapticManager.instance.toggle(context)
+                                val curr = com.auraplayer.audio.BassHapticManager.instance.intensity.value
+                                val msg = if (curr != com.auraplayer.audio.HapticIntensity.OFF) "📳 Subwoofer: ${curr.label}" else "Subwoofer Háptico: Apagado"
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            } catch (t: Throwable) {
+                                com.auraplayer.util.AppLog.e("PlayerScreen", "Error toggling haptics", t)
+                            }
                         },
                         label = {
                             Text(
