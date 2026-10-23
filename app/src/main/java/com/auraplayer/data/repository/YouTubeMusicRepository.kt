@@ -201,14 +201,31 @@ class YouTubeMusicRepository {
         if (videoId.isBlank()) return@withContext null
         refreshRemoteConfigIfNeeded()
 
-        // 1. Try InnerTube IOS direct player endpoint (Fastest, AAC 256kbps, bypasses n-sig)
+        // 1. Primary: InnerTube ANDROID player (Instant ~200ms, direct ratebypass URL, no cipher)
+        try {
+            val androidUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID",
+                clientVersion = "20.10.38",
+                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+                isVideo = false
+            )
+            if (!androidUrl.isNullOrBlank()) {
+                return@withContext androidUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID para videoId=$videoId", e)
+        }
+
+        // 2. Secondary: InnerTube IOS player
         try {
             val iosUrl = queryInnerTube(
                 videoId = videoId,
                 clientName = "IOS",
-                clientVersion = "19.29.1",
-                userAgent = "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X; en_US)",
-                deviceModel = "iPhone16,2"
+                clientVersion = "20.10.1",
+                userAgent = "com.google.ios.youtube/20.10.1 (iPhone16,2; U; CPU iOS 18_2 like Mac OS X; en_US)",
+                deviceModel = "iPhone16,2",
+                isVideo = false
             )
             if (!iosUrl.isNullOrBlank()) {
                 return@withContext iosUrl
@@ -217,7 +234,37 @@ class YouTubeMusicRepository {
             AppLog.w(TAG, "Fallo en endpoint InnerTube IOS para videoId=$videoId", e)
         }
 
-        // 2. Try NewPipeExtractor (Direct googlevideo audio stream with highest bitrate)
+        // 3. Fallback: Fast Invidious dynamic mirror (max 2 mirrors, 2.5s timeout)
+        for (mirror in invidiousMirrors.take(2)) {
+            try {
+                val invUrl = "$mirror/api/v1/videos/$videoId"
+                val conn = (URL(invUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 2500
+                    readTimeout = 2500
+                    requestMethod = "GET"
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                }
+                if (conn.responseCode == 200) {
+                    val resp = conn.inputStream.bufferedReader().use { it.readText() }
+                    val root = JSONObject(resp)
+                    val formats = root.optJSONArray("adaptiveFormats") ?: root.optJSONArray("formatStreams")
+                    if (formats != null) {
+                        for (i in 0 until formats.length()) {
+                            val fmt = formats.getJSONObject(i)
+                            val type = fmt.optString("type", "")
+                            val u = fmt.optString("url", "")
+                            if (u.isNotBlank() && type.contains("audio", ignoreCase = true)) {
+                                return@withContext u
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                AppLog.w(TAG, "Fallo en mirror Invidious $mirror para videoId=$videoId", e)
+            }
+        }
+
+        // 4. Fallback: NewPipeExtractor
         try {
             initNewPipe()
             val watchUrl = "https://www.youtube.com/watch?v=$videoId"
@@ -225,12 +272,9 @@ class YouTubeMusicRepository {
             extractor.fetchPage()
             val audioStreams: List<AudioStream>? = extractor.audioStreams
             if (!audioStreams.isNullOrEmpty()) {
-                val aacStream = audioStreams.filter { stream ->
-                    val fmtName = stream.format?.name ?: ""
-                    fmtName.contains("M4A", ignoreCase = true)
-                }.maxByOrNull { it.averageBitrate }
-
-                val chosenStream = aacStream ?: audioStreams.maxByOrNull { it.averageBitrate } ?: audioStreams.first()
+                val chosenStream = audioStreams.filter {
+                    it.format?.name?.contains("M4A", ignoreCase = true) == true
+                }.maxByOrNull { it.averageBitrate } ?: audioStreams.first()
                 val directUrl = chosenStream.url
                 if (!directUrl.isNullOrBlank()) {
                     return@withContext directUrl
@@ -238,89 +282,6 @@ class YouTubeMusicRepository {
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "Fallo en NewPipeExtractor para videoId=$videoId", e)
-        }
-
-        // 3. Try Cobalt API instances
-        try {
-            val cobaltUrl = queryCobalt(videoId)
-            if (!cobaltUrl.isNullOrBlank()) {
-                return@withContext cobaltUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en instancia Cobalt de audio para videoId=$videoId", e)
-        }
-
-        // 4. Try InnerTube WEB_REMIX (YouTube Music Web Client)
-        try {
-            val ytmUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "WEB_REMIX",
-                clientVersion = "1.20240901.01.00",
-                userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0"
-            )
-            if (!ytmUrl.isNullOrBlank()) {
-                return@withContext ytmUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en endpoint InnerTube WEB_REMIX para videoId=$videoId", e)
-        }
-
-        // 5. Try InnerTube ANDROID_VR direct player endpoint
-        try {
-            val vrUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "ANDROID_VR",
-                clientVersion = "1.61.48"
-            )
-            if (!vrUrl.isNullOrBlank()) {
-                return@withContext vrUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID_VR para videoId=$videoId", e)
-        }
-
-        // 6. Try Invidious dynamic mirror endpoints
-        for (mirror in invidiousMirrors) {
-            try {
-                val invUrl = "$mirror/api/v1/videos/$videoId"
-                val conn = (URL(invUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 3500
-                    readTimeout = 3500
-                    requestMethod = "GET"
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
-                }
-                if (conn.responseCode == 200) {
-                    val resp = conn.inputStream.bufferedReader().use { it.readText() }
-                    val root = JSONObject(resp)
-                    val formats = root.optJSONArray("adaptiveFormats")
-                    if (formats != null) {
-                        var bestUrl: String? = null
-                        var highestBitrate = 0
-                        for (i in 0 until formats.length()) {
-                            val fmt = formats.getJSONObject(i)
-                            val type = fmt.optString("type", "")
-                            if (type.contains("audio", ignoreCase = true)) {
-                                val u = fmt.optString("url", "")
-                                val bitrate = fmt.optInt("bitrate", 0)
-                                if (u.isNotBlank()) {
-                                    if (type.contains("mp4", ignoreCase = true)) {
-                                        return@withContext u
-                                    }
-                                    if (bitrate >= highestBitrate) {
-                                        highestBitrate = bitrate
-                                        bestUrl = u
-                                    }
-                                }
-                            }
-                        }
-                        if (!bestUrl.isNullOrBlank()) {
-                            return@withContext bestUrl
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                AppLog.w(TAG, "Fallo en mirror Invidious $mirror para videoId=$videoId", e)
-            }
         }
 
         // If all providers failed, YouTube likely updated its cipher/player JS — trigger self-updater check!
@@ -337,36 +298,31 @@ class YouTubeMusicRepository {
      * Resolves high quality video MP4 stream (audio + video muxed) for offline playback in Movies gallery.
      */
     suspend fun resolveVideoStream(videoId: String): String? = withContext(Dispatchers.IO) {
-        // 1. Try NewPipeExtractor (direct googlevideo muxed mp4 streams)
+        if (videoId.isBlank()) return@withContext null
+
+        // 1. Primary: InnerTube ANDROID player (Instant ~200ms, direct muxed MP4 720p/360p with ratebypass=yes)
         try {
-            initNewPipe()
-            val watchUrl = "https://www.youtube.com/watch?v=$videoId"
-            val extractor = ServiceList.YouTube.getStreamExtractor(watchUrl)
-            extractor.fetchPage()
-            val videoStreams: List<VideoStream>? = extractor.videoStreams
-            if (!videoStreams.isNullOrEmpty()) {
-                val mp4Streams = videoStreams.filter { it.format?.name?.contains("MP4", ignoreCase = true) == true }
-                val chosen = mp4Streams.firstOrNull { it.resolution?.contains("720") == true }
-                    ?: mp4Streams.firstOrNull { it.resolution?.contains("480") == true }
-                    ?: mp4Streams.firstOrNull { it.resolution?.contains("360") == true }
-                    ?: mp4Streams.firstOrNull()
-                    ?: videoStreams.firstOrNull()
-                val directUrl = chosen?.url
-                if (!directUrl.isNullOrBlank()) {
-                    return@withContext directUrl
-                }
+            val androidUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID",
+                clientVersion = "20.10.38",
+                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+                isVideo = true
+            )
+            if (!androidUrl.isNullOrBlank()) {
+                return@withContext androidUrl
             }
         } catch (e: Exception) {
-            AppLog.e(TAG, "Fallo al resolver vídeo MP4 para videoId=$videoId", e)
+            AppLog.w(TAG, "Fallo en InnerTube ANDROID de vídeo para videoId=$videoId", e)
         }
 
-        // 2. Try Invidious formatStreams (muxed MP4 video+audio)
-        for (mirror in invidiousMirrors) {
+        // 2. Secondary: Fast Invidious formatStreams (muxed MP4 video+audio)
+        for (mirror in invidiousMirrors.take(2)) {
             try {
                 val invUrl = "$mirror/api/v1/videos/$videoId"
                 val conn = (URL(invUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 3500
-                    readTimeout = 3500
+                    connectTimeout = 2500
+                    readTimeout = 2500
                     requestMethod = "GET"
                     setRequestProperty("User-Agent", "Mozilla/5.0")
                 }
@@ -390,101 +346,43 @@ class YouTubeMusicRepository {
             }
         }
 
-        // 3. Try Cobalt Video mode
+        // 3. Fallback: NewPipeExtractor
         try {
-            val cobaltUrl = queryCobaltVideo(videoId)
-            if (!cobaltUrl.isNullOrBlank()) {
-                return@withContext cobaltUrl
+            initNewPipe()
+            val watchUrl = "https://www.youtube.com/watch?v=$videoId"
+            val extractor = ServiceList.YouTube.getStreamExtractor(watchUrl)
+            extractor.fetchPage()
+            val videoStreams: List<VideoStream>? = extractor.videoStreams
+            if (!videoStreams.isNullOrEmpty()) {
+                val mp4Streams = videoStreams.filter { it.format?.name?.contains("MP4", ignoreCase = true) == true }
+                val chosen = mp4Streams.firstOrNull { it.resolution?.contains("720") == true }
+                    ?: mp4Streams.firstOrNull { it.resolution?.contains("480") == true }
+                    ?: mp4Streams.firstOrNull { it.resolution?.contains("360") == true }
+                    ?: mp4Streams.firstOrNull()
+                val directUrl = chosen?.url
+                if (!directUrl.isNullOrBlank()) {
+                    return@withContext directUrl
+                }
             }
         } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en Cobalt Video para videoId=$videoId", e)
+            AppLog.w(TAG, "Fallo al resolver vídeo MP4 en NewPipe para videoId=$videoId", e)
         }
 
         null
     }
 
-    private fun queryCobaltVideo(videoId: String): String? {
-        val targetUrl = "https://www.youtube.com/watch?v=$videoId"
-        for (instance in cobaltMirrors) {
-            try {
-                val url = URL(instance)
-                val conn = (url.openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 4000
-                    readTimeout = 4000
-                    requestMethod = "POST"
-                    setRequestProperty("Content-Type", "application/json")
-                    setRequestProperty("Accept", "application/json")
-                    setRequestProperty("User-Agent", "DaVE-Player/2.0")
-                    doOutput = true
-                }
-                val payload = JSONObject().apply {
-                    put("url", targetUrl)
-                    put("videoQuality", "720")
-                }
-                conn.outputStream.use { it.write(payload.toString().toByteArray()) }
-
-                if (conn.responseCode in 200..299) {
-                    val resp = conn.inputStream.bufferedReader().use { it.readText() }
-                    val root = JSONObject(resp)
-                    val streamUrl = root.optString("url", "")
-                    if (streamUrl.isNotBlank()) {
-                        return streamUrl
-                    }
-                }
-            } catch (e: Exception) {
-                AppLog.w(TAG, "Fallo en instancia Cobalt de vídeo $instance", e)
-            }
-        }
-        return null
-    }
-
-    private fun queryCobalt(videoId: String): String? {
-        val targetUrl = "https://www.youtube.com/watch?v=$videoId"
-        for (instance in cobaltMirrors) {
-            try {
-                val url = URL(instance)
-                val conn = (url.openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 4000
-                    readTimeout = 4000
-                    requestMethod = "POST"
-                    setRequestProperty("Content-Type", "application/json")
-                    setRequestProperty("Accept", "application/json")
-                    setRequestProperty("User-Agent", "DaVE-Player/2.0")
-                    doOutput = true
-                }
-                val payload = JSONObject().apply {
-                    put("url", targetUrl)
-                    put("downloadMode", "audio")
-                    put("audioFormat", "mp3")
-                }
-                conn.outputStream.use { it.write(payload.toString().toByteArray()) }
-
-                if (conn.responseCode in 200..299) {
-                    val resp = conn.inputStream.bufferedReader().use { it.readText() }
-                    val root = JSONObject(resp)
-                    val streamUrl = root.optString("url", "")
-                    if (streamUrl.isNotBlank()) {
-                        return streamUrl
-                    }
-                }
-            } catch (e: Exception) {
-                AppLog.w(TAG, "Fallo en instancia Cobalt de audio $instance", e)
-            }
-        }
-        return null
-    }
-
     private fun queryInnerTube(
         videoId: String,
-        clientName: String,
-        clientVersion: String,
-        userAgent: String = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        deviceModel: String? = null
+        clientName: String = "ANDROID",
+        clientVersion: String = "20.10.38",
+        userAgent: String = "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+        deviceModel: String? = null,
+        isVideo: Boolean = false
     ): String? {
         val url = URL("https://www.youtube.com/youtubei/v1/player")
         val conn = (url.openConnection() as HttpURLConnection).apply {
-            connectTimeout = 7000
-            readTimeout = 7000
+            connectTimeout = 5000
+            readTimeout = 5000
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("User-Agent", userAgent)
@@ -513,37 +411,79 @@ class YouTubeMusicRepository {
         if (conn.responseCode == 200) {
             val resp = conn.inputStream.bufferedReader().use { it.readText() }
             val root = JSONObject(resp)
+            val playability = root.optJSONObject("playabilityStatus")
+            val status = playability?.optString("status") ?: ""
+            if (status != "OK") {
+                AppLog.w(TAG, "InnerTube playabilityStatus=$status para videoId=$videoId")
+                return null
+            }
             val streamingData = root.optJSONObject("streamingData") ?: return null
-            val formats = streamingData.optJSONArray("adaptiveFormats")
-                ?: streamingData.optJSONArray("formats")
-                ?: return null
 
-            var bestAacUrl: String? = null
-            var bestAacBitrate = 0
-            var bestAnyUrl: String? = null
-            var highestBitrate = 0
+            // 1. Check muxed formats (formats contains ratebypass=yes streams that download at maximum speed)
+            val muxedFormats = streamingData.optJSONArray("formats")
+            if (muxedFormats != null && muxedFormats.length() > 0) {
+                var bestMuxedUrl: String? = null
+                var bestQualityScore = -1
 
-            for (i in 0 until formats.length()) {
-                val fmt = formats.getJSONObject(i)
-                val mime = fmt.optString("mimeType", "")
-                val streamUrl = fmt.optString("url", "")
-                val bitrate = fmt.optInt("bitrate", 0)
-
-                if (mime.contains("audio", ignoreCase = true) && streamUrl.isNotBlank()) {
-                    if (mime.contains("mp4", ignoreCase = true) || mime.contains("m4a", ignoreCase = true)) {
-                        if (bitrate >= bestAacBitrate) {
-                            bestAacBitrate = bitrate
-                            bestAacUrl = streamUrl
+                for (i in 0 until muxedFormats.length()) {
+                    val fmt = muxedFormats.getJSONObject(i)
+                    val streamUrl = fmt.optString("url", "")
+                    val quality = fmt.optString("qualityLabel", "")
+                    if (streamUrl.isNotBlank()) {
+                        val score = when {
+                            quality.contains("1080") -> 1080
+                            quality.contains("720") -> 720
+                            quality.contains("480") -> 480
+                            quality.contains("360") -> 360
+                            else -> 240
+                        }
+                        if (score > bestQualityScore) {
+                            bestQualityScore = score
+                            bestMuxedUrl = streamUrl
                         }
                     }
-                    if (bitrate >= highestBitrate) {
-                        highestBitrate = bitrate
-                        bestAnyUrl = streamUrl
-                    }
+                }
+
+                if (!bestMuxedUrl.isNullOrBlank()) {
+                    AppLog.d(TAG, "Stream muxed encontrado (qualityScore=$bestQualityScore) para videoId=$videoId")
+                    return bestMuxedUrl
                 }
             }
 
-            return bestAacUrl ?: bestAnyUrl
+            // 2. If video was not requested (audio only) and no muxed format was found, check adaptiveFormats
+            if (!isVideo) {
+                val adaptiveFormats = streamingData.optJSONArray("adaptiveFormats")
+                if (adaptiveFormats != null) {
+                    var bestAacUrl: String? = null
+                    var bestAacBitrate = 0
+                    var bestAnyUrl: String? = null
+                    var highestBitrate = 0
+
+                    for (i in 0 until adaptiveFormats.length()) {
+                        val fmt = adaptiveFormats.getJSONObject(i)
+                        val mime = fmt.optString("mimeType", "")
+                        val streamUrl = fmt.optString("url", "")
+                        val bitrate = fmt.optInt("bitrate", 0)
+
+                        if (mime.contains("audio", ignoreCase = true) && streamUrl.isNotBlank()) {
+                            if (mime.contains("mp4", ignoreCase = true) || mime.contains("m4a", ignoreCase = true)) {
+                                if (bitrate >= bestAacBitrate) {
+                                    bestAacBitrate = bitrate
+                                    bestAacUrl = streamUrl
+                                }
+                            }
+                            if (bitrate >= highestBitrate) {
+                                highestBitrate = bitrate
+                                bestAnyUrl = streamUrl
+                            }
+                        }
+                    }
+                    val chosen = bestAacUrl ?: bestAnyUrl
+                    if (!chosen.isNullOrBlank()) {
+                        return chosen
+                    }
+                }
+            }
         }
         return null
     }

@@ -325,19 +325,30 @@ class DownloadEngine(
         var currentUrl = audioUrl
         var connection: HttpURLConnection
         var redirectCount = 0
+        var useRangeHeader = true
+
         while (true) {
             val url = URL(currentUrl)
+            val isGoogleVideo = currentUrl.contains("googlevideo.com", ignoreCase = true)
+            val ua = if (isGoogleVideo) {
+                "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip"
+            } else {
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            }
+
             connection = (url.openConnection() as HttpURLConnection).apply {
                 connectTimeout = 25000
                 readTimeout = 30000
                 requestMethod = "GET"
                 instanceFollowRedirects = true
-                setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                setRequestProperty("User-Agent", ua)
                 setRequestProperty("Accept", "*/*")
                 setRequestProperty("Accept-Language", "en-US,en;q=0.9")
                 setRequestProperty("Connection", "keep-alive")
-                // Range header helps resume and tells server we want the full body
-                setRequestProperty("Range", "bytes=0-")
+                if (useRangeHeader) {
+                    // Range header helps resume and tells server we want the full body
+                    setRequestProperty("Range", "bytes=0-")
+                }
             }
             val code = connection.responseCode
             if ((code in 301..303 || code == 307 || code == 308) && redirectCount < 8) {
@@ -348,6 +359,11 @@ class DownloadEngine(
                     connection.disconnect()
                     continue
                 }
+            }
+            if ((code == 403 || code == 416) && useRangeHeader) {
+                useRangeHeader = false
+                connection.disconnect()
+                continue
             }
             break
         }
@@ -369,6 +385,8 @@ class DownloadEngine(
                     rawContentType.contains("aac") ||
                     currentUrl.contains("mime=audio%2fmp4", ignoreCase = true) ||
                     currentUrl.contains("mime=audio/mp4", ignoreCase = true) ||
+                    currentUrl.contains("mime=video%2fmp4", ignoreCase = true) ||
+                    currentUrl.contains("mime=video/mp4", ignoreCase = true) ||
                     currentUrl.contains(".m4a", ignoreCase = true) ||
                     currentUrl.contains(".mp4", ignoreCase = true)
 
@@ -671,15 +689,26 @@ class DownloadEngine(
         var currentUrl = videoUrl
         var connection: HttpURLConnection
         var redirectCount = 0
+        var useRangeHeader = true
+
         while (true) {
             val url = URL(currentUrl)
+            val isGoogleVideo = currentUrl.contains("googlevideo.com", ignoreCase = true)
+            val ua = if (isGoogleVideo) {
+                "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip"
+            } else {
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+
             connection = (url.openConnection() as HttpURLConnection).apply {
                 connectTimeout = 25000
                 readTimeout = 30000
                 requestMethod = "GET"
                 instanceFollowRedirects = true
-                setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                setRequestProperty("Range", "bytes=0-")
+                setRequestProperty("User-Agent", ua)
+                if (useRangeHeader) {
+                    setRequestProperty("Range", "bytes=0-")
+                }
             }
             val code = connection.responseCode
             if ((code in 301..303 || code == 307 || code == 308) && redirectCount < 8) {
@@ -690,6 +719,11 @@ class DownloadEngine(
                     connection.disconnect()
                     continue
                 }
+            }
+            if ((code == 403 || code == 416) && useRangeHeader) {
+                useRangeHeader = false
+                connection.disconnect()
+                continue
             }
             break
         }

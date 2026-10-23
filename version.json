@@ -1,7 +1,7 @@
 {
-  "versionCode": 116,
-  "versionName": "4.9.16",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.16/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.16 (Build 116):\n• 🔮 Selector Directo de Aura en el Reproductor: Nueva píldora '🔮 Aura' en la cabecera del reproductor a pantalla completa para alternar instantáneamente entre los temas misteriosos (Misterio Arcano, Eclipse Enigmático, Espectro Abisal, Nebulosa, AMOLED, Cyberpunk) sin salir de tu música.\n• 🌌 Fondos y Efectos Reactivos Dinámicos: Cuando una canción no tiene carátula o se usan fondos ambientales, el aura se genera armoniosamente con los colores primario y secundario de tu tema misterioso elegido.\n• ✨ Chispas Táctiles, Ondas Supernova y Forma de Onda Sincronizadas: Los destellos táctiles (AuraTouchSparks), la onda de choque Supernova y la barra de progreso de audio ahora vibran con los acentos secundarios y terciarios del tema misterioso.\n• 🎛️ Ecualizador Atmosférico: El panel de ecualización ahora cuenta con un fondo degradado ambiental reactivo y bordes luminosos que sumergen la experiencia sonora.",
+  "versionCode": 117,
+  "versionName": "4.9.17",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.17/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.17 (Build 117):\n• ⚡ Descargas de Música y Videos Reparadas y Ultra Rápidas: Nuevo motor extractor InnerTube ANDROID 2026 que resuelve streams directos en menos de 300ms sin esperas ni bloqueos.\n• 🎵 Descarga de Audio HQ Optimizada: 'Solo Música' guarda canciones en Music/DaVEPlayer con stream AAC directo de alta velocidad, carátulas HD y letras sincronizadas.\n• 🎬 Descarga de Videos MP4 Instantánea: 'Video Completo MP4' extrae y descarga videos completos muxed (con audio y video combinados) a la galería de Videos sin depender de servicios caídos.\n• 🔍 Búsqueda Federada Fluida: Búsquedas simultáneas en YouTube y Deezer sin bloqueos por APIs externas ni congelamiento de pantalla.\n• 🔮 Aura Misteriosa Completa: Todas las mejoras visuales, temas misteriosos y ecualizador atmosférico de v4.9.16 100% integrados.",
   "fileSizeMb": 24.5
 }

@@ -14,8 +14,8 @@ android {
         applicationId = "com.auraplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 116
-        versionName = "4.9.16"
+        versionCode = 117
+        versionName = "4.9.17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
