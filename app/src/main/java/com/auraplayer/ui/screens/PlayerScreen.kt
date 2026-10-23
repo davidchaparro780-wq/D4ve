@@ -135,11 +135,13 @@ import com.auraplayer.ui.components.AudioQualityDialog
 import com.auraplayer.ui.components.WaveformVisualizer
 import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.data.repository.PlaylistManager
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.ui.AspectRatioFrameLayout
