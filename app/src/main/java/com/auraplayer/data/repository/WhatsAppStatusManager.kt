@@ -3,11 +3,16 @@ package com.auraplayer.data.repository
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.LruCache
 import androidx.core.content.FileProvider
 import com.auraplayer.util.AppLog
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +41,12 @@ object WhatsAppStatusManager {
         // WhatsApp legado en raíz de almacenamiento
         File(Environment.getExternalStorageDirectory(), "WhatsApp/Media/.Statuses"),
         // WhatsApp Business legado
-        File(Environment.getExternalStorageDirectory(), "WhatsApp Business/Media/.Statuses")
+        File(Environment.getExternalStorageDirectory(), "WhatsApp Business/Media/.Statuses"),
+        // GBWhatsApp / Mods comunes
+        File(Environment.getExternalStorageDirectory(), "Android/media/com.gbwhatsapp/GBWhatsApp/Media/.Statuses"),
+        File(Environment.getExternalStorageDirectory(), "GBWhatsApp/Media/.Statuses"),
+        // Clones y Dual App
+        File(Environment.getExternalStorageDirectory(), "DualApp/WhatsApp/Media/.Statuses")
     )
 
     /**
@@ -158,5 +168,113 @@ object WhatsAppStatusManager {
         } catch (e: Exception) {
             AppLog.e(TAG, "Error compartiendo estado", e)
         }
+    }
+
+    private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+    private val cacheSize = maxMemory / 8 // 1/8th of app memory for status thumbnails
+
+    private val thumbnailCache = object : LruCache<String, Bitmap>(cacheSize) {
+        override fun sizeOf(key: String, value: Bitmap): Int {
+            return value.byteCount / 1024
+        }
+    }
+
+    fun getCachedThumbnail(path: String): Bitmap? = thumbnailCache.get(path)
+
+    fun putCachedThumbnail(path: String, bitmap: Bitmap) {
+        thumbnailCache.put(path, bitmap)
+    }
+
+    /**
+     * Extrae de forma eficiente la miniatura de un estado (fotograma de video a 500ms o foto optimizada).
+     */
+    suspend fun loadThumbnail(context: Context, item: WhatsAppStatusItem): Bitmap? = withContext(Dispatchers.IO) {
+        val cached = getCachedThumbnail(item.file.absolutePath)
+        if (cached != null) return@withContext cached
+
+        var resultBitmap: Bitmap? = null
+
+        if (item.isVideo) {
+            val retriever = MediaMetadataRetriever()
+            try {
+                if (item.file.exists() && item.file.canRead()) {
+                    retriever.setDataSource(item.file.absolutePath)
+                } else {
+                    retriever.setDataSource(context, item.uri)
+                }
+
+                val rawFrame: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    try {
+                        retriever.getScaledFrameAtTime(500000L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, 360, 480)
+                    } catch (_: Throwable) { null }
+                        ?: retriever.getFrameAtTime(500000L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                        ?: retriever.frameAtTime
+                } else {
+                    retriever.getFrameAtTime(500000L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                        ?: retriever.frameAtTime
+                }
+
+                resultBitmap = rawFrame
+            } catch (e: Exception) {
+                AppLog.w(TAG, "Fallo al extraer fotograma de video ${item.file.name}: ${e.message}")
+            } finally {
+                try { retriever.release() } catch (_: Throwable) {}
+            }
+
+            if (resultBitmap == null) {
+                try {
+                    @Suppress("DEPRECATION")
+                    resultBitmap = ThumbnailUtils.createVideoThumbnail(
+                        item.file.absolutePath,
+                        MediaStore.Images.Thumbnails.MINI_KIND
+                    )
+                } catch (_: Throwable) {}
+            }
+        } else {
+            try {
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                if (item.file.exists() && item.file.canRead()) {
+                    BitmapFactory.decodeFile(item.file.absolutePath, options)
+                } else {
+                    context.contentResolver.openInputStream(item.uri)?.use {
+                        BitmapFactory.decodeStream(it, null, options)
+                    }
+                }
+
+                val reqW = 360
+                val reqH = 480
+                var inSampleSize = 1
+                if (options.outHeight > reqH || options.outWidth > reqW) {
+                    val halfH = options.outHeight / 2
+                    val halfW = options.outWidth / 2
+                    while (halfH / inSampleSize >= reqH && halfW / inSampleSize >= reqW) {
+                        inSampleSize *= 2
+                    }
+                }
+
+                val decodeOptions = BitmapFactory.Options().apply {
+                    this.inSampleSize = inSampleSize
+                    inPreferredConfig = Bitmap.Config.RGB_565
+                }
+
+                resultBitmap = if (item.file.exists() && item.file.canRead()) {
+                    BitmapFactory.decodeFile(item.file.absolutePath, decodeOptions)
+                } else {
+                    context.contentResolver.openInputStream(item.uri)?.use {
+                        BitmapFactory.decodeStream(it, null, decodeOptions)
+                    }
+                }
+            } catch (e: Exception) {
+                AppLog.w(TAG, "Fallo al decodificar imagen ${item.file.name}: ${e.message}")
+            }
+        }
+
+        if (resultBitmap != null) {
+            putCachedThumbnail(item.file.absolutePath, resultBitmap)
+        }
+
+        resultBitmap
     }
 }

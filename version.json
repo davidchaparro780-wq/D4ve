@@ -1,7 +1,7 @@
 {
-  "versionCode": 131,
-  "versionName": "4.9.31",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.31/app-debug.apk",
-  "changelog": "🛡️ DaVE Player v4.9.31 (Build 131) — Auditoría y Corrección Profunda de Bugs:\n• 🛡️ Estabilidad del Portapapeles: Corrección de crash por IndexOutOfBoundsException al pegar enlaces en Descubrir y TikTok.\n• 🎬 Descarga de Video Musical Local: Resolución y descarga precisa de videos oficiales en YouTube para cualquier canción de tu biblioteca.\n• 📂 WhatsApp Status en Android 11+: Asistente de permisos de almacenamiento para leer y guardar estados de carpetas protegidas sin bloqueos.\n• 📱 Context Unwrapping en Jetpack Compose: Soporte impecable de PiP, control gestual de brillo, biometría en Baúl y pantalla activa en Modo Conducción.\n• ⚡ Estabilidad de UI: Prevención de bloqueos ANR en búsqueda de texto resaltado y scroll adaptable en diálogo de playlists.",
+  "versionCode": 132,
+  "versionName": "4.9.32",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.32/app-debug.apk",
+  "changelog": "🖼️ DaVE Player v4.9.32 (Build 132) — Miniaturas de Estados de WhatsApp y Vista Previa HD:\n• 🎬 Carátulas y Fotogramas en Tiempo Real: Extracción nativa de fotogramas a 500ms para videos de WhatsApp (.mp4) con MediaMetadataRetriever sin pantallas negras.\n• 🖼️ Miniaturas Optimizadas para Fotos: Decodificación downsampled de imágenes con caché LRU de alto rendimiento para navegación fluida a 60/120 FPS.\n• 🔍 Vista Previa en Pantalla Completa: Toca cualquier estado para abrir el visor HD con opciones directas de Descargar y Compartir.\n• 📱 Soporte Extendido: Detección ampliada para WhatsApp estándar, Business, Dual App y GBWhatsApp.",
   "fileSizeMb": 24.9
 }

@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Image as ImageIcon
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
@@ -29,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +58,7 @@ fun WhatsAppStatusDialog(
     var isLoading by remember { mutableStateOf(true) }
     var selectedFilter by remember { mutableIntStateOf(0) } // 0: Todos, 1: Videos, 2: Fotos
     var savedSet by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var previewItem by remember { mutableStateOf<WhatsAppStatusItem?>(null) }
 
     fun load() {
         isLoading = true
@@ -231,106 +236,341 @@ fun WhatsAppStatusDialog(
                     ) {
                         items(filteredList, key = { it.file.absolutePath }) { item ->
                             val isSaved = savedSet.contains(item.file.absolutePath)
-                            Box(
-                                modifier = Modifier
-                                    .aspectRatio(0.75f)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF182032))
-                                    .clickable {
-                                        if (item.isVideo && onPlayVideo != null) {
-                                            onPlayVideo(item)
+                            WhatsAppStatusCard(
+                                item = item,
+                                isSaved = isSaved,
+                                onSave = {
+                                    scope.launch {
+                                        val res = WhatsAppStatusManager.saveStatusToGallery(context, item)
+                                        if (res.isSuccess) {
+                                            savedSet = savedSet + item.file.absolutePath
+                                            Toast.makeText(context, "✅ Guardado en tu Galería", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "Error al guardar: ${res.exceptionOrNull()?.message ?: ""}", Toast.LENGTH_SHORT).show()
                                         }
                                     }
-                            ) {
-                                AsyncImage(
-                                    model = item.file,
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-
-                                // Gradiente inferior para controles
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(60.dp)
-                                        .align(Alignment.BottomCenter)
-                                        .background(
-                                            Brush.verticalGradient(
-                                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))
-                                            )
-                                        )
-                                )
-
-                                // Indicador de video
-                                if (item.isVideo) {
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .align(Alignment.TopStart)
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(Color.Black.copy(alpha = 0.65f))
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(Icons.Default.PlayCircle, contentDescription = null, tint = Color(0xFF25D366), modifier = Modifier.size(14.dp))
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("VIDEO", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                                        }
+                                },
+                                onShare = {
+                                    WhatsAppStatusManager.shareStatus(context, item)
+                                },
+                                onClick = {
+                                    if (item.isVideo && onPlayVideo != null) {
+                                        onPlayVideo(item)
+                                    } else {
+                                        previewItem = item
                                     }
                                 }
-
-                                // Botones inferiores: Guardar y Compartir
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.BottomCenter)
-                                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            WhatsAppStatusManager.shareStatus(context, item)
-                                        },
-                                        modifier = Modifier.size(34.dp)
-                                    ) {
-                                        Icon(Icons.Default.Share, contentDescription = "Compartir", tint = Color.White, modifier = Modifier.size(18.dp))
-                                    }
-
-                                    Button(
-                                        onClick = {
-                                            scope.launch {
-                                                val res = WhatsAppStatusManager.saveStatusToGallery(context, item)
-                                                if (res.isSuccess) {
-                                                    savedSet = savedSet + item.file.absolutePath
-                                                    Toast.makeText(context, "✅ Guardado en tu Galería", Toast.LENGTH_SHORT).show()
-                                                } else {
-                                                    Toast.makeText(context, "Error al guardar", Toast.LENGTH_SHORT).show()
-                                                }
-                                            }
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = if (isSaved) Color(0xFF10B981) else Color(0xFF25D366)
-                                        ),
-                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                        shape = RoundedCornerShape(10.dp),
-                                        modifier = Modifier.height(32.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (isSaved) Icons.Default.CheckCircle else Icons.Default.Download,
-                                            contentDescription = null,
-                                            tint = Color.White,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(if (isSaved) "Guardado" else "Guardar", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                                    }
-                                }
-                            }
+                            )
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Modal de Vista Previa en Pantalla Completa
+    if (previewItem != null) {
+        val pItem = previewItem!!
+        val isItemSaved = savedSet.contains(pItem.file.absolutePath)
+
+        Dialog(
+            onDismissRequest = { previewItem = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.95f))
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+            ) {
+                val previewThumb = produceState<Bitmap?>(
+                    initialValue = WhatsAppStatusManager.getCachedThumbnail(pItem.file.absolutePath),
+                    key1 = pItem.file.absolutePath
+                ) {
+                    if (value == null) {
+                        value = WhatsAppStatusManager.loadThumbnail(context, pItem)
+                    }
+                }
+
+                // Imagen / Miniatura centrada
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 70.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val bmp = previewThumb.value
+                    if (bmp != null) {
+                        Image(
+                            bitmap = bmp.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else if (!pItem.isVideo) {
+                        AsyncImage(
+                            model = pItem.file,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else {
+                        CircularProgressIndicator(color = Color(0xFF25D366))
+                    }
+
+                    if (pItem.isVideo) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.65f))
+                                .clickable {
+                                    if (onPlayVideo != null) {
+                                        previewItem = null
+                                        onPlayVideo(pItem)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayCircle,
+                                contentDescription = "Reproducir",
+                                tint = Color(0xFF25D366),
+                                modifier = Modifier.size(44.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Barra superior de cierre y título
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .align(Alignment.TopCenter),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (pItem.isVideo) "🎬 Video de Estado" else "📷 Foto de Estado",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { previewItem = null },
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.2f))
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
+                    }
+                }
+
+                // Barra inferior de acciones (Compartir y Descargar)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 24.dp)
+                        .align(Alignment.BottomCenter),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = { WhatsAppStatusManager.shareStatus(context, pItem) },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Compartir", fontWeight = FontWeight.Bold)
+                    }
+
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val res = WhatsAppStatusManager.saveStatusToGallery(context, pItem)
+                                if (res.isSuccess) {
+                                    savedSet = savedSet + pItem.file.absolutePath
+                                    Toast.makeText(context, "✅ Guardado en tu Galería", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Error al guardar", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isItemSaved) Color(0xFF10B981) else Color(0xFF25D366)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isItemSaved) Icons.Default.CheckCircle else Icons.Default.Download,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(if (isItemSaved) "Guardado" else "Descargar", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WhatsAppStatusCard(
+    item: WhatsAppStatusItem,
+    isSaved: Boolean,
+    onSave: () -> Unit,
+    onShare: () -> Unit,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val thumbState = produceState<Bitmap?>(
+        initialValue = WhatsAppStatusManager.getCachedThumbnail(item.file.absolutePath),
+        key1 = item.file.absolutePath
+    ) {
+        if (value == null) {
+            value = WhatsAppStatusManager.loadThumbnail(context, item)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .aspectRatio(0.75f)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFF182032))
+            .clickable(onClick = onClick)
+    ) {
+        val thumb = thumbState.value
+        if (thumb != null) {
+            Image(
+                bitmap = thumb.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else if (!item.isVideo) {
+            AsyncImage(
+                model = item.file,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF1E293B)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color(0xFF25D366),
+                    strokeWidth = 2.dp
+                )
+            }
+        }
+
+        // Gradiente inferior para controles
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))
+                    )
+                )
+        )
+
+        // Indicador de video o foto en esquina superior izquierda
+        Box(
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.TopStart)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.Black.copy(alpha = 0.65f))
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (item.isVideo) Icons.Default.PlayCircle else ImageIcon,
+                    contentDescription = null,
+                    tint = if (item.isVideo) Color(0xFF25D366) else Color(0xFF38BDF8),
+                    modifier = Modifier.size(13.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = if (item.isVideo) "VIDEO" else "FOTO",
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        // Botones inferiores: Compartir y Guardar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onShare,
+                modifier = Modifier.size(34.dp)
+            ) {
+                Icon(
+                    Icons.Default.Share,
+                    contentDescription = "Compartir",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Button(
+                onClick = onSave,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isSaved) Color(0xFF10B981) else Color(0xFF25D366)
+                ),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.height(32.dp)
+            ) {
+                Icon(
+                    imageVector = if (isSaved) Icons.Default.CheckCircle else Icons.Default.Download,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = if (isSaved) "Guardado" else "Guardar",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
         }
     }
