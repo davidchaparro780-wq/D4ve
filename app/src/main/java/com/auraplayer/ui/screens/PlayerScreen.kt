@@ -3,6 +3,7 @@ package com.auraplayer.ui.screens
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import com.auraplayer.util.findActivity
 import android.media.AudioManager
 import android.os.Build
 import android.provider.Settings
@@ -427,7 +428,7 @@ fun PlayerScreen(
     fun triggerPiP() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                val act = context as? Activity
+                val act = context.findActivity()
                 val params = android.app.PictureInPictureParams.Builder().build()
                 act?.enterPictureInPictureMode(params)
             } catch (e: Exception) {
@@ -681,7 +682,7 @@ fun PlayerScreen(
                         val isLeftSide = change.position.x < size.width / 2f
                         if (isLeftSide) {
                             // Brightness Gesture (Left side)
-                            val activity = context as? Activity
+                            val activity = context.findActivity()
                             activity?.let { act ->
                                 val window = act.window
                                 val params = window.attributes

@@ -3,6 +3,7 @@ package com.auraplayer.ui.screens
 import android.app.Activity
 import android.app.PictureInPictureParams
 import android.content.Context
+import com.auraplayer.util.findActivity
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Build
@@ -99,7 +100,7 @@ fun VideoPlayerScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val activity = context as? Activity
+    val activity = context.findActivity()
 
     val resumePrefs = remember { context.getSharedPreferences("dave_video_resume", Context.MODE_PRIVATE) }
     val resumeKey = remember(video.id, video.path) {
@@ -503,7 +504,7 @@ fun VideoPlayerScreen(
                     ) {
                         IconButton(
                             onClick = {
-                                val act = context as? Activity
+                                val act = context.findActivity()
                                 val params = PictureInPictureParams.Builder()
                                     .setAspectRatio(Rational(16, 9))
                                     .build()

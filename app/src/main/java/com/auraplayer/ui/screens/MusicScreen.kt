@@ -2229,7 +2229,12 @@ fun MusicScreen(
             onDismissRequest = { songToAddToPlaylist = null },
             title = { Text("Añadir a Playlist", fontWeight = FontWeight.Bold) },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 340.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
                     if (playlists.isEmpty()) {
                         Text("No tienes playlists aún. Crea una primero.")
                     } else {
@@ -2801,7 +2806,7 @@ fun HighlightedText(
 
     val annotated = remember(text, query, color, highlightColor, highlightBg) {
         buildAnnotatedString {
-            if (hasDirect) {
+            if (hasDirect && lowerQuery.isNotEmpty()) {
                 var currentIndex = 0
                 while (currentIndex < text.length) {
                     val matchIndex = lowerText.indexOf(lowerQuery, currentIndex)
@@ -2812,7 +2817,7 @@ fun HighlightedText(
                     if (matchIndex > currentIndex) {
                         append(text.substring(currentIndex, matchIndex))
                     }
-                    val matchEnd = matchIndex + lowerQuery.length
+                    val matchEnd = (matchIndex + lowerQuery.length).coerceAtMost(text.length)
                     withStyle(
                         SpanStyle(
                             color = highlightColor,
@@ -2821,6 +2826,10 @@ fun HighlightedText(
                         )
                     ) {
                         append(text.substring(matchIndex, matchEnd))
+                    }
+                    if (matchEnd <= currentIndex) {
+                        append(text.substring(currentIndex))
+                        break
                     }
                     currentIndex = matchEnd
                 }

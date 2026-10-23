@@ -3,6 +3,7 @@ package com.auraplayer.ui.components
 import android.app.Activity
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import com.auraplayer.util.findActivity
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -91,7 +92,7 @@ fun CarDriveModeDialog(
 ) {
     val context = LocalContext.current
     val view = LocalView.current
-    val activity = context as? Activity
+    val activity = context.findActivity()
 
     // Mantener la pantalla encendida mientras el modo auto esté abierto
     DisposableEffect(Unit) {

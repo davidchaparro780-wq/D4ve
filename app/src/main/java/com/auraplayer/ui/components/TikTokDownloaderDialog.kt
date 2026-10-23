@@ -4,6 +4,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import com.auraplayer.util.getSafeClipboardText
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -187,11 +188,10 @@ fun TikTokDownloaderDialog(
         if (initialUrl.isNotBlank()) {
             resolveLink(initialUrl)
         } else {
-            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
+            val clip = context.getSafeClipboardText()
             if (!clip.isNullOrBlank() && TikTokDownloader.isTikTokUrl(clip)) {
-                urlInput = clip.trim()
-                resolveLink(clip.trim())
+                urlInput = clip
+                resolveLink(clip)
             }
         }
     }
@@ -288,11 +288,10 @@ fun TikTokDownloaderDialog(
                             }
                             IconButton(
                                 onClick = {
-                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                                    val clip = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
+                                    val clip = context.getSafeClipboardText()
                                     if (!clip.isNullOrBlank()) {
-                                        urlInput = clip.trim()
-                                        resolveLink(clip.trim())
+                                        urlInput = clip
+                                        resolveLink(clip)
                                     } else {
                                         Toast.makeText(context, "Portapapeles vacío", Toast.LENGTH_SHORT).show()
                                     }

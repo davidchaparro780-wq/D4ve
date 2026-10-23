@@ -729,6 +729,25 @@ class DownloadEngine(
             }
 
             if (videoStreamUrl.isNullOrBlank()) {
+                // Intento de rescate por búsqueda si el videoId era inválido o local
+                try {
+                    val query = "${track.artist} ${track.title}".trim()
+                    if (query.isNotBlank()) {
+                        val fallbackSearch = youtubeRepo.searchYouTube(query)
+                        val fallbackBest = fallbackSearch.firstOrNull()
+                        if (fallbackBest != null) {
+                            val fbId = fallbackBest.id.removePrefix("yt_")
+                            if (fbId.isNotBlank()) {
+                                videoStreamUrl = youtubeRepo.resolveVideoStream(fbId)
+                            }
+                        }
+                    }
+                } catch (e: Throwable) {
+                    AppLog.w(TAG, "Error en búsqueda de rescate de video: ${e.message}")
+                }
+            }
+
+            if (videoStreamUrl.isNullOrBlank()) {
                 throw IllegalStateException("No se pudo obtener el stream de video MP4 de YouTube.")
             }
 

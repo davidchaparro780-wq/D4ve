@@ -1,5 +1,10 @@
 package com.auraplayer.ui.components
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
@@ -137,21 +143,83 @@ fun WhatsAppStatusDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                val isAndroid11Plus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                val hasStorageManager = if (isAndroid11Plus) Environment.isExternalStorageManager() else true
+                val needsStoragePermission = isAndroid11Plus && !hasStorageManager
+
                 if (isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = Color(0xFF25D366))
                     }
                 } else if (filteredList.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-                            Text("👀 No hay estados vistos aún", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                "Abre WhatsApp y mira los estados de tus amigos. Al volver aquí aparecerán listos para guardarse.",
-                                color = Color(0xFF94A3B8),
-                                fontSize = 13.sp,
-                                textAlign = TextAlign.Center
-                            )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(28.dp)
+                        ) {
+                            if (needsStoragePermission) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF25D366).copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Lock,
+                                        contentDescription = null,
+                                        tint = Color(0xFF25D366),
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    "Acceso a Archivos Necesario",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 17.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "En Android 11 y versiones superiores, los estados de WhatsApp se guardan en la carpeta protegida de medios. Para leerlos y guardarlos, activa el acceso a todos los archivos.",
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 18.sp
+                                )
+                                Spacer(modifier = Modifier.height(18.dp))
+                                Button(
+                                    onClick = {
+                                        try {
+                                            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                                data = Uri.parse("package:${context.packageName}")
+                                            }
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {
+                                            try {
+                                                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                                                context.startActivity(intent)
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "Abre Ajustes > Permisos para conceder acceso", Toast.LENGTH_LONG).show()
+                                            }
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Text("Conceder Permiso en Ajustes", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Text("👀 No hay estados vistos aún", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    "Abre WhatsApp y mira los estados de tus amigos. Al volver aquí aparecerán listos para guardarse.",
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                 } else {

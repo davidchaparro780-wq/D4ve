@@ -2811,41 +2811,48 @@ fun AuraApp(
                 },
                 onDownloadVideoForSong = { song ->
                     scope.launch {
-                        Toast.makeText(context, "Iniciando descarga de video: ${song.title}...", Toast.LENGTH_SHORT).show()
-                        val onlineTrack = com.auraplayer.data.model.OnlineTrack(
-                            id = "yt_${song.id}",
-                            title = song.title,
-                            artist = song.artist,
-                            album = song.album,
-                            durationSec = (song.duration / 1000L).toInt(),
-                            audioUrl = song.path,
-                            coverUrl = song.artworkUri?.toString() ?: "",
-                            format = "MP4",
-                            bitrateKbps = 320,
-                            source = "YouTube"
-                        )
-                        downloadEngine.downloadVideo(
-                            track = onlineTrack,
-                            onComplete = {
-                                Toast.makeText(context, "✓ Video descargado con éxito: ${song.title}", Toast.LENGTH_SHORT).show()
-                                scope.launch {
-                                    val reloadedSongs = mediaRepository.loadAudioFiles()
-                                    val reloadedVideos = mediaRepository.loadVideoFiles()
-                                    withContext(Dispatchers.Main) {
-                                        songs = reloadedSongs
-                                        videos = reloadedVideos
-                                        val match = reloadedSongs.firstOrNull { it.id == song.id || it.path.contains(song.title, ignoreCase = true) }
-                                            ?: reloadedVideos.firstOrNull { it.title.contains(song.title, ignoreCase = true) }
-                                        if (match != null) {
-                                            currentMedia = match
+                        Toast.makeText(context, "Buscando video musical: ${song.title}...", Toast.LENGTH_SHORT).show()
+                        try {
+                            val query = "${song.title} ${song.artist}".trim()
+                            val searchResults = downloadEngine.youtubeRepo.searchYouTube(query)
+                            val bestTrack = searchResults.firstOrNull() ?: com.auraplayer.data.model.OnlineTrack(
+                                id = "yt_${song.id}",
+                                title = song.title,
+                                artist = song.artist,
+                                album = song.album,
+                                durationSec = (song.duration / 1000L).toInt(),
+                                audioUrl = song.path,
+                                coverUrl = song.artworkUri?.toString() ?: "",
+                                format = "MP4",
+                                bitrateKbps = 320,
+                                source = "YouTube"
+                            )
+                            Toast.makeText(context, "Descargando video: ${bestTrack.title}...", Toast.LENGTH_SHORT).show()
+                            downloadEngine.downloadVideo(
+                                track = bestTrack,
+                                onComplete = {
+                                    Toast.makeText(context, "✓ Video descargado con éxito: ${song.title}", Toast.LENGTH_SHORT).show()
+                                    scope.launch {
+                                        val reloadedSongs = mediaRepository.loadAudioFiles()
+                                        val reloadedVideos = mediaRepository.loadVideoFiles()
+                                        withContext(Dispatchers.Main) {
+                                            songs = reloadedSongs
+                                            videos = reloadedVideos
+                                            val match = reloadedSongs.firstOrNull { it.id == song.id || it.path.contains(song.title, ignoreCase = true) }
+                                                ?: reloadedVideos.firstOrNull { it.title.contains(song.title, ignoreCase = true) }
+                                            if (match != null) {
+                                                currentMedia = match
+                                            }
                                         }
                                     }
+                                },
+                                onError = { err ->
+                                    Toast.makeText(context, "Error al descargar video: $err", Toast.LENGTH_SHORT).show()
                                 }
-                            },
-                            onError = { err ->
-                                Toast.makeText(context, "Error al descargar video: $err", Toast.LENGTH_SHORT).show()
-                            }
-                        )
+                            )
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error buscando video musical: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 },
                 onDismiss = { showPlayerScreen = false },
