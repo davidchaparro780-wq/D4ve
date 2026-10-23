@@ -20,8 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +32,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +65,8 @@ fun DownloadsScreen(
     val states by downloadEngine.downloadStates.collectAsState()
     val tracks by downloadEngine.trackRegistry.collectAsState()
 
+    var selectedTab by remember { mutableStateOf(0) } // 0: Todas, 1: Música, 2: Videos
+
     val registryEntries = tracks.entries.toList()
     val activeEntries = registryEntries.filter { (key, _) ->
         when (states[key]) {
@@ -74,6 +79,15 @@ fun DownloadsScreen(
     }
     val visibleEntries = activeEntries + completedEntries
 
+    val musicEntries = visibleEntries.filter { !it.key.startsWith("vid_") }
+    val videoEntries = visibleEntries.filter { it.key.startsWith("vid_") }
+
+    val currentFilteredEntries = when (selectedTab) {
+        1 -> musicEntries
+        2 -> videoEntries
+        else -> visibleEntries
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -85,6 +99,7 @@ fun DownloadsScreen(
                 .statusBarsPadding()
                 .padding(horizontal = 16.dp)
         ) {
+            // Top Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +136,31 @@ fun DownloadsScreen(
                 }
             }
 
-            if (visibleEntries.isEmpty()) {
+            // Filter Tabs (Todas, Música, Videos)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                DownloadCategoryChip(
+                    label = "Todas (${visibleEntries.size})",
+                    isSelected = selectedTab == 0,
+                    onClick = { selectedTab = 0 }
+                )
+                DownloadCategoryChip(
+                    label = "🎵 Música (${musicEntries.size})",
+                    isSelected = selectedTab == 1,
+                    onClick = { selectedTab = 1 }
+                )
+                DownloadCategoryChip(
+                    label = "🎬 Videos (${videoEntries.size})",
+                    isSelected = selectedTab == 2,
+                    onClick = { selectedTab = 2 }
+                )
+            }
+
+            if (currentFilteredEntries.isEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -130,21 +169,28 @@ fun DownloadsScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CloudDownload,
+                        imageVector = when (selectedTab) {
+                            2 -> Icons.Default.Videocam
+                            else -> Icons.Default.CloudDownload
+                        },
                         contentDescription = null,
                         tint = Color(0xFF1E293B),
                         modifier = Modifier.size(64.dp)
                     )
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = "No hay descargas aún",
+                        text = when (selectedTab) {
+                            1 -> "No hay canciones descargadas"
+                            2 -> "No hay videos descargados"
+                            else -> "No hay descargas aún"
+                        },
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF94A3B8)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Descarga música desde Explorar",
+                        text = "Descarga música y videos desde Explorar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF64748B),
                         textAlign = TextAlign.Center
@@ -158,7 +204,7 @@ fun DownloadsScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp)
                 ) {
-                    items(visibleEntries, key = { it.key }) { (downloadKey, track) ->
+                    items(currentFilteredEntries, key = { it.key }) { (downloadKey, track) ->
                         val isVideo = downloadKey.startsWith("vid_")
                         DownloadRow(
                             track = track,
@@ -190,6 +236,49 @@ fun DownloadsScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DownloadCategoryChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (isSelected) Color(0xFF38BDF8) else Color(0xFF1E293B))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 7.dp)
+    ) {
+        Text(
+            text = label,
+            color = if (isSelected) Color(0xFF0B0E1A) else Color(0xFF94A3B8),
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun QualityBadge(
+    text: String,
+    bg: Color,
+    color: Color
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(bg)
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -261,6 +350,36 @@ private fun DownloadRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(top = 4.dp)
+            ) {
+                if (isVideo) {
+                    QualityBadge(
+                        text = "🎬 MP4 HD",
+                        bg = Color(0xFF0284C7).copy(alpha = 0.2f),
+                        color = Color(0xFF38BDF8)
+                    )
+                } else {
+                    val fmt = if (track.format.isNotBlank()) track.format.uppercase() else "MP3"
+                    val rate = if (track.bitrateKbps > 0) "${track.bitrateKbps}k" else "HQ"
+                    QualityBadge(
+                        text = "🎵 $fmt • $rate",
+                        bg = Color(0xFF7C3AED).copy(alpha = 0.2f),
+                        color = Color(0xFFA78BFA)
+                    )
+                }
+                if (track.durationSec > 0) {
+                    val m = track.durationSec / 60
+                    val s = track.durationSec % 60
+                    QualityBadge(
+                        text = String.format("%d:%02d", m, s),
+                        bg = Color(0xFF334155).copy(alpha = 0.4f),
+                        color = Color(0xFF94A3B8)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.width(8.dp))

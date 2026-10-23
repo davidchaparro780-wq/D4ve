@@ -56,8 +56,19 @@ class PlaybackService : MediaSessionService() {
 
         val defaultDataSourceFactory = androidx.media3.datasource.DefaultDataSource.Factory(this, httpDataSourceFactory)
 
-        val mediaSourceFactory = androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
-            .setDataSourceFactory(defaultDataSourceFactory)
+        val mediaSourceFactory = try {
+            val cache = com.auraplayer.audio.AuraMediaCache.getInstance(this)
+            val cacheDataSourceFactory = androidx.media3.datasource.cache.CacheDataSource.Factory()
+                .setCache(cache)
+                .setUpstreamDataSourceFactory(defaultDataSourceFactory)
+                .setFlags(androidx.media3.datasource.cache.CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+                .setDataSourceFactory(cacheDataSourceFactory)
+        } catch (e: Exception) {
+            com.auraplayer.util.AppLog.w("PlaybackService", "Error al inicializar CacheDataSource, fallback a defaultDataSourceFactory", e)
+            androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+                .setDataSourceFactory(defaultDataSourceFactory)
+        }
 
         val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setBufferDurationsMs(

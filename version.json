@@ -1,7 +1,7 @@
 {
-  "versionCode": 120,
-  "versionName": "4.9.20",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.20/app-debug.apk",
-  "changelog": "✨ DaVE Player v4.9.20 (Build 120) — UI RYT Music & Motor Anti-Bloqueo Definitivo:\n• 🎨 Nueva UI de Descarga Estilo RYT Music: Elegante Modal BottomSheet con selección intuitiva de formato y calidad: Audio HQ (320 kbps), Audio Ligero (128 kbps), Video HD (720p MP4) y Video SD (360p MP4), con cálculo de peso estimado en MB y barra de progreso en vivo.\n• ⚡ Clientes InnerTube de Próxima Generación: Integrado ANDROID_VR (Meta Quest) y VISIONOS (Apple Vision Pro) que no requieren BotGuard ni sufren limitaciones de PO-Tokens, entregando streams de audio puro adaptive a máxima velocidad.\n• 🛡️ Anti-Bloqueo VEVO Resuelto al 100%: Añadido soporte InnerTube ANDROID 21.26.364 para canciones comerciales protegidas (Despacito, Bohemian Rhapsody, etc.) resolviendo streams directos sin el error 400 FAILED_PRECONDITION ni bloqueos.\n• 📦 NewPipeExtractor v0.26.5: Actualizado el motor central de extracción con los parches más recientes de la comunidad de código abierto.\n• 🔄 Sincronización Completa de User-Agents: Descargas blindadas contra códigos 403 Forbidden en servidores googlevideo.",
-  "fileSizeMb": 24.8
+  "versionCode": 121,
+  "versionName": "4.9.21",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.21/app-debug.apk",
+  "changelog": "✨ DaVE Player v4.9.21 (Build 121) — Notificaciones en Vivo de Descarga & Smart Disk Cache:\n• 📥 Notificaciones de Descarga en Vivo: Barra de progreso persistente en la barra de estado de Android durante descargas de música y videos MP4, blindando el proceso para que no se congele ni se cierre al apagar la pantalla.\n• ⚡ Smart Streaming Disk Cache (ExoPlayer LRU ~250MB): Las canciones reproducidas online se almacenan en caché automáticamente en internal storage; al repetirlas se reproducen de inmediato con 0 ms de buffering y 0 consumo de datos móviles.\n• 🏷️ Filtros y Badges en Pantalla de Descargas: Pestañas de filtrado (Todas, Música, Videos) y etiquetas de calidad visuales (HQ 320k, 128k, MP4 HD, duración) estilo RYT Music / Lark Player Pro.\n• 🛡️ Anti-Bloqueo de YouTube Reforzado: Máxima estabilidad con los clientes InnerTube ANDROID_VR, VISIONOS y ANDROID v21.26.",
+  "fileSizeMb": 24.9
 }

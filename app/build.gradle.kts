@@ -14,8 +14,8 @@ android {
         applicationId = "com.auraplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 120
-        versionName = "4.9.20"
+        versionCode = 121
+        versionName = "4.9.21"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -89,11 +89,13 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
 
-    // Media3 (ExoPlayer, Session, UI)
+    // Media3 (ExoPlayer, Session, UI, Cache & Database)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)
+    implementation(libs.androidx.media3.datasource)
+    implementation(libs.androidx.media3.database)
 
     // Coil Image Loading
     implementation(libs.coil.compose)

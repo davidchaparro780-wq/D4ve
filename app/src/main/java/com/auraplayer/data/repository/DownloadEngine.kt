@@ -46,6 +46,8 @@ class DownloadEngine(
 
     companion object {
         private const val TAG = "DownloadEngine"
+        private const val CHANNEL_COMPLETED_ID = "dave_downloads_channel"
+        private const val CHANNEL_PROGRESS_ID = "dave_active_downloads_channel"
     }
 
     var onUpdateNeeded: (() -> Unit)? = null
@@ -291,6 +293,7 @@ class DownloadEngine(
                     performDownload(resolvedAudioUrl, track, safeArtist, safeTitle)
 
                     updateState(track.id, DownloadStatus.Completed)
+                    cancelProgressNotification(track.id)
                     showDownloadCompletedNotification(track.title, track.artist)
                     onDownloadCompleted?.invoke(track)
                     withContext(Dispatchers.Main) {
@@ -346,6 +349,7 @@ class DownloadEngine(
                 e.message?.contains("audio", ignoreCase = true) == true -> e.localizedMessage ?: "Error de audio"
                 else -> e.localizedMessage ?: "Error de descarga"
             }
+            cancelProgressNotification(track.id)
             updateState(track.id, DownloadStatus.Error(userMsg))
             withContext(Dispatchers.Main) {
                 onError?.invoke(userMsg)
@@ -494,7 +498,7 @@ class DownloadEngine(
                     pendingUri = uri
                     if (uri != null) {
                         context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                            streamWithProgress(inputStream, outputStream, contentLength, track.id)
+                            streamWithProgress(inputStream, outputStream, contentLength, track.id, track.title, track.artist)
                         }
                         val updateValues = ContentValues().apply {
                             put(MediaStore.Audio.Media.IS_PENDING, 0)
@@ -535,7 +539,7 @@ class DownloadEngine(
 
             try {
                 FileOutputStream(targetFile).use { outputStream ->
-                    streamWithProgress(inputStream, outputStream, contentLength, track.id)
+                    streamWithProgress(inputStream, outputStream, contentLength, track.id, track.title, track.artist)
                 }
             } catch (e: Exception) {
                 try { targetFile.delete() } catch (_: Exception) {}
@@ -558,6 +562,7 @@ class DownloadEngine(
         } catch (e: Exception) { AppLog.d(TAG, "No se pudo cerrar la conexión HTTP de la descarga", e) }
 
         updateState(track.id, DownloadStatus.Tagging)
+        showProgressNotification(track.id, track.title, "Etiquetando metadatos...", 100, isIndeterminate = true)
 
         // Save Cover Art locally for instant offline display
         if (track.coverUrl.isNotBlank()) {
@@ -611,7 +616,9 @@ class DownloadEngine(
         inputStream: java.io.InputStream,
         outputStream: OutputStream,
         contentLength: Int,
-        trackId: String
+        trackId: String,
+        title: String = "",
+        subtitle: String = ""
     ) {
         val bufferedIn = if (inputStream is java.io.BufferedInputStream) inputStream else java.io.BufferedInputStream(inputStream, 65536)
         val bufferedOut = if (outputStream is java.io.BufferedOutputStream) outputStream else java.io.BufferedOutputStream(outputStream, 65536)
@@ -619,6 +626,11 @@ class DownloadEngine(
         var bytesRead: Int
         var totalBytesRead = 0L
         var lastReportedProgress = -1
+        var lastNotifProgress = -1
+
+        if (title.isNotBlank()) {
+            showProgressNotification(trackId, title, subtitle, 0, isIndeterminate = contentLength <= 0)
+        }
 
         while (bufferedIn.read(buffer).also { bytesRead = it } != -1) {
             bufferedOut.write(buffer, 0, bytesRead)
@@ -628,6 +640,12 @@ class DownloadEngine(
                 if (progress != lastReportedProgress) {
                     lastReportedProgress = progress
                     updateState(trackId, DownloadStatus.Downloading(progress))
+                    if (progress - lastNotifProgress >= 4 || progress >= 99) {
+                        lastNotifProgress = progress
+                        if (title.isNotBlank()) {
+                            showProgressNotification(trackId, title, subtitle, progress, false)
+                        }
+                    }
                 }
             }
         }
@@ -724,6 +742,7 @@ class DownloadEngine(
                     performVideoDownload(currentVideoUrl, downloadId, fileName, track.title)
 
                     updateState(downloadId, DownloadStatus.Completed)
+                    cancelProgressNotification(downloadId)
                     showDownloadCompletedNotification(track.title, "Video MP4")
                     onDownloadCompleted?.invoke(track)
                     withContext(Dispatchers.Main) {
@@ -753,6 +772,7 @@ class DownloadEngine(
         } catch (e: Exception) {
             AppLog.e(TAG, "No se pudo descargar el video ${track.title}", e)
             val userMsg = e.localizedMessage ?: "Error al descargar el video"
+            cancelProgressNotification(downloadId)
             updateState(downloadId, DownloadStatus.Error(userMsg))
             withContext(Dispatchers.Main) {
                 onError?.invoke(userMsg)
@@ -854,7 +874,7 @@ class DownloadEngine(
                 if (uri != null) {
                     val outputStream = context.contentResolver.openOutputStream(uri)
                     if (outputStream != null) {
-                        streamWithProgress(inputStream, outputStream, contentLength, downloadId)
+                        streamWithProgress(inputStream, outputStream, contentLength, downloadId, videoTitle, "Video MP4")
                         outputStream.close()
                         savedUri = uri
                     }
@@ -881,7 +901,7 @@ class DownloadEngine(
             savedUri = Uri.fromFile(targetFile)
 
             FileOutputStream(targetFile).use { outputStream ->
-                streamWithProgress(inputStream, outputStream, contentLength, downloadId)
+                streamWithProgress(inputStream, outputStream, contentLength, downloadId, videoTitle, "Video MP4")
             }
 
             MediaScannerConnection.scanFile(
@@ -909,21 +929,88 @@ class DownloadEngine(
         return text.replace(Regex("[\\\\/:*?\"<>|]"), "_").trim()
     }
 
-    private fun showDownloadCompletedNotification(title: String, artist: String) {
+    private fun ensureNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+
+            // Channel for completed downloads
+            val completedChannel = NotificationChannel(
+                CHANNEL_COMPLETED_ID,
+                "Descargas completadas",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Notificaciones de canciones y videos descargados con éxito"
+                setShowBadge(true)
+            }
+            notificationManager.createNotificationChannel(completedChannel)
+
+            // Channel for active progress (low importance = completely silent, won't interrupt audio)
+            val progressChannel = NotificationChannel(
+                CHANNEL_PROGRESS_ID,
+                "Descargas en curso",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Progreso en tiempo real de descargas activas"
+                setShowBadge(false)
+            }
+            notificationManager.createNotificationChannel(progressChannel)
+        }
+    }
+
+    private fun getNotificationId(downloadId: String): Int {
+        return (downloadId.hashCode() and 0x7FFFFFFF) % 100000 + 1000
+    }
+
+    private fun showProgressNotification(
+        downloadId: String,
+        title: String,
+        subtitle: String,
+        progress: Int,
+        isIndeterminate: Boolean = false
+    ) {
+        try {
+            ensureNotificationChannels()
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            val notifId = getNotificationId(downloadId)
+
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            val pendingIntent = if (launchIntent != null) {
+                PendingIntent.getActivity(
+                    context,
+                    notifId,
+                    launchIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            } else null
+
+            val notif = NotificationCompat.Builder(context, CHANNEL_PROGRESS_ID)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setContentTitle(title)
+                .setContentText(if (isIndeterminate) subtitle else "$subtitle • $progress%")
+                .setProgress(100, progress, isIndeterminate)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build()
+
+            notificationManager.notify(notifId, notif)
+        } catch (e: Exception) {
+            AppLog.w(TAG, "No se pudo actualizar notificación de progreso: ${e.message}")
+        }
+    }
+
+    private fun cancelProgressNotification(downloadId: String) {
         try {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
-            val channelId = "dave_downloads_channel"
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    channelId,
-                    "Descargas DaVE",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    description = "Notificaciones de canciones y videos descargados"
-                    setShowBadge(true)
-                }
-                notificationManager.createNotificationChannel(channel)
-            }
+            notificationManager.cancel(getNotificationId(downloadId))
+        } catch (_: Exception) {}
+    }
+
+    private fun showDownloadCompletedNotification(title: String, artist: String) {
+        try {
+            ensureNotificationChannels()
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
 
             val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
             val pendingIntent = if (launchIntent != null) {
@@ -935,7 +1022,7 @@ class DownloadEngine(
                 )
             } else null
 
-            val notif = NotificationCompat.Builder(context, channelId)
+            val notif = NotificationCompat.Builder(context, CHANNEL_COMPLETED_ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download_done)
                 .setContentTitle("Descarga completada")
                 .setContentText("$title • $artist")
