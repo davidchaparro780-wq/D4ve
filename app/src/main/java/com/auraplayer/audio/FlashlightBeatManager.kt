@@ -17,6 +17,7 @@ private const val TAG = "FlashlightBeatManager"
 class FlashlightBeatManager(private val context: Context) {
 
     private val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as? CameraManager
+    private var strobeJob: Job? = null
     private val exceptionHandler = kotlinx.coroutines.CoroutineExceptionHandler { _, throwable ->
         AppLog.e(TAG, "Uncaught error en FlashlightBeatManager", throwable)
     }
