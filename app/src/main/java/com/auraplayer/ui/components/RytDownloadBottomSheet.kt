@@ -90,7 +90,7 @@ fun RytDownloadBottomSheet(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    var selectedFormat by remember { mutableStateOf(RytDownloadFormat.AUDIO_HQ_320) }
+    var selectedFormat by remember { mutableStateOf(RytDownloadFormat.VIDEO_HD_720) }
     val downloadStates by downloadEngine.downloadStates.collectAsState()
 
     val isVideoSelected = selectedFormat == RytDownloadFormat.VIDEO_HD_720 || selectedFormat == RytDownloadFormat.VIDEO_SD_360
@@ -316,9 +316,9 @@ fun RytDownloadBottomSheet(
             // Option 3: Video HD 720p
             val sizeHd = String.format("%.1f MB", ((dur * 1800) / 8000.0).coerceAtLeast(16.0))
             FormatSelectionTile(
-                title = "Video Alta Definición (HD)",
-                subtitle = "MP4 720p Muxed • Audio + video HD completo",
-                badgeText = "🎬 HD 720p",
+                title = "Canción con Video HD (Recomendada)",
+                subtitle = "MP4 720p • Audio HQ + videoclip sincronizado para escuchar y ver",
+                badgeText = "⭐ DUAL HD",
                 sizeText = sizeHd,
                 badgeColor = Color(0xFF8B5CF6),
                 isSelected = selectedFormat == RytDownloadFormat.VIDEO_HD_720,
@@ -535,7 +535,7 @@ fun RytDownloadBottomSheet(
                                         downloadEngine.downloadVideo(
                                             track = track,
                                             onComplete = {
-                                                Toast.makeText(context, "✓ Video guardado en Movies/DaVEPlayer: ${track.title}", Toast.LENGTH_LONG).show()
+                                                Toast.makeText(context, "✓ Canción con video guardada: ${track.title}", Toast.LENGTH_LONG).show()
                                                 onDownloadCompleted(track)
                                             },
                                             onError = { err ->
@@ -591,7 +591,7 @@ fun RytDownloadBottomSheet(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = if (isVideoSelected) "Descargar Video MP4" else "Descargar Música Ahora",
+                                    text = if (isVideoSelected) "Descargar Canción con Video (MP4 HD)" else "Descargar Solo Audio",
                                     color = Color.Black,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 14.sp

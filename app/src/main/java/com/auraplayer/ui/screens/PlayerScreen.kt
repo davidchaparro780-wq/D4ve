@@ -138,6 +138,13 @@ import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
+import com.auraplayer.service.PlaybackService
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -268,6 +275,8 @@ fun PlayerScreen(
     isHeadphonesConnected: Boolean = false,
     onSearchOnline: (String) -> Unit = {},
     onAccentChange: (String) -> Unit = {},
+    onOpenFullScreenVideo: (MediaModel) -> Unit = {},
+    onDownloadVideoForSong: (MediaModel) -> Unit = {},
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -290,6 +299,13 @@ fun PlayerScreen(
     var isEdgeLightingEnabled by remember { mutableStateOf(false) }
     var isSpatial8D by remember { mutableStateOf(EqualizerManager.instance.isSpatial8DEnabled) }
     var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Live Spectrum Waves
+    var isVideoMode by rememberSaveable { mutableStateOf(currentMedia?.isVideo == true) }
+
+    LaunchedEffect(currentMedia?.id) {
+        if (currentMedia?.isVideo == true) {
+            isVideoMode = true
+        }
+    }
     var showSoundboardDialog by remember { mutableStateOf(false) }
     var showSyncedLyricsDialog by remember { mutableStateOf(false) }
     var showIpodClassicDialog by remember { mutableStateOf(false) }
@@ -1041,6 +1057,81 @@ fun PlayerScreen(
                     }
                 }
 
+                // YouTube Music Style Switcher: [ 🎵 Canción | 🎬 Video ]
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(22.dp))
+                            .padding(3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 🎵 Canción Tab
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(if (!isVideoMode) activeAccent.copy(alpha = 0.32f) else Color.Transparent)
+                                .clickable {
+                                    AuraHaptic.click(view)
+                                    isVideoMode = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = null,
+                                    tint = if (!isVideoMode) Color.White else Color.Gray,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Text(
+                                    text = "Canción",
+                                    fontSize = 11.sp,
+                                    fontWeight = if (!isVideoMode) FontWeight.ExtraBold else FontWeight.Medium,
+                                    color = if (!isVideoMode) Color.White else Color.Gray
+                                )
+                            }
+                        }
+
+                        // 🎬 Video Tab
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(if (isVideoMode) Color(0xFF8B5CF6).copy(alpha = 0.42f) else Color.Transparent)
+                                .clickable {
+                                    AuraHaptic.click(view)
+                                    isVideoMode = true
+                                }
+                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Videocam,
+                                    contentDescription = null,
+                                    tint = if (isVideoMode) Color(0xFFA78BFA) else Color.Gray,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Text(
+                                    text = "Video",
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isVideoMode) FontWeight.ExtraBold else FontWeight.Medium,
+                                    color = if (isVideoMode) Color.White else Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Center Display: Either Glowing Vinyl OR Synced Karaoke Lyrics (Swipe to change track)
                 BoxWithConstraints(
                     modifier = Modifier
@@ -1072,7 +1163,103 @@ fun PlayerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     val maxArtSize = minOf(maxWidth * 0.90f, maxHeight * 0.92f)
-                    if (!showLyricsView) {
+                    if (isVideoMode) {
+                        // Video Player Screen
+                        val activeExo = PlaybackService.activePlayer
+                        val hasVideoTrack = activeExo != null && (currentMedia.isVideo || activeExo.currentTracks.groups.any { it.type == C.TRACK_TYPE_VIDEO })
+
+                        Box(
+                            modifier = Modifier
+                                .size(maxArtSize)
+                                .offset(y = levitationOffsetDp)
+                                .clip(RoundedCornerShape(26.dp))
+                                .background(Color.Black)
+                                .border(1.5.dp, activeAccent.copy(alpha = 0.6f), RoundedCornerShape(26.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (activeExo != null && hasVideoTrack) {
+                                AndroidView(
+                                    factory = { ctx ->
+                                        PlayerView(ctx).apply {
+                                            player = activeExo
+                                            useController = false
+                                            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                                            keepScreenOn = true
+                                        }
+                                    },
+                                    update = { pv ->
+                                        pv.player = activeExo
+                                        pv.keepScreenOn = true
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(26.dp))
+                                )
+
+                                // Floating Fullscreen Expand Button
+                                IconButton(
+                                    onClick = {
+                                        AuraHaptic.click(view)
+                                        onOpenFullScreenVideo(currentMedia)
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(10.dp)
+                                        .size(36.dp)
+                                        .background(Color.Black.copy(alpha = 0.65f), CircleShape)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Fullscreen,
+                                        contentDescription = "Pantalla Completa",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            } else {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Videocam,
+                                        contentDescription = null,
+                                        tint = activeAccent,
+                                        modifier = Modifier.size(46.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Videoclip Musical",
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Descarga esta canción con video para ver el videoclip HD mientras escuchas.",
+                                        color = Color.White.copy(alpha = 0.7f),
+                                        fontSize = 12.sp,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(
+                                        onClick = {
+                                            AuraHaptic.click(view)
+                                            onDownloadVideoForSong(currentMedia)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = activeAccent),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Icon(Icons.Default.Download, null, modifier = Modifier.size(16.dp), tint = Color.Black)
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Descargar Video MP4", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    }
+                                }
+                            }
+                        }
+                    } else if (!showLyricsView) {
                         AnimatedContent(
                             targetState = currentMedia.id,
                             transitionSpec = {

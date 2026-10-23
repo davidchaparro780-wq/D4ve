@@ -1,7 +1,7 @@
 {
-  "versionCode": 124,
-  "versionName": "4.9.24",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.24/app-debug.apk",
-  "changelog": "🛡️ DaVE Player v4.9.24 (Build 124) — Restauración Total de Estabilidad y Arranque:\n• 🚀 Arranque Inmediato Garantizado: Reversión completa al estado 100% probado y funcional de v4.9.21, eliminando de raíz cualquier error de inicialización o bucle de cierre forzado.\n• 📥 Notificaciones de Descarga en Vivo: Barra de progreso persistente en tiempo real durante descargas de canciones y videos MP4.\n• ⚡ Smart Streaming Disk Cache: Reproducción instantánea con 0 ms de buffering y 0 datos móviles al repetir canciones.\n• 🏷️ Filtros RYT Music y Badges HD: Categorías y etiquetas visuales de calidad de audio.",
+  "versionCode": 125,
+  "versionName": "4.9.25",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.25/app-debug.apk",
+  "changelog": "🎬 DaVE Player v4.9.25 (Build 125) — Modo Dual [ Canción | Video ] & Descarga Automática de Videoclips:\n• 🎬 Switcher [ 🎵 Canción | 🎬 Video ]: Transforma la carátula del reproductor en el videoclip musical sincronizado en tiempo real estilo YouTube Music.\n• 📥 Descarga Automática Dual (Audio + Video): Al descargar cualquier canción, se descarga automáticamente en formato MP4 HD con audio de alta fidelidad, lista para escuchar y ver sin internet.\n• 🏷️ Badge [🎬 VIDEO] en Biblioteca: Las canciones con videoclip muestran una insignia destacada y se integran automáticamente en las secciones de Música y Videos.\n• 📺 Pantalla Completa: Botón de expansión rápida para disfrutar del videoclip en pantalla completa con rotación.",
   "fileSizeMb": 24.9
 }

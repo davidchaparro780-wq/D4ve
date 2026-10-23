@@ -2740,6 +2740,43 @@ fun AuraApp(
                     selectedNavTab = 1
                 },
                 onAccentChange = onAccentChange,
+                onOpenFullScreenVideo = { video ->
+                    activeVideo = video
+                },
+                onDownloadVideoForSong = { song ->
+                    scope.launch {
+                        Toast.makeText(context, "Iniciando descarga de video: ${song.title}...", Toast.LENGTH_SHORT).show()
+                        val onlineTrack = com.auraplayer.data.model.OnlineTrack(
+                            id = "yt_${song.id}",
+                            title = song.title,
+                            artist = song.artist,
+                            album = song.album,
+                            durationSec = (song.duration / 1000L).toInt(),
+                            audioUrl = song.path,
+                            coverUrl = song.artworkUri?.toString() ?: "",
+                            format = "MP4",
+                            bitrateKbps = 320,
+                            source = "YouTube"
+                        )
+                        downloadEngine.downloadVideo(
+                            track = onlineTrack,
+                            onComplete = {
+                                Toast.makeText(context, "✓ Video descargado con éxito: ${song.title}", Toast.LENGTH_SHORT).show()
+                                scope.launch {
+                                    val reloadedSongs = mediaRepository.loadAudioFiles()
+                                    val reloadedVideos = mediaRepository.loadVideoFiles()
+                                    withContext(Dispatchers.Main) {
+                                        songs = reloadedSongs
+                                        videos = reloadedVideos
+                                    }
+                                }
+                            },
+                            onError = { err ->
+                                Toast.makeText(context, "Error al descargar video: $err", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                },
                 onDismiss = { showPlayerScreen = false },
                 modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             )

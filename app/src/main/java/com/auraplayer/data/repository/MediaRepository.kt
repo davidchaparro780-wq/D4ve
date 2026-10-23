@@ -168,7 +168,81 @@ class MediaRepository(private val context: Context) {
             }
         }
 
-        audioList
+        // Strategy 3: Also include downloaded MP4 videos from DaVEPlayer into audioList as playable songs with video!
+        try {
+            val videoCollection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            } else {
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            }
+            val videoProjection = arrayOf(
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.TITLE,
+                MediaStore.Video.Media.DURATION,
+                MediaStore.Video.Media.DATA,
+                MediaStore.Video.Media.SIZE,
+                MediaStore.Video.Media.DATE_ADDED
+            )
+            val videoSelection = "${MediaStore.Video.Media.DATA} LIKE '%DaVEPlayer%'"
+            context.contentResolver.query(videoCollection, videoProjection, videoSelection, null, sortOrder)?.use { cursor ->
+                val idCol = cursor.getColumnIndex(MediaStore.Video.Media._ID)
+                val titleCol = cursor.getColumnIndex(MediaStore.Video.Media.TITLE)
+                val durationCol = cursor.getColumnIndex(MediaStore.Video.Media.DURATION)
+                val dataCol = cursor.getColumnIndex(MediaStore.Video.Media.DATA)
+                val sizeCol = cursor.getColumnIndex(MediaStore.Video.Media.SIZE)
+                val dateAddedCol = cursor.getColumnIndex(MediaStore.Video.Media.DATE_ADDED)
+
+                while (cursor.moveToNext()) {
+                    val id = if (idCol >= 0) cursor.getLong(idCol) else 0L
+                    if (id == 0L) continue
+                    val data = if (dataCol >= 0) cursor.getString(dataCol) ?: "" else ""
+                    if (data.isBlank() || vaultManager.isPathHidden(data)) continue
+
+                    val rawTitle = if (titleCol >= 0) cursor.getString(titleCol) ?: "Video" else "Video"
+                    val duration = if (durationCol >= 0) cursor.getLong(durationCol) else 0L
+                    val size = if (sizeCol >= 0) cursor.getLong(sizeCol) else 0L
+                    val dateAdded = if (dateAddedCol >= 0) {
+                        try { cursor.getLong(dateAddedCol) } catch (_: Exception) { 0L }
+                    } else 0L
+
+                    var finalArtist = "DaVE Video"
+                    var finalTitle = rawTitle
+                    if (rawTitle.contains(" - ")) {
+                        finalArtist = rawTitle.substringBefore(" - ").trim()
+                        finalTitle = rawTitle.substringAfter(" - ").trim()
+                    } else if (data.isNotBlank()) {
+                        val file = File(data)
+                        val nameNoExt = file.nameWithoutExtension
+                        if (nameNoExt.contains(" - ")) {
+                            finalArtist = nameNoExt.substringBefore(" - ").trim()
+                            finalTitle = nameNoExt.substringAfter(" - ").trim()
+                        }
+                    }
+
+                    val contentUri = ContentUris.withAppendedId(videoCollection, id)
+                    audioList.add(
+                        MediaModel(
+                            id = id,
+                            title = finalTitle,
+                            artist = finalArtist,
+                            album = "Descargas DaVE",
+                            duration = duration,
+                            uri = contentUri,
+                            artworkUri = contentUri,
+                            isVideo = true,
+                            folderName = "DaVEPlayer",
+                            path = data,
+                            size = size,
+                            dateAdded = dateAdded
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.e(TAG, "Error al indexar videos de DaVEPlayer en la biblioteca de audio", e)
+        }
+
+        audioList.distinctBy { it.path }
     }
 
     suspend fun loadVideoFiles(): List<MediaModel> = withContext(Dispatchers.IO) {
