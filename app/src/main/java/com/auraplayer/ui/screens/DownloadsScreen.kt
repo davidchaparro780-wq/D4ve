@@ -1,6 +1,7 @@
 package com.auraplayer.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -50,7 +52,12 @@ import com.auraplayer.data.repository.DownloadStatus
 import kotlinx.coroutines.launch
 
 @Composable
-fun DownloadsScreen(downloadEngine: DownloadEngine, onClose: () -> Unit) {
+fun DownloadsScreen(
+    downloadEngine: DownloadEngine,
+    onClose: () -> Unit,
+    onPlayTrack: (OnlineTrack) -> Unit = {},
+    onPlayVideo: (OnlineTrack) -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
     val states by downloadEngine.downloadStates.collectAsState()
     val tracks by downloadEngine.trackRegistry.collectAsState()
@@ -92,13 +99,25 @@ fun DownloadsScreen(downloadEngine: DownloadEngine, onClose: () -> Unit) {
                     color = Color.White,
                     fontSize = 20.sp
                 )
-                IconButton(onClick = onClose) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Cerrar",
-                        tint = Color(0xFF94A3B8),
-                        modifier = Modifier.size(24.dp)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (completedEntries.isNotEmpty()) {
+                        TextButton(onClick = { downloadEngine.clearCompleted() }) {
+                            Text(
+                                text = "Limpiar",
+                                color = Color(0xFF38BDF8),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                    IconButton(onClick = onClose) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cerrar",
+                            tint = Color(0xFF94A3B8),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
 
@@ -140,12 +159,26 @@ fun DownloadsScreen(downloadEngine: DownloadEngine, onClose: () -> Unit) {
                     contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp)
                 ) {
                     items(visibleEntries, key = { it.key }) { (downloadKey, track) ->
+                        val isVideo = downloadKey.startsWith("vid_")
                         DownloadRow(
                             track = track,
+                            isVideo = isVideo,
                             status = states[downloadKey] ?: DownloadStatus.Idle,
+                            onClick = {
+                                if (states[downloadKey] is DownloadStatus.Completed) {
+                                    if (isVideo) {
+                                        onPlayVideo(track)
+                                    } else {
+                                        onPlayTrack(track)
+                                    }
+                                }
+                            },
+                            onRemove = {
+                                downloadEngine.removeEntry(downloadKey)
+                            },
                             onRetry = {
                                 scope.launch {
-                                    if (downloadKey.startsWith("vid_")) {
+                                    if (isVideo) {
                                         downloadEngine.downloadVideo(track = track)
                                     } else {
                                         downloadEngine.downloadTrack(track = track)
@@ -163,14 +196,19 @@ fun DownloadsScreen(downloadEngine: DownloadEngine, onClose: () -> Unit) {
 @Composable
 private fun DownloadRow(
     track: OnlineTrack,
+    isVideo: Boolean,
     status: DownloadStatus,
+    onClick: () -> Unit,
+    onRemove: () -> Unit,
     onRetry: () -> Unit
 ) {
+    val isCompleted = status is DownloadStatus.Completed
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFF13182E))
+            .clickable(enabled = isCompleted, onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -194,9 +232,9 @@ private fun DownloadRow(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Default.CloudDownload,
+                    imageVector = if (isVideo) Icons.Default.Videocam else Icons.Default.CloudDownload,
                     contentDescription = null,
-                    tint = Color(0xFF8B5CF6).copy(alpha = 0.7f),
+                    tint = if (isVideo) Color(0xFF38BDF8) else Color(0xFF8B5CF6).copy(alpha = 0.7f),
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -266,35 +304,60 @@ private fun DownloadRow(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = "Descargada",
                         tint = Color(0xFF22C55E),
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Descargada",
+                        text = if (isVideo) "Video listo" else "Listo",
                         color = Color(0xFF22C55E),
                         fontSize = 11.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    IconButton(
+                        onClick = onRemove,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Descartar",
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
             is DownloadStatus.Error -> {
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = status.message,
-                        color = Color(0xFFEF4444),
-                        fontSize = 11.sp,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.width(96.dp)
-                    )
-                    TextButton(onClick = onRetry) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "Reintentar",
-                            color = Color(0xFF38BDF8),
+                            text = status.message,
+                            color = Color(0xFFEF4444),
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.width(96.dp)
+                        )
+                        TextButton(onClick = onRetry) {
+                            Text(
+                                text = "Reintentar",
+                                color = Color(0xFF38BDF8),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = onRemove,
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Descartar",
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }

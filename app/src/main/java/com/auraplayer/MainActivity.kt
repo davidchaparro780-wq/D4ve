@@ -1152,7 +1152,22 @@ fun AuraApp(
                     if (media != null && media.id == -1L) {
                         // Attempt automatic stream self-healing before failing
                         scope.launch(Dispatchers.IO) {
-                            val freshUrl = searchService.fetchFreshDeezerPreview(media.artist, media.title)
+                            val candidateTrack = com.auraplayer.data.model.OnlineTrack(
+                                id = media.path,
+                                title = media.title,
+                                artist = media.artist,
+                                album = media.album,
+                                durationSec = (media.duration / 1000).toInt(),
+                                audioUrl = media.path,
+                                coverUrl = media.artworkUri?.toString() ?: "",
+                                source = "Online"
+                            )
+                            val resolvedUrl = searchService.resolveValidAudioUrl(candidateTrack)
+                            val freshUrl = if (resolvedUrl.isNotBlank() && resolvedUrl != media.path) {
+                                resolvedUrl
+                            } else {
+                                searchService.fetchFreshDeezerPreview(media.artist, media.title)
+                            }
                             if (!freshUrl.isNullOrBlank() && freshUrl != media.path) {
                                 withContext(Dispatchers.Main) {
                                     currentMedia = media.copy(uri = Uri.parse(freshUrl), path = freshUrl)
@@ -1181,7 +1196,13 @@ fun AuraApp(
                             }
                         }
                     } else {
-                        Toast.makeText(context, "Error al reproducir audio.", Toast.LENGTH_SHORT).show()
+                        if (controller?.hasNextMediaItem() == true) {
+                            controller?.seekToNextMediaItem()
+                            controller?.prepare()
+                            controller?.play()
+                        } else {
+                            Toast.makeText(context, "Error al reproducir audio o archivo no disponible.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             })
@@ -2821,7 +2842,86 @@ fun AuraApp(
     ) {
         com.auraplayer.ui.screens.DownloadsScreen(
             downloadEngine = downloadEngine,
-            onClose = { showDownloadsScreen = false }
+            onClose = { showDownloadsScreen = false },
+            onPlayTrack = { onlineTrack ->
+                val cleanTitle = onlineTrack.title.replace(Regex("[\\\\/:*?\"<>|]"), "_").trim()
+                val localMatch = songs.firstOrNull { it.title.contains(cleanTitle, ignoreCase = true) || it.path.contains(cleanTitle, ignoreCase = true) }
+                if (localMatch != null) {
+                    val item = MediaItem.Builder()
+                        .setUri(localMatch.uri)
+                        .setMediaId(localMatch.id.toString())
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setTitle(localMatch.title)
+                                .setArtist(localMatch.artist)
+                                .setAlbumTitle(localMatch.album)
+                                .setArtworkUri(localMatch.artworkUri)
+                                .build()
+                        )
+                        .build()
+                    currentMedia = localMatch
+                    durationMs = localMatch.duration
+                    controller?.run {
+                        setMediaItem(item)
+                        prepare()
+                        play()
+                    }
+                } else {
+                    scope.launch {
+                        val validUrl = searchService.resolveValidAudioUrl(onlineTrack)
+                        val trackDurationMs = onlineTrack.durationSec * 1000L
+                        val item = MediaItem.Builder()
+                            .setUri(validUrl)
+                            .setMediaId("online_${onlineTrack.id}")
+                            .setMediaMetadata(
+                                MediaMetadata.Builder()
+                                    .setTitle(onlineTrack.title)
+                                    .setArtist(onlineTrack.artist)
+                                    .setAlbumTitle(onlineTrack.album)
+                                    .setArtworkUri(if (onlineTrack.coverUrl.isNotBlank()) Uri.parse(onlineTrack.coverUrl) else null)
+                                    .build()
+                            )
+                            .build()
+                        currentMedia = MediaModel(
+                            id = -1L,
+                            title = onlineTrack.title,
+                            artist = onlineTrack.artist,
+                            album = onlineTrack.album,
+                            duration = trackDurationMs,
+                            uri = Uri.parse(validUrl),
+                            path = validUrl,
+                            artworkUri = if (onlineTrack.coverUrl.isNotBlank()) Uri.parse(onlineTrack.coverUrl) else null
+                        )
+                        durationMs = trackDurationMs
+                        controller?.run {
+                            setMediaItem(item)
+                            prepare()
+                            play()
+                        }
+                    }
+                }
+            },
+            onPlayVideo = { onlineTrack ->
+                controller?.pause()
+                val cleanTitle = onlineTrack.title.replace(Regex("[\\\\/:*?\"<>|]"), "_").trim()
+                val localMatch = videos.firstOrNull { it.title.contains(cleanTitle, ignoreCase = true) || it.path.contains(cleanTitle, ignoreCase = true) }
+                if (localMatch != null) {
+                    activeVideo = localMatch
+                } else {
+                    val moviesDir = java.io.File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_MOVIES), "DaVEPlayer/$cleanTitle.mp4")
+                    val uri = if (moviesDir.exists()) Uri.fromFile(moviesDir) else Uri.parse(onlineTrack.audioUrl)
+                    activeVideo = MediaModel(
+                        id = System.currentTimeMillis(),
+                        title = onlineTrack.title,
+                        artist = onlineTrack.artist,
+                        album = "DaVE Descargas",
+                        duration = onlineTrack.durationSec * 1000L,
+                        path = moviesDir.absolutePath,
+                        uri = uri,
+                        isVideo = true
+                    )
+                }
+            }
         )
     }
 

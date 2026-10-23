@@ -117,10 +117,12 @@ class GlobalSearchService(
             return@withContext track.audioUrl
         }
 
-        if (track.source == "YouTube" || track.id.startsWith("yt_") || track.license == "YouTube" || track.audioUrl.contains("youtube.com/watch")) {
+        if (track.source == "YouTube" || track.id.startsWith("yt_") || track.license == "YouTube" || track.audioUrl.contains("youtube.com") || track.audioUrl.contains("youtu.be")) {
             val videoId = when {
                 track.id.startsWith("yt_") -> track.id.removePrefix("yt_")
-                track.audioUrl.contains("v=") -> track.audioUrl.substringAfter("v=").substringBefore("&")
+                track.audioUrl.contains("v=") -> track.audioUrl.substringAfter("v=").substringBefore("&").substringBefore("#")
+                track.audioUrl.contains("youtu.be/") -> track.audioUrl.substringAfter("youtu.be/").substringBefore("?").substringBefore("#")
+                track.audioUrl.contains("/shorts/") -> track.audioUrl.substringAfter("/shorts/").substringBefore("?").substringBefore("#")
                 else -> ""
             }
             if (videoId.isNotBlank()) {
@@ -391,7 +393,7 @@ class GlobalSearchService(
         // Execute searches concurrently with quick timeouts
         val youtubeDeferred = async {
             if (selectedSource == "Todas" || selectedSource == "YouTube") {
-                withTimeoutOrNull(4000) {
+                withTimeoutOrNull(7000) {
                     youtubeRepo.searchYouTube(query)
                 } ?: emptyList()
             } else {

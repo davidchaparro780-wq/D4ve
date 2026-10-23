@@ -148,7 +148,7 @@ class MediaRepository(private val context: Context) {
         }
 
         // Strategy 1: Standard broad query for Android MediaStore
-        val primarySelection = "(${MediaStore.Audio.Media.IS_MUSIC} != 0 OR ${MediaStore.Audio.Media.DURATION} >= 2000 OR ${MediaStore.Audio.Media.DURATION} IS NULL)"
+        val primarySelection = "(${MediaStore.Audio.Media.IS_MUSIC} != 0 OR ${MediaStore.Audio.Media.DURATION} >= 2000 OR ${MediaStore.Audio.Media.DURATION} IS NULL OR ${MediaStore.Audio.Media.DATA} LIKE '%DaVEPlayer%')"
         try {
             context.contentResolver.query(collection, projection, primarySelection, null, sortOrder)?.use { cursor ->
                 parseCursor(cursor)
@@ -212,17 +212,19 @@ class MediaRepository(private val context: Context) {
                         continue
                     }
 
-                    // 2. Skip if physical file does not exist on disk, and purge stale MediaStore entry
+                    val contentUri = ContentUris.withAppendedId(collection, id)
                     val file = File(data)
-                    if (!file.exists() || file.length() == 0L) {
-                        try {
-                            val staleUri = ContentUris.withAppendedId(collection, id)
-                            context.contentResolver.delete(staleUri, null, null)
-                        } catch (e: Exception) { AppLog.d(TAG, "No se pudo eliminar la entrada obsoleta de video en MediaStore", e) }
+                    val isReadable = try {
+                        if (file.exists() && file.length() > 0L) {
+                            true
+                        } else {
+                            context.contentResolver.openAssetFileDescriptor(contentUri, "r")?.use { true } ?: false
+                        }
+                    } catch (_: Exception) { false }
+
+                    if (!isReadable) {
                         continue
                     }
-
-                    val contentUri = ContentUris.withAppendedId(collection, id)
 
                     val folderName = try {
                         file.parentFile?.name ?: "Videos"
@@ -391,24 +393,29 @@ class MediaRepository(private val context: Context) {
             val pathsToScan = mutableListOf<String>()
             val extStorage = android.os.Environment.getExternalStorageDirectory()
             val candidateDirs = listOf(
+                File(extStorage, "Music/DaVEPlayer"),
+                File(extStorage, "Movies/DaVEPlayer"),
+                File(extStorage, "Download/DaVEPlayer"),
                 File(extStorage, "Download"),
                 File(extStorage, "Download/Snaptube"),
                 File(extStorage, "snaptube/download"),
                 File(extStorage, "Music"),
                 File(extStorage, "Music/Snaptube"),
+                File(extStorage, "Movies"),
+                File(extStorage, "DCIM/Camera"),
                 File(extStorage, "WhatsApp/Media/WhatsApp Audio"),
-                File(extStorage, "Telegram/Telegram Audio")
+                File(extStorage, "WhatsApp/Media/WhatsApp Video"),
+                File(extStorage, "Telegram/Telegram Audio"),
+                File(extStorage, "Telegram/Telegram Video")
+            )
+            val supportedExtensions = setOf(
+                "mp3", "m4a", "flac", "wav", "aac", "opus", "ogg",
+                "mp4", "mkv", "webm", "avi", "3gp", "mov"
             )
             for (dir in candidateDirs) {
                 if (dir.exists() && dir.isDirectory) {
                     dir.listFiles()?.forEach { file ->
-                        if (file.isFile && (file.extension.equals("mp3", true) ||
-                                    file.extension.equals("m4a", true) ||
-                                    file.extension.equals("flac", true) ||
-                                    file.extension.equals("wav", true) ||
-                                    file.extension.equals("aac", true) ||
-                                    file.extension.equals("opus", true) ||
-                                    file.extension.equals("ogg", true))) {
+                        if (file.isFile && file.extension.lowercase() in supportedExtensions) {
                             pathsToScan.add(file.absolutePath)
                         }
                     }

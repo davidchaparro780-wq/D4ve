@@ -145,6 +145,33 @@ class DownloadEngine(
         return _downloadStates.value[trackId] ?: DownloadStatus.Idle
     }
 
+    fun removeEntry(key: String) {
+        val currentStates = _downloadStates.value.toMutableMap()
+        currentStates.remove(key)
+        _downloadStates.value = currentStates
+
+        val currentRegistry = _trackRegistry.value.toMutableMap()
+        currentRegistry.remove(key)
+        _trackRegistry.value = currentRegistry
+
+        persistRegistry()
+    }
+
+    fun clearCompleted() {
+        val currentStates = _downloadStates.value.toMutableMap()
+        val currentRegistry = _trackRegistry.value.toMutableMap()
+
+        val keysToRemove = currentStates.filter { it.value is DownloadStatus.Completed }.keys
+        keysToRemove.forEach { key ->
+            currentStates.remove(key)
+            currentRegistry.remove(key)
+        }
+
+        _downloadStates.value = currentStates
+        _trackRegistry.value = currentRegistry
+        persistRegistry()
+    }
+
     /**
      * Downloads an entire playlist or album batch sequentially in background with live progress.
      */
@@ -451,6 +478,10 @@ class DownloadEngine(
                         }
                         context.contentResolver.update(uri, updateValues, null, null)
                         savedFileUri = uri
+                        try {
+                            val audioFullPath = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "DaVEPlayer/$safeFileName").absolutePath
+                            MediaScannerConnection.scanFile(context, arrayOf(audioFullPath), arrayOf(mimeType), null)
+                        } catch (_: Exception) {}
                     }
                 } catch (e: Exception) {
                     AppLog.e(TAG, "Escritura en MediaStore falló: ${e.message}", e)
@@ -667,6 +698,7 @@ class DownloadEngine(
 
             updateState(downloadId, DownloadStatus.Completed)
             showDownloadCompletedNotification(track.title, "Video MP4")
+            onDownloadCompleted?.invoke(track)
             withContext(Dispatchers.Main) {
                 onComplete?.invoke()
             }
@@ -797,7 +829,8 @@ class DownloadEngine(
             )
         } else {
             try {
-                MediaScannerConnection.scanFile(context, arrayOf(savedPath ?: fileName), arrayOf("video/mp4"), null)
+                val fullVideoPath = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), "DaVEPlayer/$fileName").absolutePath
+                MediaScannerConnection.scanFile(context, arrayOf(fullVideoPath), arrayOf("video/mp4"), null)
             } catch (e: Exception) { AppLog.d(TAG, "No se pudo reescanear el video guardado en MediaStore", e) }
         }
     }

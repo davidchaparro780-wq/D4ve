@@ -1,7 +1,7 @@
 {
-  "versionCode": 117,
-  "versionName": "4.9.17",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.17/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.17 (Build 117):\n• ⚡ Descargas de Música y Videos Reparadas y Ultra Rápidas: Nuevo motor extractor InnerTube ANDROID 2026 que resuelve streams directos en menos de 300ms sin esperas ni bloqueos.\n• 🎵 Descarga de Audio HQ Optimizada: 'Solo Música' guarda canciones en Music/DaVEPlayer con stream AAC directo de alta velocidad, carátulas HD y letras sincronizadas.\n• 🎬 Descarga de Videos MP4 Instantánea: 'Video Completo MP4' extrae y descarga videos completos muxed (con audio y video combinados) a la galería de Videos sin depender de servicios caídos.\n• 🔍 Búsqueda Federada Fluida: Búsquedas simultáneas en YouTube y Deezer sin bloqueos por APIs externas ni congelamiento de pantalla.\n• 🔮 Aura Misteriosa Completa: Todas las mejoras visuales, temas misteriosos y ecualizador atmosférico de v4.9.16 100% integrados.",
+  "versionCode": 118,
+  "versionName": "4.9.18",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.18/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.18 (Build 118) — Corrección Integral de Bugs:\n• 🛡️ Solución Crítica en Videos Locales: Eliminado el borrado accidental en Scoped Storage (Android 10+) que hacía desaparecer videos de la biblioteca.\n• ⚡ Descargas Ligeras y Ultra Rápidas: El motor de audio ahora selecciona streams de audio puro (M4A/Opus ~3MB) en lugar de videos de 70MB, eliminando esperas y tiempos de carga excesivos.\n• 📥 Pantalla de Descargas Interactiva: Reproduce tus canciones y videos completados tocando directamente la fila; nuevo botón 'Limpiar' y opción de descartar descargas individuales con '✕'.\n• 🔄 Auto-Refresco Inmediato de Videos: Los videos descargados ahora refrescan automáticamente la galería sin necesidad de reiniciar la app.\n• 🔍 Búsqueda Multi-Sección & Metadatos Reales: Búsqueda de YouTube que no omite canciones por chips o estantes iniciales, y extracción precisa de títulos y duraciones vía InnerTube.\n• 🩹 Auto-Curación de Streaming Mejorada: Si un stream online falla, se regenera con audio HQ automáticamente; en local, avanza limpiamente sin bloquear el reproductor.",
   "fileSizeMb": 24.5
 }

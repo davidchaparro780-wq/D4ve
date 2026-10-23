@@ -78,67 +78,68 @@ class YouTubeMusicRepository {
                     ?.optJSONObject("sectionListRenderer")
                     ?.optJSONArray("contents")
 
-                val items = sections?.optJSONObject(0)
-                    ?.optJSONObject("itemSectionRenderer")
-                    ?.optJSONArray("contents")
+                if (sections != null) {
+                    for (s in 0 until sections.length()) {
+                        val itemSection = sections.optJSONObject(s)?.optJSONObject("itemSectionRenderer") ?: continue
+                        val items = itemSection.optJSONArray("contents") ?: continue
 
-                if (items != null) {
-                    for (i in 0 until items.length()) {
-                        val video = items.getJSONObject(i).optJSONObject("videoRenderer") ?: continue
-                        val videoId = video.optString("videoId")
-                        if (videoId.isBlank()) continue
+                        for (i in 0 until items.length()) {
+                            val video = items.optJSONObject(i)?.optJSONObject("videoRenderer") ?: continue
+                            val videoId = video.optString("videoId")
+                            if (videoId.isBlank() || list.any { it.id == "yt_$videoId" }) continue
 
-                        val title = video.optJSONObject("title")
-                            ?.optJSONArray("runs")
-                            ?.optJSONObject(0)
-                            ?.optString("text") ?: "Canción"
+                            val title = video.optJSONObject("title")
+                                ?.optJSONArray("runs")
+                                ?.optJSONObject(0)
+                                ?.optString("text") ?: "Canción"
 
-                        val author = video.optJSONObject("ownerText")
-                            ?.optJSONArray("runs")
-                            ?.optJSONObject(0)
-                            ?.optString("text") ?: "Artista"
+                            val author = video.optJSONObject("ownerText")
+                                ?.optJSONArray("runs")
+                                ?.optJSONObject(0)
+                                ?.optString("text") ?: "Artista"
 
-                        val durationStr = video.optJSONObject("lengthText")
-                            ?.optString("simpleText", "0:00") ?: "0:00"
+                            val durationStr = video.optJSONObject("lengthText")
+                                ?.optString("simpleText", "0:00") ?: "0:00"
 
-                        val thumbArray = video.optJSONObject("thumbnail")?.optJSONArray("thumbnails")
-                        val rawCover = if (thumbArray != null && thumbArray.length() > 0) {
-                            thumbArray.optJSONObject(thumbArray.length() - 1)?.optString("url") ?: ""
-                        } else {
-                            ""
-                        }
-                        val coverUrl = when {
-                            rawCover.startsWith("//") -> "https:$rawCover"
-                            rawCover.startsWith("http") -> rawCover
-                            else -> "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
-                        }
+                            val thumbArray = video.optJSONObject("thumbnail")?.optJSONArray("thumbnails")
+                            val rawCover = if (thumbArray != null && thumbArray.length() > 0) {
+                                thumbArray.optJSONObject(thumbArray.length() - 1)?.optString("url") ?: ""
+                            } else {
+                                ""
+                            }
+                            val coverUrl = when {
+                                rawCover.startsWith("//") -> "https:$rawCover"
+                                rawCover.startsWith("http") -> rawCover
+                                else -> "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
+                            }
 
-                        // Parse duration mm:ss or hh:mm:ss to seconds
-                        val parts = durationStr.split(":")
-                        val durationSec = when (parts.size) {
-                            2 -> (parts[0].toIntOrNull() ?: 0) * 60 + (parts[1].toIntOrNull() ?: 0)
-                            3 -> (parts[0].toIntOrNull() ?: 0) * 3600 + (parts[1].toIntOrNull() ?: 0) * 60 + (parts[2].toIntOrNull() ?: 0)
-                            else -> 180
-                        }
+                            // Parse duration mm:ss or hh:mm:ss to seconds
+                            val parts = durationStr.split(":")
+                            val durationSec = when (parts.size) {
+                                2 -> (parts[0].toIntOrNull() ?: 0) * 60 + (parts[1].toIntOrNull() ?: 0)
+                                3 -> (parts[0].toIntOrNull() ?: 0) * 3600 + (parts[1].toIntOrNull() ?: 0) * 60 + (parts[2].toIntOrNull() ?: 0)
+                                else -> 180
+                            }
 
-                        val audioUrl = "https://www.youtube.com/watch?v=$videoId"
+                            val audioUrl = "https://www.youtube.com/watch?v=$videoId"
 
-                        list.add(
-                            OnlineTrack(
-                                id = "yt_$videoId",
-                                title = title,
-                                artist = author,
-                                album = "YouTube Music",
-                                durationSec = durationSec,
-                                audioUrl = audioUrl,
-                                coverUrl = coverUrl,
-                                format = "HQ Audio",
-                                bitrateKbps = 320,
-                                license = "YouTube",
-                                source = "YouTube",
-                                isDownloadable = true
+                            list.add(
+                                OnlineTrack(
+                                    id = "yt_$videoId",
+                                    title = title,
+                                    artist = author,
+                                    album = "YouTube Music",
+                                    durationSec = durationSec,
+                                    audioUrl = audioUrl,
+                                    coverUrl = coverUrl,
+                                    format = "HQ Audio",
+                                    bitrateKbps = 320,
+                                    license = "YouTube",
+                                    source = "YouTube",
+                                    isDownloadable = true
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -419,39 +420,39 @@ class YouTubeMusicRepository {
             }
             val streamingData = root.optJSONObject("streamingData") ?: return null
 
-            // 1. Check muxed formats (formats contains ratebypass=yes streams that download at maximum speed)
-            val muxedFormats = streamingData.optJSONArray("formats")
-            if (muxedFormats != null && muxedFormats.length() > 0) {
-                var bestMuxedUrl: String? = null
-                var bestQualityScore = -1
+            // 1. If Video requested, check muxed formats first (contains audio+video in single MP4)
+            if (isVideo) {
+                val muxedFormats = streamingData.optJSONArray("formats")
+                if (muxedFormats != null && muxedFormats.length() > 0) {
+                    var bestMuxedUrl: String? = null
+                    var bestQualityScore = -1
 
-                for (i in 0 until muxedFormats.length()) {
-                    val fmt = muxedFormats.getJSONObject(i)
-                    val streamUrl = fmt.optString("url", "")
-                    val quality = fmt.optString("qualityLabel", "")
-                    if (streamUrl.isNotBlank()) {
-                        val score = when {
-                            quality.contains("1080") -> 1080
-                            quality.contains("720") -> 720
-                            quality.contains("480") -> 480
-                            quality.contains("360") -> 360
-                            else -> 240
-                        }
-                        if (score > bestQualityScore) {
-                            bestQualityScore = score
-                            bestMuxedUrl = streamUrl
+                    for (i in 0 until muxedFormats.length()) {
+                        val fmt = muxedFormats.getJSONObject(i)
+                        val streamUrl = fmt.optString("url", "")
+                        val quality = fmt.optString("qualityLabel", "")
+                        if (streamUrl.isNotBlank()) {
+                            val score = when {
+                                quality.contains("1080") -> 1080
+                                quality.contains("720") -> 720
+                                quality.contains("480") -> 480
+                                quality.contains("360") -> 360
+                                else -> 240
+                            }
+                            if (score > bestQualityScore) {
+                                bestQualityScore = score
+                                bestMuxedUrl = streamUrl
+                            }
                         }
                     }
-                }
 
-                if (!bestMuxedUrl.isNullOrBlank()) {
-                    AppLog.d(TAG, "Stream muxed encontrado (qualityScore=$bestQualityScore) para videoId=$videoId")
-                    return bestMuxedUrl
+                    if (!bestMuxedUrl.isNullOrBlank()) {
+                        AppLog.d(TAG, "Stream muxed de video encontrado (qualityScore=$bestQualityScore) para videoId=$videoId")
+                        return bestMuxedUrl
+                    }
                 }
-            }
-
-            // 2. If video was not requested (audio only) and no muxed format was found, check adaptiveFormats
-            if (!isVideo) {
+            } else {
+                // 2. Audio requested: check adaptiveFormats first for lightweight, fast HQ audio-only streams (M4A / Opus)
                 val adaptiveFormats = streamingData.optJSONArray("adaptiveFormats")
                 if (adaptiveFormats != null) {
                     var bestAacUrl: String? = null
@@ -480,7 +481,20 @@ class YouTubeMusicRepository {
                     }
                     val chosen = bestAacUrl ?: bestAnyUrl
                     if (!chosen.isNullOrBlank()) {
+                        AppLog.d(TAG, "Stream de audio puro adaptive encontrado (bitrate=$highestBitrate) para videoId=$videoId")
                         return chosen
+                    }
+                }
+
+                // Fallback for audio: if no adaptive audio stream, fallback to muxed format
+                val muxedFormats = streamingData.optJSONArray("formats")
+                if (muxedFormats != null && muxedFormats.length() > 0) {
+                    for (i in 0 until muxedFormats.length()) {
+                        val fmt = muxedFormats.getJSONObject(i)
+                        val streamUrl = fmt.optString("url", "")
+                        if (streamUrl.isNotBlank()) {
+                            return streamUrl
+                        }
                     }
                 }
             }
@@ -667,12 +681,73 @@ class YouTubeMusicRepository {
     }
 
     /**
-     * Extracts metadata for a single YouTube video using official oEmbed.
+     * Extracts metadata for a single YouTube video using InnerTube player API with oEmbed fallback.
      */
     suspend fun extractSingleVideo(videoId: String): OnlineTrack? = withContext(Dispatchers.IO) {
         val cleanId = videoId.trim()
         if (cleanId.isBlank()) return@withContext null
 
+        // 1. Try InnerTube player endpoint first for full metadata & exact duration
+        try {
+            val url = URL("https://www.youtube.com/youtubei/v1/player")
+            val conn = (url.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 4000
+                readTimeout = 4000
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("User-Agent", "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip")
+                doOutput = true
+            }
+            val payload = JSONObject().apply {
+                put("context", JSONObject().apply {
+                    put("client", JSONObject().apply {
+                        put("clientName", "ANDROID")
+                        put("clientVersion", "20.10.38")
+                        put("hl", "es")
+                        put("gl", "US")
+                    })
+                })
+                put("videoId", cleanId)
+            }
+            conn.outputStream.use { it.write(payload.toString().toByteArray()) }
+            if (conn.responseCode == 200) {
+                val resp = conn.inputStream.bufferedReader().use { it.readText() }
+                val root = JSONObject(resp)
+                val videoDetails = root.optJSONObject("videoDetails")
+                if (videoDetails != null) {
+                    val title = videoDetails.optString("title", "Canción YouTube")
+                    val author = videoDetails.optString("author", "YouTube")
+                    val durationSec = videoDetails.optString("lengthSeconds", "0").toIntOrNull() ?: 0
+                    val thumbs = videoDetails.optJSONObject("thumbnail")?.optJSONArray("thumbnails")
+                    val rawCover = if (thumbs != null && thumbs.length() > 0) {
+                        thumbs.optJSONObject(thumbs.length() - 1)?.optString("url") ?: ""
+                    } else ""
+                    val coverUrl = when {
+                        rawCover.startsWith("//") -> "https:$rawCover"
+                        rawCover.startsWith("http") -> rawCover
+                        else -> "https://i.ytimg.com/vi/$cleanId/hqdefault.jpg"
+                    }
+                    return@withContext OnlineTrack(
+                        id = "yt_$cleanId",
+                        title = title,
+                        artist = author,
+                        album = "YouTube Track",
+                        durationSec = durationSec,
+                        audioUrl = "https://www.youtube.com/watch?v=$cleanId",
+                        coverUrl = coverUrl,
+                        format = "HQ Audio",
+                        bitrateKbps = 320,
+                        license = "YouTube",
+                        source = "YouTube",
+                        isDownloadable = true
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo al extraer metadata vía InnerTube para videoId=$cleanId", e)
+        }
+
+        // 2. Fallback to oEmbed
         try {
             val oembedUrl = "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=$cleanId&format=json"
             val conn = (URL(oembedUrl).openConnection() as HttpURLConnection).apply {
@@ -707,7 +782,7 @@ class YouTubeMusicRepository {
             AppLog.w(TAG, "Fallo en oEmbed de YouTube para videoId=$cleanId", e)
         }
 
-        // Fallback without oEmbed
+        // 3. Fallback without oEmbed
         OnlineTrack(
             id = "yt_$cleanId",
             title = "YouTube Audio",
