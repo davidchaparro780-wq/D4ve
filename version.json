@@ -1,7 +1,7 @@
 {
-  "versionCode": 128,
-  "versionName": "4.9.28",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.28/app-debug.apk",
-  "changelog": "✨ DaVE Player v4.9.28 (Build 128) — Descargador Automático de TikTok sin Marca de Agua:\n• 📥 Compartir y Descargar de TikTok: Al ver cualquier TikTok y presionar 'Compartir' > 'DaVE Player', la app detecta automáticamente el enlace, extrae el video en alta definición sin marca de agua y lo descarga inmediatamente en la Galería (DCIM/DaVEPlayer).\n• 🚀 Detección Inteligente de Texto Compartido: Filtro de recepción para enlaces con texto, hashtags o URLs acortadas (vm.tiktok.com, vt.tiktok.com).\n• 💬 Listo para WhatsApp: Videos procesados en formato estándar H.264 AVC listos para compartir directamente en Chats o Estados de WhatsApp con un solo toque.",
+  "versionCode": 129,
+  "versionName": "4.9.29",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.29/app-debug.apk",
+  "changelog": "✨ DaVE Player v4.9.29 (Build 129) — Hub de Redes Sociales, Instagram Reels & Guardador de Estados de WhatsApp:\n• 🟢 Guardador de Estados de WhatsApp: Visualiza, descarga y comparte estados de WhatsApp y WhatsApp Business (fotos y videos) con 1 toque antes de que desaparezcan. Guardado directo en la Galería.\n• 📸 Descargador de Instagram (Reels y Videos): Pega cualquier enlace o comparte directamente desde Instagram a DaVE Player para descargar el Reel en alta calidad sin marcas de agua.\n• 🎵 TikTok Sin Marca de Agua: Compartir o pegar enlaces de TikTok para descargar video HD o extraer audio MP3.\n• 🎬 Acceso Rápido en Video & Música: Chips de acceso directo en la pestaña de Videos y en el menú de Herramientas de Música.",
   "fileSizeMb": 24.9
 }

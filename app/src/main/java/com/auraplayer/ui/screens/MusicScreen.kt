@@ -19,6 +19,8 @@ import com.auraplayer.ui.components.StemMixerDialog
 import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.ui.components.StoryCardDialog
 import com.auraplayer.ui.components.TikTokDownloaderDialog
+import com.auraplayer.ui.components.InstagramDownloaderDialog
+import com.auraplayer.ui.components.WhatsAppStatusDialog
 import com.auraplayer.ui.components.ViralAudioStudioDialog
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -260,6 +262,8 @@ fun MusicScreen(
     var showOledSaver by remember { mutableStateOf(false) }
     var showStemMixer by remember { mutableStateOf(false) }
     var showTikTokDownloader by remember { mutableStateOf(false) }
+    var showInstagramDownloader by remember { mutableStateOf(false) }
+    var showWhatsAppStatusDialog by remember { mutableStateOf(false) }
     var songForStoryMaker by remember { mutableStateOf<MediaModel?>(null) }
     val stemManager = remember { StemMixerManager.getInstance(context) }
     val sleepSensorManager = remember { SmartSleepSensorManager(context) }
@@ -585,6 +589,14 @@ fun MusicScreen(
                         DropdownMenuItem(
                             text = { Text("🎵 Descargar de TikTok (Audio / Video)", color = Color(0xFF00F2FE), fontWeight = FontWeight.Bold) },
                             onClick = { showToolsMenu = false; showTikTokDownloader = true }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("📸 Descargar de Instagram (Reels)", color = Color(0xFFE1306C), fontWeight = FontWeight.Bold) },
+                            onClick = { showToolsMenu = false; showInstagramDownloader = true }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("🟢 Guardar Estados de WhatsApp", color = Color(0xFF25D366), fontWeight = FontWeight.Bold) },
+                            onClick = { showToolsMenu = false; showWhatsAppStatusDialog = true }
                         )
                         DropdownMenuItem(
                             text = { Text("🎛️ Estudio Viral FX (Slowed / 8D)", color = Color(0xFFEC4899), fontWeight = FontWeight.Bold) },
@@ -2605,6 +2617,24 @@ fun MusicScreen(
             onDownloadCompleted = { _, isVideo ->
                 if (!isVideo) onRefreshLibrary()
             }
+        )
+    }
+
+    // Instagram Reels / Video Downloader Dialog
+    if (showInstagramDownloader) {
+        InstagramDownloaderDialog(
+            initialUrl = "",
+            onDismiss = { showInstagramDownloader = false },
+            onDownloadCompleted = { _ ->
+                onRefreshLibrary()
+            }
+        )
+    }
+
+    // WhatsApp Status Saver Dialog
+    if (showWhatsAppStatusDialog) {
+        WhatsAppStatusDialog(
+            onDismiss = { showWhatsAppStatusDialog = false }
         )
     }
 

@@ -152,6 +152,8 @@ import com.auraplayer.ui.screens.VideoPlayerScreen
 import com.auraplayer.ui.screens.VideoScreen
 import com.auraplayer.ui.theme.AuraTheme
 import com.auraplayer.ui.components.TikTokDownloaderDialog
+import com.auraplayer.ui.components.InstagramDownloaderDialog
+import com.auraplayer.ui.components.WhatsAppStatusDialog
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -169,6 +171,7 @@ class MainActivity : ComponentActivity() {
         var onResumeCallback: (() -> Unit)? = null
         var pendingSharedUri by mutableStateOf<android.net.Uri?>(null)
         var pendingSharedTikTokUrl by mutableStateOf<String?>(null)
+        var pendingSharedInstagramUrl by mutableStateOf<String?>(null)
         var pendingUpdateInfo by mutableStateOf<UpdateInfo?>(null)
     }
 
@@ -185,12 +188,15 @@ class MainActivity : ComponentActivity() {
                 if (streamUri != null) {
                     pendingSharedUri = streamUri
                 } else {
-                    // Detectar enlaces de TikTok compartidos directamente desde la app de TikTok (texto plano)
+                    // Detectar enlaces de TikTok o Instagram compartidos directamente desde sus apps (texto plano)
                     val sharedText = inIntent.getStringExtra(Intent.EXTRA_TEXT)
                     if (!sharedText.isNullOrBlank()) {
-                        val extracted = com.auraplayer.data.repository.TikTokDownloader.extractTikTokUrl(sharedText)
-                        if (extracted != null) {
-                            pendingSharedTikTokUrl = extracted
+                        val tiktok = com.auraplayer.data.repository.TikTokDownloader.extractTikTokUrl(sharedText)
+                        val instagram = com.auraplayer.data.repository.InstagramDownloader.extractInstagramUrl(sharedText)
+                        if (tiktok != null) {
+                            pendingSharedTikTokUrl = tiktok
+                        } else if (instagram != null) {
+                            pendingSharedInstagramUrl = instagram
                         }
                     }
                 }
@@ -199,9 +205,12 @@ class MainActivity : ComponentActivity() {
                 val dataUri = inIntent.data
                 if (dataUri != null) {
                     val dataStr = dataUri.toString()
-                    val extracted = com.auraplayer.data.repository.TikTokDownloader.extractTikTokUrl(dataStr)
-                    if (extracted != null) {
-                        pendingSharedTikTokUrl = extracted
+                    val tiktok = com.auraplayer.data.repository.TikTokDownloader.extractTikTokUrl(dataStr)
+                    val instagram = com.auraplayer.data.repository.InstagramDownloader.extractInstagramUrl(dataStr)
+                    if (tiktok != null) {
+                        pendingSharedTikTokUrl = tiktok
+                    } else if (instagram != null) {
+                        pendingSharedInstagramUrl = instagram
                     } else {
                         pendingSharedUri = dataUri
                     }
@@ -3115,6 +3124,41 @@ fun AuraApp(
                     title = "Video TikTok",
                     artist = "TikTok",
                     album = "TikTok",
+                    duration = 0L,
+                    uri = uri,
+                    path = uri.path ?: "",
+                    isVideo = true
+                )
+                controller?.pause()
+                activeVideo = model
+            }
+        )
+    }
+
+    // Shared Instagram Auto Downloader Dialog (Instant Auto Download HD)
+    val sharedInstagramUrl = MainActivity.pendingSharedInstagramUrl
+    if (!sharedInstagramUrl.isNullOrBlank()) {
+        InstagramDownloaderDialog(
+            initialUrl = sharedInstagramUrl,
+            autoDownload = true,
+            onDismiss = { MainActivity.pendingSharedInstagramUrl = null },
+            onDownloadCompleted = { uri ->
+                MainActivity.pendingSharedInstagramUrl = null
+                scope.launch {
+                    delay(400)
+                    videos = mediaRepository.loadVideoFiles()
+                }
+            },
+            onPlayDownloadedVideo = { uri ->
+                MainActivity.pendingSharedInstagramUrl = null
+                scope.launch {
+                    videos = mediaRepository.loadVideoFiles()
+                }
+                val model = MediaModel(
+                    id = System.currentTimeMillis(),
+                    title = "Reel de Instagram",
+                    artist = "Instagram",
+                    album = "Instagram",
                     duration = 0L,
                     uri = uri,
                     path = uri.path ?: "",

@@ -27,10 +27,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import android.net.Uri
+import com.auraplayer.ui.components.TikTokDownloaderDialog
+import com.auraplayer.ui.components.InstagramDownloaderDialog
+import com.auraplayer.ui.components.WhatsAppStatusDialog
+import com.auraplayer.data.repository.WhatsAppStatusItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Lock
@@ -224,6 +230,9 @@ fun VideoScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var videoForMenu by remember { mutableStateOf<MediaModel?>(null) }
+    var showWhatsAppStatusDialog by remember { mutableStateOf(false) }
+    var showInstagramDownloader by remember { mutableStateOf(false) }
+    var showTikTokDownloader by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -291,6 +300,85 @@ fun VideoScreen(
                     }
                 }
             }
+
+        // Quick Social & Hub Action Chips
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // WhatsApp Status Chip
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFF25D366).copy(alpha = 0.18f))
+                    .border(1.dp, Color(0xFF25D366).copy(alpha = 0.55f), RoundedCornerShape(20.dp))
+                    .clickable { showWhatsAppStatusDialog = true }
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🟢", fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "Estados WhatsApp",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4ADE80)
+                    )
+                }
+            }
+
+            // Instagram Reels Chip
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF833AB4).copy(alpha = 0.25f), Color(0xFFFD1D1D).copy(alpha = 0.25f), Color(0xFFFCAF45).copy(alpha = 0.25f))
+                        )
+                    )
+                    .border(1.dp, Color(0xFFE1306C).copy(alpha = 0.55f), RoundedCornerShape(20.dp))
+                    .clickable { showInstagramDownloader = true }
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("📸", fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "Instagram Reels",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFF472B6)
+                    )
+                }
+            }
+
+            // TikTok Chip
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFF00F2FE).copy(alpha = 0.15f))
+                    .border(1.dp, Color(0xFF00F2FE).copy(alpha = 0.55f), RoundedCornerShape(20.dp))
+                    .clickable { showTikTokDownloader = true }
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🎵", fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "TikTok HD",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF38BDF8)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -556,6 +644,46 @@ fun VideoScreen(
                 }
             }
         }
+    }
+
+    // WhatsApp Status Saver Dialog
+    if (showWhatsAppStatusDialog) {
+        WhatsAppStatusDialog(
+            onDismiss = { showWhatsAppStatusDialog = false },
+            onPlayVideo = { item ->
+                val file = File(item.path)
+                val uri = Uri.fromFile(file)
+                onPlayDownloadedUri(uri)
+            }
+        )
+    }
+
+    // Instagram Downloader Dialog
+    if (showInstagramDownloader) {
+        InstagramDownloaderDialog(
+            initialUrl = "",
+            onDismiss = { showInstagramDownloader = false },
+            onDownloadCompleted = { uri ->
+                onRefreshVideos()
+            },
+            onPlayDownloadedVideo = { uri ->
+                onPlayDownloadedUri(uri)
+            }
+        )
+    }
+
+    // TikTok Downloader Dialog
+    if (showTikTokDownloader) {
+        TikTokDownloaderDialog(
+            initialUrl = "",
+            onDismiss = { showTikTokDownloader = false },
+            onDownloadCompleted = { uri, isVideo ->
+                if (isVideo) {
+                    onRefreshVideos()
+                    onPlayDownloadedUri(uri)
+                }
+            }
+        )
     }
 }
 
