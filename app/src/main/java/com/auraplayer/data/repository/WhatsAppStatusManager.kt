@@ -21,7 +21,8 @@ data class WhatsAppStatusItem(
     val uri: Uri,
     val isVideo: Boolean,
     val timestamp: Long,
-    val size: Long
+    val size: Long,
+    val path: String = file.absolutePath
 )
 
 object WhatsAppStatusManager {

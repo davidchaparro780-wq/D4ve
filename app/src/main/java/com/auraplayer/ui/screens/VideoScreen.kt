@@ -651,9 +651,7 @@ fun VideoScreen(
         WhatsAppStatusDialog(
             onDismiss = { showWhatsAppStatusDialog = false },
             onPlayVideo = { item ->
-                val file = File(item.path)
-                val uri = Uri.fromFile(file)
-                onPlayDownloadedUri(uri)
+                onPlayDownloadedUri(item.uri)
             }
         )
     }
