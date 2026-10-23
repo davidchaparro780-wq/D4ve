@@ -83,6 +83,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TikTokDownloaderDialog(
     initialUrl: String = "",
+    autoDownload: Boolean = false,
     onDismiss: () -> Unit,
     onDownloadCompleted: (Uri, Boolean) -> Unit = { _, _ -> },
     onPlayDownloadedVideo: ((Uri) -> Unit)? = null
@@ -106,45 +107,7 @@ fun TikTokDownloaderDialog(
     val tiktokPink = Color(0xFFFE2C55)
     val tiktokGradient = Brush.horizontalGradient(listOf(tiktokCyan, tiktokPink))
 
-    fun resolveLink(targetUrl: String) {
-        val clean = targetUrl.trim()
-        if (clean.isBlank()) {
-            Toast.makeText(context, "Pega un enlace de TikTok primero", Toast.LENGTH_SHORT).show()
-            return
-        }
-        keyboardController?.hide()
-        isResolving = true
-        resolveError = null
-        resolvedDetails = null
-        completedUri = null
-
-        scope.launch {
-            val result = TikTokDownloader.resolveTikTok(clean)
-            isResolving = false
-            result.onSuccess { details ->
-                resolvedDetails = details
-            }.onFailure { err ->
-                resolveError = err.message ?: "No se pudo extraer el video. Verifica el enlace."
-            }
-        }
-    }
-
-    // Auto-detección del portapapeles si initialUrl está vacío
-    LaunchedEffect(Unit) {
-        if (initialUrl.isNotBlank()) {
-            resolveLink(initialUrl)
-        } else {
-            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
-            if (!clip.isNullOrBlank() && TikTokDownloader.isTikTokUrl(clip)) {
-                urlInput = clip.trim()
-                resolveLink(clip.trim())
-            }
-        }
-    }
-
-    fun startDownload(asAudioOnly: Boolean, useHd: Boolean = false) {
-        val details = resolvedDetails ?: return
+    fun downloadDetails(details: TikTokVideoDetails, asAudioOnly: Boolean, useHd: Boolean = false) {
         val downloadUrl = if (asAudioOnly) {
             details.audioUrl ?: details.videoNoWatermarkUrl
         } else if (useHd && !details.videoHdUrl.isNullOrBlank()) {
@@ -188,6 +151,51 @@ fun TikTokDownloaderDialog(
         }
     }
 
+    fun startDownload(asAudioOnly: Boolean, useHd: Boolean = false) {
+        val details = resolvedDetails ?: return
+        downloadDetails(details, asAudioOnly, useHd)
+    }
+
+    fun resolveLink(targetUrl: String) {
+        val clean = targetUrl.trim()
+        if (clean.isBlank()) {
+            Toast.makeText(context, "Pega un enlace de TikTok primero", Toast.LENGTH_SHORT).show()
+            return
+        }
+        keyboardController?.hide()
+        isResolving = true
+        resolveError = null
+        resolvedDetails = null
+        completedUri = null
+
+        scope.launch {
+            val result = TikTokDownloader.resolveTikTok(clean)
+            isResolving = false
+            result.onSuccess { details ->
+                resolvedDetails = details
+                if (autoDownload) {
+                    downloadDetails(details, asAudioOnly = false)
+                }
+            }.onFailure { err ->
+                resolveError = err.message ?: "No se pudo extraer el video. Verifica el enlace."
+            }
+        }
+    }
+
+    // Auto-detección del portapapeles si initialUrl está vacío
+    LaunchedEffect(Unit) {
+        if (initialUrl.isNotBlank()) {
+            resolveLink(initialUrl)
+        } else {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            val clip = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
+            if (!clip.isNullOrBlank() && TikTokDownloader.isTikTokUrl(clip)) {
+                urlInput = clip.trim()
+                resolveLink(clip.trim())
+            }
+        }
+    }
+
     AlertDialog(
         onDismissRequest = {
             if (!isDownloading) onDismiss()
@@ -218,13 +226,13 @@ fun TikTokDownloaderDialog(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "TikTok Sin Marca",
+                            text = if (autoDownload) "⚡ Descarga Automática" else "TikTok Sin Marca",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 17.sp
                         )
                         Text(
-                            text = "Descargador HD Libre de Agua",
+                            text = if (autoDownload) "Compartido desde TikTok • Sin marca de agua" else "Descargador HD Libre de Agua",
                             color = tiktokCyan,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium

@@ -111,6 +111,13 @@
                 <data android:mimeType="audio/*" />
                 <data android:mimeType="video/*" />
             </intent-filter>
+
+            <!-- Share target: receive links and text shared from TikTok, YouTube, browser, etc. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
 
         <!-- Media3 Background Service for uninterrupted playback -->

@@ -151,6 +151,7 @@ import com.auraplayer.ui.screens.VaultScreen
 import com.auraplayer.ui.screens.VideoPlayerScreen
 import com.auraplayer.ui.screens.VideoScreen
 import com.auraplayer.ui.theme.AuraTheme
+import com.auraplayer.ui.components.TikTokDownloaderDialog
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -167,6 +168,7 @@ class MainActivity : ComponentActivity() {
         var activeController: MediaController? by mutableStateOf(null)
         var onResumeCallback: (() -> Unit)? = null
         var pendingSharedUri by mutableStateOf<android.net.Uri?>(null)
+        var pendingSharedTikTokUrl by mutableStateOf<String?>(null)
         var pendingUpdateInfo by mutableStateOf<UpdateInfo?>(null)
     }
 
@@ -180,10 +182,30 @@ class MainActivity : ComponentActivity() {
                     @Suppress("DEPRECATION")
                     inIntent.getParcelableExtra(Intent.EXTRA_STREAM)
                 }
-                if (streamUri != null) pendingSharedUri = streamUri
+                if (streamUri != null) {
+                    pendingSharedUri = streamUri
+                } else {
+                    // Detectar enlaces de TikTok compartidos directamente desde la app de TikTok (texto plano)
+                    val sharedText = inIntent.getStringExtra(Intent.EXTRA_TEXT)
+                    if (!sharedText.isNullOrBlank()) {
+                        val extracted = com.auraplayer.data.repository.TikTokDownloader.extractTikTokUrl(sharedText)
+                        if (extracted != null) {
+                            pendingSharedTikTokUrl = extracted
+                        }
+                    }
+                }
             }
             Intent.ACTION_VIEW -> {
-                inIntent.data?.let { pendingSharedUri = it }
+                val dataUri = inIntent.data
+                if (dataUri != null) {
+                    val dataStr = dataUri.toString()
+                    val extracted = com.auraplayer.data.repository.TikTokDownloader.extractTikTokUrl(dataStr)
+                    if (extracted != null) {
+                        pendingSharedTikTokUrl = extracted
+                    } else {
+                        pendingSharedUri = dataUri
+                    }
+                }
             }
             "ACTION_SHOW_UPDATE" -> {
                 val vName = inIntent.getStringExtra("UPDATE_VERSION_NAME") ?: ""
@@ -3066,6 +3088,42 @@ fun AuraApp(
                 onBack = { activeVideo = null }
             )
         }
+    }
+
+    // Shared TikTok Auto Downloader Dialog (Instant Auto Download without Watermark)
+    val sharedTikTokUrl = MainActivity.pendingSharedTikTokUrl
+    if (!sharedTikTokUrl.isNullOrBlank()) {
+        TikTokDownloaderDialog(
+            initialUrl = sharedTikTokUrl,
+            autoDownload = true,
+            onDismiss = { MainActivity.pendingSharedTikTokUrl = null },
+            onDownloadCompleted = { uri, isVideo ->
+                MainActivity.pendingSharedTikTokUrl = null
+                scope.launch {
+                    delay(400)
+                    videos = mediaRepository.loadVideoFiles()
+                    songs = mediaRepository.loadAudioFiles().map(applyTagOverride)
+                }
+            },
+            onPlayDownloadedVideo = { uri ->
+                MainActivity.pendingSharedTikTokUrl = null
+                scope.launch {
+                    videos = mediaRepository.loadVideoFiles()
+                }
+                val model = MediaModel(
+                    id = System.currentTimeMillis(),
+                    title = "Video TikTok",
+                    artist = "TikTok",
+                    album = "TikTok",
+                    duration = 0L,
+                    uri = uri,
+                    path = uri.path ?: "",
+                    isVideo = true
+                )
+                controller?.pause()
+                activeVideo = model
+            }
+        )
     }
 
     // In-App Auto Update Dialog (DaVE Updater)

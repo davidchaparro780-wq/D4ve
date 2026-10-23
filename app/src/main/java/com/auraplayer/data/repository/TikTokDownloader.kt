@@ -46,8 +46,27 @@ object TikTokDownloader {
 
     fun isTikTokUrl(url: String): Boolean {
         val trimmed = url.trim().lowercase()
-        return (trimmed.contains("tiktok.com") || trimmed.contains("douyin.com")) &&
+        return (trimmed.contains("tiktok.com") || trimmed.contains("douyin.com") || trimmed.contains("tikwm.com") || trimmed.contains("tiktokv.com")) &&
                 (trimmed.startsWith("http://") || trimmed.startsWith("https://"))
+    }
+
+    /**
+     * Extrae de forma limpia cualquier enlace de TikTok contenido dentro de un texto compartido.
+     * Soporta enlaces cortos (vm.tiktok.com, vt.tiktok.com) y texto con comentarios o hashtags.
+     */
+    fun extractTikTokUrl(text: String): String? {
+        val trimmed = text.trim()
+        if (isTikTokUrl(trimmed)) return trimmed
+
+        val urlRegex = Regex("""https?://[^\s<>"'{}|\\^`]+""")
+        val matches = urlRegex.findAll(text)
+        for (match in matches) {
+            val candidate = match.value.trim()
+            if (isTikTokUrl(candidate)) {
+                return candidate
+            }
+        }
+        return null
     }
 
     /**
