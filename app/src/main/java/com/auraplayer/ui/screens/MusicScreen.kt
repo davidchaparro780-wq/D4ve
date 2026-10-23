@@ -18,6 +18,7 @@ import com.auraplayer.ui.components.ShimmerListPlaceholder
 import com.auraplayer.ui.components.StemMixerDialog
 import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.ui.components.StoryCardDialog
+import com.auraplayer.ui.components.TikTokDownloaderDialog
 import com.auraplayer.ui.components.ViralAudioStudioDialog
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -257,6 +258,7 @@ fun MusicScreen(
     var showViralStudio by remember { mutableStateOf(false) }
     var showOledSaver by remember { mutableStateOf(false) }
     var showStemMixer by remember { mutableStateOf(false) }
+    var showTikTokDownloader by remember { mutableStateOf(false) }
     var songForStoryMaker by remember { mutableStateOf<MediaModel?>(null) }
     val stemManager = remember { StemMixerManager.getInstance(context) }
     val sleepSensorManager = remember { SmartSleepSensorManager(context) }
@@ -417,8 +419,8 @@ fun MusicScreen(
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        themePrimary.copy(alpha = 0.16f),
-                        themeSecondary.copy(alpha = 0.07f),
+                        themePrimary.copy(alpha = 0.22f),
+                        themeSecondary.copy(alpha = 0.10f),
                         MaterialTheme.colorScheme.background,
                         MaterialTheme.colorScheme.background
                     )
@@ -578,6 +580,10 @@ fun MusicScreen(
                         DropdownMenuItem(
                             text = { Text("🎬 Extraer Audio de Video (MP3)", color = Color(0xFF06B6D4), fontWeight = FontWeight.Bold) },
                             onClick = { showToolsMenu = false; onOpenVideoExtractor() }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("🎵 Descargar de TikTok (Audio / Video)", color = Color(0xFF00F2FE), fontWeight = FontWeight.Bold) },
+                            onClick = { showToolsMenu = false; showTikTokDownloader = true }
                         )
                         DropdownMenuItem(
                             text = { Text("🎛️ Estudio Viral FX (Slowed / 8D)", color = Color(0xFFEC4899), fontWeight = FontWeight.Bold) },
@@ -2590,6 +2596,17 @@ fun MusicScreen(
         )
     }
 
+    // TikTok Video / Audio Downloader Dialog
+    if (showTikTokDownloader) {
+        TikTokDownloaderDialog(
+            initialUrl = "",
+            onDismiss = { showTikTokDownloader = false },
+            onDownloadCompleted = { _, isVideo ->
+                if (!isVideo) onRefreshLibrary()
+            }
+        )
+    }
+
     // Live AI Stem Mixer (Vocal, Drums, Bass, Melodies)
     if (showStemMixer) {
         StemMixerDialog(
@@ -2940,8 +2957,8 @@ fun SongListItem(
                     onLongClick = onLongClick
                 )
                 .background(
-                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                    else MaterialTheme.colorScheme.background
+                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                    else Color.Transparent
                 )
                 .padding(horizontal = 16.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically

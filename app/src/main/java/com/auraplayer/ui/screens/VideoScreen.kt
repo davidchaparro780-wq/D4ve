@@ -225,7 +225,20 @@ fun VideoScreen(
     val scope = rememberCoroutineScope()
     var videoForMenu by remember { mutableStateOf<MediaModel?>(null) }
 
-    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
+    ) {
         // Top Header Bar with Vault Button
         Row(
             modifier = Modifier
@@ -254,7 +267,7 @@ fun VideoScreen(
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF8B5CF6), Color(0xFF38BDF8))
+                            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
                         )
                     )
                     .clickable { onOpenVault() }

@@ -89,12 +89,36 @@ fun TagEditorDialog(
     var searchResults by remember { mutableStateOf<List<SearchCoverResult>>(emptyList()) }
     var searchError by remember { mutableStateOf<String?>(null) }
 
+    var removeCoverRequested by remember { mutableStateOf(false) }
+
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            customCoverUri = uri
-            selectedWebCoverUrl = null
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val tempDir = File(context.cacheDir, "picked_covers").apply { if (!exists()) mkdirs() }
+                    val tempFile = File(tempDir, "cover_${song.id}_${System.currentTimeMillis()}.jpg")
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        tempFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    if (tempFile.exists() && tempFile.length() > 0) {
+                        withContext(Dispatchers.Main) {
+                            customCoverUri = Uri.fromFile(tempFile)
+                            selectedWebCoverUrl = null
+                            removeCoverRequested = false
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        customCoverUri = uri
+                        selectedWebCoverUrl = null
+                        removeCoverRequested = false
+                    }
+                }
+            }
         }
     }
 
@@ -168,7 +192,7 @@ fun TagEditorDialog(
                             .clickable { photoPickerLauncher.launch("image/*") },
                         contentAlignment = Alignment.Center
                     ) {
-                        val displayModel: Any? = selectedWebCoverUrl ?: customCoverUri ?: song.artworkUri
+                        val displayModel: Any? = if (removeCoverRequested) null else (selectedWebCoverUrl ?: customCoverUri ?: song.artworkUri)
                         if (displayModel != null) {
                             AsyncImage(
                                 model = displayModel,
@@ -205,14 +229,22 @@ fun TagEditorDialog(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (selectedWebCoverUrl != null || customCoverUri != null) "✨ Carátula seleccionada" else "Carátula de la pista",
+                            text = when {
+                                removeCoverRequested -> "🗑️ Carátula eliminada"
+                                selectedWebCoverUrl != null || customCoverUri != null -> "✨ Carátula seleccionada"
+                                else -> "Carátula de la pista"
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (selectedWebCoverUrl != null || customCoverUri != null) Color(0xFF10B981) else Color.White
+                            color = when {
+                                removeCoverRequested -> Color(0xFFF87171)
+                                selectedWebCoverUrl != null || customCoverUri != null -> Color(0xFF10B981)
+                                else -> Color.White
+                            }
                         )
                         Spacer(modifier = Modifier.height(6.dp))
 
-                        Row {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             TextButton(
                                 onClick = { photoPickerLauncher.launch("image/*") },
                                 modifier = Modifier.height(32.dp)
@@ -233,6 +265,23 @@ fun TagEditorDialog(
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.White)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Buscar HD", fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                            if (selectedWebCoverUrl != null || customCoverUri != null || (song.artworkUri != null && !removeCoverRequested)) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                TextButton(
+                                    onClick = {
+                                        removeCoverRequested = true
+                                        customCoverUri = null
+                                        selectedWebCoverUrl = null
+                                    },
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text(
+                                        text = "Quitar",
+                                        fontSize = 11.sp,
+                                        color = Color(0xFFF87171)
+                                    )
+                                }
                             }
                         }
                     }
@@ -378,16 +427,21 @@ fun TagEditorDialog(
                     val cleanArtist = artist.trim().ifEmpty { song.artist }
                     val cleanAlbum = album.trim().ifEmpty { song.album }
 
-                    val webUrl = selectedWebCoverUrl
-                    if (webUrl != null) {
-                        scope.launch {
-                            val localUri = downloadCoverToLocal(context, webUrl, song.id)
-                            onSave(cleanTitle, cleanArtist, cleanAlbum, localUri ?: customCoverUri)
+                    if (removeCoverRequested) {
+                        onSave(cleanTitle, cleanArtist, cleanAlbum, Uri.EMPTY)
+                        onDismiss()
+                    } else {
+                        val webUrl = selectedWebCoverUrl
+                        if (webUrl != null) {
+                            scope.launch {
+                                val localUri = downloadCoverToLocal(context, webUrl, song.id)
+                                onSave(cleanTitle, cleanArtist, cleanAlbum, localUri ?: customCoverUri)
+                                onDismiss()
+                            }
+                        } else {
+                            onSave(cleanTitle, cleanArtist, cleanAlbum, customCoverUri)
                             onDismiss()
                         }
-                    } else {
-                        onSave(cleanTitle, cleanArtist, cleanAlbum, customCoverUri)
-                        onDismiss()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),

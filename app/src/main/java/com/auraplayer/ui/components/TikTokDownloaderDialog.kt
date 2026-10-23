@@ -565,7 +565,8 @@ fun TikTokDownloaderDialog(
                             } else {
                                 // Botones de descarga
                                 Column {
-                                    // Botón Video Sin Marca (Compatible con WhatsApp)
+                                    // Botón Único de Video Sin Marca (Mejor Calidad HD / Ultra HD automática)
+                                    val hasHd = !details.videoHdUrl.isNullOrBlank() && details.videoHdUrl != details.videoNoWatermarkUrl
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -573,9 +574,9 @@ fun TikTokDownloaderDialog(
                                             .background(tiktokGradient)
                                             .clickable {
                                                 AuraHaptic.click(view)
-                                                startDownload(asAudioOnly = false, useHd = false)
+                                                startDownload(asAudioOnly = false, useHd = hasHd)
                                             }
-                                            .padding(vertical = 10.dp, horizontal = 12.dp),
+                                            .padding(vertical = 11.dp, horizontal = 12.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -584,11 +585,11 @@ fun TikTokDownloaderDialog(
                                                     imageVector = Icons.Default.VideoFile,
                                                     contentDescription = null,
                                                     tint = Color.Black,
-                                                    modifier = Modifier.size(18.dp)
+                                                    modifier = Modifier.size(19.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Text(
-                                                    text = "Descargar Video Sin Marca (HD)",
+                                                    text = if (hasHd) "Descargar Video Sin Marca (Ultra HD 1080p)" else "Descargar Video Sin Marca (HD)",
                                                     fontWeight = FontWeight.ExtraBold,
                                                     fontSize = 13.sp,
                                                     color = Color.Black
@@ -597,47 +598,13 @@ fun TikTokDownloaderDialog(
                                             Text(
                                                 text = "H.264 AVC • 100% Compatible con WhatsApp y Redes",
                                                 fontSize = 10.sp,
-                                                color = Color.Black.copy(alpha = 0.8f),
-                                                fontWeight = FontWeight.Medium
+                                                color = Color.Black.copy(alpha = 0.85f),
+                                                fontWeight = FontWeight.SemiBold
                                             )
                                         }
                                     }
 
-                                    // Si hay enlace HD separado disponible
-                                    if (!details.videoHdUrl.isNullOrBlank() && details.videoHdUrl != details.videoNoWatermarkUrl) {
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(14.dp))
-                                                .background(Color(0xFF1E293B))
-                                                .border(1.dp, Color(0xFF6366F1).copy(alpha = 0.6f), RoundedCornerShape(14.dp))
-                                                .clickable {
-                                                    AuraHaptic.click(view)
-                                                    startDownload(asAudioOnly = false, useHd = true)
-                                                }
-                                                .padding(vertical = 10.dp, horizontal = 12.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Hd,
-                                                    contentDescription = null,
-                                                    tint = Color(0xFFA5B4FC),
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Text(
-                                                    text = "Descargar en Ultra HD (1080p)",
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 12.sp,
-                                                    color = Color.White
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
 
                                     // Botón Solo Audio MP3
                                     if (!details.audioUrl.isNullOrBlank()) {

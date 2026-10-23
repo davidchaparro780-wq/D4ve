@@ -260,6 +260,16 @@ fun DiscoverScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                )
                 .padding(horizontal = 14.dp)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
@@ -281,7 +291,7 @@ fun DiscoverScreen(
                             .size(34.dp)
                             .clip(CircleShape)
                             .background(
-                                Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFF38BDF8)))
+                                Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary))
                             ),
                         contentAlignment = Alignment.Center
                     ) {

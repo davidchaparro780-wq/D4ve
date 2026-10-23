@@ -1,7 +1,7 @@
 {
-  "versionCode": 114,
-  "versionName": "4.9.14",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.14/app-debug.apk",
-  "changelog": "🔮 DaVE Player v4.9.14 (Build 114):\n• 🎨 Reactividad total y corrección de temas: al seleccionar cualquier tema o color misterioso ('Eclipse', 'Espectro Abisal', 'Nebulosa', etc.) los colores se aplican instantáneamente en toda la aplicación sin ser anulados por Material You.\n• 🌌 Fondo atmosférico con aura radiante: resplandor etéreo sutil en la parte superior de la biblioteca según la paleta elegida.\n• 🏷️ Pestañas y barra indicadora luminosa ('Canciones', 'Playlists', 'Favoritos') adaptadas a tu atmósfera activa.\n• ⚡ Botones principales ('Mezclar Todo', filtros rápidos, 'Refrescar', 'Ordenar', temporizador) sincronizados con los colores primario y secundario del tema.\n• 🔔 Confirmación inmediata con respuesta háptica y aviso en pantalla al cambiar de tema.",
+  "versionCode": 115,
+  "versionName": "4.9.15",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.15/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.15 (Build 115):\n• 🖼️ Miniaturas & Carátulas 100% Persistentes: Solucionado el problema donde al seleccionar una carátula no se aplicaba o se eliminaba. Ahora los bytes se copian inmediatamente al almacenamiento privado seguro con compresión optimizada y botón para quitarla si lo deseas.\n• 🎬 Descargador de TikTok Unificado: Eliminada la opción redundante de video; ahora hay un único botón inteligente 'Descargar Video Sin Marca (HD 1080p)' que elige automáticamente la mejor resolución compatible con WhatsApp y redes, manteniendo la descarga de audio MP3.\n• 🎵 Acceso TikTok en Música: Acceso directo a descargas de TikTok disponible en el menú de herramientas mágicas de la pestaña Música.\n• 🔮 Atmósfera & Temas Misteriosos Visibles: El aura y gradiente misterioso ahora fluye por toda la pantalla de canciones, explorar y videos sin ser ocultada.\n• ⚡ Presets Virales de 1 Toque: En el control de tono/velocidad se añadieron accesos rápidos (Slowed, Nightcore, Ardilla, Voz Grave, Rápido y Normal).",
   "fileSizeMb": 24.5
 }

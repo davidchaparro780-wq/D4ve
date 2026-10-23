@@ -313,18 +313,48 @@ class CoverArtManager(private val context: Context) {
                         val f = File(sourceUri.path ?: "")
                         if (f.exists()) f.readBytes() else null
                     } else {
-                        context.contentResolver.openInputStream(sourceUri)?.use { it.readBytes() }
+                        try {
+                            context.contentResolver.openInputStream(sourceUri)?.use { it.readBytes() }
+                        } catch (se: Exception) {
+                            AppLog.w(TAG, "No se pudo abrir stream de sourceUri, intentando resolver path", se)
+                            sourceUri.path?.let { p ->
+                                val f = File(p)
+                                if (f.exists()) f.readBytes() else null
+                            }
+                        }
                     }
                 }
             }
 
             if (bytes != null && bytes.isNotEmpty()) {
-                FileOutputStream(targetFile).use { it.write(bytes) }
+                var savedSuccessfully = false
+                try {
+                    val boundsOptions = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, boundsOptions)
+                    val maxDim = Math.max(boundsOptions.outWidth, boundsOptions.outHeight)
+                    var inSampleSize = 1
+                    while (maxDim / (inSampleSize * 2) >= 800) {
+                        inSampleSize *= 2
+                    }
+                    val decodeOptions = android.graphics.BitmapFactory.Options().apply { this.inSampleSize = inSampleSize }
+                    val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOptions)
+                    if (bmp != null) {
+                        FileOutputStream(targetFile).use { out ->
+                            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, out)
+                        }
+                        bmp.recycle()
+                        savedSuccessfully = true
+                    }
+                } catch (_: Throwable) {}
+
+                if (!savedSuccessfully) {
+                    FileOutputStream(targetFile).use { it.write(bytes) }
+                }
 
                 if (!title.isNullOrBlank() && !artist.isNullOrBlank()) {
                     val cleanKey = sanitize("${artist}_${title}")
                     val namedFile = File(coversDir, "$cleanKey.jpg")
-                    FileOutputStream(namedFile).use { it.write(bytes) }
+                    try { targetFile.copyTo(namedFile, overwrite = true) } catch (_: Exception) {}
                     prefs.edit().putString("cover_id_$id", targetFile.absolutePath).apply()
                 }
 
@@ -332,16 +362,20 @@ class CoverArtManager(private val context: Context) {
                     val nameNoExt = File(path).nameWithoutExtension
                     if (nameNoExt.isNotBlank()) {
                         val directFile = File(coversDir, "$nameNoExt.jpg")
-                        FileOutputStream(directFile).use { it.write(bytes) }
+                        try { targetFile.copyTo(directFile, overwrite = true) } catch (_: Exception) {}
                         prefs.edit().putString("cover_file_${nameNoExt.lowercase().trim()}", directFile.absolutePath).apply()
                     }
                 }
 
+                val finalUri = Uri.fromFile(targetFile)
                 try {
-                    coil.Coil.imageLoader(context).memoryCache?.clear()
+                    val loader = coil.Coil.imageLoader(context)
+                    loader.memoryCache?.clear()
+                    loader.diskCache?.remove(finalUri.toString())
+                    loader.diskCache?.remove(targetFile.absolutePath)
                 } catch (_: Exception) {}
 
-                return Uri.parse("file://${targetFile.absolutePath}?t=${System.currentTimeMillis()}")
+                return finalUri
             }
         } catch (e: Exception) {
             AppLog.e(TAG, "No se pudo guardar la carátula personalizada", e)

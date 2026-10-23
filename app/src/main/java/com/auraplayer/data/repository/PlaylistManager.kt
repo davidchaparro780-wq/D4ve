@@ -174,17 +174,33 @@ class PlaylistManager(context: Context) {
         year: String = "",
         customCoverPath: String = ""
     ) {
+        val existing = getTagOverride(songId)
+        val finalCover = if (customCoverPath.isNotBlank()) customCoverPath else (existing?.customCoverPath ?: "")
         val obj = JSONObject().apply {
             put("title", title)
             put("artist", artist)
             put("album", album)
             put("genre", genre)
             put("year", year)
-            if (customCoverPath.isNotBlank()) {
-                put("cover", customCoverPath)
+            if (finalCover.isNotBlank()) {
+                put("cover", finalCover)
             }
         }
         prefs.edit().putString("tag_$songId", obj.toString()).apply()
+    }
+
+    fun removeCustomCover(songId: Long) {
+        val existing = getTagOverride(songId)
+        if (existing != null) {
+            val obj = JSONObject().apply {
+                put("title", existing.title)
+                put("artist", existing.artist)
+                put("album", existing.album)
+                put("genre", existing.genre)
+                put("year", existing.year)
+            }
+            prefs.edit().putString("tag_$songId", obj.toString()).apply()
+        }
     }
 
     fun getTagOverride(songId: Long): TagOverride? {

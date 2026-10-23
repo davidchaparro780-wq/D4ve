@@ -50,6 +50,100 @@ fun PitchSpeedDialog(
                     fontSize = 13.sp
                 )
 
+                // Presets Rápidos Populares
+                Column {
+                    Text(
+                        "PRESETS RÁPIDOS POPULARES (1 TOQUE):",
+                        color = Color(0xFFA5B4FC),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    androidx.compose.foundation.lazy.LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (semitones == 0 && speed == 1.0f) Color(0xFF6366F1) else Color(0xFF1E293B),
+                                modifier = Modifier.clickable {
+                                    semitones = 0
+                                    speed = 1.0f
+                                    updatePlayback()
+                                }
+                            ) {
+                                Text("🔄 Normal", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (semitones == -2 && speed == 0.85f) Color(0xFF8B5CF6) else Color(0xFF1E293B),
+                                modifier = Modifier.clickable {
+                                    semitones = -2
+                                    speed = 0.85f
+                                    updatePlayback()
+                                }
+                            ) {
+                                Text("✨ Slowed (0.85x)", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (semitones == 2 && speed == 1.25f) Color(0xFFEC4899) else Color(0xFF1E293B),
+                                modifier = Modifier.clickable {
+                                    semitones = 2
+                                    speed = 1.25f
+                                    updatePlayback()
+                                }
+                            ) {
+                                Text("⚡ Nightcore (1.25x)", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (semitones == 4 && speed == 1.35f) Color(0xFFF59E0B) else Color(0xFF1E293B),
+                                modifier = Modifier.clickable {
+                                    semitones = 4
+                                    speed = 1.35f
+                                    updatePlayback()
+                                }
+                            ) {
+                                Text("🐿️ Ardilla (+4)", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (semitones == -4 && speed == 0.95f) Color(0xFF06B6D4) else Color(0xFF1E293B),
+                                modifier = Modifier.clickable {
+                                    semitones = -4
+                                    speed = 0.95f
+                                    updatePlayback()
+                                }
+                            ) {
+                                Text("🎙️ Voz Grave (-4)", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (semitones == 0 && speed == 1.5f) Color(0xFF10B981) else Color(0xFF1E293B),
+                                modifier = Modifier.clickable {
+                                    semitones = 0
+                                    speed = 1.5f
+                                    updatePlayback()
+                                }
+                            ) {
+                                Text("🏎️ Rápido (1.5x)", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
                 // Pitch Semitones Slider
                 Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)), shape = RoundedCornerShape(16.dp)) {
                     Column(Modifier.padding(16.dp)) {

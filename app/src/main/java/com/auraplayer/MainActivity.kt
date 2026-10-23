@@ -644,10 +644,7 @@ fun AuraApp(
             scope.launch {
                 mediaRepository.rescanDownloadDirectories()
                 val freshSongs = mediaRepository.loadAudioFiles()
-                val reloadedSongs = freshSongs.map { s ->
-                    val override = playlistManager.getTagOverride(s.id)
-                    if (override != null) s.copy(title = override.title, artist = override.artist, album = override.album) else s
-                }
+                val reloadedSongs = freshSongs.map(applyTagOverride)
                 withContext(Dispatchers.Main) {
                     songs = reloadedSongs
                 }
@@ -2162,7 +2159,12 @@ fun AuraApp(
                     },
                     onSaveTags = { song, newTitle, newArtist, newAlbum, newCoverUri ->
                         var finalCoverUri = song.artworkUri
-                        if (newCoverUri != null) {
+                        if (newCoverUri == Uri.EMPTY) {
+                            // Usuario solicitó explícitamente quitar la carátula personalizada
+                            mediaRepository.coverArtManager.cleanupSongCache(song)
+                            playlistManager.removeCustomCover(song.id)
+                            finalCoverUri = null
+                        } else if (newCoverUri != null) {
                             val savedUri = mediaRepository.coverArtManager.saveCustomCoverFromUri(
                                 id = song.id,
                                 sourceUri = newCoverUri,
@@ -2717,7 +2719,7 @@ fun AuraApp(
                     selectedNavTab = 1
                 },
                 onDismiss = { showPlayerScreen = false },
-                modifier = Modifier.fillMaxSize().background(Color(0xFF070A12))
+                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             )
         }
     }
