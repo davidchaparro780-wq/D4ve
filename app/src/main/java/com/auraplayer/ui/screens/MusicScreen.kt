@@ -323,8 +323,6 @@ fun MusicScreen(
 
     val settings = remember { com.auraplayer.data.repository.SettingsManager.getInstance(context) }
     val folderShield = remember { com.auraplayer.data.repository.FolderShieldManager.getInstance(context) }
-    var favoritesTrigger by remember { mutableIntStateOf(0) }
-    val favoriteIds = remember(songs, favoritesTrigger) { favoritesManager.getFavoriteIds() }
 
     // Process Filter and Sort
     val filteredSongs = remember(
@@ -332,7 +330,7 @@ fun MusicScreen(
         searchQuery,
         selectedFilterIndex,
         selectedSortMode,
-        favoriteIds,
+        favoritesManager,
         settings.hideShortAudioDurationSec,
         folderShield.isShortTracksFilterEnabled,
         folderShield.minTrackDurationSeconds,
@@ -376,7 +374,8 @@ fun MusicScreen(
                 ext in listOf("flac", "wav", "m4a", "alac", "dsf", "dff")
             }
             5 -> {
-                list.filter { favoriteIds.contains(it.id) }
+                val favs = favoritesManager.getFavoriteIds()
+                list.filter { favs.contains(it.id) }
             }
             6 -> list.filter { it.duration in 1..150000L } // < 2.5 min
             7 -> list.filter { it.duration >= 240000L } // > 4 min
@@ -398,8 +397,9 @@ fun MusicScreen(
         }
     }
 
-    val favoriteSongs = remember(songs, favoriteIds) {
-        songs.filter { favoriteIds.contains(it.id) }
+    val favoriteSongs = remember(songs, favoritesManager) {
+        val favIds = favoritesManager.getFavoriteIds()
+        songs.filter { favIds.contains(it.id) }
     }
 
     val totalDurationFormatted = remember(songs) {
@@ -1459,7 +1459,7 @@ fun MusicScreen(
                                             SongListItem(
                                                 song = song,
                                                 isSelected = isSelected,
-                                                isFavorite = favoriteIds.contains(song.id),
+                                                isFavorite = favoritesManager.isFavorite(song.id),
                                                 isSelectionMode = isSelectionMode,
                                                 isChecked = isChecked,
                                                 highlightQuery = searchQuery,
@@ -1483,7 +1483,6 @@ fun MusicScreen(
                                                 },
                                                 onSwipeToggleFavorite = {
                                                     val isFav = favoritesManager.toggleFavorite(song.id)
-                                                    favoritesTrigger++
                                                     Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
                                                 }
                                             )
@@ -1555,7 +1554,6 @@ fun MusicScreen(
                                         TextButton(
                                             onClick = {
                                                 selectedSongs.forEach { favoritesManager.toggleFavorite(it.id) }
-                                                favoritesTrigger++
                                                 Toast.makeText(context, "${selectedSongs.size} canciones actualizadas en Favoritos", Toast.LENGTH_SHORT).show()
                                                 isSelectionMode = false
                                                 selectedSongIds = emptySet()
@@ -1647,7 +1645,7 @@ fun MusicScreen(
                                         SongListItem(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
-                                            isFavorite = favoriteIds.contains(song.id),
+                                            isFavorite = favoritesManager.isFavorite(song.id),
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song },
@@ -1657,7 +1655,6 @@ fun MusicScreen(
                                             },
                                             onSwipeToggleFavorite = {
                                                 val isFav = favoritesManager.toggleFavorite(song.id)
-                                                favoritesTrigger++
                                                 Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
                                             }
                                         )
@@ -1780,7 +1777,7 @@ fun MusicScreen(
                                                     song = song,
                                                     extraBadge = "🔥 $count plays",
                                                     isSelected = currentMedia?.id == song.id,
-                                                    isFavorite = favoriteIds.contains(song.id),
+                                                    isFavorite = favoritesManager.isFavorite(song.id),
                                                     onClick = { onSongClick(song) },
                                                     onLongClick = { selectedSongForMenu = song },
                                                     onOptionsClick = { selectedSongForMenu = song }
@@ -1805,7 +1802,7 @@ fun MusicScreen(
                                                     song = song,
                                                     extraBadge = "🕒 Reciente",
                                                     isSelected = currentMedia?.id == song.id,
-                                                    isFavorite = favoriteIds.contains(song.id),
+                                                    isFavorite = favoritesManager.isFavorite(song.id),
                                                     onClick = { onSongClick(song) },
                                                     onLongClick = { selectedSongForMenu = song },
                                                     onOptionsClick = { selectedSongForMenu = song }
@@ -1837,7 +1834,6 @@ fun MusicScreen(
                                     },
                                     onSwipeToggleFavorite = {
                                         val isFav = favoritesManager.toggleFavorite(song.id)
-                                        favoritesTrigger++
                                         Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
                                     }
                                 )
@@ -1932,7 +1928,7 @@ fun MusicScreen(
                                         SongListItem(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
-                                            isFavorite = favoriteIds.contains(song.id),
+                                            isFavorite = favoritesManager.isFavorite(song.id),
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song }
@@ -2091,7 +2087,7 @@ fun MusicScreen(
                                         SongListItem(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
-                                            isFavorite = favoriteIds.contains(song.id),
+                                            isFavorite = favoritesManager.isFavorite(song.id),
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song }
@@ -2283,7 +2279,7 @@ fun MusicScreen(
     // Song Options BottomSheet Modal (Musicolet Style Queuing & Tags)
     if (selectedSongForMenu != null) {
         val song = selectedSongForMenu!!
-        val isFav = favoriteIds.contains(song.id)
+        val isFav = favoritesManager.isFavorite(song.id)
 
         ModalBottomSheet(
             onDismissRequest = { selectedSongForMenu = null },
@@ -2389,7 +2385,6 @@ fun MusicScreen(
                     title = if (isFav) "Quitar de Favoritos" else "Añadir a Favoritos",
                     onClick = {
                         favoritesManager.toggleFavorite(song.id)
-                        favoritesTrigger++
                         selectedSongForMenu = null
                     }
                 )

@@ -85,6 +85,17 @@ fun MiniPlayer(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1400, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowAlpha"
+    )
+
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val dragOffsetX = remember { Animatable(0f) }
@@ -232,9 +243,9 @@ fun MiniPlayer(
                                 modifier = Modifier
                                     .size(48.dp)
                                     .shadow(
-                                        elevation = if (isPlaying) 10.dp else 2.dp,
+                                        elevation = if (isPlaying) 12.dp else 2.dp,
                                         shape = RoundedCornerShape(14.dp),
-                                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) 0.45f else 0f)
+                                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) glowAlpha else 0f)
                                     )
                                     .clip(RoundedCornerShape(14.dp))
                                     .background(
@@ -382,7 +393,6 @@ fun MiniPlayer(
                         }
 
                         // Ultra Neon Liquid Progress Bar with Ambient Glow
-                        val safeProgress = if (progress.isNaN() || progress.isInfinite()) 0f else progress.coerceIn(0f, 1f)
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -390,25 +400,23 @@ fun MiniPlayer(
                                 .background(Color.White.copy(alpha = 0.08f))
                                 .semantics {
                                     contentDescription = "Progreso de reproducción"
-                                    progressBarRangeInfo = ProgressBarRangeInfo(safeProgress, 0f..1f)
+                                    progressBarRangeInfo = ProgressBarRangeInfo(progress.coerceIn(0f, 1f), 0f..1f)
                                 }
                         ) {
-                            if (safeProgress > 0f) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(safeProgress)
-                                        .fillMaxHeight()
-                                        .background(
-                                            Brush.horizontalGradient(
-                                                listOf(
-                                                    MaterialTheme.colorScheme.primary,
-                                                    MaterialTheme.colorScheme.secondary,
-                                                    MaterialTheme.colorScheme.tertiary
-                                                )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                                    .fillMaxHeight()
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.secondary,
+                                                MaterialTheme.colorScheme.tertiary
                                             )
                                         )
-                                )
-                            }
+                                    )
+                            )
                         }
                     }
                 }

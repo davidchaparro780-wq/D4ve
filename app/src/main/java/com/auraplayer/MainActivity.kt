@@ -1240,16 +1240,18 @@ fun AuraApp(
                 }
             }
             val now = System.currentTimeMillis()
-            if (now - lastResumeSaveMs >= 10000L) {
+            if (now - lastResumeSaveMs >= 3000L) {
                 lastResumeSaveMs = now
                 saveResumePosition()
             }
-            if (now - lastStatsTime >= 5000L) {
+            if (now - lastStatsTime >= 1000L) {
                 val elapsedSecs = ((now - lastStatsTime) / 1000L).toInt()
                 statsManager.recordListeningTime(currentMedia?.artist ?: "Desconocido", elapsedSecs)
+                loudnessManager.applyLoudness()
+                crossfeedManager.applyCrossfeed()
                 lastStatsTime = now
             }
-            delay(500)
+            delay(400)
         }
     }
 
@@ -1971,10 +1973,7 @@ fun AuraApp(
 
                 // Mini Player
                 val effectiveDuration = if (durationMs > 0L) durationMs else (currentMedia?.duration ?: 0L)
-                val progress = if (effectiveDuration > 0L) {
-                    val p = positionState.value.toFloat() / effectiveDuration.toFloat()
-                    if (p.isNaN() || p.isInfinite()) 0f else p.coerceIn(0f, 1f)
-                } else 0f
+                val progress = if (effectiveDuration > 0L) positionState.value.toFloat() / effectiveDuration.toFloat() else 0f
                 MiniPlayer(
                     currentMedia = currentMedia,
                     isPlaying = isPlaying,

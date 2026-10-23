@@ -133,8 +133,6 @@ import com.auraplayer.ui.components.CanvasLoopsOverlay
 import com.auraplayer.ui.components.CanvasLoopTheme
 import com.auraplayer.ui.components.AudioQualityDialog
 import com.auraplayer.ui.components.WaveformVisualizer
-import androidx.compose.ui.unit.IntOffset
-import kotlin.math.roundToInt
 import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.FastRewind
@@ -383,8 +381,10 @@ fun PlayerScreen(
     }
 
     LaunchedEffect(currentPositionMs, isAbLoopActive, abLoopA, abLoopB, isPlaying) {
-        if (isAbLoopActive && abLoopA != null && abLoopB != null && isPlaying && currentPositionMs >= abLoopB!!) {
-            onSeek(abLoopA!!)
+        if (isAbLoopActive && abLoopA != null && abLoopB != null && isPlaying) {
+            if (currentPositionMs >= abLoopB!!) {
+                onSeek(abLoopA!!)
+            }
         }
     }
 
@@ -604,8 +604,19 @@ fun PlayerScreen(
         }
     }
 
-    // Anti-Gravity Levitation Oscillation (Organic Floating)
+    // Visualizer wave phase animation
     val infiniteTransition = rememberInfiniteTransition(label = "player_infinite")
+    val visualizerPhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2 * Math.PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = AnimRepeatMode.Restart
+        ),
+        label = "visualizerPhase"
+    )
+
+    // Anti-Gravity Levitation Oscillation (Organic Floating)
     val levitationPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = (2 * Math.PI).toFloat(),

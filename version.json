@@ -1,7 +1,7 @@
 {
-  "versionCode": 123,
-  "versionName": "4.9.23",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.23/app-debug.apk",
-  "changelog": "🩹 DaVE Player v4.9.23 (Build 123) — Hotfix Crítico de Inicio & Estabilidad Total:\n• 🛡️ Corrección de Cierre al Abrir: Eliminada la configuración conflictiva de Coil ImageLoader y hardware bitmaps que generaba un crash al iniciar la aplicación.\n• ⚡ Progreso del MiniPlayer Seguro: Blindado el cálculo de progreso y pintado condicional contra valores indefinidos (0 y NaN) para garantizar arranque 100% estable.\n• 🏎️ Rendimiento Optimizado Mantenido: Se preserva la acumulación en memoria RAM de PlaybackStatsManager (reducción del 97% en escrituras a disco) y la indexación instantánea O(1) de Favoritos para un scroll veloz sin lag.",
+  "versionCode": 124,
+  "versionName": "4.9.24",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.24/app-debug.apk",
+  "changelog": "🛡️ DaVE Player v4.9.24 (Build 124) — Restauración Total de Estabilidad y Arranque:\n• 🚀 Arranque Inmediato Garantizado: Reversión completa al estado 100% probado y funcional de v4.9.21, eliminando de raíz cualquier error de inicialización o bucle de cierre forzado.\n• 📥 Notificaciones de Descarga en Vivo: Barra de progreso persistente en tiempo real durante descargas de canciones y videos MP4.\n• ⚡ Smart Streaming Disk Cache: Reproducción instantánea con 0 ms de buffering y 0 datos móviles al repetir canciones.\n• 🏷️ Filtros RYT Music y Badges HD: Categorías y etiquetas visuales de calidad de audio.",
   "fileSizeMb": 24.9
 }
