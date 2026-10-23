@@ -2643,21 +2643,7 @@ fun MusicScreen(
     // WhatsApp Status Saver Dialog
     if (showWhatsAppStatusDialog) {
         WhatsAppStatusDialog(
-            onDismiss = { showWhatsAppStatusDialog = false },
-            onPlayVideo = { item ->
-                onOpenFullScreenVideo?.invoke(
-                    com.auraplayer.data.model.MediaModel(
-                        id = System.currentTimeMillis(),
-                        title = item.file.nameWithoutExtension,
-                        artist = "Estado de WhatsApp",
-                        album = "WhatsApp",
-                        duration = 0L,
-                        uri = item.uri,
-                        path = item.file.absolutePath,
-                        isVideo = true
-                    )
-                )
-            }
+            onDismiss = { showWhatsAppStatusDialog = false }
         )
     }
 

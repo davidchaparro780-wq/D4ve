@@ -20,7 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Image as ImageIcon
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
@@ -333,6 +333,16 @@ fun WhatsAppStatusDialog(
                                     if (onPlayVideo != null) {
                                         previewItem = null
                                         onPlayVideo(pItem)
+                                    } else {
+                                        try {
+                                            val playIntent = Intent(Intent.ACTION_VIEW).apply {
+                                                setDataAndType(pItem.uri, "video/*")
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            }
+                                            context.startActivity(Intent.createChooser(playIntent, "Reproducir video"))
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "No hay reproductor de video disponible", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 },
                             contentAlignment = Alignment.Center
@@ -513,7 +523,7 @@ private fun WhatsAppStatusCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = if (item.isVideo) Icons.Default.PlayCircle else ImageIcon,
+                    imageVector = if (item.isVideo) Icons.Default.PlayCircle else Icons.Default.Image,
                     contentDescription = null,
                     tint = if (item.isVideo) Color(0xFF25D366) else Color(0xFF38BDF8),
                     modifier = Modifier.size(13.dp)
