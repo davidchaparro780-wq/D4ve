@@ -716,7 +716,8 @@ class DownloadEngine(
             var lastVideoException: Exception? = null
             for (attempt in 1..3) {
                 try {
-                    performVideoDownload(videoStreamUrl, downloadId, fileName, track.title)
+                    val currentVideoUrl = videoStreamUrl ?: throw IllegalStateException("No se pudo obtener el stream de video MP4 de YouTube.")
+                    performVideoDownload(currentVideoUrl, downloadId, fileName, track.title)
 
                     updateState(downloadId, DownloadStatus.Completed)
                     showDownloadCompletedNotification(track.title, "Video MP4")
