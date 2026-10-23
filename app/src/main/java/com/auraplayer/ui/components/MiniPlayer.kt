@@ -229,25 +229,26 @@ fun MiniPlayer(
                         },
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp,
-                    color = Color(0xF2101524)
+                    color = Color(0xF40C1220)
                 ) {
                     Column {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .padding(horizontal = 14.dp, vertical = 9.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Artwork with glowing ambient ring when playing
                             Box(
                                 modifier = Modifier
-                                    .size(48.dp)
+                                    .size(46.dp)
                                     .shadow(
-                                        elevation = if (isPlaying) 12.dp else 2.dp,
-                                        shape = RoundedCornerShape(14.dp),
+                                        elevation = if (isPlaying) 10.dp else 2.dp,
+                                        shape = RoundedCornerShape(12.dp),
                                         spotColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) glowAlpha else 0f)
                                     )
-                                    .clip(RoundedCornerShape(14.dp))
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .border(0.8.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                                     .background(
                                         Brush.linearGradient(
                                             listOf(
@@ -396,7 +397,7 @@ fun MiniPlayer(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(3.dp)
+                                .height(2.5.dp)
                                 .background(Color.White.copy(alpha = 0.08f))
                                 .semantics {
                                     contentDescription = "Progreso de reproducción"
@@ -407,6 +408,7 @@ fun MiniPlayer(
                                 modifier = Modifier
                                     .fillMaxWidth(progress.coerceIn(0f, 1f))
                                     .fillMaxHeight()
+                                    .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
                                     .background(
                                         Brush.horizontalGradient(
                                             listOf(

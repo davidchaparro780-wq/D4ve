@@ -1082,7 +1082,7 @@ fun MusicScreen(
             }
         }
 
-        // Tab Row with Dynamic Theme Accent Indicator
+        // Tab Row with Dynamic Theme Accent Indicator (Floating Pill Style)
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
             edgePadding = 16.dp,
@@ -1093,18 +1093,17 @@ fun MusicScreen(
                     Box(
                         Modifier
                             .tabIndicatorOffset(tabPositions[selectedTab])
-                            .height(3.dp)
-                            .padding(horizontal = 14.dp)
-                            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(themePrimary, themeSecondary)
-                                )
-                            )
+                            .fillMaxHeight()
+                            .padding(horizontal = 4.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(themePrimary.copy(alpha = 0.22f))
+                            .border(1.dp, themePrimary.copy(alpha = 0.55f), RoundedCornerShape(20.dp))
                     )
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -1114,12 +1113,13 @@ fun MusicScreen(
                         selectedTab = index
                         selectedPlaylistForView = null
                     },
+                    modifier = Modifier.clip(RoundedCornerShape(20.dp)),
                     text = {
                         Text(
                             text = title,
-                            fontWeight = if (selectedTab == index) FontWeight.ExtraBold else FontWeight.Medium,
-                            color = if (selectedTab == index) themePrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            fontSize = 14.sp
+                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                            color = if (selectedTab == index) themePrimary else Color(0xFF94A3B8),
+                            fontSize = 13.5.sp
                         )
                     }
                 )
@@ -2981,17 +2981,24 @@ fun SongListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 3.dp)
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .then(swipeModifier)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                    else Color.Transparent
+                )
+                .border(
+                    if (isSelected) 1.dp else 0.dp,
+                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
+                    RoundedCornerShape(14.dp)
+                )
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick
                 )
-                .background(
-                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-                    else Color.Transparent
-                )
-                .padding(horizontal = 16.dp, vertical = 7.dp),
+                .padding(horizontal = 10.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isSelectionMode) {
@@ -3005,8 +3012,8 @@ fun SongListItem(
             }
             Box(
                 modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
                         if (isSelected) {
                             Brush.linearGradient(
@@ -3025,9 +3032,9 @@ fun SongListItem(
                         }
                     )
                     .border(
-                        1.dp,
-                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        RoundedCornerShape(14.dp)
+                        0.8.dp,
+                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.65f) else Color.White.copy(alpha = 0.1f),
+                        RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {

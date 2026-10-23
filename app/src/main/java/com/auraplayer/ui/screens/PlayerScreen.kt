@@ -1706,9 +1706,10 @@ fun PlayerScreen(
                     ) { t ->
                         Text(
                             text = t,
-                            fontSize = 17.sp,
-                            lineHeight = 22.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            lineHeight = 23.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = (-0.2).sp,
                             color = MaterialTheme.colorScheme.onBackground,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -1727,18 +1728,18 @@ fun PlayerScreen(
                         Text(
                             text = "$a • ${currentMedia.album.ifEmpty { "Aura Audio" }}",
                             fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                     qualityInfo?.let { q ->
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
                         Surface(
-                            color = Color(q.qualityColor).copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(50),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(q.qualityColor).copy(alpha = 0.4f))
+                            color = Color(q.qualityColor).copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(q.qualityColor).copy(alpha = 0.35f))
                         ) {
                             Text(
                                 text = "${q.codec} • ${q.bitrateKbps} kbps • ${q.qualityLabel}",
@@ -2816,6 +2817,8 @@ fun PlayerScreen(
                         },
                         modifier = Modifier
                             .graphicsLayer { rotationZ = shuffleRotation.value }
+                            .clip(CircleShape)
+                            .background(if (isShuffle) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent)
                             .bounceClick()
                     ) {
                         Icon(
@@ -2889,6 +2892,8 @@ fun PlayerScreen(
                                 scaleX = repeatBounce.value
                                 scaleY = repeatBounce.value
                             }
+                            .clip(CircleShape)
+                            .background(if (repeatMode != RepeatMode.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent)
                             .bounceClick()
                     ) {
                         Icon(

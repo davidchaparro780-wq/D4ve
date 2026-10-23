@@ -2031,87 +2031,112 @@ fun AuraApp(
                     }
                 )
 
-                // Mysterious subtle luminous gradient border
+                // Floating Glass Navigation Dock
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(1.dp)
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(
-                                    Color.Transparent,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
-                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f),
-                                    Color.Transparent
-                                )
+                        .padding(start = 14.dp, end = 14.dp, bottom = 10.dp, top = 2.dp)
+                ) {
+                    NavigationBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(66.dp)
+                            .shadow(
+                                elevation = 16.dp,
+                                shape = RoundedCornerShape(28.dp),
+                                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                ambientColor = Color.Black
+                            )
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(Color(0xF00B101E))
+                            .border(
+                                1.dp,
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color.White.copy(alpha = 0.18f),
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
+                                        Color.White.copy(alpha = 0.12f)
+                                    )
+                                ),
+                                RoundedCornerShape(28.dp)
+                            ),
+                        containerColor = Color.Transparent,
+                        tonalElevation = 0.dp
+                    ) {
+                        NavigationBarItem(
+                            selected = selectedNavTab == 0,
+                            onClick = {
+                                if (selectedNavTab != 0) {
+                                    AuraHaptic.click(view)
+                                    selectedNavTab = 0
+                                }
+                            },
+                            icon = { Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            label = { Text("Música", fontWeight = if (selectedNavTab == 0) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = Color(0xFF94A3B8),
+                                unselectedTextColor = Color(0xFF94A3B8),
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
                             )
                         )
-                )
-
-                // Aesthetic Navigation Bar
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ) {
-                    NavigationBarItem(
-                        selected = selectedNavTab == 0,
-                        onClick = {
-                            if (selectedNavTab != 0) {
-                                AuraHaptic.click(view)
-                                selectedNavTab = 0
-                            }
-                        },
-                        icon = { Icon(Icons.Default.MusicNote, contentDescription = null) },
-                        label = { Text("Música") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        NavigationBarItem(
+                            selected = selectedNavTab == 1,
+                            onClick = {
+                                if (selectedNavTab != 1) {
+                                    AuraHaptic.click(view)
+                                    selectedNavTab = 1
+                                }
+                            },
+                            icon = { Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            label = { Text("Explorar", fontWeight = if (selectedNavTab == 1) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = Color(0xFF94A3B8),
+                                unselectedTextColor = Color(0xFF94A3B8),
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                            )
                         )
-                    )
-                    NavigationBarItem(
-                        selected = selectedNavTab == 1,
-                        onClick = {
-                            if (selectedNavTab != 1) {
-                                AuraHaptic.click(view)
-                                selectedNavTab = 1
-                            }
-                        },
-                        icon = { Icon(Icons.Default.Explore, contentDescription = null) },
-                        label = { Text("Explorar") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        NavigationBarItem(
+                            selected = selectedNavTab == 2,
+                            onClick = {
+                                if (selectedNavTab != 2) {
+                                    AuraHaptic.click(view)
+                                    selectedNavTab = 2
+                                }
+                            },
+                            icon = { Icon(Icons.Default.VideoLibrary, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            label = { Text("Videos", fontWeight = if (selectedNavTab == 2) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = Color(0xFF94A3B8),
+                                unselectedTextColor = Color(0xFF94A3B8),
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                            )
                         )
-                    )
-                    NavigationBarItem(
-                        selected = selectedNavTab == 2,
-                        onClick = {
-                            if (selectedNavTab != 2) {
-                                AuraHaptic.click(view)
-                                selectedNavTab = 2
-                            }
-                        },
-                        icon = { Icon(Icons.Default.VideoLibrary, contentDescription = null) },
-                        label = { Text("Videos") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        NavigationBarItem(
+                            selected = selectedNavTab == 3,
+                            onClick = {
+                                if (selectedNavTab != 3) {
+                                    AuraHaptic.click(view)
+                                    selectedNavTab = 3
+                                }
+                            },
+                            icon = { Icon(Icons.Default.Equalizer, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            label = { Text("Ecualizador", fontWeight = if (selectedNavTab == 3) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = Color(0xFF94A3B8),
+                                unselectedTextColor = Color(0xFF94A3B8),
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                            )
                         )
-                    )
-                    NavigationBarItem(
-                        selected = selectedNavTab == 3,
-                        onClick = {
-                            if (selectedNavTab != 3) {
-                                AuraHaptic.click(view)
-                                selectedNavTab = 3
-                            }
-                        },
-                        icon = { Icon(Icons.Default.Equalizer, contentDescription = null) },
-                        label = { Text("Ecualizador") },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        )
-                    )
+                    }
                 }
             }
         }
