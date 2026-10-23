@@ -6,27 +6,37 @@ import android.content.SharedPreferences
 class FavoritesManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("aura_favorites", Context.MODE_PRIVATE)
 
-    fun isFavorite(songId: Long): Boolean {
-        return prefs.getBoolean("fav_$songId", false)
+    private val cache: MutableSet<Long> = try {
+        prefs.all.filter { it.key.startsWith("fav_") && it.value == true }
+            .mapNotNull { it.key.removePrefix("fav_").toLongOrNull() }
+            .toMutableSet()
+    } catch (_: Exception) {
+        mutableSetOf()
     }
 
-    fun toggleFavorite(songId: Long): Boolean {
-        val current = isFavorite(songId)
+    fun isFavorite(songId: Long): Boolean = synchronized(cache) {
+        cache.contains(songId)
+    }
+
+    fun toggleFavorite(songId: Long): Boolean = synchronized(cache) {
+        val current = cache.contains(songId)
         if (current) {
+            cache.remove(songId)
             prefs.edit().remove("fav_$songId").apply()
         } else {
+            cache.add(songId)
             prefs.edit().putBoolean("fav_$songId", true).apply()
         }
-        return !current
+        !current
     }
 
-    fun getFavoriteIds(): Set<Long> {
-        return prefs.all.filter { it.key.startsWith("fav_") && it.value == true }
-            .mapNotNull { it.key.removePrefix("fav_").toLongOrNull() }
-            .toSet()
+    fun getFavoriteIds(): Set<Long> = synchronized(cache) {
+        cache.toSet()
     }
 
-    fun setFavorites(ids: Set<Long>) {
+    fun setFavorites(ids: Set<Long>) = synchronized(cache) {
+        cache.clear()
+        cache.addAll(ids)
         val editor = prefs.edit()
         prefs.all.keys.filter { it.startsWith("fav_") }.forEach { editor.remove(it) }
         ids.forEach { editor.putBoolean("fav_$it", true) }

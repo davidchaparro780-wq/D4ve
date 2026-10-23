@@ -133,6 +133,8 @@ import com.auraplayer.ui.components.CanvasLoopsOverlay
 import com.auraplayer.ui.components.CanvasLoopTheme
 import com.auraplayer.ui.components.AudioQualityDialog
 import com.auraplayer.ui.components.WaveformVisualizer
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.FastRewind
@@ -380,12 +382,8 @@ fun PlayerScreen(
         com.auraplayer.audio.ABRepeatManager.instance.clear()
     }
 
-    LaunchedEffect(currentPositionMs, isAbLoopActive, abLoopA, abLoopB, isPlaying) {
-        if (isAbLoopActive && abLoopA != null && abLoopB != null && isPlaying) {
-            if (currentPositionMs >= abLoopB!!) {
-                onSeek(abLoopA!!)
-            }
-        }
+    if (isAbLoopActive && abLoopA != null && abLoopB != null && isPlaying && currentPositionMs >= abLoopB!!) {
+        onSeek(abLoopA!!)
     }
 
     LaunchedEffect(showSeekBadge) {
@@ -604,19 +602,8 @@ fun PlayerScreen(
         }
     }
 
-    // Visualizer wave phase animation
+    // Anti-Gravity Levitation Oscillation (Evaluated in Layout phase to eliminate 120 FPS recompositions)
     val infiniteTransition = rememberInfiniteTransition(label = "player_infinite")
-    val visualizerPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = (2 * Math.PI).toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = AnimRepeatMode.Restart
-        ),
-        label = "visualizerPhase"
-    )
-
-    // Anti-Gravity Levitation Oscillation (Organic Floating)
     val levitationPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = (2 * Math.PI).toFloat(),
@@ -626,7 +613,6 @@ fun PlayerScreen(
         ),
         label = "levitationPhase"
     )
-    val levitationOffsetDp = (kotlin.math.sin(levitationPhase) * 6f).dp
 
     val audioBadgeText = remember(currentMedia.path) {
         val ext = File(currentMedia.path).extension.lowercase()
@@ -1096,7 +1082,7 @@ fun PlayerScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset(y = levitationOffsetDp)
+                                        .offset { IntOffset(0, (kotlin.math.sin(levitationPhase) * 6.dp.toPx()).roundToInt()) }
                                         .padding(vertical = 4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -1149,7 +1135,7 @@ fun PlayerScreen(
                                     modifier = Modifier
                                         .width(maxArtSize)
                                         .height(maxArtSize * 0.65f)
-                                        .offset(y = levitationOffsetDp)
+                                        .offset { IntOffset(0, (kotlin.math.sin(levitationPhase) * 6.dp.toPx()).roundToInt()) }
                                         .pointerInput(Unit) {
                                             detectTapGestures(
                                                 onTap = {
@@ -1164,7 +1150,7 @@ fun PlayerScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset(y = levitationOffsetDp)
+                                        .offset { IntOffset(0, (kotlin.math.sin(levitationPhase) * 6.dp.toPx()).roundToInt()) }
                                         .clip(RoundedCornerShape(28.dp))
                                         .background(
                                             Brush.verticalGradient(
