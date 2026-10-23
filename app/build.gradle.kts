@@ -14,8 +14,8 @@ android {
         applicationId = "com.auraplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 119
-        versionName = "4.9.19"
+        versionCode = 120
+        versionName = "4.9.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -99,7 +99,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     // NewPipeExtractor (YouTube Stream Extractor) & OkHttp
-    implementation("com.github.teamnewpipe:NewPipeExtractor:v0.26.3")
+    implementation("com.github.teamnewpipe:NewPipeExtractor:v0.26.5")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Palette API for dynamic album art color extraction

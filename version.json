@@ -1,7 +1,7 @@
 {
-  "versionCode": 119,
-  "versionName": "4.9.19",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.19/app-debug.apk",
-  "changelog": "🛡️ DaVE Player v4.9.19 (Build 119) — Arquitectura Anti-Bloqueo de YouTube Multi-Capa:\n• 🚀 Bye-Bye Error 403 Forbidden: Implementada la arquitectura multi-capa de clientes InnerTube (iOS 19.45.4 & Smart TV TVHTML5) que no exigen PO-Tokens ni verificaciones BotGuard de Google.\n• 🌐 Cobalt API Gateway Integrado: Microservicio distribuido de alta velocidad que resuelve streams de audio y video desde servidores proxy externos cuando hay restricciones de IP local.\n• 🔄 Sincronización Dinámica de User-Agent: Descargas de googlevideo con User-Agent exacto según el cliente de origen (iOS/TV/Android) y sin compresión gzip corrupta, eliminando rechazos en streams por rangos.\n• 🔁 Auto-Recuperación Inteligente con 3 Reintentos: Si una descarga de audio o video encuentra un enlace temporal bloqueado o expirado, se re-resuelve en caliente al instante con fallback HQ a Deezer.\n• 🎬 Descargas de Video MP4 Robustas: Descarga videos musicales completos muxed (audio + video 720p/360p) directamente a tu galería Movies/DaVEPlayer sin fallos ni bloqueos.",
-  "fileSizeMb": 24.6
+  "versionCode": 120,
+  "versionName": "4.9.20",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.20/app-debug.apk",
+  "changelog": "✨ DaVE Player v4.9.20 (Build 120) — UI RYT Music & Motor Anti-Bloqueo Definitivo:\n• 🎨 Nueva UI de Descarga Estilo RYT Music: Elegante Modal BottomSheet con selección intuitiva de formato y calidad: Audio HQ (320 kbps), Audio Ligero (128 kbps), Video HD (720p MP4) y Video SD (360p MP4), con cálculo de peso estimado en MB y barra de progreso en vivo.\n• ⚡ Clientes InnerTube de Próxima Generación: Integrado ANDROID_VR (Meta Quest) y VISIONOS (Apple Vision Pro) que no requieren BotGuard ni sufren limitaciones de PO-Tokens, entregando streams de audio puro adaptive a máxima velocidad.\n• 🛡️ Anti-Bloqueo VEVO Resuelto al 100%: Añadido soporte InnerTube ANDROID 21.26.364 para canciones comerciales protegidas (Despacito, Bohemian Rhapsody, etc.) resolviendo streams directos sin el error 400 FAILED_PRECONDITION ni bloqueos.\n• 📦 NewPipeExtractor v0.26.5: Actualizado el motor central de extracción con los parches más recientes de la comunidad de código abierto.\n• 🔄 Sincronización Completa de User-Agents: Descargas blindadas contra códigos 403 Forbidden en servidores googlevideo.",
+  "fileSizeMb": 24.8
 }

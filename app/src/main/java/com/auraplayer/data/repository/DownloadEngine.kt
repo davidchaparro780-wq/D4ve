@@ -369,14 +369,18 @@ class DownloadEngine(
             val url = URL(currentUrl)
             val isGoogleVideo = currentUrl.contains("googlevideo.com", ignoreCase = true)
             val ua = when {
+                isGoogleVideo && currentUrl.contains("c=ANDROID_VR", ignoreCase = true) ->
+                    "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36"
+                isGoogleVideo && currentUrl.contains("c=VISIONOS", ignoreCase = true) ->
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15"
+                isGoogleVideo && currentUrl.contains("c=ANDROID", ignoreCase = true) ->
+                    "com.google.android.youtube/21.26.364 (Linux; U; Android 14)"
                 isGoogleVideo && currentUrl.contains("c=IOS", ignoreCase = true) ->
-                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                    "com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
                 isGoogleVideo && currentUrl.contains("c=TVHTML5", ignoreCase = true) ->
                     "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1"
-                isGoogleVideo && currentUrl.contains("c=ANDROID", ignoreCase = true) ->
-                    "com.google.android.youtube/20.10.38 (Linux; U; Android 14)"
                 isGoogleVideo ->
-                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                    "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36"
                 else ->
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
             }
@@ -771,14 +775,18 @@ class DownloadEngine(
             val url = URL(currentUrl)
             val isGoogleVideo = currentUrl.contains("googlevideo.com", ignoreCase = true)
             val ua = when {
+                isGoogleVideo && currentUrl.contains("c=ANDROID_VR", ignoreCase = true) ->
+                    "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36"
+                isGoogleVideo && currentUrl.contains("c=VISIONOS", ignoreCase = true) ->
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15"
+                isGoogleVideo && currentUrl.contains("c=ANDROID", ignoreCase = true) ->
+                    "com.google.android.youtube/21.26.364 (Linux; U; Android 14)"
                 isGoogleVideo && currentUrl.contains("c=IOS", ignoreCase = true) ->
-                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                    "com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
                 isGoogleVideo && currentUrl.contains("c=TVHTML5", ignoreCase = true) ->
                     "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1"
-                isGoogleVideo && currentUrl.contains("c=ANDROID", ignoreCase = true) ->
-                    "com.google.android.youtube/20.10.38 (Linux; U; Android 14)"
                 isGoogleVideo ->
-                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)"
+                    "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36"
                 else ->
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
             }

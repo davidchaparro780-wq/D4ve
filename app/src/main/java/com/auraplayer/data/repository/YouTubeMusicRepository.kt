@@ -202,13 +202,64 @@ class YouTubeMusicRepository {
         if (videoId.isBlank()) return@withContext null
         refreshRemoteConfigIfNeeded()
 
-        // 1. Primary: InnerTube IOS player (Bypasses PO-Tokens & bot restrictions)
+        // 1. Primary: InnerTube ANDROID_VR player (Zero BotGuard, unthrottled adaptive audio & direct formats)
+        try {
+            val vrUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID_VR",
+                clientVersion = "1.56.21",
+                userAgent = "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36",
+                isVideo = false
+            )
+            if (!vrUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube ANDROID_VR")
+                return@withContext vrUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID_VR para videoId=$videoId", e)
+        }
+
+        // 2. Secondary: InnerTube VISIONOS player (Vision Pro client, direct streams)
+        try {
+            val visionUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "VISIONOS",
+                clientVersion = "1.02",
+                userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15",
+                isVideo = false
+            )
+            if (!visionUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube VISIONOS")
+                return@withContext visionUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en endpoint InnerTube VISIONOS para videoId=$videoId", e)
+        }
+
+        // 3. Tertiary: InnerTube ANDROID player (v21.26.364 with direct muxed MP4 stream for VEVO tracks)
+        try {
+            val androidUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID",
+                clientVersion = "21.26.364",
+                userAgent = "com.google.android.youtube/21.26.364 (Linux; U; Android 14)",
+                isVideo = false
+            )
+            if (!androidUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube ANDROID")
+                return@withContext androidUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID para videoId=$videoId", e)
+        }
+
+        // 4. Quaternary: InnerTube IOS player (v21.26.4)
         try {
             val iosUrl = queryInnerTube(
                 videoId = videoId,
                 clientName = "IOS",
-                clientVersion = "19.45.4",
-                userAgent = "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)",
+                clientVersion = "21.26.4",
+                userAgent = "com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)",
                 deviceModel = "iPhone16,2",
                 isVideo = false
             )
@@ -218,41 +269,6 @@ class YouTubeMusicRepository {
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "Fallo en endpoint InnerTube IOS para videoId=$videoId", e)
-        }
-
-        // 2. Secondary: InnerTube TVHTML5 player (Smart TV client, zero botguard requirement)
-        try {
-            val tvUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "TVHTML5",
-                clientVersion = "7.20250101.12.00",
-                userAgent = "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1",
-                deviceModel = null,
-                isVideo = false
-            )
-            if (!tvUrl.isNullOrBlank()) {
-                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube TVHTML5")
-                return@withContext tvUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en endpoint InnerTube TVHTML5 para videoId=$videoId", e)
-        }
-
-        // 3. Tertiary: InnerTube ANDROID player
-        try {
-            val androidUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "ANDROID",
-                clientVersion = "20.10.38",
-                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14)",
-                isVideo = false
-            )
-            if (!androidUrl.isNullOrBlank()) {
-                AppLog.d(TAG, "Audio resuelto exitosamente vía InnerTube ANDROID")
-                return@withContext androidUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en endpoint InnerTube ANDROID para videoId=$videoId", e)
         }
 
         // 4. Quaternary: Cobalt High-Speed API Gateway (Dedicated anti-blocking server)
@@ -332,13 +348,64 @@ class YouTubeMusicRepository {
     suspend fun resolveVideoStream(videoId: String): String? = withContext(Dispatchers.IO) {
         if (videoId.isBlank()) return@withContext null
 
-        // 1. Primary: InnerTube IOS player (Bypasses PO-Tokens & bot restrictions)
+        // 1. Primary: InnerTube ANDROID_VR player
+        try {
+            val vrUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID_VR",
+                clientVersion = "1.56.21",
+                userAgent = "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36",
+                isVideo = true
+            )
+            if (!vrUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube ANDROID_VR")
+                return@withContext vrUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en InnerTube ANDROID_VR de video para videoId=$videoId", e)
+        }
+
+        // 2. Secondary: InnerTube VISIONOS player
+        try {
+            val visionUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "VISIONOS",
+                clientVersion = "1.02",
+                userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15",
+                isVideo = true
+            )
+            if (!visionUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube VISIONOS")
+                return@withContext visionUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en InnerTube VISIONOS de video para videoId=$videoId", e)
+        }
+
+        // 3. Tertiary: InnerTube ANDROID player (v21.26.364)
+        try {
+            val androidUrl = queryInnerTube(
+                videoId = videoId,
+                clientName = "ANDROID",
+                clientVersion = "21.26.364",
+                userAgent = "com.google.android.youtube/21.26.364 (Linux; U; Android 14)",
+                isVideo = true
+            )
+            if (!androidUrl.isNullOrBlank()) {
+                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube ANDROID")
+                return@withContext androidUrl
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo en InnerTube ANDROID de video para videoId=$videoId", e)
+        }
+
+        // 4. Quaternary: InnerTube IOS player (v21.26.4)
         try {
             val iosUrl = queryInnerTube(
                 videoId = videoId,
                 clientName = "IOS",
-                clientVersion = "19.45.4",
-                userAgent = "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)",
+                clientVersion = "21.26.4",
+                userAgent = "com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_1_1 like Mac OS X; en_US)",
                 deviceModel = "iPhone16,2",
                 isVideo = true
             )
@@ -348,41 +415,6 @@ class YouTubeMusicRepository {
             }
         } catch (e: Exception) {
             AppLog.w(TAG, "Fallo en InnerTube IOS de video para videoId=$videoId", e)
-        }
-
-        // 2. Secondary: InnerTube TVHTML5 player (Smart TV client, zero botguard requirement)
-        try {
-            val tvUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "TVHTML5",
-                clientVersion = "7.20250101.12.00",
-                userAgent = "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/5.0 TV Safari/538.1",
-                deviceModel = null,
-                isVideo = true
-            )
-            if (!tvUrl.isNullOrBlank()) {
-                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube TVHTML5")
-                return@withContext tvUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en InnerTube TVHTML5 de video para videoId=$videoId", e)
-        }
-
-        // 3. Tertiary: InnerTube ANDROID player
-        try {
-            val androidUrl = queryInnerTube(
-                videoId = videoId,
-                clientName = "ANDROID",
-                clientVersion = "20.10.38",
-                userAgent = "com.google.android.youtube/20.10.38 (Linux; U; Android 14)",
-                isVideo = true
-            )
-            if (!androidUrl.isNullOrBlank()) {
-                AppLog.d(TAG, "Video resuelto exitosamente vía InnerTube ANDROID")
-                return@withContext androidUrl
-            }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "Fallo en InnerTube ANDROID de video para videoId=$videoId", e)
         }
 
         // 4. Quaternary: Cobalt High-Speed API Gateway
@@ -517,14 +549,16 @@ class YouTubeMusicRepository {
 
     private fun queryInnerTube(
         videoId: String,
-        clientName: String = "ANDROID",
-        clientVersion: String = "20.10.38",
-        userAgent: String = "com.google.android.youtube/20.10.38 (Linux; U; Android 14)",
+        clientName: String = "ANDROID_VR",
+        clientVersion: String = "1.56.21",
+        userAgent: String = "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36",
         deviceModel: String? = null,
         isVideo: Boolean = false
     ): String? {
         val url = URL("https://www.youtube.com/youtubei/v1/player")
         val clientNumber = when (clientName) {
+            "ANDROID_VR" -> "28"
+            "VISIONOS" -> "101"
             "IOS" -> "5"
             "TVHTML5" -> "85"
             "ANDROID" -> "3"
@@ -549,6 +583,16 @@ class YouTubeMusicRepository {
             put("hl", "es")
             put("gl", "US")
             when (clientName) {
+                "ANDROID_VR" -> {
+                    // ANDROID_VR is lightweight and unthrottled
+                }
+                "VISIONOS" -> {
+                    put("deviceMake", "Apple")
+                    put("deviceModel", "Vision Pro")
+                    put("osName", "visionOS")
+                    put("osVersion", "1.02")
+                    put("platform", "DESKTOP")
+                }
                 "IOS" -> {
                     put("deviceMake", "Apple")
                     put("deviceModel", deviceModel ?: "iPhone16,2")
@@ -869,14 +913,16 @@ class YouTubeMusicRepository {
                 readTimeout = 4000
                 requestMethod = "POST"
                 setRequestProperty("Content-Type", "application/json")
-                setRequestProperty("User-Agent", "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip")
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12; Quest 3) AppleWebKit/537.36")
+                setRequestProperty("X-YouTube-Client-Name", "28")
+                setRequestProperty("X-YouTube-Client-Version", "1.56.21")
                 doOutput = true
             }
             val payload = JSONObject().apply {
                 put("context", JSONObject().apply {
                     put("client", JSONObject().apply {
-                        put("clientName", "ANDROID")
-                        put("clientVersion", "20.10.38")
+                        put("clientName", "ANDROID_VR")
+                        put("clientVersion", "1.56.21")
                         put("hl", "es")
                         put("gl", "US")
                     })
