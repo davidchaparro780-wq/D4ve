@@ -301,12 +301,16 @@ fun PlayerScreen(
     var isEdgeLightingEnabled by remember { mutableStateOf(false) }
     var isSpatial8D by remember { mutableStateOf(EqualizerManager.instance.isSpatial8DEnabled) }
     var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Live Spectrum Waves
-    var isVideoMode by rememberSaveable { mutableStateOf(currentMedia?.isVideo == true) }
+    var isVideoMode by rememberSaveable {
+        mutableStateOf(currentMedia?.isVideo == true ||
+            currentMedia?.path?.endsWith(".mp4", ignoreCase = true) == true ||
+            currentMedia?.path?.endsWith(".mkv", ignoreCase = true) == true)
+    }
 
     LaunchedEffect(currentMedia?.id) {
-        if (currentMedia?.isVideo == true) {
-            isVideoMode = true
-        }
+        isVideoMode = currentMedia?.isVideo == true ||
+            currentMedia?.path?.endsWith(".mp4", ignoreCase = true) == true ||
+            currentMedia?.path?.endsWith(".mkv", ignoreCase = true) == true
     }
     var showSoundboardDialog by remember { mutableStateOf(false) }
     var showSyncedLyricsDialog by remember { mutableStateOf(false) }
@@ -1167,8 +1171,11 @@ fun PlayerScreen(
                     val maxArtSize = minOf(maxWidth * 0.90f, maxHeight * 0.92f)
                     if (isVideoMode) {
                         // Video Player Screen
-                        val activeExo = PlaybackService.activePlayer
-                        val hasVideoTrack = activeExo != null && (currentMedia.isVideo || activeExo.currentTracks.groups.any { it.type == C.TRACK_TYPE_VIDEO })
+                        val isVideoSource = currentMedia.isVideo ||
+                            currentMedia.path.endsWith(".mp4", ignoreCase = true) ||
+                            currentMedia.path.endsWith(".mkv", ignoreCase = true) ||
+                            currentMedia.path.endsWith(".webm", ignoreCase = true)
+                        val hasVideoTrack = activeExo != null && (isVideoSource || activeExo.currentTracks.groups.any { it.type == C.TRACK_TYPE_VIDEO })
 
                         Box(
                             modifier = Modifier
@@ -1685,7 +1692,7 @@ fun PlayerScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedContent(
@@ -1698,14 +1705,16 @@ fun PlayerScreen(
                     ) { t ->
                         Text(
                             text = t,
-                            style = MaterialTheme.typography.titleLarge,
+                            fontSize = 17.sp,
+                            lineHeight = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     AnimatedContent(
                         targetState = currentMedia.artist,
                         transitionSpec = {
@@ -1716,10 +1725,11 @@ fun PlayerScreen(
                     ) { a ->
                         Text(
                             text = "$a • ${currentMedia.album.ifEmpty { "Aura Audio" }}",
-                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                     qualityInfo?.let { q ->
@@ -3461,7 +3471,7 @@ fun PlayerScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = song.title,
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                                         fontWeight = if (isPlayingThis) FontWeight.Bold else FontWeight.Medium,
                                         color = if (isPlayingThis) Color(0xFF38BDF8) else Color.White,
                                         maxLines = 1,
@@ -3469,7 +3479,7 @@ fun PlayerScreen(
                                     )
                                     Text(
                                         text = "${song.artist} • ${song.formattedDuration}",
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                                         color = if (isPlayingThis) Color(0xFF94A3B8) else Color(0xFF64748B),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis

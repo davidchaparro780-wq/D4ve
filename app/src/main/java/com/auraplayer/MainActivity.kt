@@ -2768,6 +2768,11 @@ fun AuraApp(
                                     withContext(Dispatchers.Main) {
                                         songs = reloadedSongs
                                         videos = reloadedVideos
+                                        val match = reloadedSongs.firstOrNull { it.id == song.id || it.path.contains(song.title, ignoreCase = true) }
+                                            ?: reloadedVideos.firstOrNull { it.title.contains(song.title, ignoreCase = true) }
+                                        if (match != null) {
+                                            currentMedia = match
+                                        }
                                     }
                                 }
                             },

@@ -2319,15 +2319,15 @@ fun MusicScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = song.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onBackground,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = "${song.artist} • ${song.formattedDuration}",
-                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -3036,7 +3036,9 @@ fun SongListItem(
                     HighlightedText(
                         text = song.title,
                         query = highlightQuery,
-                        style = MaterialTheme.typography.bodyLarge.copy(
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 14.5.sp,
+                            lineHeight = 19.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                         ),
                         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
@@ -3072,14 +3074,15 @@ fun SongListItem(
                     HighlightedText(
                         text = song.artist,
                         query = highlightQuery,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     Text(
                         text = " • ${song.formattedDuration}",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )

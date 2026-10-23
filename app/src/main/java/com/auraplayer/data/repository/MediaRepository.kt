@@ -183,7 +183,11 @@ class MediaRepository(private val context: Context) {
                 MediaStore.Video.Media.SIZE,
                 MediaStore.Video.Media.DATE_ADDED
             )
-            val videoSelection = "${MediaStore.Video.Media.DATA} LIKE '%DaVEPlayer%'"
+            val videoSelection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                "(${MediaStore.Video.Media.DATA} LIKE '%DaVEPlayer%' OR ${MediaStore.Video.Media.RELATIVE_PATH} LIKE '%DaVEPlayer%')"
+            } else {
+                "${MediaStore.Video.Media.DATA} LIKE '%DaVEPlayer%'"
+            }
             context.contentResolver.query(videoCollection, videoProjection, videoSelection, null, sortOrder)?.use { cursor ->
                 val idCol = cursor.getColumnIndex(MediaStore.Video.Media._ID)
                 val titleCol = cursor.getColumnIndex(MediaStore.Video.Media.TITLE)
@@ -201,9 +205,14 @@ class MediaRepository(private val context: Context) {
                     val rawTitle = if (titleCol >= 0) cursor.getString(titleCol) ?: "Video" else "Video"
                     val duration = if (durationCol >= 0) cursor.getLong(durationCol) else 0L
                     val size = if (sizeCol >= 0) cursor.getLong(sizeCol) else 0L
-                    val dateAdded = if (dateAddedCol >= 0) {
+                    val rawDateAdded = if (dateAddedCol >= 0) {
                         try { cursor.getLong(dateAddedCol) } catch (_: Exception) { 0L }
                     } else 0L
+                    val dateAdded = if (rawDateAdded > 0L) rawDateAdded else {
+                        try {
+                            if (data.isNotBlank()) File(data).lastModified() / 1000L else System.currentTimeMillis() / 1000L
+                        } catch (_: Exception) { System.currentTimeMillis() / 1000L }
+                    }
 
                     var finalArtist = "DaVE Video"
                     var finalTitle = rawTitle

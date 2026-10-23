@@ -1,7 +1,7 @@
 {
-  "versionCode": 125,
-  "versionName": "4.9.25",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.25/app-debug.apk",
-  "changelog": "🎬 DaVE Player v4.9.25 (Build 125) — Modo Dual [ Canción | Video ] & Descarga Automática de Videoclips:\n• 🎬 Switcher [ 🎵 Canción | 🎬 Video ]: Transforma la carátula del reproductor en el videoclip musical sincronizado en tiempo real estilo YouTube Music.\n• 📥 Descarga Automática Dual (Audio + Video): Al descargar cualquier canción, se descarga automáticamente en formato MP4 HD con audio de alta fidelidad, lista para escuchar y ver sin internet.\n• 🏷️ Badge [🎬 VIDEO] en Biblioteca: Las canciones con videoclip muestran una insignia destacada y se integran automáticamente en las secciones de Música y Videos.\n• 📺 Pantalla Completa: Botón de expansión rápida para disfrutar del videoclip en pantalla completa con rotación.",
+  "versionCode": 126,
+  "versionName": "4.9.26",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.26/app-debug.apk",
+  "changelog": "✨ DaVE Player v4.9.26 (Build 126) — Calibración Tipográfica & Corrección de Bugs:\n• 📏 Tipografía Equilibrada y Elegante: Reducción del tamaño excesivo en los títulos de canciones al seleccionarlas en la lista (14.5sp) y en el reproductor principal (17sp bold centrado hasta 2 líneas), evitando recortes agresivos o desbordamientos.\n• 🏷️ Subtítulos y Badges Protegidos: Protección contra desbordamiento en nombres largos de artistas para que los badges [FLAC], [NUEVA] y [🎬 VIDEO] siempre permanezcan visibles.\n• 🔄 Corrección del Modo Video: Resuelto el bug donde el reproductor mantenía el estado de video al pasar a una canción de solo audio.\n• ⚡ Detección y Orden de Videos Descargados: Los videos descargados en Movies/DaVEPlayer y Music/DaVEPlayer ahora ordenan correctamente por fecha reciente incluso si MediaStore tarda en indexar.",
   "fileSizeMb": 24.9
 }
