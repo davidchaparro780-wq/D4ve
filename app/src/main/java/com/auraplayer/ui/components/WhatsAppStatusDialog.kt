@@ -56,6 +56,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.auraplayer.data.repository.WhatsAppStatusItem
 import com.auraplayer.data.repository.WhatsAppStatusManager
+import com.auraplayer.util.AppLog
 import com.auraplayer.util.findActivity
 import kotlinx.coroutines.launch
 
@@ -87,14 +88,24 @@ fun WhatsAppStatusDialog(
     }
     var hasSaf by remember { mutableStateOf(WhatsAppStatusManager.hasSafAccess(context)) }
 
+    var isCurrentlyLoading by remember { mutableStateOf(false) }
+
     fun load() {
+        if (isCurrentlyLoading) return
+        isCurrentlyLoading = true
         isLoading = true
         scope.launch {
-            val loaded = WhatsAppStatusManager.getStatuses(context)
-            statuses = loaded
-            isLoading = false
-            if (loaded.isNotEmpty() && !loaded.any { it.isRecent24h } && selectedFilter == 0) {
-                selectedFilter = 1
+            try {
+                val loaded = WhatsAppStatusManager.getStatuses(context)
+                statuses = loaded
+                if (loaded.isNotEmpty() && !loaded.any { it.isRecent24h } && selectedFilter == 0) {
+                    selectedFilter = 1
+                }
+            } catch (e: Throwable) {
+                AppLog.e("WhatsAppStatusDialog", "Error cargando estados", e)
+            } finally {
+                isLoading = false
+                isCurrentlyLoading = false
             }
         }
     }

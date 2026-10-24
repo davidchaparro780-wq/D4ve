@@ -1,7 +1,7 @@
 {
-  "versionCode": 140,
-  "versionName": "4.9.40",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.40/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.40 (Build 140) — Solución Total a Permisos y Detección de Estados de WhatsApp:\n• 🔄 Auto-Recarga en Tiempo Real (Lifecycle Resume): Al regresar de Ajustes o de WhatsApp, la app detecta automáticamente los permisos concedidos y recarga la lista al instante sin requerir reiniciar la pantalla.\n• 📂 Navegación Recursiva SAF Inteligente: Acceso garantizado a .Statuses sin importar qué carpeta seleccionó el usuario (Media, WhatsApp o com.whatsapp) mediante búsqueda en árbol BFS.\n• 🎯 URI Inicial Directa a Media: El selector del sistema se abre posicionado directamente con el botón 'USAR ESTA CARPETA' activo y seleccionable.\n• 💬 Botón Directo para Abrir WhatsApp: Guía interactiva con un toque para abrir WhatsApp, ver los estados pendientes de descarga y encontrarlos al volver.",
+  "versionCode": 141,
+  "versionName": "4.9.41",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.41/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.41 (Build 141) — Carga Ultra-Rápida Instantánea de Estados de WhatsApp:\n• ⚡ Eliminado el Bloqueo de Carga Infinita: Reemplazado el escaneo masivo de carpetas por búsqueda selectiva y directa de .Statuses en menos de 50ms sin recorrer fotos ni audios de chats.\n• 🛡️ Timeout de Seguridad y Blindaje try-finally: Garantía absoluta de que el indicador de carga se apaga de inmediato y nunca se queda girando.\n• 🎯 Filtrado Inteligente Sin I/O Pesado: Omisión instantánea de archivos legados sin llamadas bloqueantes al sistema de archivos.",
   "fileSizeMb": 25.1
 }
