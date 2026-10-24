@@ -1,7 +1,7 @@
 {
-  "versionCode": 137,
-  "versionName": "4.9.37",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.37/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.37 (Build 137) — Relieve Táctil 3D Global & Purificación de Subtítulos:\n• 🌐 Relieve Táctil 3D Extendido a Toda la App: Se eliminaron por completo los bordes wireframe (.border) y divisores rígidos en Navigation Dock, Smart Resume, Playlists, Carpetas, Artistas, Videos, Ecualizador 10-Bandas, Diálogos de Efectos y Bóveda Secreta.\n• 💡 Iluminación Cenital Física: Cada tarjeta, fila y botón cuenta con sombras de elevación despegadas y gradientes de luz vertical inspirados en consolas de audio de alta gama.\n• ✨ Interfaz Purificada y Minimalista: Eliminados todos los subtítulos innecesarios, textos explicativos largos y leyendas redundantes para una experiencia visual limpia, fluida y directa.",
+  "versionCode": 138,
+  "versionName": "4.9.38",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.38/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.38 (Build 138) — Estados de WhatsApp Recientes 24h & Motor Multi-Tier para Reels de Instagram:\n• ⚡ Estados de WhatsApp Recientes 24h: Detección inteligente de fecha de llegada real (BasicFileAttributes) que separa y prioriza los estados de las últimas 24 horas del historial antiguo, con nuevo chip filtro dedicado y badges relativos ('Hace 15m', 'Hace 2h').\n• 📸 Descargador de Reels de Instagram Reparado: Solucionado el falso error de 'cuenta privada' en videos públicos mediante decodificación completa de URLs JSON escapadas (\\/ y unicode) y motor de extracción resiliente de 5 niveles (Googlebot SSR, Mobile Chrome, FacebookExternalHit, Embed Captioned y Web Info API).\n• 🎨 Pulido Táctil 3D: Reemplazo de bordes wireframe por elevación táctil 3D con sombras en tarjetas de estados de WhatsApp y diálogos de descarga.",
   "fileSizeMb": 24.9
 }

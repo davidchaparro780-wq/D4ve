@@ -64,7 +64,11 @@ object InstagramDownloader {
 
     private fun extractInstagramRef(url: String): InstagramRef? {
         val clean = url.trim().trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
-        val regex = Regex("""(?:instagram\.com|instagr\.am)/(?:share/)?(reel|reels|p|tv)/([A-Za-z0-9_-]+)""", RegexOption.IGNORE_CASE)
+        // Soporta /reel/ID, /reels/ID, /p/ID, /tv/ID, /share/reel/ID, /username/reel/ID, etc.
+        val regex = Regex(
+            """(?:instagram\.com|instagr\.am)/(?:[A-Za-z0-9_.-]+/)?(?:share/)?(reel|reels|p|tv)/([A-Za-z0-9_-]+)""",
+            RegexOption.IGNORE_CASE
+        )
         val match = regex.find(clean) ?: return null
         val rawRoute = match.groupValues[1].lowercase()
         val shortcode = match.groupValues[2]
@@ -72,9 +76,97 @@ object InstagramDownloader {
         return InstagramRef(canonicalRoute, shortcode)
     }
 
+    private fun cleanDecodedUrl(raw: String): String {
+        return raw
+            .replace("\\u0026", "&")
+            .replace("\\u00253D", "%3D")
+            .replace("\\u0025", "%")
+            .replace("\\/", "/")
+            .replace("&amp;", "&")
+            .replace("&quot;", "\"")
+            .replace("&#039;", "'")
+            .trim()
+    }
+
+    /**
+     * Extrae detalles de video (URL mp4, miniatura, título y autor) de cualquier HTML o JSON de Instagram.
+     */
+    private fun extractMediaFromText(text: String, fallbackShortcode: String?): InstagramMediaDetails? {
+        if (text.isBlank()) return null
+
+        // 1. Buscar en array video_versions (máxima calidad de reproducción en Instagram)
+        val versionsRegex = Regex(""""video_versions"\s*:\s*\[\s*\{[^}]*?"url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?\.mp4[^"]*)"""")
+        var videoUrl = versionsRegex.find(text)?.groupValues?.get(1)
+
+        // 2. Buscar url directa .mp4
+        if (videoUrl.isNullOrBlank()) {
+            val urlRegex = Regex(""""url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?\.mp4[^"]*)"""")
+            videoUrl = urlRegex.find(text)?.groupValues?.get(1)
+        }
+
+        // 3. Buscar video_url (embed y oEmbed)
+        if (videoUrl.isNullOrBlank()) {
+            val videoUrlRegex = Regex(""""video_url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?)"[,\s}]""")
+            videoUrl = videoUrlRegex.find(text)?.groupValues?.get(1)
+        }
+
+        // 4. Buscar contentUrl
+        if (videoUrl.isNullOrBlank()) {
+            val contentUrlRegex = Regex(""""contentUrl"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?\.mp4[^"]*)"""")
+            videoUrl = contentUrlRegex.find(text)?.groupValues?.get(1)
+        }
+
+        // 5. Buscar en meta og:video
+        if (videoUrl.isNullOrBlank()) {
+            val ogVideoRegex = Regex("""<meta\s+property=["']og:video(?::secure_url)?["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+            videoUrl = ogVideoRegex.find(text)?.groupValues?.get(1)
+        }
+
+        // 6. Regex directo sobre CDN de Instagram (cdninstagram / fbcdn)
+        if (videoUrl.isNullOrBlank()) {
+            val directCdnRegex = Regex("""https:(?:\\/\\/|//)[a-zA-Z0-9.-]+\.(?:cdninstagram|fbcdn)\.(?:com|net)(?:\\/|/)[^"'\s<>]+\.mp4[^"'\s<>]*""")
+            videoUrl = directCdnRegex.find(text)?.value
+        }
+
+        if (videoUrl.isNullOrBlank()) return null
+
+        val decodedVideoUrl = cleanDecodedUrl(videoUrl)
+
+        // Extraer miniatura
+        val displayUrlRegex = Regex(""""display_url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?)"""")
+        val ogImageRegex = Regex("""<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+        val rawThumb = displayUrlRegex.find(text)?.groupValues?.get(1)
+            ?: ogImageRegex.find(text)?.groupValues?.get(1) ?: ""
+        val decodedThumb = if (rawThumb.isNotBlank()) cleanDecodedUrl(rawThumb) else ""
+
+        // Extraer título
+        val ogTitleRegex = Regex("""<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+        val ogDescRegex = Regex("""<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+        val rawTitle = ogTitleRegex.find(text)?.groupValues?.get(1)
+            ?: ogDescRegex.find(text)?.groupValues?.get(1)
+            ?: "Instagram Reel"
+        val cleanTitle = cleanDecodedUrl(rawTitle)
+            .replace(Regex("""^.+?\s+on\s+Instagram:\s*"""", RegexOption.IGNORE_CASE), "")
+            .trimEnd('"')
+            .ifBlank { "Instagram Reel" }
+
+        // Extraer autor
+        val authorRegex = Regex("""<meta\s+property=["']og:title["']\s+content=["']([^"':]+)\s+on\s+Instagram""", RegexOption.IGNORE_CASE)
+        val author = authorRegex.find(text)?.groupValues?.get(1)?.trim() ?: "Instagram"
+
+        return InstagramMediaDetails(
+            id = fallbackShortcode ?: System.currentTimeMillis().toString(),
+            title = cleanTitle.take(80),
+            author = author,
+            coverUrl = decodedThumb,
+            videoUrl = decodedVideoUrl,
+            isVideo = true
+        )
+    }
+
     /**
      * Resuelve el enlace directo al video (.mp4) de Instagram en máxima calidad sin inicio de sesión
-     * a través de extracción Server-Side Rendering (Googlebot SSR), Embed Captioned y OpenGraph.
+     * a través de un motor multi-tier resiliente (Googlebot SSR, Mobile Chrome Scraper, OpenGraph, Embed Captioned y Web Info API).
      */
     suspend fun resolveInstagram(rawUrl: String): Result<InstagramMediaDetails> = withContext(Dispatchers.IO) {
         val cleanInput = rawUrl.trim().trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
@@ -84,7 +176,7 @@ object InstagramDownloader {
 
         val ref = extractInstagramRef(cleanInput)
         val shortcode = ref?.shortcode ?: run {
-            // Si no se pudo extraer el shortcode directamente, intentamos seguir redirecciones rápidas
+            // Seguir redirecciones rápidas si es un enlace corto o compartido
             var current = cleanInput
             try {
                 val conn = (URL(current).openConnection() as HttpURLConnection).apply {
@@ -110,9 +202,9 @@ object InstagramDownloader {
             cleanInput.substringBefore('?')
         }
 
-        AppLog.d(TAG, "Resolviendo Instagram: raw='$cleanInput' -> targetUrl='$targetUrl' (shortcode=$shortcode)")
+        AppLog.d(TAG, "Resolviendo Instagram Reel: raw='$cleanInput' -> targetUrl='$targetUrl' (shortcode=$shortcode)")
 
-        // 1. Motor 1 (Principal): Googlebot SSR Scraping (Instagram sirve data-sjs con video_versions y CDN .mp4 directos)
+        // 1. Motor 1: Googlebot SSR Scraping (Instagram sirve data-sjs con video_versions y CDN .mp4 directos para crawlers)
         try {
             val conn = (URL(targetUrl).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 12000
@@ -128,103 +220,46 @@ object InstagramDownloader {
                 val html = conn.inputStream.bufferedReader().use { it.readText() }
                 conn.disconnect()
 
-                // A) Buscar en script tags data-sjs
-                val sjsRegex = Regex("""<script\b[^>]*\bdata-sjs[^>]*>(\{.+?\})</script>""", RegexOption.DOT_MATCHES_ALL)
-                for (match in sjsRegex.findAll(html)) {
-                    val block = match.groupValues[1]
-                    if (block.contains("video_versions") || block.contains(".mp4")) {
-                        // Buscar URL de video mp4
-                        val videoUrlRegex = Regex(""""url":"(https:[^"\\]+?\.mp4[^\"]*)"""")
-                        val videoMatch = videoUrlRegex.find(block)?.groupValues?.get(1)
-                        if (!videoMatch.isNullOrBlank()) {
-                            val decodedVideoUrl = videoMatch.replace("\\u0026", "&").replace("\\/", "/")
-                            
-                            // Extraer thumbnail y titulo si estan disponibles
-                            val imgRegex = Regex(""""display_url":"(https:[^"\\]+?)"""")
-                            val thumbMatch = imgRegex.find(block)?.groupValues?.get(1)
-                                ?.replace("\\u0026", "&")?.replace("\\/", "/") ?: ""
-
-                            val titleRegex = Regex("""<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-                            val title = titleRegex.find(html)?.groupValues?.get(1)?.replace("&quot;", "\"") ?: "Instagram Reel"
-
-                            AppLog.d(TAG, "Instagram resuelto con éxito vía Googlebot SSR data-sjs")
-                            return@withContext Result.success(
-                                InstagramMediaDetails(
-                                    id = shortcode ?: System.currentTimeMillis().toString(),
-                                    title = title.take(60),
-                                    author = "Instagram",
-                                    coverUrl = thumbMatch,
-                                    videoUrl = decodedVideoUrl,
-                                    isVideo = true
-                                )
-                            )
-                        }
-                    }
-                }
-
-                // B) Regex directo sobre todo el HTML para encontrar URLs de CDN mp4 (cdninstagram / fbcdn)
-                val directCdnRegex = Regex("""https:\\/\\/[a-zA-Z0-9.-]+\.(?:cdninstagram|fbcdn)\.(?:com|net)\\/[^\s"'<>\\]+?\.mp4[^\s"'<>\\]*""")
-                val directMatch = directCdnRegex.find(html)?.value
-                if (!directMatch.isNullOrBlank()) {
-                    val decoded = directMatch.replace("\\u0026", "&").replace("\\/", "/")
-                    AppLog.d(TAG, "Instagram resuelto con éxito vía CDN Regex en SSR HTML")
-                    return@withContext Result.success(
-                        InstagramMediaDetails(
-                            id = shortcode ?: System.currentTimeMillis().toString(),
-                            title = "Instagram Reel",
-                            author = "Instagram",
-                            coverUrl = "",
-                            videoUrl = decoded,
-                            isVideo = true
-                        )
-                    )
+                val extracted = extractMediaFromText(html, shortcode)
+                if (extracted != null) {
+                    AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 1 (Googlebot SSR)")
+                    return@withContext Result.success(extracted)
                 }
             } else {
                 conn.disconnect()
             }
         } catch (e: Exception) {
-            AppLog.w(TAG, "Googlebot SSR fallo: ${e.message}")
+            AppLog.w(TAG, "Motor 1 (Googlebot SSR) falló: ${e.message}")
         }
 
-        // 2. Motor 2: Embed Captioned scraper
-        if (shortcode != null) {
-            try {
-                val embedUrl = "https://www.instagram.com/p/$shortcode/embed/captioned/"
-                val embedConn = (URL(embedUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 10000
-                    readTimeout = 12000
-                    requestMethod = "GET"
-                    instanceFollowRedirects = true
-                    setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                    setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                }
-
-                if (embedConn.responseCode in 200..299) {
-                    val embedHtml = embedConn.inputStream.bufferedReader().use { it.readText() }
-                    embedConn.disconnect()
-
-                    val videoRegex = Regex(""""video_url":"(https:[^"\\]+?)"""")
-                    val videoMatch = videoRegex.find(embedHtml)?.groupValues?.get(1)
-                    if (!videoMatch.isNullOrBlank()) {
-                        val decodedVideoUrl = videoMatch.replace("\\u0026", "&").replace("\\/", "/")
-                        AppLog.d(TAG, "Instagram resuelto con éxito vía Embed Captioned")
-                        return@withContext Result.success(
-                            InstagramMediaDetails(
-                                id = shortcode,
-                                title = "Instagram Reel",
-                                author = "Instagram",
-                                coverUrl = "",
-                                videoUrl = decodedVideoUrl,
-                                isVideo = true
-                            )
-                        )
-                    }
-                } else {
-                    embedConn.disconnect()
-                }
-            } catch (e: Exception) {
-                AppLog.w(TAG, "Embed Captioned scraper fallo: ${e.message}")
+        // 2. Motor 2: Mobile Chrome SSR Scraper (Pixel User-Agent con headers de navegación reales)
+        try {
+            val conn = (URL(targetUrl).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 10000
+                readTimeout = 12000
+                requestMethod = "GET"
+                instanceFollowRedirects = true
+                setRequestProperty("User-Agent", USER_AGENT)
+                setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+                setRequestProperty("Accept-Language", "es-ES,es;q=0.9,en;q=0.8")
+                setRequestProperty("Sec-Fetch-Mode", "navigate")
+                setRequestProperty("Sec-Fetch-Site", "none")
             }
+
+            if (conn.responseCode in 200..299) {
+                val html = conn.inputStream.bufferedReader().use { it.readText() }
+                conn.disconnect()
+
+                val extracted = extractMediaFromText(html, shortcode)
+                if (extracted != null) {
+                    AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 2 (Mobile Chrome)")
+                    return@withContext Result.success(extracted)
+                }
+            } else {
+                conn.disconnect()
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Motor 2 (Mobile Chrome) falló: ${e.message}")
         }
 
         // 3. Motor 3: OpenGraph Scraper con FacebookExternalHit UA
@@ -242,37 +277,88 @@ object InstagramDownloader {
                 val html = conn.inputStream.bufferedReader().use { it.readText() }
                 conn.disconnect()
 
-                val ogVideoRegex = Regex("""<meta\s+property=["']og:video(?::secure_url)?["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-                val ogImageRegex = Regex("""<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-                val ogTitleRegex = Regex("""<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-
-                val videoMatch = ogVideoRegex.find(html)?.groupValues?.get(1)
-                val imageMatch = ogImageRegex.find(html)?.groupValues?.get(1) ?: ""
-                val titleMatch = ogTitleRegex.find(html)?.groupValues?.get(1) ?: "Reel de Instagram"
-
-                if (!videoMatch.isNullOrBlank()) {
-                    val decodedVideoUrl = videoMatch.replace("&amp;", "&")
-                    val decodedImageUrl = imageMatch.replace("&amp;", "&")
-                    AppLog.d(TAG, "Instagram resuelto con éxito vía OpenGraph Scraper")
-                    return@withContext Result.success(
-                        InstagramMediaDetails(
-                            id = shortcode ?: System.currentTimeMillis().toString(),
-                            title = titleMatch.take(60),
-                            author = "Instagram",
-                            coverUrl = decodedImageUrl,
-                            videoUrl = decodedVideoUrl,
-                            isVideo = true
-                        )
-                    )
+                val extracted = extractMediaFromText(html, shortcode)
+                if (extracted != null) {
+                    AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 3 (FacebookExternalHit)")
+                    return@withContext Result.success(extracted)
                 }
             } else {
                 conn.disconnect()
             }
         } catch (e: Exception) {
-            AppLog.w(TAG, "OpenGraph Scraper fallo: ${e.message}")
+            AppLog.w(TAG, "Motor 3 (FacebookExternalHit) falló: ${e.message}")
         }
 
-        Result.failure(Exception("No se pudo obtener el video de Instagram. Asegúrate de que el enlace sea accesible o que la cuenta sea pública."))
+        // 4. Motor 4: Embed Captioned Scraper (/embed/captioned/)
+        if (shortcode != null) {
+            for (embedPrefix in listOf("p", "reel")) {
+                try {
+                    val embedUrl = "https://www.instagram.com/$embedPrefix/$shortcode/embed/captioned/"
+                    val embedConn = (URL(embedUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 10000
+                        readTimeout = 12000
+                        requestMethod = "GET"
+                        instanceFollowRedirects = true
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                        setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                    }
+
+                    if (embedConn.responseCode in 200..299) {
+                        val embedHtml = embedConn.inputStream.bufferedReader().use { it.readText() }
+                        embedConn.disconnect()
+
+                        val extracted = extractMediaFromText(embedHtml, shortcode)
+                        if (extracted != null) {
+                            AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 4 (Embed Captioned $embedPrefix)")
+                            return@withContext Result.success(extracted)
+                        }
+                    } else {
+                        embedConn.disconnect()
+                    }
+                } catch (e: Exception) {
+                    AppLog.w(TAG, "Motor 4 (Embed $embedPrefix) falló: ${e.message}")
+                }
+            }
+        }
+
+        // 5. Motor 5: Web Info API con App ID oficial de Instagram Web
+        if (shortcode != null) {
+            try {
+                val apiUrls = listOf(
+                    "https://www.instagram.com/api/v1/media/web_info/?shortcode=$shortcode",
+                    "https://www.instagram.com/reel/$shortcode/?__a=1&__d=dis"
+                )
+                for (apiUrl in apiUrls) {
+                    val apiConn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 10000
+                        readTimeout = 12000
+                        requestMethod = "GET"
+                        instanceFollowRedirects = true
+                        setRequestProperty("User-Agent", USER_AGENT)
+                        setRequestProperty("X-IG-App-ID", "936619743392459")
+                        setRequestProperty("X-Requested-With", "XMLHttpRequest")
+                        setRequestProperty("Accept", "application/json, text/plain, */*")
+                    }
+
+                    if (apiConn.responseCode in 200..299) {
+                        val jsonText = apiConn.inputStream.bufferedReader().use { it.readText() }
+                        apiConn.disconnect()
+
+                        val extracted = extractMediaFromText(jsonText, shortcode)
+                        if (extracted != null) {
+                            AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 5 (Web Info API)")
+                            return@withContext Result.success(extracted)
+                        }
+                    } else {
+                        apiConn.disconnect()
+                    }
+                }
+            } catch (e: Exception) {
+                AppLog.w(TAG, "Motor 5 (Web Info API) falló: ${e.message}")
+            }
+        }
+
+        Result.failure(Exception("No se pudo obtener el video de este Reel. Comprueba tu conexión a internet o asegúrate de que el enlace sea accesible."))
     }
 
     /**

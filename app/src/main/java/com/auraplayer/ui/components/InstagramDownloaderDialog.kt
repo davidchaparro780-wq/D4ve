@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -230,17 +231,27 @@ fun InstagramDownloaderDialog(
 
                 if (resolveError != null) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFEF4444).copy(alpha = 0.15f))
-                            .padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFEF4444).copy(alpha = 0.12f))
+                            .padding(12.dp)
                     ) {
-                        Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = resolveError ?: "", color = Color(0xFFFCA5A5), fontSize = 12.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = resolveError ?: "", color = Color(0xFFFCA5A5), fontSize = 12.sp, modifier = Modifier.weight(1f))
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            onClick = { resolveLink(urlInput) },
+                            modifier = Modifier.fillMaxWidth().height(36.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE1306C).copy(alpha = 0.85f))
+                        ) {
+                            Text("Reintentar Extracción", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
                     }
                 }
 
@@ -253,9 +264,9 @@ fun InstagramDownloaderDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .shadow(12.dp, RoundedCornerShape(18.dp))
                                 .clip(RoundedCornerShape(18.dp))
                                 .background(Color(0xFF1E1530))
-                                .border(1.dp, Color(0xFFE1306C).copy(alpha = 0.3f), RoundedCornerShape(18.dp))
                                 .padding(12.dp)
                         ) {
                             Row(

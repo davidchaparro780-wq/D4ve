@@ -46,6 +46,10 @@ import com.auraplayer.data.repository.WhatsAppStatusItem
 import com.auraplayer.data.repository.WhatsAppStatusManager
 import kotlinx.coroutines.launch
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.draw.shadow
+
 @Composable
 fun WhatsAppStatusDialog(
     onDismiss: () -> Unit,
@@ -56,15 +60,23 @@ fun WhatsAppStatusDialog(
 
     var statuses by remember { mutableStateOf<List<WhatsAppStatusItem>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    var selectedFilter by remember { mutableIntStateOf(0) } // 0: Todos, 1: Videos, 2: Fotos
+    // 0: Recientes 24h, 1: Todos, 2: Videos, 3: Fotos
+    var selectedFilter by remember { mutableIntStateOf(0) }
     var savedSet by remember { mutableStateOf<Set<String>>(emptySet()) }
     var previewItem by remember { mutableStateOf<WhatsAppStatusItem?>(null) }
+
+    val recentStatuses = remember(statuses) { statuses.filter { it.isRecent24h } }
 
     fun load() {
         isLoading = true
         scope.launch {
-            statuses = WhatsAppStatusManager.getStatuses(context)
+            val loaded = WhatsAppStatusManager.getStatuses(context)
+            statuses = loaded
             isLoading = false
+            // Si no hay estados recientes en las ultimas 24h pero si hay en el historial, seleccionar "Todos"
+            if (loaded.isNotEmpty() && !loaded.any { it.isRecent24h } && selectedFilter == 0) {
+                selectedFilter = 1
+            }
         }
     }
 
@@ -74,8 +86,10 @@ fun WhatsAppStatusDialog(
 
     val filteredList = remember(statuses, selectedFilter) {
         when (selectedFilter) {
-            1 -> statuses.filter { it.isVideo }
-            2 -> statuses.filter { !it.isVideo }
+            0 -> statuses.filter { it.isRecent24h }
+            1 -> statuses
+            2 -> statuses.filter { it.isVideo }
+            3 -> statuses.filter { !it.isVideo }
             else -> statuses
         }
     }
@@ -111,7 +125,12 @@ fun WhatsAppStatusDialog(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text("Estados de WhatsApp", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text("Guardar fotos y videos antes de que se borren", color = Color(0xFF25D366), fontSize = 11.sp)
+                            Text(
+                                if (selectedFilter == 0) "⚡ Mostrando recientes de las últimas 24h" else "Guardar fotos y videos antes de que se borren",
+                                color = Color(0xFF25D366),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
 
@@ -127,21 +146,41 @@ fun WhatsAppStatusDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Chips de filtro
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Chips de filtro con scroll horizontal
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     FilterChip(
                         selected = selectedFilter == 0,
                         onClick = { selectedFilter = 0 },
-                        label = { Text("Todos (${statuses.size})", fontSize = 12.sp) }
+                        label = {
+                            Text(
+                                text = "⚡ Recientes 24h (${recentStatuses.size})",
+                                fontSize = 12.sp,
+                                fontWeight = if (selectedFilter == 0) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF25D366).copy(alpha = 0.25f),
+                            selectedLabelColor = Color(0xFF25D366)
+                        )
                     )
                     FilterChip(
                         selected = selectedFilter == 1,
                         onClick = { selectedFilter = 1 },
-                        label = { Text("🎬 Videos (${statuses.count { it.isVideo }})", fontSize = 12.sp) }
+                        label = { Text("📁 Todos (${statuses.size})", fontSize = 12.sp) }
                     )
                     FilterChip(
                         selected = selectedFilter == 2,
                         onClick = { selectedFilter = 2 },
+                        label = { Text("🎬 Videos (${statuses.count { it.isVideo }})", fontSize = 12.sp) }
+                    )
+                    FilterChip(
+                        selected = selectedFilter == 3,
+                        onClick = { selectedFilter = 3 },
                         label = { Text("🖼️ Fotos (${statuses.count { !it.isVideo }})", fontSize = 12.sp) }
                     )
                 }
@@ -214,6 +253,23 @@ fun WhatsAppStatusDialog(
                                     shape = RoundedCornerShape(14.dp)
                                 ) {
                                     Text("Conceder Permiso en Ajustes", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                            } else if (selectedFilter == 0 && statuses.isNotEmpty()) {
+                                Text("⚡ Sin estados en las últimas 24h", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    "No hay estados recientes guardados en las últimas 24 horas, pero tienes ${statuses.size} estados guardados en tu historial.",
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    onClick = { selectedFilter = 1 },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Text("Ver Historial Completo (${statuses.size})", color = Color.White, fontWeight = FontWeight.Bold)
                                 }
                             } else {
                                 Text("👀 No hay estados vistos aún", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -465,6 +521,7 @@ private fun WhatsAppStatusCard(
     Box(
         modifier = Modifier
             .aspectRatio(0.75f)
+            .shadow(8.dp, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFF182032))
             .clickable(onClick = onClick)
@@ -536,6 +593,26 @@ private fun WhatsAppStatusCard(
                     fontWeight = FontWeight.Bold
                 )
             }
+        }
+
+        // Indicador de tiempo / frescura en esquina superior derecha
+        Box(
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.TopEnd)
+                .clip(RoundedCornerShape(6.dp))
+                .background(
+                    if (item.isRecent24h) Color(0xFF059669).copy(alpha = 0.9f)
+                    else Color.Black.copy(alpha = 0.65f)
+                )
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Text(
+                text = item.getRelativeTimeSpan(),
+                color = Color.White,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         // Botones inferiores: Compartir y Guardar

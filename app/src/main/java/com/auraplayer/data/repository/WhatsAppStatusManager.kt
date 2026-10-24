@@ -27,8 +27,28 @@ data class WhatsAppStatusItem(
     val isVideo: Boolean,
     val timestamp: Long,
     val size: Long,
+    val isRecent24h: Boolean = (System.currentTimeMillis() - timestamp) in 0L..(24L * 60 * 60 * 1000L),
     val path: String = file.absolutePath
-)
+) {
+    fun getRelativeTimeSpan(): String {
+        val diff = System.currentTimeMillis() - timestamp
+        if (diff < 0) return "Ahora"
+        val minutes = diff / (60 * 1000)
+        val hours = diff / (60 * 60 * 1000)
+        val days = diff / (24 * 60 * 60 * 1000)
+        return when {
+            minutes < 1 -> "Hace un momento"
+            minutes < 60 -> "Hace ${minutes}m"
+            hours < 24 -> "Hace ${hours}h"
+            days == 1L -> "Ayer"
+            days < 7 -> "Hace ${days}d"
+            else -> {
+                val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                sdf.format(java.util.Date(timestamp))
+            }
+        }
+    }
+}
 
 object WhatsAppStatusManager {
     private const val TAG = "WhatsAppStatusManager"
@@ -50,10 +70,14 @@ object WhatsAppStatusManager {
     )
 
     /**
-     * Obtiene la lista de todos los estados vistos de WhatsApp en el dispositivo.
+     * Obtiene la lista de todos los estados vistos de WhatsApp en el dispositivo,
+     * priorizando de forma inteligente los estados de las últimas 24 horas y resolviendo
+     * la fecha real de llegada mediante BasicFileAttributes.
      */
     suspend fun getStatuses(context: Context): List<WhatsAppStatusItem> = withContext(Dispatchers.IO) {
         val list = mutableListOf<WhatsAppStatusItem>()
+        val now = System.currentTimeMillis()
+
         for (dir in POTENTIAL_STATUS_DIRS) {
             if (dir.exists() && dir.isDirectory) {
                 val files = dir.listFiles() ?: continue
@@ -68,12 +92,32 @@ object WhatsAppStatusManager {
                             } catch (_: Exception) {
                                 Uri.fromFile(file)
                             }
+
+                            // Resolver timestamp real de llegada al dispositivo
+                            val resolvedTimestamp = try {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    val attrs = java.nio.file.Files.readAttributes(
+                                        file.toPath(),
+                                        java.nio.file.attribute.BasicFileAttributes::class.java
+                                    )
+                                    val creation = attrs.creationTime().toMillis()
+                                    val modified = attrs.lastModifiedTime().toMillis()
+                                    val fileMod = file.lastModified()
+                                    val candidates = listOf(creation, modified, fileMod).filter { it in 1L..(now + 60_000L) }
+                                    candidates.maxOrNull() ?: fileMod
+                                } else {
+                                    file.lastModified()
+                                }
+                            } catch (_: Throwable) {
+                                file.lastModified()
+                            }
+
                             list.add(
                                 WhatsAppStatusItem(
                                     file = file,
                                     uri = uri,
                                     isVideo = isVideo,
-                                    timestamp = file.lastModified(),
+                                    timestamp = resolvedTimestamp,
                                     size = file.length()
                                 )
                             )
@@ -82,8 +126,13 @@ object WhatsAppStatusManager {
                 }
             }
         }
-        // Ordenar del más reciente al más antiguo
-        list.sortedByDescending { it.timestamp }
+
+        // Ordenar con máxima prioridad para las últimas 24 horas, y dentro de cada grupo por el más reciente
+        list.sortWith(
+            compareByDescending<WhatsAppStatusItem> { it.isRecent24h }
+                .thenByDescending { it.timestamp }
+        )
+        list
     }
 
     /**
