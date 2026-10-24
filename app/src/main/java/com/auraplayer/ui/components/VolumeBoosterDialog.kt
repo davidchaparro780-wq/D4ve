@@ -129,9 +129,13 @@ fun VolumeBoosterDialog(
                 Box(
                     modifier = Modifier
                         .size(110.dp)
+                        .shadow(12.dp, CircleShape, spotColor = boostColor.copy(alpha = 0.5f))
                         .clip(CircleShape)
-                        .background(Color(0xFF1E293B))
-                        .border(3.dp, boostColor.copy(alpha = 0.6f), CircleShape),
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF232D48), Color(0xFF101626))
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
