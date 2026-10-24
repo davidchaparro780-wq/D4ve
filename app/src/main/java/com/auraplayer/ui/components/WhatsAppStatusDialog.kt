@@ -1,12 +1,15 @@
 package com.auraplayer.ui.components
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -47,9 +50,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.auraplayer.data.repository.WhatsAppStatusItem
 import com.auraplayer.data.repository.WhatsAppStatusManager
+import com.auraplayer.util.findActivity
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,6 +66,7 @@ fun WhatsAppStatusDialog(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val activity = remember(context) { context.findActivity() as? ComponentActivity }
 
     var statuses by remember { mutableStateOf<List<WhatsAppStatusItem>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -67,11 +75,17 @@ fun WhatsAppStatusDialog(
     var savedSet by remember { mutableStateOf<Set<String>>(emptySet()) }
     var previewItem by remember { mutableStateOf<WhatsAppStatusItem?>(null) }
 
-    val recentStatuses = remember(statuses) { statuses.filter { it.isRecent24h } }
     val isAndroid11Plus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-    val hasStorageManager = if (isAndroid11Plus) Environment.isExternalStorageManager() else true
-    val needsStoragePermission = isAndroid11Plus && !hasStorageManager
-    val hasSaf = remember(statuses) { WhatsAppStatusManager.hasSafAccess(context) }
+    var hasStoragePermission by remember {
+        mutableStateOf(
+            if (isAndroid11Plus) {
+                Environment.isExternalStorageManager()
+            } else {
+                ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            }
+        )
+    }
+    var hasSaf by remember { mutableStateOf(WhatsAppStatusManager.hasSafAccess(context)) }
 
     fun load() {
         isLoading = true
@@ -85,6 +99,25 @@ fun WhatsAppStatusDialog(
         }
     }
 
+    // Observador de Ciclo de Vida: al regresar de Ajustes o de WhatsApp, recargar automáticamente
+    DisposableEffect(activity) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                hasStoragePermission = if (isAndroid11Plus) {
+                    Environment.isExternalStorageManager()
+                } else {
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                }
+                hasSaf = WhatsAppStatusManager.hasSafAccess(context)
+                load()
+            }
+        }
+        activity?.lifecycle?.addObserver(observer)
+        onDispose {
+            activity?.lifecycle?.removeObserver(observer)
+        }
+    }
+
     val safLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
@@ -93,6 +126,7 @@ fun WhatsAppStatusDialog(
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(uri, flags)
                 WhatsAppStatusManager.saveTreeUri(context, uri)
+                hasSaf = true
                 Toast.makeText(context, "✅ Carpeta de WhatsApp vinculada con éxito", Toast.LENGTH_SHORT).show()
                 load()
             } catch (e: Exception) {
@@ -101,10 +135,18 @@ fun WhatsAppStatusDialog(
         }
     }
 
+    val legacyPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasStoragePermission = granted
+        if (granted) load()
+    }
+
     LaunchedEffect(Unit) {
         load()
     }
 
+    val recentStatuses = remember(statuses) { statuses.filter { it.isRecent24h } }
     val filteredList = remember(statuses, selectedFilter) {
         when (selectedFilter) {
             0 -> statuses.filter { it.isRecent24h }
@@ -167,8 +209,8 @@ fun WhatsAppStatusDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Banner de Permiso Global (si falta en Android 11+)
-                if (needsStoragePermission) {
+                // Banner de Permiso de Archivos (solo si no tiene acceso ni por sistema ni por SAF)
+                if (!hasStoragePermission && !hasSaf) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -189,7 +231,11 @@ fun WhatsAppStatusDialog(
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "En Android 11+ los estados se guardan en carpetas protegidas. Activa el acceso a todos los archivos para leer estados recientes.",
+                            text = if (isAndroid11Plus) {
+                                "En Android 11+ WhatsApp guarda los estados en carpetas protegidas. Activa el permiso para poder detectarlos automáticamente."
+                            } else {
+                                "Se requiere permiso de lectura de almacenamiento para mostrar los estados de WhatsApp."
+                            },
                             color = Color(0xFFD1D5DB),
                             fontSize = 11.sp,
                             lineHeight = 15.sp
@@ -197,31 +243,40 @@ fun WhatsAppStatusDialog(
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                try {
-                                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                                        data = Uri.parse("package:${context.packageName}")
-                                    }
-                                    context.startActivity(intent)
-                                } catch (_: Exception) {
+                                if (isAndroid11Plus) {
                                     try {
-                                        val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                                        val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                            data = Uri.parse("package:${context.packageName}")
+                                        }
                                         context.startActivity(intent)
                                     } catch (_: Exception) {
-                                        Toast.makeText(context, "Abre Ajustes > Permisos para conceder acceso", Toast.LENGTH_LONG).show()
+                                        try {
+                                            val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {
+                                            Toast.makeText(context, "Abre Ajustes > Permisos para conceder acceso", Toast.LENGTH_LONG).show()
+                                        }
                                     }
+                                } else {
+                                    legacyPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                                 }
                             },
                             modifier = Modifier.fillMaxWidth().height(36.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E0B))
                         ) {
-                            Text("Activar Permiso en Ajustes", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                            Text(
+                                if (isAndroid11Plus) "Activar Acceso a Todos los Archivos" else "Conceder Permiso de Almacenamiento",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                // Banner de Vinculación SAF para Android 11+
+                // Banner de Vinculación SAF para Android 11+ (si no tiene SAF vinculado o no hay estados recientes)
                 if (isAndroid11Plus && (!hasSaf || recentStatuses.isEmpty())) {
                     Column(
                         modifier = Modifier
@@ -243,8 +298,8 @@ fun WhatsAppStatusDialog(
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("¿No ves los estados que acabas de mirar?", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                Text("Vincula la carpeta de WhatsApp con 1 toque para que aparezcan en tiempo real.", color = Color(0xFF86EFAC), fontSize = 10.sp)
+                                Text("Vincular Carpeta de WhatsApp (SAF)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Text("Abre la carpeta Media en el explorador. Solo toca 'USAR ESTA CARPETA' abajo y 'Permitir'.", color = Color(0xFF86EFAC), fontSize = 10.sp)
                             }
                         }
                         Spacer(modifier = Modifier.height(10.dp))
@@ -252,8 +307,8 @@ fun WhatsAppStatusDialog(
                             Button(
                                 onClick = {
                                     try {
-                                        val intent = WhatsAppStatusManager.createOpenStatusesFolderIntent(isBusiness = false)
-                                        safLauncher.launch(intent.getParcelableExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI))
+                                        val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = false)
+                                        safLauncher.launch(initialUri)
                                     } catch (_: Exception) {
                                         safLauncher.launch(null)
                                     }
@@ -268,8 +323,8 @@ fun WhatsAppStatusDialog(
                             OutlinedButton(
                                 onClick = {
                                     try {
-                                        val intent = WhatsAppStatusManager.createOpenStatusesFolderIntent(isBusiness = true)
-                                        safLauncher.launch(intent.getParcelableExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI))
+                                        val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = true)
+                                        safLauncher.launch(initialUri)
                                     } catch (_: Exception) {
                                         safLauncher.launch(null)
                                     }
@@ -335,13 +390,13 @@ fun WhatsAppStatusDialog(
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(28.dp)
+                            modifier = Modifier.padding(24.dp)
                         ) {
                             if (selectedFilter == 0 && statuses.isNotEmpty()) {
                                 Text("⚡ Sin estados en las últimas 24h", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    "No hay estados recientes vistos en las últimas 24 horas, pero tienes ${statuses.size} estados guardados en tu historial.",
+                                    "Tienes ${statuses.size} estados en tu historial. Puedes verlos todos en la pestaña 'Todos'.",
                                     color = Color(0xFF94A3B8),
                                     fontSize = 13.sp,
                                     textAlign = TextAlign.Center
@@ -355,21 +410,47 @@ fun WhatsAppStatusDialog(
                                     Text("Ver Historial Completo (${statuses.size})", color = Color.White, fontWeight = FontWeight.Bold)
                                 }
                             } else {
-                                Text("👀 No hay estados vistos aún", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF25D366).copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Default.Download, contentDescription = null, tint = Color(0xFF25D366), modifier = Modifier.size(30.dp))
+                                }
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text("👀 No hay estados descargados aún", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    "Abre WhatsApp y mira los estados de tus amigos. Al volver aquí aparecerán automáticamente listos para guardarse.",
+                                    "WhatsApp no guarda los estados automáticamente. Primero debes abrir WhatsApp y mirar los estados de tus amigos completos para que tu teléfono los descargue.",
                                     color = Color(0xFF94A3B8),
                                     fontSize = 13.sp,
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 18.sp
                                 )
-                                Spacer(modifier = Modifier.height(14.dp))
-                                Text(
-                                    "💡 Consejo: Recuerda mirar el estado completo en WhatsApp para que tu teléfono termine de descargarlo.",
-                                    color = Color(0xFF86EFAC),
-                                    fontSize = 11.sp,
-                                    textAlign = TextAlign.Center
-                                )
+                                Spacer(modifier = Modifier.height(18.dp))
+                                Button(
+                                    onClick = { WhatsAppStatusManager.openWhatsApp(context) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                                    shape = RoundedCornerShape(14.dp),
+                                    modifier = Modifier.height(44.dp)
+                                ) {
+                                    Icon(Icons.Default.PlayCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Abrir WhatsApp para Mirar Estados", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                OutlinedButton(
+                                    onClick = { load() },
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF86EFAC)),
+                                    modifier = Modifier.height(38.dp)
+                                ) {
+                                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Recargar Estados", fontWeight = FontWeight.Medium, fontSize = 12.sp)
+                                }
                             }
                         }
                     }

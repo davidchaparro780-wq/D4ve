@@ -102,14 +102,25 @@ object WhatsAppStatusManager {
     }
 
     /**
+     * URI inicial para el selector SAF.
+     * Apuntamos a la carpeta visible Media para que el selector del sistema se abra
+     * con el botón "USAR ESTA CARPETA" habilitado y accesible en Android 11 a 15.
+     */
+    fun getStatusesFolderInitialUri(isBusiness: Boolean = false): Uri {
+        val pkg = if (isBusiness) "com.whatsapp.w4b" else "com.whatsapp"
+        val sub = if (isBusiness) "WhatsApp%20Business" else "WhatsApp"
+        val docId = "primary:Android/media/$pkg/$sub/Media"
+        return Uri.parse("content://com.android.externalstorage.documents/document/${Uri.encode(docId)}")
+    }
+
+    /**
      * Construye un Intent de Storage Access Framework que abre el explorador del sistema
-     * directamente dentro de la carpeta oculta .Statuses de WhatsApp en Android 11+.
+     * directamente dentro de la carpeta Media de WhatsApp en Android 11+.
      */
     fun createOpenStatusesFolderIntent(isBusiness: Boolean = false): Intent {
-        val pkg = if (isBusiness) "com.whatsapp.w4b%2FWhatsApp%20Business" else "com.whatsapp%2FWhatsApp"
-        val initialUriStr = "content://com.android.externalstorage.documents/document/primary%3AAndroid%2Fmedia%2F$pkg%2FMedia%2F.Statuses"
+        val initialUri = getStatusesFolderInitialUri(isBusiness)
         return Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.parse(initialUriStr))
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, initialUri)
             addFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or
                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
@@ -117,6 +128,81 @@ object WhatsAppStatusManager {
                 Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
             )
         }
+    }
+
+    /**
+     * Abre directamente la aplicación de WhatsApp o WhatsApp Business para que el usuario
+     * pueda ver los estados de sus contactos y descargarlos al dispositivo.
+     */
+    fun openWhatsApp(context: Context, isBusiness: Boolean = false): Boolean {
+        val pkg = if (isBusiness) "com.whatsapp.w4b" else "com.whatsapp"
+        return try {
+            val pm = context.packageManager
+            val intent = pm.getLaunchIntentForPackage(pkg) ?: Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
+                setPackage(pkg)
+            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            true
+        } catch (e: Exception) {
+            AppLog.w(TAG, "No se pudo abrir WhatsApp ($pkg): ${e.message}")
+            false
+        }
+    }
+
+    /**
+     * Extrae recursivamente los archivos de estados a partir de cualquier carpeta vinculada por SAF
+     * (sea que el usuario haya seleccionado .Statuses, Media, WhatsApp, com.whatsapp o la raíz).
+     */
+    private fun findStatusFilesFromTree(rootDoc: DocumentFile): List<DocumentFile> {
+        val results = mutableListOf<DocumentFile>()
+        val rootName = rootDoc.name ?: ""
+
+        // 1. Si el usuario seleccionó directamente .Statuses
+        if (rootName.equals(".Statuses", ignoreCase = true) || rootName.equals("statuses", ignoreCase = true)) {
+            return rootDoc.listFiles().filter { it.isFile && it.length() > 0 }
+        }
+
+        // 2. Si la carpeta seleccionada contiene directamente la subcarpeta .Statuses
+        val directStatuses = rootDoc.findFile(".Statuses")
+            ?: rootDoc.findFile(".statuses")
+            ?: try {
+                rootDoc.listFiles().firstOrNull { it.isDirectory && it.name?.equals(".Statuses", ignoreCase = true) == true }
+            } catch (_: Exception) { null }
+
+        if (directStatuses != null && directStatuses.isDirectory) {
+            return directStatuses.listFiles().filter { it.isFile && it.length() > 0 }
+        }
+
+        // 3. Búsqueda por cola (BFS) hasta 4 niveles de profundidad para encontrar .Statuses
+        val queue = ArrayDeque<Pair<DocumentFile, Int>>()
+        queue.add(rootDoc to 0)
+
+        while (queue.isNotEmpty()) {
+            val (current, depth) = queue.removeFirst()
+            if (depth > 4) continue
+
+            val children = try { current.listFiles() } catch (_: Exception) { emptyArray() }
+            for (child in children) {
+                val cName = child.name ?: ""
+                if (child.isDirectory) {
+                    if (cName.equals(".Statuses", ignoreCase = true) || cName.equals("statuses", ignoreCase = true)) {
+                        val statusFiles = try { child.listFiles() } catch (_: Exception) { emptyArray() }
+                        results.addAll(statusFiles.filter { it.isFile && it.length() > 0 })
+                    } else if (depth < 3) {
+                        val lower = cName.lowercase()
+                        if (lower == "media" || lower == "whatsapp" || lower == "whatsapp business" || lower.contains("whatsapp") || lower == "android") {
+                            queue.add(child to depth + 1)
+                        }
+                    }
+                } else if (depth == 0 && child.isFile && child.length() > 0) {
+                    // Si el usuario seleccionó una carpeta donde ya residen los archivos
+                    results.add(child)
+                }
+            }
+        }
+        return results
     }
 
     /**
@@ -136,8 +222,8 @@ object WhatsAppStatusManager {
             try {
                 val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
                 if (rootDoc != null && rootDoc.exists()) {
-                    val files = rootDoc.listFiles()
-                    for (doc in files) {
+                    val statusDocFiles = findStatusFilesFromTree(rootDoc)
+                    for (doc in statusDocFiles) {
                         if (doc.isFile && doc.length() > 0) {
                             val name = doc.name?.lowercase() ?: ""
                             if (name.startsWith(".nomedia")) continue
@@ -148,6 +234,7 @@ object WhatsAppStatusManager {
                                 val size = doc.length()
                                 val signature = "${doc.name}_$size"
                                 if (seenSignatures.add(signature)) {
+                                    // Todo archivo que esté en .Statuses vía SAF en Android 11+ es un estado activo del día
                                     list.add(
                                         WhatsAppStatusItem(
                                             file = null,
@@ -155,6 +242,7 @@ object WhatsAppStatusManager {
                                             isVideo = isVideo,
                                             timestamp = time,
                                             size = size,
+                                            isRecent24h = true,
                                             path = doc.uri.toString()
                                         )
                                     )
@@ -169,10 +257,37 @@ object WhatsAppStatusManager {
         }
 
         // 2. Motor de Archivos Físicos (File System)
-        for (dir in POTENTIAL_STATUS_DIRS) {
+        val externalStorage = Environment.getExternalStorageDirectory()
+        val dirsToScan = mutableListOf<File>()
+
+        // Rutas directas estándar
+        dirsToScan.addAll(POTENTIAL_STATUS_DIRS)
+
+        // Variaciones de mayúsculas y minúsculas comunes en fabricantes
+        dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp/WhatsApp/media/.Statuses"))
+        dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp/WhatsApp/media/.statuses"))
+        dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.Statuses"))
+        dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.statuses"))
+
+        // Escaneo dinámico profundo en Android/media/com.whatsapp
+        try {
+            val waMediaRoot = File(externalStorage, "Android/media/com.whatsapp")
+            if (waMediaRoot.exists() && waMediaRoot.isDirectory) {
+                waMediaRoot.listFiles()?.filter { it.isDirectory }?.forEach { appDir ->
+                    appDir.listFiles()?.filter { it.isDirectory && it.name.equals("media", ignoreCase = true) }?.forEach { mDir ->
+                        val dotStat = File(mDir, ".Statuses")
+                        if (dotStat.exists()) dirsToScan.add(dotStat)
+                        val lowerStat = File(mDir, ".statuses")
+                        if (lowerStat.exists()) dirsToScan.add(lowerStat)
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+
+        for (dir in dirsToScan.distinctBy { it.absolutePath }) {
             if (dir.exists() && dir.isDirectory) {
                 val isLegacyDir = !dir.absolutePath.contains("Android/media") && !dir.absolutePath.contains("DualApp")
-                val files = dir.listFiles() ?: continue
+                val files = try { dir.listFiles() } catch (_: Exception) { null } ?: continue
                 for (file in files) {
                     if (file.isFile && !file.name.startsWith(".nomedia") && file.length() > 0) {
                         val name = file.name.lowercase()
@@ -204,6 +319,10 @@ object WhatsAppStatusManager {
                                 continue
                             }
 
+                            // Todo archivo que exista en una carpeta activa de WhatsApp (.Statuses en Android/media)
+                            // está presente porque el usuario lo miró en las últimas 24 horas (WhatsApp purga automáticamente lo vencido).
+                            val isRecent = !isLegacyDir || ((now - resolvedTimestamp) in -600_000L..(24L * 60 * 60 * 1000L))
+
                             val signature = "${file.name}_${file.length()}"
                             if (seenSignatures.add(signature)) {
                                 val uri = try {
@@ -219,6 +338,7 @@ object WhatsAppStatusManager {
                                         isVideo = isVideo,
                                         timestamp = resolvedTimestamp,
                                         size = file.length(),
+                                        isRecent24h = isRecent,
                                         path = file.absolutePath
                                     )
                                 )

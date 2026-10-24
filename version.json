@@ -1,7 +1,7 @@
 {
-  "versionCode": 139,
-  "versionName": "4.9.39",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.39/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.39 (Build 139) — Solución Profunda para Estados de WhatsApp en Android 11-15 (SAF & Purga de Archivos Fantasma):\n• 🛡️ Integración Nativa Storage Access Framework (SAF): Superada la restricción de Scoped Storage y carpetas ocultas (.Statuses) en Android 11, 12, 13, 14 y 15 mediante DocumentFile y Tree URIs persistentes.\n• 🔗 Vinculación en 1 Toque: Tarjeta táctil interactiva que abre el selector del sistema directamente en la carpeta de estados de WhatsApp y WhatsApp Business con un solo toque.\n• 🧹 Purga de Residuos Legados: Eliminación de archivos 'fantasma' de 2021 del almacenamiento antiguo para garantizar que solo se muestren estados recientes reales vistos hoy.\n• ⚡ Pipeline Dual de Lectura y Streaming Universal: Carga combinada de árbol SAF y sistema de archivos físico con soporte nativo de ContentResolver para visualización, guardado en galería y compartir.",
+  "versionCode": 140,
+  "versionName": "4.9.40",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.40/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.40 (Build 140) — Solución Total a Permisos y Detección de Estados de WhatsApp:\n• 🔄 Auto-Recarga en Tiempo Real (Lifecycle Resume): Al regresar de Ajustes o de WhatsApp, la app detecta automáticamente los permisos concedidos y recarga la lista al instante sin requerir reiniciar la pantalla.\n• 📂 Navegación Recursiva SAF Inteligente: Acceso garantizado a .Statuses sin importar qué carpeta seleccionó el usuario (Media, WhatsApp o com.whatsapp) mediante búsqueda en árbol BFS.\n• 🎯 URI Inicial Directa a Media: El selector del sistema se abre posicionado directamente con el botón 'USAR ESTA CARPETA' activo y seleccionable.\n• 💬 Botón Directo para Abrir WhatsApp: Guía interactiva con un toque para abrir WhatsApp, ver los estados pendientes de descarga y encontrarlos al volver.",
   "fileSizeMb": 25.1
 }
