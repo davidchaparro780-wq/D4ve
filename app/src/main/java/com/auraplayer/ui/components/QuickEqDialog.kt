@@ -154,7 +154,7 @@ fun QuickEqDialog(
                         checked = is8D,
                         onCheckedChange = {
                             is8D = it
-                            eq.isSpatial8DEnabled = it
+                            eq.setSpatial8DEnabled(it)
                         },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
@@ -180,7 +180,7 @@ fun QuickEqDialog(
                         eq.setVirtualizerStrength(0)
                         eq.setLoudnessGain(0)
                         playlistManager.setCrossfadeSeconds(0)
-                        eq.isSpatial8DEnabled = false
+                        eq.setSpatial8DEnabled(false)
                     }
                 ) {
                     Icon(Icons.Default.RestartAlt, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(16.dp))

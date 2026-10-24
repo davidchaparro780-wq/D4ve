@@ -45,6 +45,8 @@ sealed class TikTokDownloadProgress {
 }
 
 object TikTokDownloader {
+    private const val TAG = "TikTokDownloader"
+    private const val USER_AGENT = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36"
     private const val CHANNEL_ID = "dave_social_downloads"
     private const val NOTIFICATION_ID = 8841
 

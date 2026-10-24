@@ -464,14 +464,14 @@ fun TikTokDownloaderDialog(
                                         trackColor = Color(0xFF1E293B)
                                     )
                                     Spacer(modifier = Modifier.height(10.dp))
-                                    OutlinedButton(
+                                    Button(
                                         onClick = {
                                             AuraHaptic.click(view)
                                             context.findActivity()?.moveTaskToBack(true)
                                         },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF94A3B8))
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B))
                                     ) {
                                         Icon(Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF94A3B8))
                                         Spacer(modifier = Modifier.width(6.dp))
