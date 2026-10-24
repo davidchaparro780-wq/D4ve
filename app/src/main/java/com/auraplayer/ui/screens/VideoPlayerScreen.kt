@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -534,9 +535,13 @@ fun VideoPlayerScreen(
             ) {
                 Row(
                     modifier = Modifier
+                        .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.45f))
                         .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF0F172A).copy(alpha = 0.94f))
-                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.7f), RoundedCornerShape(24.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1E2842), Color(0xFF0F1524))
+                            )
+                        )
                         .padding(horizontal = 14.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -550,8 +555,13 @@ fun VideoPlayerScreen(
 
                     Box(
                         modifier = Modifier
+                            .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF38BDF8))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF38BDF8), Color(0xFF0284C7))
+                                )
+                            )
                             .clickable {
                                 exoPlayer.seekTo(savedPos)
                                 showResumePrompt = false

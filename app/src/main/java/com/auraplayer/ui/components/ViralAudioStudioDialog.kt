@@ -2,8 +2,8 @@ package com.auraplayer.ui.components
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -131,21 +131,19 @@ fun ViralAudioStudioDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text(
-                    text = "Aplica efectos virales en tiempo real a cualquier canción:",
-                    color = Color(0xFF94A3B8),
-                    fontSize = 12.sp
-                )
-
                 // Grid de Presets Rápidos
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     // 🌙 Slowed + Reverb
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(4.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFF8B5CF6).copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF1E1B4B))
-                            .border(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF281F54), Color(0xFF140F2E))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 eqManager.setSpatial8DEnabled(true)
@@ -159,7 +157,7 @@ fun ViralAudioStudioDialog(
                             Icon(Icons.Default.Nightlight, contentDescription = null, tint = Color(0xFFA78BFA), modifier = Modifier.size(20.dp))
                             Spacer(Modifier.height(4.dp))
                             Text("Slowed", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            Text("+ Reverb", color = Color(0xFFA78BFA), fontSize = 10.sp)
+                            Text("Reverb", color = Color(0xFFA78BFA), fontSize = 10.sp)
                         }
                     }
 
@@ -167,9 +165,13 @@ fun ViralAudioStudioDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(4.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFF97316).copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF431407))
-                            .border(1.dp, Color(0xFFF97316).copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF4C1808), Color(0xFF240A03))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 eqManager.setSpatial8DEnabled(false)
@@ -191,14 +193,18 @@ fun ViralAudioStudioDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(4.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFF10B981).copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF064E3B))
-                            .border(1.dp, Color(0xFF10B981).copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF0C4E38), Color(0xFF06241A))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 eqManager.setSpatial8DEnabled(true)
                                 applyPlayback(1.0f, 0)
-                                Toast.makeText(context, "🌀 Audio 8D Espacial Activo (Ponte audífonos)", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "🌀 Audio 8D Espacial Activo", Toast.LENGTH_SHORT).show()
                             }
                             .padding(vertical = 10.dp, horizontal = 8.dp),
                         contentAlignment = Alignment.Center
@@ -207,7 +213,7 @@ fun ViralAudioStudioDialog(
                             Icon(Icons.Default.GraphicEq, contentDescription = null, tint = Color(0xFF34D399), modifier = Modifier.size(20.dp))
                             Spacer(Modifier.height(4.dp))
                             Text("8D Audio", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            Text("360° Surround", color = Color(0xFF34D399), fontSize = 10.sp)
+                            Text("360°", color = Color(0xFF34D399), fontSize = 10.sp)
                         }
                     }
                 }
@@ -218,22 +224,26 @@ fun ViralAudioStudioDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(3.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFC084FC).copy(alpha = 0.3f))
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF2E1065))
-                            .border(1.dp, Color(0xFFC084FC).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF3B1675), Color(0xFF1D0A3D))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 eqManager.setSpatial8DEnabled(false)
                                 applyPlayback(0.92f, -1)
                                 Toast.makeText(context, "☕ Modo Lo-Fi Chill Activo", Toast.LENGTH_SHORT).show()
                             }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Coffee, contentDescription = null, tint = Color(0xFFC084FC), modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text("Lo-Fi Chill Beats", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                            Text("Lo-Fi Beats", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                         }
                     }
 
@@ -241,16 +251,20 @@ fun ViralAudioStudioDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(3.dp, RoundedCornerShape(14.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF1E293B))
-                            .border(1.dp, Color(0xFF475569), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF26334D), Color(0xFF141A29))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 eqManager.setSpatial8DEnabled(false)
                                 applyPlayback(1.0f, 0)
                                 Toast.makeText(context, "Pista original restaurada", Toast.LENGTH_SHORT).show()
                             }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {

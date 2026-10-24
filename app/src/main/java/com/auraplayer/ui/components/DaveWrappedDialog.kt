@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -114,9 +115,13 @@ fun DaveWrappedDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.3f))
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF161C30))
-                            .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF1E2640), Color(0xFF101422))
+                                )
+                            )
                             .padding(14.dp)
                     ) {
                         Column {
@@ -128,9 +133,13 @@ fun DaveWrappedDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFEC4899).copy(alpha = 0.3f))
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF161C30))
-                            .border(1.dp, Color(0xFFEC4899).copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF1E2640), Color(0xFF101422))
+                                )
+                            )
                             .padding(14.dp)
                     ) {
                         Column {
@@ -145,13 +154,13 @@ fun DaveWrappedDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .shadow(5.dp, RoundedCornerShape(18.dp), spotColor = Color(0xFF8B5CF6).copy(alpha = 0.3f))
                         .clip(RoundedCornerShape(18.dp))
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color(0xFF171B2F), Color(0xFF101322))
+                                listOf(Color(0xFF1E2640), Color(0xFF101422))
                             )
                         )
-                        .border(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.35f), RoundedCornerShape(18.dp))
                         .padding(14.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -159,7 +168,7 @@ fun DaveWrappedDialog(
                             Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Top 5 Canciones Más Escuchadas",
+                                text = "Top 5 Canciones",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -168,7 +177,7 @@ fun DaveWrappedDialog(
 
                         if (topSongs.isEmpty()) {
                             Text(
-                                text = "Aún no tienes suficiente historial. ¡Sigue escuchando música!",
+                                text = "Sin reproducciones registradas.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF94A3B8),
                                 modifier = Modifier.padding(vertical = 8.dp)
@@ -221,13 +230,18 @@ fun DaveWrappedDialog(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .shadow(4.dp, RoundedCornerShape(16.dp))
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF161C30))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF1E2640), Color(0xFF101422))
+                                )
+                            )
                             .padding(14.dp)
                     ) {
                         Column {
                             Text(
-                                text = "🎤 Tus Artistas Más Frecuentes",
+                                text = "Artistas Frecuentes",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White

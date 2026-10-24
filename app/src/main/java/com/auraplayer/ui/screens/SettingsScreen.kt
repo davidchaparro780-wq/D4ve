@@ -68,6 +68,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -149,18 +150,17 @@ fun SettingsScreen(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = "Personaliza tu experiencia DaVE Player",
-                        color = Color(0xFF94A3B8),
-                        fontSize = 12.sp
-                    )
                 }
 
                 Box(
                     modifier = Modifier
+                        .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f))
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF38BDF8).copy(alpha = 0.15f))
-                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1E2840), Color(0xFF101626))
+                            )
+                        )
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
@@ -612,12 +612,13 @@ fun SettingsScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.15f) else Color(0xFF131A2A))
-                                .border(
-                                    1.dp,
-                                    if (isSelected) Color(0xFF38BDF8) else Color(0xFF1E293B),
-                                    RoundedCornerShape(10.dp)
+                                .shadow(if (isSelected) 4.dp else 1.5.dp, RoundedCornerShape(12.dp), spotColor = if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.4f) else Color.Black)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.verticalGradient(
+                                        if (isSelected) listOf(Color(0xFF1E2840), Color(0xFF101626))
+                                        else listOf(Color(0xFF161C2C), Color(0xFF0D111A))
+                                    )
                                 )
                                 .clickable {
                                     AuraHaptic.click(null)
@@ -675,25 +676,18 @@ fun SettingsScreen(
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Ajusta la intensidad y elevación con la que las ondas y barras reaccionan al audio en tiempo real:",
-                        color = Color(0xFF94A3B8),
-                        fontSize = 13.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
                     options.forEach { (value, label) ->
                         val isSelected = settings.visualizerSensitivity == value
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.15f) else Color(0xFF131A2A))
-                                .border(
-                                    1.dp,
-                                    if (isSelected) Color(0xFF38BDF8) else Color(0xFF1E293B),
-                                    RoundedCornerShape(10.dp)
+                                .shadow(if (isSelected) 4.dp else 1.5.dp, RoundedCornerShape(12.dp), spotColor = if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.4f) else Color.Black)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.verticalGradient(
+                                        if (isSelected) listOf(Color(0xFF1E2840), Color(0xFF101626))
+                                        else listOf(Color(0xFF161C2C), Color(0xFF0D111A))
+                                    )
                                 )
                                 .clickable {
                                     AuraHaptic.click(null)
@@ -747,32 +741,25 @@ fun SettingsScreen(
             onDismissRequest = { showCrossfadeDialog = false },
             title = {
                 Text(
-                    text = "🎛️ Fundido Cruzado (Crossfade)",
+                    text = "🎛️ Fundido Cruzado",
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Elige cuántos segundos se mezclarán el final de la canción actual con el inicio de la siguiente:",
-                        color = Color(0xFF94A3B8),
-                        fontSize = 13.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
                     crossfadeOptions.forEach { (seconds, label) ->
                         val isSelected = currentCrossfadeSec == seconds
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.15f) else Color(0xFF131A2A))
-                                .border(
-                                    1.dp,
-                                    if (isSelected) Color(0xFF38BDF8) else Color(0xFF1E293B),
-                                    RoundedCornerShape(10.dp)
+                                .shadow(if (isSelected) 4.dp else 1.5.dp, RoundedCornerShape(12.dp), spotColor = if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.4f) else Color.Black)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.verticalGradient(
+                                        if (isSelected) listOf(Color(0xFF1E2840), Color(0xFF101626))
+                                        else listOf(Color(0xFF161C2C), Color(0xFF0D111A))
+                                    )
                                 )
                                 .clickable {
                                     AuraHaptic.click(null)
@@ -976,9 +963,13 @@ private fun SettingsActionCard(
 
             Box(
                 modifier = Modifier
+                    .shadow(3.dp, RoundedCornerShape(10.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f))
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF38BDF8).copy(alpha = 0.15f))
-                    .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF1E2840), Color(0xFF101626))
+                        )
+                    )
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center
             ) {

@@ -1260,19 +1260,12 @@ fun PlayerScreen(
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
-                                        text = "Videoclip Musical",
+                                        text = "Sin videoclip",
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp
                                     )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "Descarga esta canción con video para ver el videoclip HD mientras escuchas.",
-                                        color = Color.White.copy(alpha = 0.7f),
-                                        fontSize = 12.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(14.dp))
                                     Button(
                                         onClick = {
                                             AuraHaptic.click(view)
@@ -1589,19 +1582,22 @@ fun PlayerScreen(
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
+                                                        .then(
+                                                            if (isActive) Modifier.shadow(
+                                                                elevation = 6.dp,
+                                                                shape = RoundedCornerShape(16.dp),
+                                                                spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f),
+                                                                ambientColor = Color.Black
+                                                            ) else Modifier
+                                                        )
                                                         .clip(RoundedCornerShape(16.dp))
                                                         .background(
-                                                            if (isActive) Brush.horizontalGradient(
+                                                            if (isActive) Brush.verticalGradient(
                                                                 listOf(
-                                                                    Color(0xFF38BDF8).copy(alpha = 0.22f),
-                                                                    Color(0xFF8B5CF6).copy(alpha = 0.22f)
+                                                                    Color(0x3538BDF8),
+                                                                    Color(0x208B5CF6)
                                                                 )
                                                             ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
-                                                        )
-                                                        .border(
-                                                            1.dp,
-                                                            if (isActive) Color(0xFF38BDF8).copy(alpha = 0.45f) else Color.Transparent,
-                                                            RoundedCornerShape(16.dp)
                                                         )
                                                         .clickable {
                                                             AuraHaptic.click(null)
@@ -3177,9 +3173,21 @@ fun PlayerScreen(
                         Box(
                             modifier = Modifier
                                 .size(90.dp)
+                                .shadow(
+                                    elevation = 16.dp,
+                                    shape = CircleShape,
+                                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                    ambientColor = Color.Black
+                                )
                                 .clip(CircleShape)
-                                .background(Color(0xFF1E293B).copy(alpha = 0.8f))
-                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color(0xFF24324D),
+                                            Color(0xFF101726)
+                                        )
+                                    )
+                                )
                                 .clickable {
                                     AuraHaptic.heavy(view)
                                     isPocketLocked = false
@@ -3195,14 +3203,14 @@ fun PlayerScreen(
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "Modo Bolsillo Activado",
+                            text = "Modo Bolsillo",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Toque el candado para desbloquear la pantalla",
+                            text = "Toca para desbloquear",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.6f),
                             textAlign = TextAlign.Center
@@ -3464,16 +3472,17 @@ fun PlayerScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(
-                                        if (isPlayingThis) Color(0xFF1E1B4B).copy(alpha = 0.85f)
-                                        else Color(0xFF13182E).copy(alpha = 0.6f)
+                                    .shadow(
+                                        elevation = if (isPlayingThis) 5.dp else 2.5.dp,
+                                        shape = RoundedCornerShape(14.dp),
+                                        spotColor = if (isPlayingThis) Color(0xFF00F0FF).copy(alpha = 0.35f) else Color.Black
                                     )
-                                    .border(
-                                        1.dp,
-                                        if (isPlayingThis) Color(0xFF38BDF8).copy(alpha = 0.8f)
-                                        else Color.White.copy(alpha = 0.06f),
-                                        RoundedCornerShape(12.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        Brush.verticalGradient(
+                                            if (isPlayingThis) listOf(Color(0xFF223050), Color(0xFF131B2E))
+                                            else listOf(Color(0xFF181F30), Color(0xFF0F1420))
+                                        )
                                     )
                                     .clickable {
                                         AuraHaptic.click(view)
@@ -3900,16 +3909,36 @@ private fun FxPresetButton(
 ) {
     Box(
         modifier = modifier
+            .shadow(
+                elevation = if (isSelected) 5.dp else 2.5.dp,
+                shape = RoundedCornerShape(12.dp),
+                spotColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Black
+            )
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-            .border(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(12.dp))
+            .background(
+                Brush.verticalGradient(
+                    if (isSelected) listOf(Color(0xFF263350), Color(0xFF131A2A))
+                    else listOf(Color(0xFF1B2236), Color(0xFF0F1524))
+                )
+            )
             .clickable { onClick() }
             .padding(vertical = 10.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White)
-            Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                title,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White
+            )
+            if (subtitle.isNotBlank()) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

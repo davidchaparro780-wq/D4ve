@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -124,18 +125,19 @@ fun EqualizerScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    1.dp,
-                    Brush.horizontalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                            Color.Transparent
-                        )
-                    ),
-                    RoundedCornerShape(20.dp)
+                .shadow(
+                    6.dp,
+                    RoundedCornerShape(20.dp),
+                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                )
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1E2842), Color(0xFF101626))
+                    )
                 ),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Row(
                 modifier = Modifier
@@ -160,7 +162,7 @@ fun EqualizerScreen(
                         )
                     }
                     Text(
-                        text = if (isEqEnabled) "DSP 32-bit Float • 10 Bandas Activo" else "Procesamiento desactivado",
+                        text = if (isEqEnabled) "DSP 32-bit Float • 10 Bandas" else "Desactivado",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isEqEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -188,15 +190,20 @@ fun EqualizerScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    1.dp,
-                    if (isKaraokeEnabled) Color(0xFFF43F5E).copy(alpha = 0.6f) else Color(0xFF334155),
-                    RoundedCornerShape(18.dp)
+                .shadow(
+                    5.dp,
+                    RoundedCornerShape(18.dp),
+                    spotColor = if (isKaraokeEnabled) Color(0xFFF43F5E).copy(alpha = 0.35f) else Color.Black
+                )
+                .clip(RoundedCornerShape(18.dp))
+                .background(
+                    Brush.verticalGradient(
+                        if (isKaraokeEnabled) listOf(Color(0xFF2A1522), Color(0xFF180D16))
+                        else listOf(Color(0xFF1A2234), Color(0xFF0F1420))
+                    )
                 ),
             shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isKaraokeEnabled) Color(0xFF201322) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Row(
                 modifier = Modifier
@@ -209,6 +216,7 @@ fun EqualizerScreen(
                     Box(
                         modifier = Modifier
                             .size(42.dp)
+                            .shadow(3.dp, CircleShape)
                             .clip(CircleShape)
                             .background(if (isKaraokeEnabled) Color(0xFFF43F5E) else Color(0xFF1E293B)),
                         contentAlignment = Alignment.Center
@@ -223,13 +231,13 @@ fun EqualizerScreen(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Modo Karaoke (Vocal Remover)",
+                            text = "Modo Karaoke",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = if (isKaraokeEnabled) Color(0xFFF43F5E) else Color.White
                         )
                         Text(
-                            text = if (isKaraokeEnabled) "Voz atenuada y campo estéreo expandido para cantar" else "Atenúa la voz principal para cantar sobre tus canciones",
+                            text = if (isKaraokeEnabled) "Voz atenuada" else "Atenúa la voz principal",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -258,15 +266,20 @@ fun EqualizerScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    1.dp,
-                    if (isSpatial8D) Color(0xFF38BDF8).copy(alpha = 0.6f) else Color(0xFF334155),
-                    RoundedCornerShape(18.dp)
+                .shadow(
+                    5.dp,
+                    RoundedCornerShape(18.dp),
+                    spotColor = if (isSpatial8D) Color(0xFF38BDF8).copy(alpha = 0.35f) else Color.Black
+                )
+                .clip(RoundedCornerShape(18.dp))
+                .background(
+                    Brush.verticalGradient(
+                        if (isSpatial8D) listOf(Color(0xFF16273C), Color(0xFF0C1622))
+                        else listOf(Color(0xFF1A2234), Color(0xFF0F1420))
+                    )
                 ),
             shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isSpatial8D) Color(0xFF0F1E2E) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Row(
                 modifier = Modifier
@@ -279,6 +292,7 @@ fun EqualizerScreen(
                     Box(
                         modifier = Modifier
                             .size(42.dp)
+                            .shadow(3.dp, CircleShape)
                             .clip(CircleShape)
                             .background(if (isSpatial8D) Color(0xFF38BDF8) else Color(0xFF1E293B)),
                         contentAlignment = Alignment.Center
@@ -299,7 +313,7 @@ fun EqualizerScreen(
                             color = if (isSpatial8D) Color(0xFF38BDF8) else Color.White
                         )
                         Text(
-                            text = if (isSpatial8D) "Reverb y virtualización 3D envolvente tipo Sala de Conciertos" else "Sonido inmersivo 360° para audífonos",
+                            text = if (isSpatial8D) "Envolvente 360°" else "Inmersión para audífonos",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -324,7 +338,7 @@ fun EqualizerScreen(
 
         // Headphone & Output Acoustic Device Profiles
         Text(
-            text = "PERFILES ACÚSTICOS DE DISPOSITIVO (DOLBY / POWERAMP)",
+            text = "PERFILES ACÚSTICOS",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -384,7 +398,7 @@ fun EqualizerScreen(
 
         // Presets Chips
         Text(
-            text = "PRESETS DE ESTUDIO",
+            text = "PRESETS",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -419,7 +433,7 @@ fun EqualizerScreen(
 
         // 10-Band Graphic Equalizer
         Text(
-            text = "ECUALIZADOR GRÁFICO PROFESIONAL (10 BANDAS)",
+            text = "Ecualizador de 10 Bandas",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -430,18 +444,19 @@ fun EqualizerScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    1.dp,
-                    Brush.horizontalGradient(
-                        listOf(
-                            themePrimary.copy(alpha = 0.35f),
-                            themeSecondary.copy(alpha = 0.20f)
-                        )
-                    ),
-                    RoundedCornerShape(20.dp)
+                .shadow(
+                    6.dp,
+                    RoundedCornerShape(20.dp),
+                    spotColor = themePrimary.copy(alpha = 0.25f)
+                )
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1E2842), Color(0xFF101626))
+                    )
                 ),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 bandFrequencies.forEachIndexed { index, freq ->
@@ -493,7 +508,7 @@ fun EqualizerScreen(
 
         // Sound Enhancement Rack (Bass Boost, 3D Virtualizer, Loudness)
         Text(
-            text = "RACK DE MEJORA ACÚSTICA",
+            text = "MEJORA ACÚSTICA",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -502,9 +517,17 @@ fun EqualizerScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(6.dp, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1E2842), Color(0xFF101626))
+                    )
+                ),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Bass Boost
@@ -514,7 +537,7 @@ fun EqualizerScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Refuerzo Dinámico de Graves (Bass)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        Text(text = "Graves (Bass)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         Text(text = "${bassBoost.toInt()}%", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
                     }
                     Slider(
@@ -543,7 +566,7 @@ fun EqualizerScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(imageVector = Icons.Default.SurroundSound, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "Sonido Envolvente 3D (Virtualizer)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text(text = "Virtualizador 3D", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         }
                         Text(text = "${virtualizer.toInt()}%", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary)
                     }
@@ -573,7 +596,7 @@ fun EqualizerScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(imageVector = Icons.Default.VolumeUp, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "Claridad y Ganancia (Loudness Boost)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text(text = "Sonoridad (Loudness)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         }
                         Text(text = "${loudness.toInt()}%", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = Color(0xFFF59E0B))
                     }
@@ -599,7 +622,7 @@ fun EqualizerScreen(
 
         // DJ Crossfade Engine
         Text(
-            text = "MOTOR DJ CROSSFADE & GAPLESS",
+            text = "CROSSFADE & GAPLESS",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -608,9 +631,17 @@ fun EqualizerScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(6.dp, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1E2842), Color(0xFF101626))
+                    )
+                ),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Row(
@@ -619,9 +650,9 @@ fun EqualizerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(text = "Fundido Cruzado (Crossfade)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(text = "Fundido Cruzado", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(
-                            text = if (crossfadeSeconds == 0) "Desactivado (Reproducción directa)" else "Transición suave de ${crossfadeSeconds}s entre canciones",
+                            text = if (crossfadeSeconds == 0) "Desactivado" else "${crossfadeSeconds}s entre pistas",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -653,9 +684,7 @@ fun EqualizerScreen(
                     )
                 )
 
-                Spacer(modifier = Modifier.height(14.dp))
-                androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // ReplayGain Normalization
                 var isReplayGain by remember { mutableStateOf(playlistManager.isReplayGainEnabled()) }
@@ -665,9 +694,9 @@ fun EqualizerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = "Normalización de Volumen (ReplayGain)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(text = "ReplayGain", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(
-                            text = "Ajusta todas las pistas a un volumen uniforme sin saturación",
+                            text = "Volumen uniforme sin saturación",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -685,7 +714,7 @@ fun EqualizerScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Autoplay / Radio Mode
                 var isAutoplay by remember { mutableStateOf(playlistManager.isAutoplayEnabled()) }
@@ -695,9 +724,9 @@ fun EqualizerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = "Autoplay / Modo Radio", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(text = "Autoplay", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Text(
-                            text = "Continúa reproduciendo temas similares al terminar la lista",
+                            text = "Continúa temas similares al terminar",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -719,9 +748,9 @@ fun EqualizerScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Cyber Theme Accent Picker (BlackPlayer Style)
+        // Cyber Theme Accent Picker
         Text(
-            text = "PERSONALIZACIÓN VISUAL (BLACKPLAYER STYLE)",
+            text = "TEMAS",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -730,15 +759,23 @@ fun EqualizerScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(6.dp, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1E2842), Color(0xFF101626))
+                    )
+                ),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Acento Neón Cyberpunk", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(text = "Color de Acento", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(14.dp))
 

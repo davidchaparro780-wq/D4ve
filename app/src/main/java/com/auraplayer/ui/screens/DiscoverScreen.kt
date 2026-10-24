@@ -89,6 +89,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -382,15 +383,13 @@ fun DiscoverScreen(
                     val is320 = downloadQuality == "320"
                     Box(
                         modifier = Modifier
+                            .shadow(3.dp, RoundedCornerShape(16.dp), spotColor = if (is320) Color(0xFF38BDF8).copy(alpha = 0.35f) else Color(0xFFF59E0B).copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF13182E))
-                            .border(
-                                1.dp,
-                                Brush.horizontalGradient(
-                                    if (is320) listOf(Color(0xFF38BDF8).copy(alpha = 0.8f), Color(0xFF8B5CF6).copy(alpha = 0.8f))
-                                    else listOf(Color(0xFFF59E0B).copy(alpha = 0.8f), Color(0xFFE11D48).copy(alpha = 0.8f))
-                                ),
-                                RoundedCornerShape(16.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    if (is320) listOf(Color(0xFF1E2642), Color(0xFF0F1524))
+                                    else listOf(Color(0xFF261D18), Color(0xFF150F0D))
+                                )
                             )
                             .clickable {
                                 AuraHaptic.tick(view)
@@ -415,22 +414,17 @@ fun DiscoverScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 2. Omnibar Global Input (Aesthetic Neon Glow)
+            // 2. Omnibar Global Input
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
+                    .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFF8B5CF6).copy(alpha = 0.35f))
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFF13182E))
-                    .border(
-                        1.dp,
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF8B5CF6).copy(alpha = 0.5f),
-                                Color(0xFF38BDF8).copy(alpha = 0.4f)
-                            )
-                        ),
-                        RoundedCornerShape(24.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF1C243B), Color(0xFF0E1322))
+                        )
                     ),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -568,22 +562,22 @@ fun DiscoverScreen(
                     val isSelected = selectedGenre == key
                     Box(
                         modifier = Modifier
+                            .shadow(
+                                if (isSelected) 5.dp else 2.5.dp,
+                                RoundedCornerShape(16.dp),
+                                spotColor = if (isSelected) Color(0xFF8B5CF6).copy(alpha = 0.5f) else Color.Black
+                            )
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (isSelected) {
-                                    Brush.horizontalGradient(
-                                        listOf(Color(0xFF8B5CF6), Color(0xFF3B82F6))
+                                    Brush.verticalGradient(
+                                        listOf(Color(0xFF8B5CF6), Color(0xFF4338CA))
                                     )
                                 } else {
-                                    Brush.linearGradient(
-                                        listOf(Color(0xFF13182E), Color(0xFF0F172A))
+                                    Brush.verticalGradient(
+                                        listOf(Color(0xFF1E2840), Color(0xFF101626))
                                     )
                                 }
-                            )
-                            .border(
-                                1.dp,
-                                if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.6f) else Color(0xFF8B5CF6).copy(alpha = 0.2f),
-                                RoundedCornerShape(16.dp)
                             )
                             .clickable {
                                 AuraHaptic.tick(view)
@@ -853,12 +847,12 @@ fun DiscoverScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
+                            .shadow(6.dp, RoundedCornerShape(18.dp), spotColor = Color(0xFFEF4444).copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(18.dp))
-                            .background(Color(0xFF1E1B4B))
-                            .border(
-                                1.dp,
-                                Color(0xFFEF4444).copy(alpha = 0.35f),
-                                RoundedCornerShape(18.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF261A28), Color(0xFF140D17))
+                                )
                             )
                             .padding(horizontal = 20.dp, vertical = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -1092,23 +1086,17 @@ fun OnlineTrackCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(
+                if (isPlayingThis) 6.dp else 3.dp,
+                RoundedCornerShape(14.dp),
+                spotColor = if (isPlayingThis) Color(0xFF38BDF8).copy(alpha = 0.35f) else Color.Black
+            )
             .clip(RoundedCornerShape(14.dp))
             .background(
-                if (isPlayingThis) Color(0xFF1E1B4B).copy(alpha = 0.7f)
-                else Color(0xFF0F172A).copy(alpha = 0.55f)
-            )
-            .border(
-                width = if (isPlayingThis) 1.5.dp else 1.dp,
-                brush = if (isPlayingThis) {
-                    Brush.horizontalGradient(
-                        listOf(Color(0xFF38BDF8), Color(0xFF8B5CF6))
-                    )
-                } else {
-                    Brush.linearGradient(
-                        listOf(Color.White.copy(alpha = 0.10f), Color.White.copy(alpha = 0.04f))
-                    )
-                },
-                shape = RoundedCornerShape(14.dp)
+                Brush.verticalGradient(
+                    if (isPlayingThis) listOf(Color(0xFF231E4D), Color(0xFF13102C))
+                    else listOf(Color(0xFF1C243B), Color(0xFF0F1422))
+                )
             )
             .clickable {
                 AuraHaptic.click(view)
@@ -1121,20 +1109,12 @@ fun OnlineTrackCard(
         Box(
             modifier = Modifier
                 .size(56.dp)
+                .shadow(3.dp, RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
                 .background(
-                    Brush.linearGradient(
-                        listOf(
-                            Color(0xFF8B5CF6).copy(alpha = 0.25f),
-                            Color(0xFF38BDF8).copy(alpha = 0.2f)
-                        )
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF251F42), Color(0xFF131122))
                     )
-                )
-                .border(
-                    1.dp,
-                    if (isPlayingThis) Color(0xFF38BDF8).copy(alpha = 0.6f)
-                    else Color(0xFF8B5CF6).copy(alpha = 0.25f),
-                    RoundedCornerShape(12.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -1244,16 +1224,17 @@ fun OnlineTrackCard(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .shadow(
+                                3.dp,
+                                CircleShape,
+                                spotColor = if (track.isDownloadable) Color(0xFF38BDF8).copy(alpha = 0.4f) else Color.Black
+                            )
                             .clip(CircleShape)
                             .background(
-                                if (track.isDownloadable) Color(0xFF1E293B).copy(alpha = 0.9f)
-                                else Color.White.copy(alpha = 0.05f)
-                            )
-                            .border(
-                                1.dp,
-                                if (track.isDownloadable) Color(0xFF38BDF8).copy(alpha = 0.35f)
-                                else Color.White.copy(alpha = 0.08f),
-                                CircleShape
+                                Brush.verticalGradient(
+                                    if (track.isDownloadable) listOf(Color(0xFF1E293B), Color(0xFF0F172A))
+                                    else listOf(Color(0xFF151824), Color(0xFF0D0F17))
+                                )
                             )
                             .clickable {
                                 AuraHaptic.click(view)
@@ -1310,9 +1291,13 @@ fun OnlineTrackCard(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .shadow(3.dp, CircleShape, spotColor = Color(0xFF10B981).copy(alpha = 0.4f))
                             .clip(CircleShape)
-                            .background(Color(0xFF10B981).copy(alpha = 0.2f))
-                            .border(1.dp, Color(0xFF10B981), CircleShape),
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF064E3B), Color(0xFF022C22))
+                                )
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -1327,9 +1312,13 @@ fun OnlineTrackCard(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .shadow(3.dp, CircleShape, spotColor = MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f))
-                            .border(1.dp, MaterialTheme.colorScheme.error, CircleShape)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF450A0A), Color(0xFF290505))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 onDownload()
@@ -1369,8 +1358,13 @@ fun OnlineTrackCard(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false },
                     modifier = Modifier
-                        .background(Color(0xFF1E1B4B))
-                        .border(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                        .shadow(8.dp, RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1F1B3E), Color(0xFF121025))
+                            )
+                        )
                 ) {
                     DropdownMenuItem(
                         text = {

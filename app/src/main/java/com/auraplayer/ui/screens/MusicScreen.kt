@@ -1040,24 +1040,22 @@ fun MusicScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                item {
-                    Text(
-                        text = "Recientes:",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF64748B),
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
                 items(searchHistoryManager.historyList) { historyItem ->
                     val isCurrent = searchQuery.equals(historyItem, ignoreCase = true)
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isCurrent) Color(0xFF8B5CF6).copy(alpha = 0.35f) else Color(0xFF1E293B).copy(alpha = 0.7f),
-                        border = BorderStroke(1.dp, if (isCurrent) Color(0xFF8B5CF6) else Color(0xFF334155)),
-                        modifier = Modifier.clickable {
-                            AuraHaptic.click(view)
-                            searchQuery = historyItem
-                        }
+                    Box(
+                        modifier = Modifier
+                            .shadow(if (isCurrent) 4.dp else 2.dp, RoundedCornerShape(12.dp), spotColor = if (isCurrent) Color(0xFF8B5CF6).copy(alpha = 0.4f) else Color.Black)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    if (isCurrent) listOf(Color(0xFF3B2A68), Color(0xFF221742))
+                                    else listOf(Color(0xFF202A3C), Color(0xFF121724))
+                                )
+                            )
+                            .clickable {
+                                AuraHaptic.click(view)
+                                searchQuery = historyItem
+                            }
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -1309,7 +1307,7 @@ fun MusicScreen(
                                     }
                                 }
                             } else {
-                                EmptyListMessage("No se encontraron canciones en el dispositivo.")
+                                EmptyListMessage("Sin canciones")
                             }
                         } else {
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -1390,18 +1388,18 @@ fun MusicScreen(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                                 val sortLabel = when (selectedSortMode) {
-                                                    0 -> "📥 Recién Descargadas"
-                                                    1 -> "🔤 Título (A-Z)"
-                                                    2 -> "👤 Artista"
-                                                    3 -> "⏱️ Mayor Duración"
-                                                    4 -> "🔥 Más Reproducidas"
-                                                    else -> "📥 Más Nuevas"
+                                                    0 -> "Recién descargadas"
+                                                    1 -> "A-Z"
+                                                    2 -> "Artista"
+                                                    3 -> "Duración"
+                                                    4 -> "Populares"
+                                                    else -> "Nuevas"
                                                 }
                                                 Text(
-                                                    text = "Orden: $sortLabel",
+                                                    text = sortLabel,
                                                     style = MaterialTheme.typography.labelSmall,
-                                                    fontSize = 10.sp,
-                                                    fontWeight = FontWeight.SemiBold,
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
                                                     color = themeSecondary
                                                 )
                                             }
@@ -1673,7 +1671,7 @@ fun MusicScreen(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             if (plSongs.isEmpty()) {
-                                EmptyListMessage("Esta playlist está vacía.\nAñade canciones desde el menú de 3 puntos de cualquier pista.")
+                                EmptyListMessage("Playlist vacía")
                             } else {
                                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                                     items(plSongs, key = { it.id }, contentType = { "song" }) { song ->
@@ -1752,37 +1750,76 @@ fun MusicScreen(
 
                                     val playlists = playlistManager.getPlaylists()
                                     if (playlists.isEmpty()) {
-                                        EmptyListMessage("No has creado playlists aún.\nToca '+ Nueva' para organizar tu música.")
+                                        EmptyListMessage("Sin playlists")
                                     } else {
                                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                                             items(playlists, key = { it.id }) { pl ->
-                                                Card(
+                                                Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(vertical = 6.dp)
-                                                        .clickable { selectedPlaylistForView = pl },
-                                                    shape = RoundedCornerShape(16.dp),
-                                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                                        .padding(horizontal = 4.dp, vertical = 5.dp)
+                                                        .shadow(
+                                                            elevation = 4.dp,
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                                                            ambientColor = Color.Black
+                                                        )
+                                                        .clip(RoundedCornerShape(16.dp))
+                                                        .background(
+                                                            Brush.verticalGradient(
+                                                                listOf(
+                                                                    Color(0xFF1C2538),
+                                                                    Color(0xFF0F1422)
+                                                                )
+                                                            )
+                                                        )
+                                                        .clickable { selectedPlaylistForView = pl }
+                                                        .padding(horizontal = 14.dp, vertical = 12.dp)
                                                 ) {
                                                     Row(
-                                                        modifier = Modifier.fillMaxWidth().padding(14.dp),
+                                                        modifier = Modifier.fillMaxWidth(),
                                                         verticalAlignment = Alignment.CenterVertically,
                                                         horizontalArrangement = Arrangement.SpaceBetween
                                                     ) {
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Row(
+                                                            modifier = Modifier.weight(1f),
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
                                                             Box(
                                                                 modifier = Modifier
                                                                     .size(46.dp)
+                                                                    .shadow(3.dp, RoundedCornerShape(12.dp))
                                                                     .clip(RoundedCornerShape(12.dp))
-                                                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                                                                    .background(
+                                                                        Brush.verticalGradient(
+                                                                            listOf(
+                                                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                                                            )
+                                                                        )
+                                                                    ),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                Icon(Icons.Default.QueueMusic, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                                                Icon(
+                                                                    Icons.Default.QueueMusic,
+                                                                    contentDescription = null,
+                                                                    tint = MaterialTheme.colorScheme.primary,
+                                                                    modifier = Modifier.size(24.dp)
+                                                                )
                                                             }
                                                             Spacer(modifier = Modifier.width(14.dp))
                                                             Column {
-                                                                Text(text = pl.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                                                                Text(text = "${pl.songIds.size} canciones", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                                Text(
+                                                                    text = pl.name,
+                                                                    style = MaterialTheme.typography.titleMedium,
+                                                                    fontWeight = FontWeight.SemiBold,
+                                                                    color = Color.White
+                                                                )
+                                                                Text(
+                                                                    text = "${pl.songIds.size} canciones",
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                    color = Color(0xFF94A3B8)
+                                                                )
                                                             }
                                                         }
 
@@ -1803,7 +1840,7 @@ fun MusicScreen(
                                     }
 
                                     if (topSongs.isEmpty()) {
-                                        EmptyListMessage("Escucha tus canciones para que aparezcan aquí ordenadas por las más reproducidas.")
+                                        EmptyListMessage("Sin reproducciones")
                                     } else {
                                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                                             items(topSongs, key = { it.id }, contentType = { "song" }) { song ->
@@ -1829,7 +1866,7 @@ fun MusicScreen(
                                     }
 
                                     if (recentSongs.isEmpty()) {
-                                        EmptyListMessage("Tu historial de reproducción está vacío.")
+                                        EmptyListMessage("Historial vacío")
                                     } else {
                                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                                             items(recentSongs, key = { it.id }, contentType = { "song" }) { song ->
@@ -1852,7 +1889,7 @@ fun MusicScreen(
                 }
                 2 -> { // Favoritos
                     if (favoriteSongs.isEmpty()) {
-                        EmptyListMessage("Aún no tienes canciones favoritas.\nToca el corazón o mantén presionada cualquier canción.")
+                        EmptyListMessage("Sin favoritos")
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(favoriteSongs, key = { it.id }, contentType = { "song" }) { song ->
@@ -1956,7 +1993,7 @@ fun MusicScreen(
                             }
 
                             if (folderSongs.isEmpty()) {
-                                EmptyListMessage("No hay canciones en esta carpeta.")
+                                EmptyListMessage("Carpeta vacía")
                             } else {
                                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                                     items(folderSongs, key = { it.id }, contentType = { "song" }) { song ->
@@ -1976,62 +2013,91 @@ fun MusicScreen(
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(folderGroups.keys.toList()) { folderName ->
                                 val folderSongs = folderGroups[folderName] ?: emptyList()
-                                Row(
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .padding(horizontal = 4.dp, vertical = 5.dp)
+                                        .shadow(
+                                            elevation = 4.dp,
+                                            shape = RoundedCornerShape(16.dp),
+                                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                                            ambientColor = Color.Black
+                                        )
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    Color(0xFF1C2538),
+                                                    Color(0xFF0F1420)
+                                                )
+                                            )
+                                        )
                                         .clickable {
                                             AuraHaptic.click(view)
                                             selectedFolderForView = folderName
                                         }
-                                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
                                     Row(
-                                        modifier = Modifier.weight(1f),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(48.dp)
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                                            contentAlignment = Alignment.Center
+                                        Row(
+                                            modifier = Modifier.weight(1f),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(46.dp)
+                                                    .shadow(3.dp, RoundedCornerShape(12.dp))
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(
+                                                        Brush.verticalGradient(
+                                                            listOf(
+                                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                                            )
+                                                        )
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Folder,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(14.dp))
+                                            Column {
+                                                Text(
+                                                    text = folderName,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color.White
+                                                )
+                                                Text(
+                                                    text = "${folderSongs.size} canciones",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = Color(0xFF94A3B8)
+                                                )
+                                            }
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                AuraHaptic.click(view)
+                                                onShuffleAll(folderSongs)
+                                            }
                                         ) {
                                             Icon(
-                                                imageVector = Icons.Default.Folder,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(28.dp)
+                                                imageVector = Icons.Default.Shuffle,
+                                                contentDescription = "Mezclar carpeta",
+                                                tint = Color(0xFF38BDF8).copy(alpha = 0.8f),
+                                                modifier = Modifier.size(20.dp)
                                             )
                                         }
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Column {
-                                            Text(
-                                                text = folderName,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                            Text(
-                                                text = "${folderSongs.size} canciones",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            AuraHaptic.click(view)
-                                            onShuffleAll(folderSongs)
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Shuffle,
-                                            contentDescription = "Mezclar carpeta",
-                                            tint = Color(0xFF38BDF8).copy(alpha = 0.8f),
-                                            modifier = Modifier.size(20.dp)
-                                        )
                                     }
                                 }
                             }
@@ -2115,7 +2181,7 @@ fun MusicScreen(
                             }
 
                             if (artistSongs.isEmpty()) {
-                                EmptyListMessage("No hay canciones para este artista.")
+                                EmptyListMessage("Sin canciones")
                             } else {
                                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                                     items(artistSongs, key = { it.id }, contentType = { "song" }) { song ->
@@ -2135,62 +2201,91 @@ fun MusicScreen(
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(artistGroups.keys.toList()) { artistName ->
                                 val artistSongs = artistGroups[artistName] ?: emptyList()
-                                Row(
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .padding(horizontal = 4.dp, vertical = 5.dp)
+                                        .shadow(
+                                            elevation = 4.dp,
+                                            shape = RoundedCornerShape(16.dp),
+                                            spotColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
+                                            ambientColor = Color.Black
+                                        )
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    Color(0xFF1C2538),
+                                                    Color(0xFF0F1420)
+                                                )
+                                            )
+                                        )
                                         .clickable {
                                             AuraHaptic.click(view)
                                             selectedArtistForView = artistName
                                         }
-                                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
                                     Row(
-                                        modifier = Modifier.weight(1f),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(48.dp)
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
-                                            contentAlignment = Alignment.Center
+                                        Row(
+                                            modifier = Modifier.weight(1f),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(46.dp)
+                                                    .shadow(3.dp, RoundedCornerShape(12.dp))
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(
+                                                        Brush.verticalGradient(
+                                                            listOf(
+                                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                                                            )
+                                                        )
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Person,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.secondary,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(14.dp))
+                                            Column {
+                                                Text(
+                                                    text = artistName,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color.White
+                                                )
+                                                Text(
+                                                    text = "${artistSongs.size} canciones",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = Color(0xFF94A3B8)
+                                                )
+                                            }
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                AuraHaptic.click(view)
+                                                onShuffleAll(artistSongs)
+                                            }
                                         ) {
                                             Icon(
-                                                imageVector = Icons.Default.Person,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.secondary,
-                                                modifier = Modifier.size(28.dp)
+                                                imageVector = Icons.Default.Shuffle,
+                                                contentDescription = "Mezclar artista",
+                                                tint = Color(0xFFA78BFA).copy(alpha = 0.8f),
+                                                modifier = Modifier.size(20.dp)
                                             )
                                         }
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Column {
-                                            Text(
-                                                text = artistName,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                            Text(
-                                                text = "${artistSongs.size} canciones",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            AuraHaptic.click(view)
-                                            onShuffleAll(artistSongs)
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Shuffle,
-                                            contentDescription = "Mezclar artista",
-                                            tint = Color(0xFFA78BFA).copy(alpha = 0.8f),
-                                            modifier = Modifier.size(20.dp)
-                                        )
                                     }
                                 }
                             }

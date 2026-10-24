@@ -1897,24 +1897,12 @@ fun AuraApp(
                             .shadow(16.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFF00F0FF).copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(20.dp))
                             .background(
-                                Brush.horizontalGradient(
+                                Brush.verticalGradient(
                                     listOf(
-                                        Color(0xF0121729),
-                                        Color(0xF01B122C),
-                                        Color(0xF00F1524)
+                                        Color(0xFF1F2942),
+                                        Color(0xFF101524)
                                     )
                                 )
-                            )
-                            .border(
-                                1.2.dp,
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color(0xFF00F0FF).copy(alpha = 0.6f),
-                                        Color(0xFFEC4899).copy(alpha = 0.6f),
-                                        Color(0xFF8B5CF6).copy(alpha = 0.6f)
-                                    )
-                                ),
-                                RoundedCornerShape(20.dp)
                             )
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
@@ -1927,9 +1915,13 @@ fun AuraApp(
                             Box(
                                 modifier = Modifier
                                     .size(46.dp)
+                                    .shadow(4.dp, RoundedCornerShape(12.dp))
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFF222B40))
-                                    .border(1.dp, Color(0xFF00F0FF).copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+                                    .background(
+                                        Brush.verticalGradient(
+                                            listOf(Color(0xFF283654), Color(0xFF151D2E))
+                                        )
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (savedResumeArtwork.isNotBlank()) {
@@ -1957,8 +1949,8 @@ fun AuraApp(
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = "CONTINUAR DONDE QUEDASTE",
-                                        fontSize = 9.sp,
+                                        text = "REANUDAR",
+                                        fontSize = 10.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = Color(0xFF00F0FF),
                                         letterSpacing = 1.sp
@@ -2219,24 +2211,19 @@ fun AuraApp(
                             .fillMaxWidth()
                             .height(66.dp)
                             .shadow(
-                                elevation = 16.dp,
+                                elevation = 20.dp,
                                 shape = RoundedCornerShape(28.dp),
-                                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                                 ambientColor = Color.Black
                             )
                             .clip(RoundedCornerShape(28.dp))
-                            .background(Color(0xF00B101E))
-                            .border(
-                                1.dp,
-                                Brush.horizontalGradient(
+                            .background(
+                                Brush.verticalGradient(
                                     listOf(
-                                        Color.White.copy(alpha = 0.18f),
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
-                                        Color.White.copy(alpha = 0.12f)
+                                        Color(0xF01A2438),
+                                        Color(0xF00D1220)
                                     )
-                                ),
-                                RoundedCornerShape(28.dp)
+                                )
                             ),
                         containerColor = Color.Transparent,
                         tonalElevation = 0.dp

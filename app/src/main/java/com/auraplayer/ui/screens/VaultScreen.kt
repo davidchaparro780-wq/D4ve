@@ -766,15 +766,11 @@ fun VaultScreen(
                         Box(
                             modifier = Modifier
                                 .size(18.dp)
+                                .shadow(2.5.dp, CircleShape, spotColor = if (isFilled) Color(0xFF38BDF8).copy(alpha = 0.5f) else Color.Black)
                                 .clip(CircleShape)
                                 .background(
                                     if (isFilled) Color(0xFF38BDF8)
                                     else Color(0xFF1E293B)
-                                )
-                                .border(
-                                    1.5.dp,
-                                    if (isFilled) Color(0xFF8B5CF6) else Color(0xFF475569),
-                                    CircleShape
                                 )
                         )
                     }
@@ -814,15 +810,17 @@ fun VaultScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(68.dp)
+                                        .shadow(
+                                            6.dp,
+                                            CircleShape,
+                                            spotColor = if (digit == "BIO") Color(0xFF38BDF8).copy(alpha = 0.45f) else Color.Black
+                                        )
                                         .clip(CircleShape)
                                         .background(
-                                            if (digit in listOf("C", "DEL", "BIO")) Color(0xFF1E1B4B).copy(alpha = 0.5f)
-                                            else Color(0xFF13182E)
-                                        )
-                                        .border(
-                                            1.dp,
-                                            if (digit == "BIO") Color(0xFF38BDF8).copy(alpha = 0.6f) else Color(0xFF8B5CF6).copy(alpha = 0.35f),
-                                            CircleShape
+                                            Brush.verticalGradient(
+                                                if (digit in listOf("C", "DEL", "BIO")) listOf(Color(0xFF261D3B), Color(0xFF140E24))
+                                                else listOf(Color(0xFF1E2840), Color(0xFF101524))
+                                            )
                                         )
                                         .clickable {
                                             when (digit) {
@@ -1133,12 +1131,12 @@ fun VaultScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .aspectRatio(1f)
+                                        .shadow(5.dp, RoundedCornerShape(16.dp))
                                         .clip(RoundedCornerShape(16.dp))
-                                        .background(Color(0xFF13182E))
-                                        .border(
-                                            1.dp,
-                                            Color(0xFF8B5CF6).copy(alpha = 0.3f),
-                                            RoundedCornerShape(16.dp)
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(Color(0xFF1E2840), Color(0xFF0F1524))
+                                            )
                                         )
                                         .clickable {
                                             if (item.isVideo) {
@@ -1337,15 +1335,11 @@ fun VaultScreen(
                             Box(
                                 modifier = Modifier
                                     .size(16.dp)
+                                    .shadow(2.dp, CircleShape, spotColor = if (isFilled) Color(0xFF38BDF8).copy(alpha = 0.5f) else Color.Black)
                                     .clip(CircleShape)
                                     .background(
                                         if (isFilled) Color(0xFF38BDF8)
                                         else Color(0xFF334155)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isFilled) Color(0xFF38BDF8) else Color(0xFF64748B),
-                                        CircleShape
                                     )
                             )
                         }
@@ -1659,12 +1653,17 @@ fun VaultScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .shadow(
+                                            if (isSelected) 6.dp else 2.5.dp,
+                                            RoundedCornerShape(14.dp),
+                                            spotColor = if (isSelected) Color(0xFF38BDF8).copy(alpha = 0.45f) else Color.Black
+                                        )
                                         .clip(RoundedCornerShape(14.dp))
-                                        .background(Color(0xFF13182E))
-                                        .border(
-                                            width = if (isSelected) 2.dp else 1.dp,
-                                            color = if (isSelected) Color(0xFF38BDF8) else Color(0x22FFFFFF),
-                                            shape = RoundedCornerShape(14.dp)
+                                        .background(
+                                            Brush.verticalGradient(
+                                                if (isSelected) listOf(Color(0xFF1E2A48), Color(0xFF0F1629))
+                                                else listOf(Color(0xFF192136), Color(0xFF0E1322))
+                                            )
                                         )
                                         .clickable {
                                             selectedMediaIds = if (isSelected) {

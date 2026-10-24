@@ -3,8 +3,8 @@ package com.auraplayer.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -239,9 +239,14 @@ fun VolumeBoosterDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(if (isCinema) 5.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = if (isCinema) Color(0xFF8B5CF6).copy(alpha = 0.4f) else Color.Black)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isCinema) Color(0xFF8B5CF6) else Color(0xFF1E293B))
-                            .border(1.dp, if (isCinema) Color(0xFFA78BFA) else Color(0xFF334155), RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    if (isCinema) listOf(Color(0xFF9333EA), Color(0xFF6B21A8))
+                                    else listOf(Color(0xFF222B3E), Color(0xFF121724))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 booster.applyProfile(BoosterProfile.CINEMA_3D)
@@ -262,9 +267,14 @@ fun VolumeBoosterDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .shadow(if (isStreet) 5.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = if (isStreet) Color(0xFFEA580C).copy(alpha = 0.4f) else Color.Black)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isStreet) Color(0xFFEA580C) else Color(0xFF1E293B))
-                            .border(1.dp, if (isStreet) Color(0xFFFB923C) else Color(0xFF334155), RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    if (isStreet) listOf(Color(0xFFEA580C), Color(0xFF9A3412))
+                                    else listOf(Color(0xFF222B3E), Color(0xFF121724))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 booster.applyProfile(BoosterProfile.STREET_LOUD)

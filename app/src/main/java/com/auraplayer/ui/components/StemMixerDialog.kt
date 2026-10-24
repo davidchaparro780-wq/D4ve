@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -79,15 +80,18 @@ fun StemMixerDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
+                .shadow(
+                    16.dp,
+                    RoundedCornerShape(26.dp),
+                    spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f)
+                )
                 .clip(RoundedCornerShape(26.dp))
-                .border(
-                    1.dp,
+                .background(
                     Brush.verticalGradient(
-                        listOf(Color(0xFF38BDF8), Color(0xFF8B5CF6), Color(0xFFEC4899))
-                    ),
-                    RoundedCornerShape(26.dp)
+                        listOf(Color(0xFF1E2842), Color(0xFF0F1524))
+                    )
                 ),
-            color = Color(0xFF0C101D)
+            color = Color.Transparent
         ) {
             Column(
                 modifier = Modifier
@@ -337,9 +341,13 @@ private fun PresetChip(
 ) {
     Box(
         modifier = modifier
+            .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = accentColor.copy(alpha = 0.25f))
             .clip(RoundedCornerShape(12.dp))
-            .background(accentColor.copy(alpha = 0.15f))
-            .border(1.dp, accentColor.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF1E2840), Color(0xFF101524))
+                )
+            )
             .clickable { onClick() }
             .padding(vertical = 8.dp, horizontal = 6.dp),
         contentAlignment = Alignment.Center
@@ -374,8 +382,13 @@ private fun StemFaderRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(4.dp, RoundedCornerShape(14.dp))
             .clip(RoundedCornerShape(14.dp))
-            .background(Color(0xFF131A2B))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF1A2338), Color(0xFF0F1422))
+                )
+            )
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Row(

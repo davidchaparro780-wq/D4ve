@@ -1,7 +1,7 @@
 {
-  "versionCode": 136,
-  "versionName": "4.9.36",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.36/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.36 (Build 136) — Rediseño Táctil 3D con Alto Relieve (Sin Líneas ni Subtítulos Excesivos):\n• 🎛️ Tarjetas Táctiles 3D con Volumen Físico: Adiós a los bordes y divisores tipo wireframe (1.dp border y HorizontalDivider). Toda la interfaz ahora cuenta con elevación cenital real, sombras profundas y volumen extruido.\n• 🎵 Canciones Limpias y Premium: Cada fila de canción es una baldosa flotante táctil esculpida en 3D. Se eliminaron cajitas y badges wireframe redundantes ('NUEVA', 'FLAC', 'VIDEO'), dejando únicamente el título nítido y 'Artista • Duración' con máxima legibilidad.\n• 🎚️ Consola DJ & Ecualizador Esculpido: Sliders, opciones de Crossfade y conmutadores espaciales agrupados en bloques táctiles con relieve físico, sin divisores de línea ni subtítulos explicativos redundantes.\n• 📱 MiniPlayer y HUD Extruidos: Mini reproductor y controles con elevación flotante de 20dp, sombras de luz ambiental y botones hápticos de consola Hi-Fi.",
+  "versionCode": 137,
+  "versionName": "4.9.37",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.37/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.37 (Build 137) — Relieve Táctil 3D Global & Purificación de Subtítulos:\n• 🌐 Relieve Táctil 3D Extendido a Toda la App: Se eliminaron por completo los bordes wireframe (.border) y divisores rígidos en Navigation Dock, Smart Resume, Playlists, Carpetas, Artistas, Videos, Ecualizador 10-Bandas, Diálogos de Efectos y Bóveda Secreta.\n• 💡 Iluminación Cenital Física: Cada tarjeta, fila y botón cuenta con sombras de elevación despegadas y gradientes de luz vertical inspirados en consolas de audio de alta gama.\n• ✨ Interfaz Purificada y Minimalista: Eliminados todos los subtítulos innecesarios, textos explicativos largos y leyendas redundantes para una experiencia visual limpia, fluida y directa.",
   "fileSizeMb": 24.9
 }

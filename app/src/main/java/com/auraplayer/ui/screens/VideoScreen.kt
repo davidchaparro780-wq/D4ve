@@ -313,9 +313,13 @@ fun VideoScreen(
             // WhatsApp Status Chip
             Box(
                 modifier = Modifier
+                    .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFF25D366).copy(alpha = 0.35f))
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF25D366).copy(alpha = 0.18f))
-                    .border(1.dp, Color(0xFF25D366).copy(alpha = 0.55f), RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF184228), Color(0xFF0C2215))
+                        )
+                    )
                     .clickable { showWhatsAppStatusDialog = true }
                     .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
@@ -334,13 +338,13 @@ fun VideoScreen(
             // Instagram Reels Chip
             Box(
                 modifier = Modifier
+                    .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFFE1306C).copy(alpha = 0.35f))
                     .clip(RoundedCornerShape(20.dp))
                     .background(
-                        Brush.horizontalGradient(
-                            listOf(Color(0xFF833AB4).copy(alpha = 0.25f), Color(0xFFFD1D1D).copy(alpha = 0.25f), Color(0xFFFCAF45).copy(alpha = 0.25f))
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF3D1532), Color(0xFF200B1A))
                         )
                     )
-                    .border(1.dp, Color(0xFFE1306C).copy(alpha = 0.55f), RoundedCornerShape(20.dp))
                     .clickable { showInstagramDownloader = true }
                     .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
@@ -359,9 +363,13 @@ fun VideoScreen(
             // TikTok Chip
             Box(
                 modifier = Modifier
+                    .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFF00F2FE).copy(alpha = 0.35f))
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF00F2FE).copy(alpha = 0.15f))
-                    .border(1.dp, Color(0xFF00F2FE).copy(alpha = 0.55f), RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF143040), Color(0xFF0A1922))
+                        )
+                    )
                     .clickable { showTikTokDownloader = true }
                     .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
@@ -395,7 +403,7 @@ fun VideoScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "No se encontraron videos en el dispositivo.",
+                        text = "Sin videos",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -413,15 +421,12 @@ fun VideoScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .shadow(6.dp, RoundedCornerShape(18.dp))
-                            .clip(RoundedCornerShape(18.dp))
-                            .border(
-                                1.dp,
-                                Brush.linearGradient(
-                                    listOf(Color(0xFF8B5CF6).copy(alpha = 0.25f), Color(0xFF38BDF8).copy(alpha = 0.15f))
-                                ),
-                                RoundedCornerShape(18.dp)
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = RoundedCornerShape(18.dp),
+                                spotColor = Color.Black.copy(alpha = 0.5f)
                             )
+                            .clip(RoundedCornerShape(18.dp))
                             .clickable { onVideoClick(video) },
                         shape = RoundedCornerShape(18.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF13182C))
@@ -458,9 +463,16 @@ fun VideoScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(38.dp)
+                                        .shadow(4.dp, CircleShape, spotColor = Color(0xFF38BDF8).copy(alpha = 0.5f))
                                         .clip(CircleShape)
-                                        .background(Color.Black.copy(alpha = 0.55f))
-                                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.8f), CircleShape),
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    Color(0xFF223452),
+                                                    Color(0xFF10192A)
+                                                )
+                                            )
+                                        ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -592,14 +604,18 @@ fun VideoScreen(
                                     }
                                 }
 
-                                // Duration badge (Aesthetic neon pill)
+                                // Duration badge (Tactile 3D pill)
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomEnd)
                                         .padding(8.dp)
+                                        .shadow(3.dp, RoundedCornerShape(8.dp))
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(Color(0xFF0F172A).copy(alpha = 0.88f))
-                                        .border(0.5.dp, Color(0xFF8B5CF6).copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(Color(0xFF1E2640), Color(0xFF0F1422))
+                                            )
+                                        )
                                         .padding(horizontal = 7.dp, vertical = 2.dp)
                                     ) {
                                     Text(
