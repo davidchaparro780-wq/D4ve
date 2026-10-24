@@ -77,6 +77,14 @@ class SleepTimerManager {
         }
     }
 
+    fun extendTimer(extraMinutes: Int = 10) {
+        if (_isTimerActive.value) {
+            _remainingSeconds.value = (_remainingSeconds.value + extraMinutes * 60).coerceAtLeast(60)
+            _fadeVolumeFactor.value = 1.0f
+            globalFadeFactor = 1.0f
+        }
+    }
+
     fun startSmartSensorTimer(context: Context, idleMinutes: Int, onFinish: () -> Unit) {
         cancelTimer()
         _isSmartSensorActive.value = true

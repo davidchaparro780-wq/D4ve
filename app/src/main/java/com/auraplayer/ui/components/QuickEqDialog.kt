@@ -14,13 +14,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import com.auraplayer.audio.EqualizerManager
+import com.auraplayer.data.repository.PlaylistManager
 
 @Composable
 fun QuickEqDialog(
     onDismiss: () -> Unit
 ) {
     val eq = remember { EqualizerManager.instance }
+
+    val context = LocalContext.current
+    val playlistManager = remember { PlaylistManager(context) }
+    var crossfadeSec by remember { mutableIntStateOf(playlistManager.getCrossfadeSeconds()) }
+    var is8D by remember { mutableStateOf(eq.isSpatial8DEnabled) }
 
     // Read current values
     var bassBoost by remember { mutableFloatStateOf(eq.bassStrength.toFloat()) }
@@ -38,7 +48,7 @@ fun QuickEqDialog(
             ) {
                 Icon(Icons.Default.Equalizer, contentDescription = null, tint = Color(0xFF38BDF8), modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Ecualizador Rápido 🎚️", fontWeight = FontWeight.ExtraBold, color = Color.White, fontSize = 18.sp)
+                Text("Consola DJ & Ecualizador 🎚️", fontWeight = FontWeight.ExtraBold, color = Color.White, fontSize = 18.sp)
             }
         },
         text = {
@@ -81,6 +91,77 @@ fun QuickEqDialog(
                         eq.setLoudnessGain(it.toInt())
                     }
                 )
+
+                HorizontalDivider(color = Color(0xFF1E293B), thickness = 1.dp)
+
+                // 4. Fundido Cruzado DJ (Crossfade)
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Mezcla DJ / Crossfade 🎧", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(
+                            text = if (crossfadeSec == 0) "OFF" else "${crossfadeSec}s",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF10B981)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf(0 to "OFF", 3 to "3s", 5 to "5s", 8 to "8s", 12 to "12s").forEach { (sec, label) ->
+                            val isSelected = crossfadeSec == sec
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) Color(0xFF10B981) else Color(0xFF161E36))
+                                    .border(1.dp, if (isSelected) Color(0xFF10B981) else Color(0xFF334155), RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        crossfadeSec = sec
+                                        playlistManager.setCrossfadeSeconds(sec)
+                                    }
+                                    .padding(vertical = 6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) Color.White else Color(0xFF94A3B8),
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // 5. Audio Espacial 8D
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Audio Espacial 8D 🌀", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Efecto envolvente 360°", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                    Switch(
+                        checked = is8D,
+                        onCheckedChange = {
+                            is8D = it
+                            eq.isSpatial8DEnabled = it
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF38BDF8)
+                        )
+                    )
+                }
             }
         },
         confirmButton = {
@@ -93,9 +174,13 @@ fun QuickEqDialog(
                         bassBoost = 0f
                         virtualizer = 0f
                         loudness = 0f
+                        crossfadeSec = 0
+                        is8D = false
                         eq.setBassBoostStrength(0)
                         eq.setVirtualizerStrength(0)
                         eq.setLoudnessGain(0)
+                        playlistManager.setCrossfadeSeconds(0)
+                        eq.isSpatial8DEnabled = false
                     }
                 ) {
                     Icon(Icons.Default.RestartAlt, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(16.dp))

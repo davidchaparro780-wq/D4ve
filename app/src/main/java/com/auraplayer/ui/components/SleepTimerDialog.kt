@@ -220,7 +220,30 @@ fun SleepTimerDialog(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    // Botones de extensión rápida
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = { sleepTimerManager.extendTimer(10) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF38BDF8)),
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("+10 Min", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                        Button(
+                            onClick = { sleepTimerManager.extendTimer(15) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6)),
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("+15 Min", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Button(
                         onClick = { sleepTimerManager.cancelTimer() },

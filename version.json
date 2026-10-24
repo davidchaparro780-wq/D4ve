@@ -1,7 +1,7 @@
 {
-  "versionCode": 132,
-  "versionName": "4.9.32",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.32/app-debug.apk",
-  "changelog": "🖼️ DaVE Player v4.9.32 (Build 132) — Miniaturas de Estados de WhatsApp y Vista Previa HD:\n• 🎬 Carátulas y Fotogramas en Tiempo Real: Extracción nativa de fotogramas a 500ms para videos de WhatsApp (.mp4) con MediaMetadataRetriever sin pantallas negras.\n• 🖼️ Miniaturas Optimizadas para Fotos: Decodificación downsampled de imágenes con caché LRU de alto rendimiento para navegación fluida a 60/120 FPS.\n• 🔍 Vista Previa en Pantalla Completa: Toca cualquier estado para abrir el visor HD con opciones directas de Descargar y Compartir.\n• 📱 Soporte Extendido: Detección ampliada para WhatsApp estándar, Business, Dual App y GBWhatsApp.",
+  "versionCode": 133,
+  "versionName": "4.9.33",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.33/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.33 (Build 133) — Descargas en Segundo Plano, Consola DJ & Audio Visualizer Pro:\n• 📥 Notificaciones de Descarga en Segundo Plano: Descarga videos de TikTok e Instagram sin marca de agua con barra de progreso en la barra de estado y botón para volver a TikTok sin interrumpir.\n• 🎧 Consola DJ & Fundido Cruzado (Crossfade): Control directo de mezcla DJ (0s a 12s) y Audio Espacial 8D accesible inmediatamente desde el reproductor.\n• 🌌 Halo de Luz Reactivo (Neon Bloom): Aura pulsante en tiempo real al ritmo de los bajos y colores dinámicos de la carátula.\n• 🌙 Temporizador Zen con Extensión Rápida: Botones instantáneos de +10 y +15 min y detector de movimiento para desvanecimiento suave sin sobresaltos.",
   "fileSizeMb": 24.9
 }

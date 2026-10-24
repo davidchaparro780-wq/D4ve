@@ -1,5 +1,9 @@
 package com.auraplayer.data.repository
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
 import android.content.ClipData
 import android.content.ContentValues
 import android.content.Context
@@ -41,8 +45,77 @@ sealed class TikTokDownloadProgress {
 }
 
 object TikTokDownloader {
-    private const val TAG = "TikTokDownloader"
-    private const val USER_AGENT = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36"
+    private const val CHANNEL_ID = "dave_social_downloads"
+    private const val NOTIFICATION_ID = 8841
+
+    fun ensureNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Descargas de Redes Sociales",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Progreso de descarga de videos de TikTok e Instagram"
+                setShowBadge(false)
+            }
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            nm?.createNotificationChannel(channel)
+        }
+    }
+
+    fun showProgressNotification(context: Context, title: String, author: String, progress: Int) {
+        try {
+            ensureNotificationChannel(context)
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            val notif = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setContentTitle("📥 Descargando TikTok sin marca ($progress%)")
+                .setContentText("@$author: ${title.take(45)}")
+                .setProgress(100, progress, progress == 0)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build()
+            nm.notify(NOTIFICATION_ID, notif)
+        } catch (_: Exception) {}
+    }
+
+    fun showCompletedNotification(context: Context, title: String, author: String, isVideo: Boolean, uri: Uri) {
+        try {
+            ensureNotificationChannel(context)
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            nm.cancel(NOTIFICATION_ID)
+
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, if (isVideo) "video/*" else "audio/*")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val pi = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            val notif = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                .setContentTitle("🎬 TikTok Descargado sin marca")
+                .setContentText("@$author: ${title.take(45)} • Toca para reproducir o enviar a WhatsApp")
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build()
+            nm.notify((System.currentTimeMillis() % 10000).toInt() + 1000, notif)
+        } catch (_: Exception) {}
+    }
+
+    fun cancelNotification(context: Context) {
+        try {
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            nm?.cancel(NOTIFICATION_ID)
+        } catch (_: Exception) {}
+    }
 
     fun isTikTokUrl(url: String): Boolean {
         val trimmed = url.trim().lowercase()
@@ -211,6 +284,8 @@ object TikTokDownloader {
             val safeAuthor = sanitizeFileName(details.author).take(30).ifBlank { details.username }
             val fileName = "TikTok - ${safeAuthor}_$safeTitle$extension"
 
+            showProgressNotification(context, details.title, details.author, 0)
+
             var currentUrl = downloadUrl
             var redirects = 0
 
@@ -291,6 +366,9 @@ object TikTokDownloader {
                         context.contentResolver.openOutputStream(uri)?.use { output ->
                             copyStreamWithProgress(inputStream, output, contentLength) { pct ->
                                 onProgress(pct)
+                                if (pct % 5 == 0 || pct == 100) {
+                                    showProgressNotification(context, details.title, details.author, pct)
+                                }
                             }
                         }
 
@@ -368,6 +446,9 @@ object TikTokDownloader {
                 FileOutputStream(targetFile).use { output ->
                     copyStreamWithProgress(inputStream, output, contentLength) { pct ->
                         onProgress(pct)
+                        if (pct % 5 == 0 || pct == 100) {
+                            showProgressNotification(context, details.title, details.author, pct)
+                        }
                     }
                 }
                 finalPath = targetFile.absolutePath
@@ -387,9 +468,11 @@ object TikTokDownloader {
 
             val resultUri = finalUri ?: return@withContext Result.failure(Exception("No se pudo obtener el URI del archivo guardado"))
             AppLog.i(TAG, "Descarga completada con compatibilidad WhatsApp: $fileName ($resultUri)")
+            showCompletedNotification(context, details.title, details.author, isVideo, resultUri)
             Result.success(resultUri)
         } catch (e: Exception) {
             AppLog.e(TAG, "Error durante la descarga de TikTok", e)
+            cancelNotification(context)
             Result.failure(e)
         } finally {
             try { inputStream?.close() } catch (_: Throwable) {}

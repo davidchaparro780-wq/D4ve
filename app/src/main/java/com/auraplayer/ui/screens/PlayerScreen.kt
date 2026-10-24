@@ -1304,6 +1304,23 @@ fun PlayerScreen(
                                         secondaryColor = MaterialTheme.colorScheme.secondary
                                     )
 
+                                    if (isPlaying) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(maxArtSize * (0.94f + bassEnergy * 0.18f))
+                                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                                .background(
+                                                    androidx.compose.ui.graphics.Brush.radialGradient(
+                                                        colors = listOf(
+                                                            activeAccent.copy(alpha = (0.32f + bassEnergy * 0.42f).coerceIn(0.15f, 0.85f)),
+                                                            Color(0xFF8B5CF6).copy(alpha = (0.18f + bassEnergy * 0.28f).coerceIn(0.08f, 0.55f)),
+                                                            Color.Transparent
+                                                        )
+                                                    )
+                                                )
+                                        )
+                                    }
+
                                     VinylTurntableSkin(
                                         song = currentMedia,
                                         isPlaying = isPlaying,
