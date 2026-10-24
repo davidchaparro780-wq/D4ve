@@ -127,141 +127,243 @@ object TikTokDownloader {
 
     /**
      * Extrae de forma limpia cualquier enlace de TikTok contenido dentro de un texto compartido.
-     * Soporta enlaces cortos (vm.tiktok.com, vt.tiktok.com) y texto con comentarios o hashtags.
+     * Soporta enlaces cortos (vm.tiktok.com, vt.tiktok.com, tiktok.com/t/) y texto con comentarios o hashtags,
+     * eliminando cualquier puntuación final accidental.
      */
     fun extractTikTokUrl(text: String): String? {
         val trimmed = text.trim()
-        if (isTikTokUrl(trimmed)) return trimmed
-
         val urlRegex = Regex("""https?://[^\s<>"'{}|\\^`]+""")
-        val matches = urlRegex.findAll(text)
+        val matches = urlRegex.findAll(trimmed)
         for (match in matches) {
-            val candidate = match.value.trim()
+            val candidate = match.value.trim().trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
             if (isTikTokUrl(candidate)) {
                 return candidate
             }
         }
+        val cleanTrimmed = trimmed.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
+        if (isTikTokUrl(cleanTrimmed)) return cleanTrimmed
         return null
+    }
+
+    /**
+     * Resuelve redirecciones 301/302 de enlaces cortos (vm.tiktok.com, vt.tiktok.com, tiktok.com/t/)
+     * y elimina parámetros de tracking (?_t=..., ?_r=..., etc.) para obtener la URL canónica del video.
+     */
+    suspend fun unshortenAndCleanTikTokUrl(rawUrl: String): String = withContext(Dispatchers.IO) {
+        var currentUrl = rawUrl.trim().trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
+
+        // Si ya es un enlace directo a video con query params, limpiamos los parámetros de tracking
+        if (currentUrl.contains("/video/")) {
+            val qIdx = currentUrl.indexOf('?')
+            if (qIdx != -1) {
+                currentUrl = currentUrl.substring(0, qIdx)
+            }
+            return@withContext currentUrl
+        }
+
+        try {
+            var redirects = 0
+            while (redirects < 6) {
+                val urlObj = URL(currentUrl)
+                val conn = (urlObj.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    instanceFollowRedirects = false
+                    requestMethod = "GET"
+                    setRequestProperty("User-Agent", USER_AGENT)
+                    setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                }
+                val code = conn.responseCode
+                if (code in 301..308) {
+                    val location = conn.getHeaderField("Location")
+                    conn.disconnect()
+                    if (!location.isNullOrBlank()) {
+                        currentUrl = if (location.startsWith("http://") || location.startsWith("https://")) {
+                            location
+                        } else {
+                            URL(urlObj, location).toString()
+                        }
+                        redirects++
+                        if (currentUrl.contains("/video/")) {
+                            val qIdx = currentUrl.indexOf('?')
+                            if (qIdx != -1) {
+                                currentUrl = currentUrl.substring(0, qIdx)
+                            }
+                            break
+                        }
+                        continue
+                    }
+                } else {
+                    conn.disconnect()
+                }
+                break
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Error resolviendo redirecciones para $rawUrl: ${e.message}")
+        }
+
+        val qIdx = currentUrl.indexOf('?')
+        if (qIdx != -1 && currentUrl.contains("/video/")) {
+            currentUrl = currentUrl.substring(0, qIdx)
+        }
+        currentUrl
     }
 
     /**
      * Resuelve los enlaces limpios sin marca de agua del video de TikTok a través de múltiples motores resilientes.
      */
     suspend fun resolveTikTok(rawUrl: String): Result<TikTokVideoDetails> = withContext(Dispatchers.IO) {
-        val cleanUrl = rawUrl.trim()
-        if (!isTikTokUrl(cleanUrl)) {
+        val cleanInput = rawUrl.trim().trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
+        if (!isTikTokUrl(cleanInput)) {
             return@withContext Result.failure(IllegalArgumentException("El enlace no parece ser un enlace válido de TikTok."))
         }
 
-        // 1. Intento primario: TikWM API
-        var conn1: HttpURLConnection? = null
-        try {
-            val encoded = URLEncoder.encode(cleanUrl, "UTF-8")
-            val tikWmApi = "https://www.tikwm.com/api/?url=$encoded&hd=1"
-            conn1 = (URL(tikWmApi).openConnection() as HttpURLConnection).apply {
-                connectTimeout = 12000
-                readTimeout = 15000
-                requestMethod = "GET"
-                setRequestProperty("User-Agent", USER_AGENT)
-                setRequestProperty("Accept", "application/json")
-            }
+        // Desreferenciar URLs cortas y limpiar tracking
+        val canonicalUrl = unshortenAndCleanTikTokUrl(cleanInput)
+        AppLog.d(TAG, "Resolviendo TikTok: original='$cleanInput' -> canonica='$canonicalUrl'")
 
-            if (conn1.responseCode == 200) {
-                val responseText = conn1.inputStream.bufferedReader().use { it.readText() }
-                val root = JSONObject(responseText)
-                if (root.optInt("code", -1) == 0) {
-                    val data = root.optJSONObject("data")
-                    if (data != null) {
-                        val videoUrl = data.optString("play", "")
-                        val hdVideoUrl = data.optString("hdplay", "").takeIf { it.isNotBlank() }
-                        val audioUrl = data.optString("music", "").takeIf { it.isNotBlank() }
-                        val cover = data.optString("cover", "")
-                        val title = data.optString("title", "Video de TikTok").trim().ifBlank { "Video de TikTok" }
-                        val authorObj = data.optJSONObject("author")
-                        val authorName = authorObj?.optString("nickname", "TikTok Creator") ?: "TikTok Creator"
-                        val username = authorObj?.optString("unique_id", "tiktok") ?: "tiktok"
-                        val id = data.optString("id", System.currentTimeMillis().toString())
-                        val duration = data.optInt("duration", 0)
+        // Helper para consultar TikWM
+        fun queryTikWm(targetUrl: String): TikTokVideoDetails? {
+            var conn: HttpURLConnection? = null
+            try {
+                val encoded = URLEncoder.encode(targetUrl, "UTF-8")
+                val tikWmApi = "https://www.tikwm.com/api/?url=$encoded&hd=1"
+                conn = (URL(tikWmApi).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 12000
+                    readTimeout = 15000
+                    requestMethod = "GET"
+                    setRequestProperty("User-Agent", USER_AGENT)
+                    setRequestProperty("Accept", "application/json")
+                }
 
-                        val finalVideoUrl = videoUrl.ifBlank { hdVideoUrl ?: "" }
-                        if (finalVideoUrl.isNotBlank()) {
-                            AppLog.d(TAG, "TikTok resuelto con éxito vía TikWM: $id ($title)")
-                            return@withContext Result.success(
-                                TikTokVideoDetails(
+                if (conn.responseCode == 200) {
+                    val responseText = conn.inputStream.bufferedReader().use { it.readText() }
+                    val root = JSONObject(responseText)
+                    if (root.optInt("code", -1) == 0) {
+                        val data = root.optJSONObject("data")
+                        if (data != null) {
+                            val videoUrl = data.optString("play", "")
+                            val hdVideoUrl = data.optString("hdplay", "").takeIf { it.isNotBlank() }
+                            val audioUrl = data.optString("music", "").takeIf { it.isNotBlank() }
+                            val cover = data.optString("cover", "")
+                            val title = data.optString("title", "Video de TikTok").trim().ifBlank { "Video de TikTok" }
+                            val authorObj = data.optJSONObject("author")
+                            val authorName = authorObj?.optString("nickname", "TikTok Creator") ?: "TikTok Creator"
+                            val username = authorObj?.optString("unique_id", "tiktok") ?: "tiktok"
+                            val id = data.optString("id", System.currentTimeMillis().toString())
+                            val duration = data.optInt("duration", 0)
+
+                            val finalVideoUrl = videoUrl.ifBlank { hdVideoUrl ?: "" }
+                            if (finalVideoUrl.isNotBlank()) {
+                                return TikTokVideoDetails(
                                     id = id,
                                     title = title,
                                     author = authorName,
                                     username = username,
                                     coverUrl = cover,
-                                    videoNoWatermarkUrl = finalVideoUrl, // H.264 AVC estándar 100% compatible con WhatsApp
+                                    videoNoWatermarkUrl = finalVideoUrl,
                                     videoHdUrl = hdVideoUrl,
                                     audioUrl = audioUrl,
                                     durationSeconds = duration
                                 )
-                            )
+                            }
                         }
                     }
                 }
+            } catch (e: Exception) {
+                AppLog.w(TAG, "TikWM fallo con URL $targetUrl: ${e.message}")
+            } finally {
+                try { conn?.disconnect() } catch (_: Throwable) {}
             }
-        } catch (e: Exception) {
-            AppLog.w(TAG, "TikWM API falló, probando motor alternativo...", e)
-        } finally {
-            try { conn1?.disconnect() } catch (_: Throwable) {}
+            return null
         }
 
-        // 2. Intento secundario: Tiklydown API
-        var conn2: HttpURLConnection? = null
+        // 1. Motor 1: TikWM con la URL canónica limpia
+        queryTikWm(canonicalUrl)?.let {
+            AppLog.d(TAG, "TikTok resuelto exitosamente via TikWM con URL canónica: ${it.id}")
+            return@withContext Result.success(it)
+        }
+
+        // 2. Motor 2: TikTok oficial oEmbed -> extrae embed_product_id -> consulta TikWM con ID directo
         try {
-            val encoded = URLEncoder.encode(cleanUrl, "UTF-8")
-            val tiklyApi = "https://api.tiklydown.eu.org/api/download/v5?url=$encoded"
-            conn2 = (URL(tiklyApi).openConnection() as HttpURLConnection).apply {
-                connectTimeout = 12000
-                readTimeout = 15000
+            val encodedCanonical = URLEncoder.encode(canonicalUrl, "UTF-8")
+            val oembedUrl = "https://www.tiktok.com/oembed?url=$encodedCanonical"
+            val oembedConn = (URL(oembedUrl).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 8000
+                readTimeout = 8000
                 requestMethod = "GET"
                 setRequestProperty("User-Agent", USER_AGENT)
                 setRequestProperty("Accept", "application/json")
             }
+            if (oembedConn.responseCode == 200) {
+                val oembedText = oembedConn.inputStream.bufferedReader().use { it.readText() }
+                oembedConn.disconnect()
+                val oembedJson = JSONObject(oembedText)
+                val videoId = oembedJson.optString("embed_product_id", "")
+                if (videoId.isNotBlank()) {
+                    AppLog.d(TAG, "ID de TikTok resuelto via oEmbed: $videoId")
+                    queryTikWm("https://www.tiktok.com/@tiktok/video/$videoId")?.let {
+                        return@withContext Result.success(it)
+                    }
+                }
+            } else {
+                oembedConn.disconnect()
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Fallo TikTok oEmbed: ${e.message}")
+        }
 
-            if (conn2.responseCode == 200) {
-                val responseText = conn2.inputStream.bufferedReader().use { it.readText() }
-                val root = JSONObject(responseText)
-                val resultObj = root.optJSONObject("result")
-                val videoObj = resultObj?.optJSONObject("video")
-                val noWmUrl = videoObj?.optString("no_watermark", "") ?: ""
-                val musicObj = resultObj?.optJSONObject("music")
-                val audioUrl = musicObj?.optString("play_url", "")
+        // 3. Motor 3: TikWM con la URL de entrada original por si acaso
+        if (cleanInput != canonicalUrl) {
+            queryTikWm(cleanInput)?.let {
+                AppLog.d(TAG, "TikTok resuelto con URL original: ${it.id}")
+                return@withContext Result.success(it)
+            }
+        }
 
-                if (noWmUrl.isNotBlank()) {
-                    val authorObj = resultObj?.optJSONObject("author")
-                    val authorName = authorObj?.optString("name", "TikTok Creator") ?: "TikTok Creator"
-                    val username = authorObj?.optString("unique_id", "tiktok") ?: "tiktok"
-                    val title = resultObj?.optString("title", "Video de TikTok") ?: "Video de TikTok"
-                    val cover = videoObj?.optString("cover", "") ?: ""
-                    val id = resultObj?.optString("id", System.currentTimeMillis().toString()) ?: System.currentTimeMillis().toString()
+        // 4. Motor 4: Scraping directo de HTML para playAddr
+        try {
+            val scrapeConn = (URL(canonicalUrl).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 10000
+                readTimeout = 12000
+                requestMethod = "GET"
+                instanceFollowRedirects = true
+                setRequestProperty("User-Agent", USER_AGENT)
+                setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            }
+            if (scrapeConn.responseCode in 200..299) {
+                val html = scrapeConn.inputStream.bufferedReader().use { it.readText() }
+                scrapeConn.disconnect()
 
-                    AppLog.d(TAG, "TikTok resuelto con éxito vía Tiklydown: $id")
+                val playAddrRegex = Regex(""""(?:playAddr|downloadAddr)":"(https:[^"]+)"""")
+                val match = playAddrRegex.find(html)?.groupValues?.get(1)
+                if (!match.isNullOrBlank()) {
+                    val decodedUrl = match.replace("\\u0026", "&").replace("\\/", "/")
+                    val titleRegex = Regex("""<title>([^<]+)</title>""")
+                    val rawTitle = titleRegex.find(html)?.groupValues?.get(1) ?: "Video de TikTok"
+
                     return@withContext Result.success(
                         TikTokVideoDetails(
-                            id = id,
-                            title = title,
-                            author = authorName,
-                            username = username,
-                            coverUrl = cover,
-                            videoNoWatermarkUrl = noWmUrl,
+                            id = System.currentTimeMillis().toString(),
+                            title = rawTitle.replace(" | TikTok", "").trim(),
+                            author = "TikTok Creator",
+                            username = "tiktok",
+                            coverUrl = "",
+                            videoNoWatermarkUrl = decodedUrl,
                             videoHdUrl = null,
-                            audioUrl = audioUrl,
+                            audioUrl = null,
                             durationSeconds = 0
                         )
                     )
                 }
+            } else {
+                scrapeConn.disconnect()
             }
         } catch (e: Exception) {
-            AppLog.w(TAG, "Tiklydown API falló: ${e.message}", e)
-        } finally {
-            try { conn2?.disconnect() } catch (_: Throwable) {}
+            AppLog.w(TAG, "Direct HTML scraping fallo: ${e.message}")
         }
 
-        Result.failure(Exception("No se pudo obtener el video sin marca de agua. Verifica que el enlace sea público e intenta de nuevo."))
+        Result.failure(Exception("No se pudo obtener el video sin marca de agua de TikTok. Verifica que el enlace sea accesible e intenta nuevamente."))
     }
 
     /**
