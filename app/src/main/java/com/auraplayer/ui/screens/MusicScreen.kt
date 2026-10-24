@@ -471,9 +471,13 @@ fun MusicScreen(
                     Box(
                         modifier = Modifier
                             .size(38.dp)
+                            .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                            .border(1.dp, themeTertiary.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF243048), Color(0xFF131826))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 showSortMenu = true
@@ -520,9 +524,13 @@ fun MusicScreen(
                 Box(
                     modifier = Modifier
                         .size(38.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                        .border(1.dp, themeSecondary.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF243048), Color(0xFF131826))
+                            )
+                        )
                         .clickable {
                             AuraHaptic.click(view)
                             onOpenSleepTimer()
@@ -542,9 +550,13 @@ fun MusicScreen(
                     Box(
                         modifier = Modifier
                             .size(38.dp)
+                            .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                            .border(1.dp, themePrimary.copy(alpha = 0.55f), RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF243048), Color(0xFF131826))
+                                )
+                            )
                             .clickable {
                                 AuraHaptic.click(view)
                                 showToolsMenu = true
@@ -864,12 +876,13 @@ fun MusicScreen(
                 Box(
                     modifier = Modifier
                         .size(38.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                        .border(
-                            1.dp,
-                            if (activeUser != null) Color(0xFFFFD700).copy(alpha = 0.6f) else themePrimary.copy(alpha = 0.45f),
-                            RoundedCornerShape(12.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                if (activeUser != null) listOf(Color(0xFF3B3216), Color(0xFF1E1A0A))
+                                else listOf(Color(0xFF243048), Color(0xFF131826))
+                            )
                         )
                         .clickable {
                             if (activeUser != null) onOpenProfile() else onOpenAuth()
@@ -892,12 +905,12 @@ fun MusicScreen(
                 Box(
                     modifier = Modifier
                         .size(38.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                        .border(
-                            1.dp,
-                            themeSecondary.copy(alpha = 0.45f),
-                            RoundedCornerShape(12.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF243048), Color(0xFF131826))
+                            )
                         )
                         .clickable {
                             AuraHaptic.click(view)
@@ -921,17 +934,17 @@ fun MusicScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 14.dp, vertical = 6.dp)
                 .height(48.dp)
+                .shadow(
+                    elevation = 6.dp,
+                    shape = RoundedCornerShape(24.dp),
+                    spotColor = Color.Black.copy(alpha = 0.45f),
+                    ambientColor = Color.Black.copy(alpha = 0.3f)
+                )
                 .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .border(
-                    1.dp,
-                    Brush.horizontalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
-                        )
-                    ),
-                    RoundedCornerShape(24.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1F293D), Color(0xFF111726))
+                    )
                 )
                 .padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart
@@ -1099,9 +1112,16 @@ fun MusicScreen(
                             .tabIndicatorOffset(tabPositions[selectedTab])
                             .fillMaxHeight()
                             .padding(horizontal = 4.dp, vertical = 6.dp)
+                            .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = themePrimary.copy(alpha = 0.5f))
                             .clip(RoundedCornerShape(20.dp))
-                            .background(themePrimary.copy(alpha = 0.22f))
-                            .border(1.dp, themePrimary.copy(alpha = 0.55f), RoundedCornerShape(20.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        themePrimary.copy(alpha = 0.35f),
+                                        themePrimary.copy(alpha = 0.18f)
+                                    )
+                                )
+                            )
                     )
                 }
             },
@@ -1143,25 +1163,18 @@ fun MusicScreen(
                     val isSelected = selectedFilterIndex == index
                     Box(
                         modifier = Modifier
+                            .shadow(
+                                elevation = if (isSelected) 5.dp else 2.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = if (isSelected) themePrimary.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.4f)
+                            )
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (isSelected) {
-                                    Brush.horizontalGradient(
-                                        listOf(themePrimary, themeSecondary)
-                                    )
+                                    Brush.verticalGradient(listOf(themePrimary, themeSecondary))
                                 } else {
-                                    Brush.linearGradient(
-                                        listOf(
-                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                                        )
-                                    )
+                                    Brush.verticalGradient(listOf(Color(0xFF222B40), Color(0xFF141926)))
                                 }
-                            )
-                            .border(
-                                1.dp,
-                                if (isSelected) Color.Transparent else themePrimary.copy(alpha = 0.25f),
-                                RoundedCornerShape(16.dp)
                             )
                             .clickable {
                                 AuraHaptic.tick(view)
@@ -1396,9 +1409,13 @@ fun MusicScreen(
                                                 // Quick Refresh Button
                                                 Box(
                                                     modifier = Modifier
+                                                        .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                                                         .clip(RoundedCornerShape(12.dp))
-                                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
-                                                        .border(1.dp, themePrimary.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                                        .background(
+                                                            Brush.verticalGradient(
+                                                                listOf(Color(0xFF243048), Color(0xFF131826))
+                                                            )
+                                                        )
                                                         .clickable {
                                                             AuraHaptic.click(view)
                                                             onRefreshLibrary()
@@ -2888,9 +2905,6 @@ fun SongListItem(
     onSwipePlayNext: (() -> Unit)? = null,
     onSwipeToggleFavorite: (() -> Unit)? = null
 ) {
-    val ext = remember(song.path) {
-        File(song.path).extension.uppercase().ifEmpty { "AUDIO" }
-    }
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
@@ -2990,28 +3004,36 @@ fun SongListItem(
             }
         }
 
-        // Foreground Song Item Row
+        // Foreground Song Item Row with 3D tactile embossed volume
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 3.dp)
+                .padding(horizontal = 10.dp, vertical = 3.5.dp)
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .then(swipeModifier)
-                .clip(RoundedCornerShape(14.dp))
-                .background(
-                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                    else Color.Transparent
+                .shadow(
+                    elevation = if (isSelected) 6.dp else 2.5.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    spotColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f) else Color.Black.copy(alpha = 0.4f),
+                    ambientColor = Color.Black.copy(alpha = 0.25f)
                 )
-                .border(
-                    if (isSelected) 1.dp else 0.dp,
-                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                    RoundedCornerShape(14.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    if (isSelected) {
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF1E2942), Color(0xFF111726))
+                        )
+                    } else {
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF181F30), Color(0xFF0F1420))
+                        )
+                    }
                 )
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick
                 )
-                .padding(horizontal = 10.dp, vertical = 7.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isSelectionMode) {
@@ -3026,28 +3048,28 @@ fun SongListItem(
             Box(
                 modifier = Modifier
                     .size(50.dp)
+                    .shadow(
+                        elevation = if (isSelected) 5.dp else 3.dp,
+                        shape = RoundedCornerShape(12.dp),
+                        spotColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.4f)
+                    )
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         if (isSelected) {
-                            Brush.linearGradient(
+                            Brush.verticalGradient(
                                 listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                                     MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)
                                 )
                             )
                         } else {
-                            Brush.linearGradient(
+                            Brush.verticalGradient(
                                 listOf(
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                                    Color(0xFF263248),
+                                    Color(0xFF151C2A)
                                 )
                             )
                         }
-                    )
-                    .border(
-                        0.8.dp,
-                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.65f) else Color.White.copy(alpha = 0.1f),
-                        RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -3124,90 +3146,18 @@ fun SongListItem(
                     HighlightedText(
                         text = song.artist,
                         query = highlightQuery,
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     Text(
                         text = " • ${song.formattedDuration}",
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         maxLines = 1
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    // Small dynamic format badge chip
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(if (ext == "FLAC" || ext == "WAV") Color(0xFF06B6D4).copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .padding(horizontal = 4.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            text = ext,
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (ext == "FLAC" || ext == "WAV") Color(0xFF06B6D4) else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    if (song.isRecentlyAdded) {
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFF10B981).copy(alpha = 0.22f))
-                                .border(0.8.dp, Color(0xFF10B981).copy(alpha = 0.75f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 4.dp, vertical = 1.dp)
-                        ) {
-                            Text(
-                                text = "NUEVA",
-                                fontSize = 8.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color(0xFF10B981)
-                            )
-                        }
-                    }
-
-                    if (song.isVideo || ext in listOf("MP4", "MKV", "WEBM")) {
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFF8B5CF6).copy(alpha = 0.25f))
-                                .border(0.8.dp, Color(0xFF8B5CF6).copy(alpha = 0.8f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 4.dp, vertical = 1.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Videocam,
-                                    contentDescription = null,
-                                    tint = Color(0xFFA78BFA),
-                                    modifier = Modifier.size(10.dp)
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = "VIDEO",
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color(0xFFA78BFA)
-                                )
-                            }
-                        }
-                    }
-
-                    if (extraBadge != null) {
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = extraBadge,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
             }
 

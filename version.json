@@ -1,7 +1,7 @@
 {
-  "versionCode": 135,
-  "versionName": "4.9.35",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.35/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.35 (Build 135) — Radar Mágico de Enlaces, Estados de WhatsApp 30s & Modo Karaoke:\n• 🎯 Radar Mágico de Descargas (Clipboard Sniffer): Detección instantánea en primer plano de enlaces copiados de TikTok o Instagram Reels. Muestra un chip de cristal animado con un botón de un toque para descargar directamente sin marcas de agua.\n• 🟢 Creador de Estados de WhatsApp (30s): Nuevo preset inteligente en el Cortador de Audio que recorta la canción a un máximo estricto de 30 segundos y lo envía directamente a los Estados de WhatsApp.\n• 🎤 Modo Karaoke Vocal Remover: Conmutador en la Consola DJ / QuickEq para atenuar las voces principales mediante DSP de corte notch en frecuencias vocales, dejando la pista instrumental para cantar.",
+  "versionCode": 136,
+  "versionName": "4.9.36",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.36/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.36 (Build 136) — Rediseño Táctil 3D con Alto Relieve (Sin Líneas ni Subtítulos Excesivos):\n• 🎛️ Tarjetas Táctiles 3D con Volumen Físico: Adiós a los bordes y divisores tipo wireframe (1.dp border y HorizontalDivider). Toda la interfaz ahora cuenta con elevación cenital real, sombras profundas y volumen extruido.\n• 🎵 Canciones Limpias y Premium: Cada fila de canción es una baldosa flotante táctil esculpida en 3D. Se eliminaron cajitas y badges wireframe redundantes ('NUEVA', 'FLAC', 'VIDEO'), dejando únicamente el título nítido y 'Artista • Duración' con máxima legibilidad.\n• 🎚️ Consola DJ & Ecualizador Esculpido: Sliders, opciones de Crossfade y conmutadores espaciales agrupados en bloques táctiles con relieve físico, sin divisores de línea ni subtítulos explicativos redundantes.\n• 📱 MiniPlayer y HUD Extruidos: Mini reproductor y controles con elevación flotante de 20dp, sombras de luz ambiental y botones hápticos de consola Hi-Fi.",
   "fileSizeMb": 24.9
 }

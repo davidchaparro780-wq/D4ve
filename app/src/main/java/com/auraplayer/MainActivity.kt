@@ -2071,26 +2071,22 @@ fun AuraApp(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 14.dp, vertical = 6.dp)
-                            .shadow(16.dp, RoundedCornerShape(20.dp), spotColor = if (isTk) Color(0xFF00F0FF).copy(alpha = 0.4f) else Color(0xFFE1306C).copy(alpha = 0.4f))
+                            .shadow(
+                                elevation = 16.dp,
+                                shape = RoundedCornerShape(20.dp),
+                                spotColor = if (isTk) Color(0xFF00F0FF).copy(alpha = 0.45f) else Color(0xFFE1306C).copy(alpha = 0.45f),
+                                ambientColor = Color.Black.copy(alpha = 0.4f)
+                            )
                             .clip(RoundedCornerShape(20.dp))
                             .background(
-                                Brush.horizontalGradient(
+                                Brush.verticalGradient(
                                     listOf(
-                                        Color(0xF010162A),
-                                        Color(0xF01A1028),
-                                        Color(0xF00D1322)
+                                        Color(0xFF1F293F),
+                                        Color(0xFF101524)
                                     )
                                 )
                             )
-                            .border(
-                                1.2.dp,
-                                Brush.horizontalGradient(
-                                    if (isTk) listOf(Color(0xFF00F0FF), Color(0xFFFE2C55))
-                                    else listOf(Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFFCB045))
-                                ),
-                                RoundedCornerShape(20.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -2100,26 +2096,22 @@ fun AuraApp(
                             // Service Icon
                             Box(
                                 modifier = Modifier
-                                    .size(44.dp)
+                                    .size(42.dp)
+                                    .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
-                                        Brush.linearGradient(
-                                            if (isTk) listOf(Color(0xFF00F0FF).copy(alpha = 0.2f), Color(0xFFFE2C55).copy(alpha = 0.2f))
-                                            else listOf(Color(0xFF833AB4).copy(alpha = 0.25f), Color(0xFFFD1D1D).copy(alpha = 0.25f))
+                                        Brush.verticalGradient(
+                                            if (isTk) listOf(Color(0xFF00F0FF).copy(alpha = 0.35f), Color(0xFF008080).copy(alpha = 0.35f))
+                                            else listOf(Color(0xFF833AB4).copy(alpha = 0.35f), Color(0xFFFD1D1D).copy(alpha = 0.35f))
                                         )
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isTk) Color(0xFF00F0FF).copy(alpha = 0.4f) else Color(0xFFFD1D1D).copy(alpha = 0.4f),
-                                        RoundedCornerShape(12.dp)
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = if (isTk) Icons.Default.MusicNote else Icons.Default.VideoLibrary,
                                     contentDescription = null,
-                                    tint = if (isTk) Color(0xFF00F0FF) else Color(0xFFFD1D1D),
-                                    modifier = Modifier.size(24.dp)
+                                    tint = if (isTk) Color(0xFF00F0FF) else Color(0xFFFF5252),
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
 
@@ -2129,26 +2121,15 @@ fun AuraApp(
                             Column(
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = if (isTk) "⚡ ENLACE DE TIKTOK DETECTADO" else "📸 ENLACE DE INSTAGRAM DETECTADO",
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = if (isTk) Color(0xFF00F0FF) else Color(0xFFF77737),
-                                        letterSpacing = 1.sp
-                                    )
-                                }
                                 Text(
-                                    text = if (isTk) "Video listo para descargar sin marca" else "Reel listo para descargar en HD",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    color = Color.White,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    text = if (isTk) "⚡ TikTok detectado" else "📸 Instagram detectado",
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (isTk) Color(0xFF00F0FF) else Color(0xFFFF7043)
                                 )
                                 Text(
                                     text = detectedUrl,
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = Color(0xFF94A3B8),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis

@@ -267,3 +267,25 @@
       - Parser JS: 0 discrepancias (`pDepth: 0`, `bDepth: 0`, `bracketDepth: 0`).
       - Parser HTML: 349 `<div>` abiertas / 349 cerradas; 165 `<button>` abiertos / 165 cerrados.
     - *Despliegue:* Versión `v4.3.6` subida a la rama `main`, desplegada en vivo en GitHub Pages y espejada en Google Drive (`G:\` y `H:\`).
+
+32. **🎛️ DaVE Player Android — Rediseño Táctil 3D con Alto Relieve & Limpieza de Subtítulos (v4.9.36 / Build 136):**
+    - *Situación:* El usuario solicitó: *"Mejora la ui veo muchas lineas quiero que tenga relieves y no tenga tantos subtitulos"*. La interfaz acumulaba bordes de trazo duro (`.border(1.dp)`), separadores de línea (`HorizontalDivider`), cajitas de badges redundantes (`NUEVA`, `FLAC`, `VIDEO`, `extraBadge`) y múltiples líneas de texto secundario explicativo que sobrecargaban visualmente la vista haciéndola parecer un wireframe plano.
+    - *Solución Integral Implementada:*
+      1. **Baldosas Flotantes Táctiles 3D (`SongListItem` en `MusicScreen.kt`):**
+         - Se eliminó el `.border(1.dp)` y se dotó a cada fila de canción de elevación y relieve tridimensional táctil (`shadow(elevation = 2.5dp a 6dp, shape = RoundedCornerShape(16.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))`).
+         - Fondo degradado cenital (`Brush.verticalGradient(listOf(Color(0xFF181F30), Color(0xFF0F1420)))`) con luz superior y sombra inferior física.
+         - Carátula de la canción con sombra despegada 3D (`elevation = 3dp a 5dp`) sin líneas de contorno duras.
+         - **Eliminación Total de Subtítulos y Badges Wireframe:** Se suprimieron las cajitas de texto y badges de formato (`NUEVA`, `FLAC`, `VIDEO`, `extraBadge`). El subtítulo ahora es puramente limpio y legible: `Artista • Duración`.
+      2. **Consola DJ & Ecualizador Esculpido (`QuickEqDialog.kt`):**
+         - Se eliminó el divisor horizontal wireframe (`HorizontalDivider(thickness = 1.dp)`).
+         - Se eliminaron subtítulos secundarios redundantes ("Efecto envolvente 360°" y "Atenúa la voz central para cantar").
+         - Se envolvieron los controles en bloques táctiles de relieve físico 3D (`shadow(4.dp)`, `RoundedCornerShape(16.dp)`, `Brush.verticalGradient`).
+         - Los selectores de Crossfade DJ ahora son baldosas con elevación e iluminación táctil sin bordes de línea dura.
+      3. **MiniPlayer y HUD con Relieve Físico Profundo (`MiniPlayer.kt` & `PlayerScreen.kt`):**
+         - Elevación flotante del MiniPlayer aumentada a `20.dp` con sombra difusa ambiental y eliminación de la línea de contorno de 1.2dp.
+         - Las píldoras de funciones del reproductor (*FX Studio*, *Bucle A-B*, *Tube Amp*, *DRC Noche*, *Karaoke*, *Audio Viral*, *LRC*, *iPod*, *Canvas Loop*) se convirtieron en botones táctiles 3D en relieve con degradados físicos verticales y elevación sombreada.
+         - Conmutador *Canción / Video* rediseñado con cápsula de relieve extruido y baldosas elevadas de 4dp.
+      4. **Radar Mágico de Descargas Simplificado (`MainActivity.kt`):**
+         - Eliminado el borde de línea dura `.border(1.2.dp)` reemplazándolo por una cápsula extruida con `shadow(16.dp)`.
+         - Los 3 niveles de texto se simplificaron a 2 líneas directas y legibles: Título de plataforma (`⚡ TikTok detectado` / `📸 Instagram detectado`) y el enlace detectado.
+    - *Despliegue CI/CD:* Versión `v4.9.36` (Build `136`) compilada y distribuida en GitHub Release.

@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import com.auraplayer.audio.EqualizerManager
 import com.auraplayer.data.repository.PlaylistManager
@@ -55,136 +57,181 @@ fun QuickEqDialog(
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // 1. Bass Boost
-                EqSliderRow(
-                    label = "Graves & Sub-Bajos 🔊",
-                    value = bassBoost,
-                    valueRange = 0f..1000f,
-                    color = Color(0xFF8B5CF6),
-                    onValueChange = {
-                        bassBoost = it
-                        eq.setBassBoostStrength(it.toInt().toShort())
-                    }
-                )
-
-                // 2. Virtualizer / Soundstage
-                EqSliderRow(
-                    label = "Espacio Sonoro 3D 🌌",
-                    value = virtualizer,
-                    valueRange = 0f..1000f,
-                    color = Color(0xFF00F0FF),
-                    onValueChange = {
-                        virtualizer = it
-                        eq.setVirtualizerStrength(it.toInt().toShort())
-                    }
-                )
-
-                // 3. Loudness Boost
-                EqSliderRow(
-                    label = "Potencia / Brillo ⚡",
-                    value = loudness,
-                    valueRange = 0f..1000f,
-                    color = Color(0xFFFFD700),
-                    onValueChange = {
-                        loudness = it
-                        eq.setLoudnessGain(it.toInt())
-                    }
-                )
-
-                HorizontalDivider(color = Color(0xFF1E293B), thickness = 1.dp)
-
-                // 4. Fundido Cruzado DJ (Crossfade)
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Mezcla DJ / Crossfade 🎧", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text(
-                            text = if (crossfadeSec == 0) "OFF" else "${crossfadeSec}s",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF10B981)
+                // 1, 2, 3: Sliders Console Tile
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
+                        )
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EqSliderRow(
+                            label = "Graves & Sub-Bajos 🔊",
+                            value = bassBoost,
+                            valueRange = 0f..1000f,
+                            color = Color(0xFF8B5CF6),
+                            onValueChange = {
+                                bassBoost = it
+                                eq.setBassBoostStrength(it.toInt().toShort())
+                            }
+                        )
+                        EqSliderRow(
+                            label = "Espacio Sonoro 3D 🌌",
+                            value = virtualizer,
+                            valueRange = 0f..1000f,
+                            color = Color(0xFF00F0FF),
+                            onValueChange = {
+                                virtualizer = it
+                                eq.setVirtualizerStrength(it.toInt().toShort())
+                            }
+                        )
+                        EqSliderRow(
+                            label = "Potencia / Brillo ⚡",
+                            value = loudness,
+                            valueRange = 0f..1000f,
+                            color = Color(0xFFFFD700),
+                            onValueChange = {
+                                loudness = it
+                                eq.setLoudnessGain(it.toInt())
+                            }
                         )
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        listOf(0 to "OFF", 3 to "3s", 5 to "5s", 8 to "8s", 12 to "12s").forEach { (sec, label) ->
-                            val isSelected = crossfadeSec == sec
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(if (isSelected) Color(0xFF10B981) else Color(0xFF161E36))
-                                    .border(1.dp, if (isSelected) Color(0xFF10B981) else Color(0xFF334155), RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        crossfadeSec = sec
-                                        playlistManager.setCrossfadeSeconds(sec)
-                                    }
-                                    .padding(vertical = 6.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = label,
-                                    color = if (isSelected) Color.White else Color(0xFF94A3B8),
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                )
+                }
+
+                // 4. Fundido Cruzado DJ (Crossfade) in 3D Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
+                        )
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Mezcla DJ / Crossfade 🎧", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(
+                                text = if (crossfadeSec == 0) "OFF" else "${crossfadeSec}s",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF10B981)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            listOf(0 to "OFF", 3 to "3s", 5 to "5s", 8 to "8s", 12 to "12s").forEach { (sec, label) ->
+                                val isSelected = crossfadeSec == sec
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .shadow(if (isSelected) 4.dp else 2.dp, RoundedCornerShape(8.dp))
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            if (isSelected) Brush.verticalGradient(listOf(Color(0xFF10B981), Color(0xFF059669)))
+                                            else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF141926)))
+                                        )
+                                        .clickable {
+                                            crossfadeSec = sec
+                                            playlistManager.setCrossfadeSeconds(sec)
+                                        }
+                                        .padding(vertical = 7.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        color = if (isSelected) Color.White else Color(0xFF94A3B8),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                // 5. Audio Espacial 8D
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Audio Espacial 8D 🌀", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("Efecto envolvente 360°", fontSize = 10.sp, color = Color(0xFF64748B))
-                    }
-                    Switch(
-                        checked = is8D,
-                        onCheckedChange = {
-                            is8D = it
-                            eq.setSpatial8DEnabled(it)
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF38BDF8)
+                // 5. Audio Espacial 8D in 3D Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
                         )
-                    )
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Audio Espacial 8D 🌀", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Switch(
+                            checked = is8D,
+                            onCheckedChange = {
+                                is8D = it
+                                eq.setSpatial8DEnabled(it)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFF38BDF8)
+                            )
+                        )
+                    }
                 }
 
-                // 6. Modo Karaoke (Vocal Remover DSP)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Modo Karaoke (Atenuar Voz) 🎤", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("Atenúa la voz central para cantar", fontSize = 10.sp, color = Color(0xFF64748B))
-                    }
-                    Switch(
-                        checked = isKaraoke,
-                        onCheckedChange = {
-                            isKaraoke = it
-                            eq.setKaraokeMode(it)
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFFEC4899)
+                // 6. Modo Karaoke (Vocal Remover DSP) in 3D Card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
                         )
-                    )
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Modo Karaoke (Atenuar Voz) 🎤", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Switch(
+                            checked = isKaraoke,
+                            onCheckedChange = {
+                                isKaraoke = it
+                                eq.setKaraokeMode(it)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFFEC4899)
+                            )
+                        )
+                    }
                 }
             }
         },

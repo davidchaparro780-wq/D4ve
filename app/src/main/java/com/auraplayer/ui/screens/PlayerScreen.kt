@@ -1073,17 +1073,25 @@ fun PlayerScreen(
                 ) {
                     Row(
                         modifier = Modifier
+                            .shadow(6.dp, RoundedCornerShape(22.dp), spotColor = Color.Black.copy(alpha = 0.6f))
                             .clip(RoundedCornerShape(22.dp))
-                            .background(Color.Black.copy(alpha = 0.55f))
-                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(22.dp))
-                            .padding(3.dp),
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF1E2840), Color(0xFF0F1424))
+                                )
+                            )
+                            .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // 🎵 Canción Tab
                         Box(
                             modifier = Modifier
+                                .shadow(if (!isVideoMode) 4.dp else 0.dp, RoundedCornerShape(18.dp))
                                 .clip(RoundedCornerShape(18.dp))
-                                .background(if (!isVideoMode) activeAccent.copy(alpha = 0.32f) else Color.Transparent)
+                                .background(
+                                    if (!isVideoMode) Brush.verticalGradient(listOf(activeAccent, activeAccent.copy(alpha = 0.7f)))
+                                    else Color.Transparent
+                                )
                                 .clickable {
                                     AuraHaptic.click(view)
                                     isVideoMode = false
@@ -1111,8 +1119,12 @@ fun PlayerScreen(
                         // 🎬 Video Tab
                         Box(
                             modifier = Modifier
+                                .shadow(if (isVideoMode) 4.dp else 0.dp, RoundedCornerShape(18.dp))
                                 .clip(RoundedCornerShape(18.dp))
-                                .background(if (isVideoMode) Color(0xFF8B5CF6).copy(alpha = 0.42f) else Color.Transparent)
+                                .background(
+                                    if (isVideoMode) Brush.verticalGradient(listOf(Color(0xFF8B5CF6), Color(0xFF6D28D9)))
+                                    else Color.Transparent
+                                )
                                 .clickable {
                                     AuraHaptic.click(view)
                                     isVideoMode = true
@@ -1124,7 +1136,7 @@ fun PlayerScreen(
                                 Icon(
                                     imageVector = Icons.Default.Videocam,
                                     contentDescription = null,
-                                    tint = if (isVideoMode) Color(0xFFA78BFA) else Color.Gray,
+                                    tint = if (isVideoMode) Color.White else Color.Gray,
                                     modifier = Modifier.size(13.dp)
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
@@ -1183,9 +1195,9 @@ fun PlayerScreen(
                             modifier = Modifier
                                 .size(maxArtSize)
                                 .offset(y = levitationOffsetDp)
+                                .shadow(16.dp, RoundedCornerShape(26.dp), spotColor = activeAccent.copy(alpha = 0.55f))
                                 .clip(RoundedCornerShape(26.dp))
-                                .background(Color.Black)
-                                .border(1.5.dp, activeAccent.copy(alpha = 0.6f), RoundedCornerShape(26.dp)),
+                                .background(Color.Black),
                             contentAlignment = Alignment.Center
                         ) {
                             if (activeExo != null && hasVideoTrack) {
@@ -1380,16 +1392,12 @@ fun PlayerScreen(
                                     modifier = Modifier
                                         .size(maxArtSize)
                                         .offset(y = levitationOffsetDp)
+                                        .shadow(16.dp, RoundedCornerShape(28.dp), spotColor = Color(0xFF00F0FF).copy(alpha = 0.5f))
                                         .clip(RoundedCornerShape(28.dp))
                                         .background(
                                             Brush.verticalGradient(
                                                 listOf(Color(0xFF131A2E), Color(0xFF090D18))
                                             )
-                                        )
-                                        .border(
-                                            1.5.dp,
-                                            Brush.sweepGradient(listOf(Color(0xFF00F0FF), Color(0xFFFF0055), Color(0xFF8B5CF6), Color(0xFF00F0FF))),
-                                            RoundedCornerShape(28.dp)
                                         )
                                         .pointerInput(Unit) {
                                             detectTapGestures(
@@ -1463,9 +1471,9 @@ fun PlayerScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .shadow(14.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                                 .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xFF0B0E17).copy(alpha = 0.9f))
-                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
+                                .background(Color(0xFF0B0E17).copy(alpha = 0.95f))
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -1933,9 +1941,13 @@ fun PlayerScreen(
 
                     Box(
                         modifier = Modifier
+                            .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0xFF222B42), Color(0xFF131826))
+                                )
+                            )
                             .clickable { showFxDialog = true }
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
@@ -1962,22 +1974,14 @@ fun PlayerScreen(
                     val isASetOnly = abLoopA != null && abLoopB == null
                     Box(
                         modifier = Modifier
+                            .shadow(if (isAbLoopSet || isASetOnly) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 when {
-                                    isAbLoopSet -> Color(0xFF10B981).copy(alpha = 0.28f)
-                                    isASetOnly -> Color(0xFFF59E0B).copy(alpha = 0.28f)
-                                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                    isAbLoopSet -> Brush.verticalGradient(listOf(Color(0xFF10B981), Color(0xFF047857)))
+                                    isASetOnly -> Brush.verticalGradient(listOf(Color(0xFFF59E0B), Color(0xFFB45309)))
+                                    else -> Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
                                 }
-                            )
-                            .border(
-                                1.dp,
-                                when {
-                                    isAbLoopSet -> Color(0xFF10B981)
-                                    isASetOnly -> Color(0xFFF59E0B)
-                                    else -> Color.Transparent
-                                },
-                                RoundedCornerShape(12.dp)
                             )
                             .clickable {
                                 AuraHaptic.click(view)
@@ -2016,8 +2020,7 @@ fun PlayerScreen(
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = when {
-                                isAbLoopSet -> Color(0xFF10B981)
-                                isASetOnly -> Color(0xFFF59E0B)
+                                isAbLoopSet || isASetOnly -> Color.White
                                 else -> MaterialTheme.colorScheme.onSurfaceVariant
                             },
                             fontSize = 11.sp
@@ -2027,9 +2030,12 @@ fun PlayerScreen(
                     // Tube Amp Analog Warmth Pill
                     Box(
                         modifier = Modifier
+                            .shadow(if (isTubeAmpActive) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isTubeAmpActive) Color(0xFFD97706).copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                            .border(1.dp, if (isTubeAmpActive) Color(0xFFF59E0B) else Color.Transparent, RoundedCornerShape(12.dp))
+                            .background(
+                                if (isTubeAmpActive) Brush.verticalGradient(listOf(Color(0xFFF59E0B), Color(0xFFB45309)))
+                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                            )
                             .clickable {
                                 isTubeAmpActive = !isTubeAmpActive
                                 tubeAmpManager.isTubeAmpEnabled = isTubeAmpActive
@@ -2043,7 +2049,7 @@ fun PlayerScreen(
                             text = if (isTubeAmpActive) "🔥 TUBE AMP" else "💡 TUBE",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (isTubeAmpActive) Color(0xFFF59E0B) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isTubeAmpActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp
                         )
                     }
@@ -2051,9 +2057,12 @@ fun PlayerScreen(
                     // Night DRC Compressor Pill
                     Box(
                         modifier = Modifier
+                            .shadow(if (isNightDrcActive) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isNightDrcActive) Color(0xFF6366F1).copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                            .border(1.dp, if (isNightDrcActive) Color(0xFF818CF8) else Color.Transparent, RoundedCornerShape(12.dp))
+                            .background(
+                                if (isNightDrcActive) Brush.verticalGradient(listOf(Color(0xFF818CF8), Color(0xFF4338CA)))
+                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                            )
                             .clickable {
                                 isNightDrcActive = !isNightDrcActive
                                 tubeAmpManager.isNightDrcEnabled = isNightDrcActive
@@ -2065,7 +2074,7 @@ fun PlayerScreen(
                             text = if (isNightDrcActive) "🌙 DRC NOCHE" else "🌙 DRC",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (isNightDrcActive) Color(0xFF818CF8) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isNightDrcActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp
                         )
                     }
@@ -2076,9 +2085,12 @@ fun PlayerScreen(
 
                     Box(
                         modifier = Modifier
+                            .shadow(if (isKaraokeActive) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (isKaraokeActive) Color(0xFFE040FB).copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                            .border(1.dp, if (isKaraokeActive) Color(0xFFE040FB) else Color.Transparent, RoundedCornerShape(12.dp))
+                            .background(
+                                if (isKaraokeActive) Brush.verticalGradient(listOf(Color(0xFFE040FB), Color(0xFF8E24AA)))
+                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                            )
                             .clickable {
                                 AuraHaptic.click(null)
                                 isKaraokeActive = !isKaraokeActive
@@ -2092,7 +2104,7 @@ fun PlayerScreen(
                             text = if (isKaraokeActive) "🎤 KARAOKE" else "🎙️ VOCAL",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (isKaraokeActive) Color(0xFFE040FB) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isKaraokeActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp
                         )
                     }
@@ -2100,9 +2112,12 @@ fun PlayerScreen(
                     // Viral Audio Mode Pill (Slowed+Reverb / Nightcore)
                     Box(
                         modifier = Modifier
+                            .shadow(if (currentViralMode != ViralAudioMode.NORMAL) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (currentViralMode != ViralAudioMode.NORMAL) Color(0xFF00F5FF).copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                            .border(1.dp, if (currentViralMode != ViralAudioMode.NORMAL) Color(0xFF00F5FF) else Color.Transparent, RoundedCornerShape(12.dp))
+                            .background(
+                                if (currentViralMode != ViralAudioMode.NORMAL) Brush.verticalGradient(listOf(Color(0xFF00F5FF), Color(0xFF008B8B)))
+                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                            )
                             .clickable {
                                 currentViralMode = viralEffectsManager.cycleMode(MainActivity.activeController)
                                 Toast.makeText(context, "Efecto: ${currentViralMode.displayName} (${currentViralMode.tag})", Toast.LENGTH_SHORT).show()
@@ -2117,7 +2132,7 @@ fun PlayerScreen(
                             },
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (currentViralMode != ViralAudioMode.NORMAL) Color(0xFF00F5FF) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (currentViralMode != ViralAudioMode.NORMAL) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp
                         )
                     }
@@ -2125,8 +2140,9 @@ fun PlayerScreen(
                     // Synced Lyrics LRC Button
                     Box(
                         modifier = Modifier
+                            .shadow(2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                            .background(Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826))))
                             .clickable { showSyncedLyricsDialog = true }
                             .padding(horizontal = 9.dp, vertical = 6.dp)
                     ) {
@@ -2142,8 +2158,9 @@ fun PlayerScreen(
                     // Retro iPod Classic Skin Button
                     Box(
                         modifier = Modifier
+                            .shadow(2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                            .background(Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826))))
                             .clickable { showIpodClassicDialog = true }
                             .padding(horizontal = 9.dp, vertical = 6.dp)
                     ) {
@@ -2159,9 +2176,12 @@ fun PlayerScreen(
                     // Canvas Loop Ambient Background Pill
                     Box(
                         modifier = Modifier
+                            .shadow(if (currentCanvasLoop != CanvasLoopTheme.OFF) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (currentCanvasLoop != CanvasLoopTheme.OFF) Color(0xFFE879F9).copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                            .border(1.dp, if (currentCanvasLoop != CanvasLoopTheme.OFF) Color(0xFFE879F9) else Color.Transparent, RoundedCornerShape(12.dp))
+                            .background(
+                                if (currentCanvasLoop != CanvasLoopTheme.OFF) Brush.verticalGradient(listOf(Color(0xFFE879F9), Color(0xFF9333EA)))
+                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                            )
                             .clickable {
                                 currentCanvasLoop = when (currentCanvasLoop) {
                                     CanvasLoopTheme.OFF -> CanvasLoopTheme.RAIN
@@ -3081,9 +3101,13 @@ fun PlayerScreen(
             ) {
                 Box(
                     modifier = Modifier
+                        .shadow(16.dp, RoundedCornerShape(20.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFF0F1424).copy(alpha = 0.92f))
-                        .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1E2840), Color(0xFF0F1424))
+                            )
+                        )
                         .padding(horizontal = 24.dp, vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {

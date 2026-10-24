@@ -168,23 +168,19 @@ fun MiniPlayer(
                         .fillMaxWidth()
                         .offset { IntOffset(dragOffsetX.value.roundToInt(), 0) }
                         .shadow(
-                            elevation = 16.dp,
+                            elevation = 20.dp,
                             shape = RoundedCornerShape(24.dp),
-                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) 0.45f else 0.15f),
-                            ambientColor = Color(0xFF0F172A)
+                            spotColor = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f) else Color.Black.copy(alpha = 0.5f),
+                            ambientColor = Color.Black.copy(alpha = 0.4f)
                         )
                         .clip(RoundedCornerShape(24.dp))
-                        .border(
-                            1.2.dp,
-                            Brush.horizontalGradient(
+                        .background(
+                            Brush.verticalGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.25f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.65f),
-                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f),
-                                    Color.White.copy(alpha = 0.15f)
+                                    Color(0xFF1E2840),
+                                    Color(0xFF101524)
                                 )
-                            ),
-                            RoundedCornerShape(24.dp)
+                            )
                         )
                         .semantics {
                             contentDescription = "Reproductor mini: ${currentMedia.title} de ${currentMedia.artist}. Toca para abrir el reproductor completo."
@@ -243,17 +239,16 @@ fun MiniPlayer(
                                 modifier = Modifier
                                     .size(46.dp)
                                     .shadow(
-                                        elevation = if (isPlaying) 10.dp else 2.dp,
+                                        elevation = if (isPlaying) 12.dp else 4.dp,
                                         shape = RoundedCornerShape(12.dp),
-                                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) glowAlpha else 0f)
+                                        spotColor = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha) else Color.Black.copy(alpha = 0.4f)
                                     )
                                     .clip(RoundedCornerShape(12.dp))
-                                    .border(0.8.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                                     .background(
-                                        Brush.linearGradient(
+                                        Brush.verticalGradient(
                                             listOf(
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f)
                                             )
                                         )
                                     ),
