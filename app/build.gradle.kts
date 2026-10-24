@@ -14,8 +14,8 @@ android {
         applicationId = "com.auraplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 138
-        versionName = "4.9.38"
+        versionCode = 139
+        versionName = "4.9.39"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -112,4 +112,7 @@ dependencies {
 
     // ZXing for Offline QR Code Sharing
     implementation("com.google.zxing:core:3.5.3")
+
+    // Storage Access Framework (SAF) DocumentFile for Android 11+ WhatsApp Statuses
+    implementation("androidx.documentfile:documentfile:1.0.1")
 }
