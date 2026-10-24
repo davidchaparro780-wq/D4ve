@@ -1088,9 +1088,12 @@ fun PlayerScreen(
                             modifier = Modifier
                                 .shadow(if (!isVideoMode) 4.dp else 0.dp, RoundedCornerShape(18.dp))
                                 .clip(RoundedCornerShape(18.dp))
-                                .background(
-                                    if (!isVideoMode) Brush.verticalGradient(listOf(activeAccent, activeAccent.copy(alpha = 0.7f)))
-                                    else Color.Transparent
+                                .then(
+                                    if (!isVideoMode) {
+                                        Modifier.background(Brush.verticalGradient(listOf(activeAccent, activeAccent.copy(alpha = 0.7f))))
+                                    } else {
+                                        Modifier.background(Color.Transparent)
+                                    }
                                 )
                                 .clickable {
                                     AuraHaptic.click(view)
@@ -1121,9 +1124,12 @@ fun PlayerScreen(
                             modifier = Modifier
                                 .shadow(if (isVideoMode) 4.dp else 0.dp, RoundedCornerShape(18.dp))
                                 .clip(RoundedCornerShape(18.dp))
-                                .background(
-                                    if (isVideoMode) Brush.verticalGradient(listOf(Color(0xFF8B5CF6), Color(0xFF6D28D9)))
-                                    else Color.Transparent
+                                .then(
+                                    if (isVideoMode) {
+                                        Modifier.background(Brush.verticalGradient(listOf(Color(0xFF8B5CF6), Color(0xFF6D28D9))))
+                                    } else {
+                                        Modifier.background(Color.Transparent)
+                                    }
                                 )
                                 .clickable {
                                     AuraHaptic.click(view)
