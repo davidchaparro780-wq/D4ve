@@ -3,10 +3,13 @@ package com.auraplayer
 import android.Manifest
 import android.app.Activity
 import android.app.RecoverableSecurityException
+import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -568,6 +571,54 @@ fun AuraApp(
 
     LaunchedEffect(showUpdateDialog) {
         if (showUpdateDialog) updateError = ""
+    }
+
+    // Radar Mágico de Enlaces (Smart Clipboard Sniffer: TikTok & Instagram)
+    var detectedClipboardUrl by remember { mutableStateOf<String?>(null) }
+    var dismissedClipboardUrl by rememberSaveable { mutableStateOf<String?>(null) }
+    var isClipboardTikTok by remember { mutableStateOf(false) }
+    var isClipboardInstagram by remember { mutableStateOf(false) }
+
+    val checkClipboardForMediaLinks = remember {
+        {
+            try {
+                val clipManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                if (clipManager?.hasPrimaryClip() == true) {
+                    val clip = clipManager.primaryClip
+                    if (clip != null && clip.itemCount > 0) {
+                        val rawText = clip.getItemAt(0)?.text?.toString()?.trim() ?: ""
+                        if (rawText.isNotBlank() && rawText != dismissedClipboardUrl) {
+                            val lower = rawText.lowercase()
+                            val isTk = lower.contains("tiktok.com") || lower.contains("douyin.com")
+                            val isIg = lower.contains("instagram.com") || lower.contains("instagr.am")
+                            if (isTk || isIg) {
+                                detectedClipboardUrl = rawText
+                                isClipboardTikTok = isTk
+                                isClipboardInstagram = isIg
+                            }
+                        }
+                    }
+                }
+            } catch (_: Throwable) {}
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        delay(600)
+        checkClipboardForMediaLinks()
+    }
+
+    DisposableEffect(context) {
+        val componentActivity = context as? ComponentActivity
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                checkClipboardForMediaLinks()
+            }
+        }
+        componentActivity?.lifecycle?.addObserver(observer)
+        onDispose {
+            componentActivity?.lifecycle?.removeObserver(observer)
+        }
     }
 
     // Play audio/video files shared or opened from other apps
@@ -2000,6 +2051,151 @@ fun AuraApp(
                                 Icon(
                                     Icons.Default.Close,
                                     contentDescription = "Ocultar",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Smart Clipboard Radar Banner (TikTok / Instagram Link Sniffer)
+                AnimatedVisibility(
+                    visible = detectedClipboardUrl != null && !showPlayerScreen,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    val detectedUrl = detectedClipboardUrl ?: ""
+                    val isTk = isClipboardTikTok
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                            .shadow(16.dp, RoundedCornerShape(20.dp), spotColor = if (isTk) Color(0xFF00F0FF).copy(alpha = 0.4f) else Color(0xFFE1306C).copy(alpha = 0.4f))
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color(0xF010162A),
+                                        Color(0xF01A1028),
+                                        Color(0xF00D1322)
+                                    )
+                                )
+                            )
+                            .border(
+                                1.2.dp,
+                                Brush.horizontalGradient(
+                                    if (isTk) listOf(Color(0xFF00F0FF), Color(0xFFFE2C55))
+                                    else listOf(Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFFCB045))
+                                ),
+                                RoundedCornerShape(20.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Service Icon
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        Brush.linearGradient(
+                                            if (isTk) listOf(Color(0xFF00F0FF).copy(alpha = 0.2f), Color(0xFFFE2C55).copy(alpha = 0.2f))
+                                            else listOf(Color(0xFF833AB4).copy(alpha = 0.25f), Color(0xFFFD1D1D).copy(alpha = 0.25f))
+                                        )
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isTk) Color(0xFF00F0FF).copy(alpha = 0.4f) else Color(0xFFFD1D1D).copy(alpha = 0.4f),
+                                        RoundedCornerShape(12.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isTk) Icons.Default.MusicNote else Icons.Default.VideoLibrary,
+                                    contentDescription = null,
+                                    tint = if (isTk) Color(0xFF00F0FF) else Color(0xFFFD1D1D),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            // Details
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = if (isTk) "⚡ ENLACE DE TIKTOK DETECTADO" else "📸 ENLACE DE INSTAGRAM DETECTADO",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = if (isTk) Color(0xFF00F0FF) else Color(0xFFF77737),
+                                        letterSpacing = 1.sp
+                                    )
+                                }
+                                Text(
+                                    text = if (isTk) "Video listo para descargar sin marca" else "Reel listo para descargar en HD",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = detectedUrl,
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF94A3B8),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            // Action Download
+                            Button(
+                                onClick = {
+                                    if (isTk) {
+                                        MainActivity.pendingSharedTikTokUrl = detectedUrl
+                                    } else {
+                                        MainActivity.pendingSharedInstagramUrl = detectedUrl
+                                    }
+                                    dismissedClipboardUrl = detectedUrl
+                                    detectedClipboardUrl = null
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isTk) Color(0xFF00F0FF) else Color(0xFFE1306C)
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                modifier = Modifier.height(34.dp)
+                            ) {
+                                Text(
+                                    text = "Descargar",
+                                    color = if (isTk) Color.Black else Color.White,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 11.sp
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            // Dismiss
+                            IconButton(
+                                onClick = {
+                                    dismissedClipboardUrl = detectedUrl
+                                    detectedClipboardUrl = null
+                                },
+                                modifier = Modifier.size(28.dp).bounceClick()
+                            ) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Descartar",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                     modifier = Modifier.size(16.dp)
                                 )

@@ -1,7 +1,7 @@
 {
-  "versionCode": 134,
-  "versionName": "4.9.34",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.34/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.34 (Build 134) — Extracción Resiliente de TikTok e Instagram:\n• 🎬 Descarga de TikTok 100% Reparada: Resuelve automáticamente enlaces compartidos directos desde la app de TikTok (vm.tiktok.com, vt.tiktok.com, tiktok.com/t/), elimina parámetros de seguimiento (?_t=, ?_r=) y activa redundancia multinivel (TikWM + TikTok oEmbed oficial).\n• 📸 Descarga de Instagram Reels Reparada: Extracción directa de URLs compartidas (/share/reel/, /share/p/, ?igsh=) con motor Server-Side Rendering (Googlebot SSR) y Embed Captioned para videos en HD sin falsos bloqueos de privacidad.\n• ⚡ Indexación Automática en DCIM/DaVEPlayer y compatibilidad total con WhatsApp y reproductores de galería.",
+  "versionCode": 135,
+  "versionName": "4.9.35",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.35/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.35 (Build 135) — Radar Mágico de Enlaces, Estados de WhatsApp 30s & Modo Karaoke:\n• 🎯 Radar Mágico de Descargas (Clipboard Sniffer): Detección instantánea en primer plano de enlaces copiados de TikTok o Instagram Reels. Muestra un chip de cristal animado con un botón de un toque para descargar directamente sin marcas de agua.\n• 🟢 Creador de Estados de WhatsApp (30s): Nuevo preset inteligente en el Cortador de Audio que recorta la canción a un máximo estricto de 30 segundos y lo envía directamente a los Estados de WhatsApp.\n• 🎤 Modo Karaoke Vocal Remover: Conmutador en la Consola DJ / QuickEq para atenuar las voces principales mediante DSP de corte notch en frecuencias vocales, dejando la pista instrumental para cantar.",
   "fileSizeMb": 24.9
 }

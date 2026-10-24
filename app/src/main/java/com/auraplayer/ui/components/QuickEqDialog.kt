@@ -31,6 +31,7 @@ fun QuickEqDialog(
     val playlistManager = remember { PlaylistManager(context) }
     var crossfadeSec by remember { mutableIntStateOf(playlistManager.getCrossfadeSeconds()) }
     var is8D by remember { mutableStateOf(eq.isSpatial8DEnabled) }
+    var isKaraoke by remember { mutableStateOf(eq.isKaraokeMode) }
 
     // Read current values
     var bassBoost by remember { mutableFloatStateOf(eq.bassStrength.toFloat()) }
@@ -162,6 +163,29 @@ fun QuickEqDialog(
                         )
                     )
                 }
+
+                // 6. Modo Karaoke (Vocal Remover DSP)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Modo Karaoke (Atenuar Voz) 🎤", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Atenúa la voz central para cantar", fontSize = 10.sp, color = Color(0xFF64748B))
+                    }
+                    Switch(
+                        checked = isKaraoke,
+                        onCheckedChange = {
+                            isKaraoke = it
+                            eq.setKaraokeMode(it)
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFFEC4899)
+                        )
+                    )
+                }
             }
         },
         confirmButton = {
@@ -176,11 +200,13 @@ fun QuickEqDialog(
                         loudness = 0f
                         crossfadeSec = 0
                         is8D = false
+                        isKaraoke = false
                         eq.setBassBoostStrength(0)
                         eq.setVirtualizerStrength(0)
                         eq.setLoudnessGain(0)
                         playlistManager.setCrossfadeSeconds(0)
                         eq.setSpatial8DEnabled(false)
+                        eq.setKaraokeMode(false)
                     }
                 ) {
                     Icon(Icons.Default.RestartAlt, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(16.dp))

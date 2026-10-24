@@ -17,6 +17,8 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -351,7 +353,9 @@ fun AudioCutterDialog(
 
                 // Quick Presets
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     FilterChip(
@@ -362,6 +366,20 @@ fun AudioCutterDialog(
                         },
                         label = { Text("0-30s", fontSize = 11.sp) },
                         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary)
+                    )
+                    FilterChip(
+                        selected = (endSec - startSec) <= 30.01f && (endSec - startSec) >= 29.5f,
+                        onClick = {
+                            endSec = (startSec + 30f).coerceAtMost(totalSec)
+                            if (endSec - startSec < 30f && totalSec >= 30f) {
+                                startSec = (endSec - 30f).coerceAtLeast(0f)
+                            }
+                        },
+                        label = { Text("🟢 Estado WA (30s)", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF25D366),
+                            selectedLabelColor = Color.Black
+                        )
                     )
                     FilterChip(
                         selected = startSec == 30f && endSec == 60f.coerceAtMost(totalSec),
@@ -461,20 +479,34 @@ fun AudioCutterDialog(
                                     if (!dir.exists()) dir.mkdirs()
                                     val safeName = song.title.replace(Regex("[^a-zA-Z0-9._-]"), "_")
                                     val outExt = if (song.path.endsWith(".m4a", true)) "m4a" else "mp3"
-                                    val outFile = File(dir, "${safeName}_tono_${startSec.toInt()}s_${endSec.toInt()}s.$outExt")
+
+                                    // Limit audio to maximum 30s strictly for WhatsApp Status
+                                    val effectiveEnd = if (endSec - startSec > 30f) {
+                                        startSec + 30f
+                                    } else endSec
+
+                                    val outFile = File(dir, "${safeName}_estado_wa_${startSec.toInt()}s_${effectiveEnd.toInt()}s.$outExt")
                                     if (!outFile.exists() || outFile.length() == 0L) {
-                                        trimAudioFile(context, song.uri, outFile, (startSec * 1000).toLong(), (endSec * 1000).toLong())
+                                        trimAudioFile(context, song.uri, outFile, (startSec * 1000).toLong(), (effectiveEnd * 1000).toLong())
                                     }
                                     android.media.MediaScannerConnection.scanFile(context, arrayOf(outFile.absolutePath), null, null)
                                     val contentUri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", outFile)
                                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                         type = "audio/*"
                                         putExtra(Intent.EXTRA_STREAM, contentUri)
+                                        putExtra(Intent.EXTRA_TEXT, "🎵 ${song.title} - ${song.artist}")
+                                        setPackage("com.whatsapp")
                                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
                                     withContext(Dispatchers.Main) {
                                         isTrimming = false
-                                        context.startActivity(Intent.createChooser(shareIntent, "Enviar Tono / Clip a WhatsApp"))
+                                        try {
+                                            context.startActivity(shareIntent)
+                                            Toast.makeText(context, "🟢 Clip de 30s listo para tu Estado de WhatsApp", Toast.LENGTH_LONG).show()
+                                        } catch (_: Exception) {
+                                            shareIntent.setPackage(null)
+                                            context.startActivity(Intent.createChooser(shareIntent, "Compartir Clip a WhatsApp"))
+                                        }
                                         onDismiss()
                                     }
                                 } catch (e: Exception) {
@@ -490,7 +522,7 @@ fun AudioCutterDialog(
                         shape = RoundedCornerShape(12.dp),
                         enabled = !isTrimming
                     ) {
-                        Text("💬 Compartir Clip en WhatsApp", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text("🟢 Compartir Estado en WhatsApp (30s)", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 }
             }
