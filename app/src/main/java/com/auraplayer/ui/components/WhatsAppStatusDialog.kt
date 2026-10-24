@@ -134,8 +134,12 @@ fun WhatsAppStatusDialog(
     ) { uri ->
         if (uri != null) {
             try {
-                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                context.contentResolver.takePersistableUriPermission(uri, flags)
+                try {
+                    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    context.contentResolver.takePersistableUriPermission(uri, flags)
+                } catch (_: SecurityException) {
+                    context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
                 WhatsAppStatusManager.saveTreeUri(context, uri)
                 hasSaf = true
                 Toast.makeText(context, "✅ Carpeta de WhatsApp vinculada con éxito", Toast.LENGTH_SHORT).show()
@@ -434,29 +438,89 @@ fun WhatsAppStatusDialog(
                                 Text("👀 No hay estados descargados aún", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    "WhatsApp no guarda los estados automáticamente. Primero debes abrir WhatsApp y mirar los estados de tus amigos completos para que tu teléfono los descargue.",
+                                    "WhatsApp solo guarda los estados en la memoria de tu teléfono cuando los abres y los miras completos en la app de WhatsApp.",
                                     color = Color(0xFF94A3B8),
                                     fontSize = 13.sp,
                                     textAlign = TextAlign.Center,
                                     lineHeight = 18.sp
                                 )
-                                Spacer(modifier = Modifier.height(18.dp))
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Fila de diagnóstico de conexión
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (hasSaf) Color(0xFF14532D) else Color(0xFF334155))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            if (hasSaf) "📁 SAF Conectado" else "📁 SAF Pendiente",
+                                            color = if (hasSaf) Color(0xFF86EFAC) else Color(0xFFCBD5E1),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (hasStoragePermission) Color(0xFF14532D) else Color(0xFF334155))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            if (hasStoragePermission) "🛡️ Permiso Otorgado" else "🛡️ Permiso Básico",
+                                            color = if (hasStoragePermission) Color(0xFF86EFAC) else Color(0xFFCBD5E1),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
                                 Button(
                                     onClick = { WhatsAppStatusManager.openWhatsApp(context) },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
                                     shape = RoundedCornerShape(14.dp),
-                                    modifier = Modifier.height(44.dp)
+                                    modifier = Modifier.fillMaxWidth().height(44.dp)
                                 ) {
                                     Icon(Icons.Default.PlayCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("Abrir WhatsApp para Mirar Estados", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
+
+                                if (isAndroid11Plus && !hasSaf) {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    OutlinedButton(
+                                        onClick = {
+                                            try {
+                                                val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = false)
+                                                safLauncher.launch(initialUri)
+                                            } catch (_: Exception) {
+                                                safLauncher.launch(null)
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF86EFAC)),
+                                        modifier = Modifier.fillMaxWidth().height(40.dp)
+                                    ) {
+                                        Icon(Icons.Default.FolderShared, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Vincular Carpeta de WhatsApp (SAF)", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                                    }
+                                }
+
                                 Spacer(modifier = Modifier.height(10.dp))
+
                                 OutlinedButton(
                                     onClick = { load() },
                                     shape = RoundedCornerShape(14.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF86EFAC)),
-                                    modifier = Modifier.height(38.dp)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF94A3B8)),
+                                    modifier = Modifier.fillMaxWidth().height(38.dp)
                                 ) {
                                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -558,7 +622,21 @@ fun WhatsAppStatusDialog(
                             contentScale = ContentScale.Fit
                         )
                     } else {
-                        CircularProgressIndicator(color = Color(0xFF25D366))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(Color(0xFF1E293B)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF25D366),
+                                modifier = Modifier.size(56.dp)
+                            )
+                        }
                     }
 
                     if (pItem.isVideo) {
@@ -727,14 +805,39 @@ private fun WhatsAppStatusCard(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF1E293B)),
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF1E293B), Color(0xFF0F172A))
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = Color(0xFF25D366),
-                    strokeWidth = 2.dp
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF25D366).copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayCircle,
+                            contentDescription = "Video",
+                            tint = Color(0xFF25D366),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Video",
+                        color = Color(0xFF94A3B8),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
 

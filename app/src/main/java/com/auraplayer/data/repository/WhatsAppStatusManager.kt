@@ -107,11 +107,25 @@ object WhatsAppStatusManager {
      * Apuntamos a la carpeta visible Media para que el selector del sistema se abra
      * con el botón "USAR ESTA CARPETA" habilitado y accesible en Android 11 a 15.
      */
+    /**
+     * URI inicial para el selector SAF.
+     * Retorna una Tree Document URI válida que cumple con DocumentsContract.isTreeUri()
+     * para que DocumentsUI se abra directamente dentro de la carpeta Media en Android 11 a 15,
+     * mostrando el botón "USAR ESTA CARPETA" habilitado.
+     */
     fun getStatusesFolderInitialUri(isBusiness: Boolean = false): Uri {
         val pkg = if (isBusiness) "com.whatsapp.w4b" else "com.whatsapp"
         val sub = if (isBusiness) "WhatsApp%20Business" else "WhatsApp"
         val docId = "primary:Android/media/$pkg/$sub/Media"
-        return Uri.parse("content://com.android.externalstorage.documents/document/${Uri.encode(docId)}")
+        return DocumentsContract.buildTreeDocumentUri("com.android.externalstorage.documents", docId)
+    }
+
+    /**
+     * URI de respaldo apuntando a Android/media para dispositivos donde el fabricante
+     * restringe la selección de subcarpetas profundas.
+     */
+    fun getMediaFolderInitialUri(): Uri {
+        return DocumentsContract.buildTreeDocumentUri("com.android.externalstorage.documents", "primary:Android/media")
     }
 
     /**
@@ -135,37 +149,199 @@ object WhatsAppStatusManager {
      * Abre directamente la aplicación de WhatsApp o WhatsApp Business para que el usuario
      * pueda ver los estados de sus contactos y descargarlos al dispositivo.
      */
-    fun openWhatsApp(context: Context, isBusiness: Boolean = false): Boolean {
-        val pkg = if (isBusiness) "com.whatsapp.w4b" else "com.whatsapp"
-        return try {
-            val pm = context.packageManager
-            val intent = pm.getLaunchIntentForPackage(pkg) ?: Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_LAUNCHER)
-                setPackage(pkg)
-            }
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-            true
-        } catch (e: Exception) {
-            AppLog.w(TAG, "No se pudo abrir WhatsApp ($pkg): ${e.message}")
-            false
+    fun openWhatsApp(context: Context, preferBusiness: Boolean = false): Boolean {
+        val pkgs = if (preferBusiness) {
+            listOf("com.whatsapp.w4b", "com.whatsapp")
+        } else {
+            listOf("com.whatsapp", "com.whatsapp.w4b")
         }
+        for (pkg in pkgs) {
+            try {
+                val pm = context.packageManager
+                val intent = pm.getLaunchIntentForPackage(pkg) ?: Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_LAUNCHER)
+                    setPackage(pkg)
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+                return true
+            } catch (_: Exception) {}
+        }
+        AppLog.w(TAG, "No se encontró instalada la app de WhatsApp ni WhatsApp Business")
+        return false
     }
 
     /**
-     * Extrae de forma ultra-rápida y selectiva los archivos de estados a partir de la carpeta vinculada por SAF.
-     * Solo examina directamente las carpetas .Statuses / Media / WhatsApp, NUNCA entra a subcarpetas como
-     * WhatsApp Images o Voice Notes para evitar bloqueos y demoras de minutos.
+     * Consulta de forma ultra-directa (en 5 milisegundos) los archivos de estados en SAF
+     * utilizando ContentResolver y DocumentContract proyecciones directas, eliminando las
+     * decenas de llamadas IPC Binder que congelan la interfaz al usar DocumentFile.
+     */
+    private fun queryStatusesDirectFromTree(context: Context, treeUri: Uri): List<WhatsAppStatusItem> {
+        val treeDocId = try {
+            DocumentsContract.getTreeDocumentId(treeUri)
+        } catch (_: Exception) {
+            null
+        } ?: return emptyList()
+
+        val results = mutableListOf<WhatsAppStatusItem>()
+        val seenSignatures = mutableSetOf<String>()
+
+        // 1. Determinar posibles carpetas de estados según lo que haya seleccionado el usuario
+        val candidateFolderDocIds = mutableListOf<String>()
+
+        val lowerTreeDocId = treeDocId.lowercase()
+        if (lowerTreeDocId.endsWith("/.statuses") || lowerTreeDocId.endsWith("/statuses") || lowerTreeDocId.endsWith(".statuses")) {
+            candidateFolderDocIds.add(treeDocId)
+        } else if (lowerTreeDocId.endsWith("/media") || lowerTreeDocId.endsWith("media")) {
+            candidateFolderDocIds.add("$treeDocId/.Statuses")
+            candidateFolderDocIds.add("$treeDocId/.statuses")
+        } else if (lowerTreeDocId.endsWith("/whatsapp") || lowerTreeDocId.endsWith("/whatsapp business")) {
+            candidateFolderDocIds.add("$treeDocId/Media/.Statuses")
+            candidateFolderDocIds.add("$treeDocId/Media/.statuses")
+        } else if (lowerTreeDocId.endsWith("com.whatsapp")) {
+            candidateFolderDocIds.add("$treeDocId/WhatsApp/Media/.Statuses")
+            candidateFolderDocIds.add("$treeDocId/WhatsApp/Media/.statuses")
+        } else if (lowerTreeDocId.endsWith("com.whatsapp.w4b")) {
+            candidateFolderDocIds.add("$treeDocId/WhatsApp Business/Media/.Statuses")
+            candidateFolderDocIds.add("$treeDocId/WhatsApp Business/Media/.statuses")
+        } else if (lowerTreeDocId.endsWith("android/media")) {
+            candidateFolderDocIds.add("$treeDocId/com.whatsapp/WhatsApp/Media/.Statuses")
+            candidateFolderDocIds.add("$treeDocId/com.whatsapp/WhatsApp/Media/.statuses")
+            candidateFolderDocIds.add("$treeDocId/com.whatsapp.w4b/WhatsApp Business/Media/.Statuses")
+            candidateFolderDocIds.add("$treeDocId/com.whatsapp.w4b/WhatsApp Business/Media/.statuses")
+        }
+
+        // Siempre intentar también relative paths directos
+        candidateFolderDocIds.add("$treeDocId/.Statuses")
+        candidateFolderDocIds.add("$treeDocId/.statuses")
+
+        for (candidateId in candidateFolderDocIds.distinct()) {
+            val items = queryChildDocuments(context, treeUri, candidateId)
+            for (item in items) {
+                val sig = "${item.path}_${item.size}"
+                if (seenSignatures.add(sig)) {
+                    results.add(item)
+                }
+            }
+            if (results.isNotEmpty()) {
+                return results
+            }
+        }
+
+        // 2. Si las rutas directas no arrojaron archivos, inspeccionar hijos de treeDocId
+        try {
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocId)
+            val projection = arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_MIME_TYPE
+            )
+
+            context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+                val idCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                val mimeCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE)
+
+                while (cursor.moveToNext()) {
+                    val childId = if (idCol != -1) cursor.getString(idCol) else continue
+                    val childName = if (nameCol != -1) cursor.getString(nameCol) ?: "" else ""
+                    val mime = if (mimeCol != -1) cursor.getString(mimeCol) ?: "" else ""
+
+                    if (mime == DocumentsContract.Document.MIME_TYPE_DIR) {
+                        if (childName.equals(".Statuses", ignoreCase = true) || childName.equals("statuses", ignoreCase = true)) {
+                            val items = queryChildDocuments(context, treeUri, childId)
+                            for (item in items) {
+                                val sig = "${item.path}_${item.size}"
+                                if (seenSignatures.add(sig)) results.add(item)
+                            }
+                        } else if (childName.equals("Media", ignoreCase = true)) {
+                            val items = queryChildDocuments(context, treeUri, "$childId/.Statuses")
+                            for (item in items) {
+                                val sig = "${item.path}_${item.size}"
+                                if (seenSignatures.add(sig)) results.add(item)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Error escaneando hijos directos de $treeDocId: ${e.message}")
+        }
+
+        return results
+    }
+
+    private fun queryChildDocuments(context: Context, treeUri: Uri, folderDocId: String): List<WhatsAppStatusItem> {
+        val list = mutableListOf<WhatsAppStatusItem>()
+        val projection = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE,
+            DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+            DocumentsContract.Document.COLUMN_SIZE
+        )
+
+        val childrenUri = try {
+            DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, folderDocId)
+        } catch (_: Exception) {
+            return emptyList()
+        }
+
+        val now = System.currentTimeMillis()
+
+        try {
+            context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+                val idCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                val mimeCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE)
+                val modCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+                val sizeCol = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE)
+
+                while (cursor.moveToNext()) {
+                    val docId = if (idCol != -1) cursor.getString(idCol) else continue
+                    val name = if (nameCol != -1) cursor.getString(nameCol) ?: "" else ""
+                    val mime = if (mimeCol != -1) cursor.getString(mimeCol) ?: "" else ""
+                    val size = if (sizeCol != -1) cursor.getLong(sizeCol) else 0L
+                    val mod = if (modCol != -1) cursor.getLong(modCol) else now
+
+                    if (name.startsWith(".nomedia") || size <= 0L) continue
+
+                    val isVideo = mime.startsWith("video/") || name.endsWith(".mp4", ignoreCase = true) || name.endsWith(".mkv", ignoreCase = true) || name.endsWith(".3gp", ignoreCase = true)
+                    val isImage = mime.startsWith("image/") || name.endsWith(".jpg", ignoreCase = true) || name.endsWith(".jpeg", ignoreCase = true) || name.endsWith(".png", ignoreCase = true) || name.endsWith(".webp", ignoreCase = true)
+
+                    if (isVideo || isImage) {
+                        val docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
+                        val time = if (mod in 1L..(now + 60_000L)) mod else now
+                        list.add(
+                            WhatsAppStatusItem(
+                                file = null,
+                                uri = docUri,
+                                isVideo = isVideo,
+                                timestamp = time,
+                                size = size,
+                                isRecent24h = true,
+                                path = docUri.toString()
+                            )
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Silencioso si la subcarpeta no existe
+        }
+        return list
+    }
+
+    /**
+     * Fallback selectivo mediante DocumentFile.
      */
     private fun findStatusFilesFromTree(rootDoc: DocumentFile): List<DocumentFile> {
         val rootName = rootDoc.name ?: ""
 
-        // 1. Si el usuario seleccionó directamente .Statuses
         if (rootName.equals(".Statuses", ignoreCase = true) || rootName.equals("statuses", ignoreCase = true)) {
             return try { rootDoc.listFiles().filter { it.isFile && it.length() > 0 } } catch (_: Exception) { emptyList() }
         }
 
-        // 2. Si rootDoc contiene directamente .Statuses
         val directChildren = try { rootDoc.listFiles() } catch (_: Exception) { emptyArray() }
         val directStatus = directChildren.firstOrNull { 
             it.isDirectory && (it.name.equals(".Statuses", ignoreCase = true) || it.name.equals("statuses", ignoreCase = true))
@@ -174,7 +350,6 @@ object WhatsAppStatusManager {
             return try { directStatus.listFiles().filter { it.isFile && it.length() > 0 } } catch (_: Exception) { emptyList() }
         }
 
-        // 3. Si la carpeta seleccionada es Media o contiene Media
         val mediaDir = if (rootName.equals("Media", ignoreCase = true)) {
             rootDoc
         } else {
@@ -191,39 +366,6 @@ object WhatsAppStatusManager {
             }
         }
 
-        // 4. Si la carpeta seleccionada es WhatsApp o com.whatsapp
-        val waDir = if (rootName.equals("WhatsApp", ignoreCase = true) || rootName.equals("WhatsApp Business", ignoreCase = true)) {
-            rootDoc
-        } else {
-            directChildren.firstOrNull { 
-                it.isDirectory && (it.name.equals("WhatsApp", ignoreCase = true) || it.name.equals("WhatsApp Business", ignoreCase = true))
-            } ?: run {
-                val pkgDir = directChildren.firstOrNull { 
-                    it.isDirectory && (it.name.equals("com.whatsapp", ignoreCase = true) || it.name.equals("com.whatsapp.w4b", ignoreCase = true))
-                }
-                pkgDir?.let { p ->
-                    try { p.listFiles() } catch (_: Exception) { emptyArray() }
-                }?.firstOrNull { 
-                    it.isDirectory && (it.name.equals("WhatsApp", ignoreCase = true) || it.name.equals("WhatsApp Business", ignoreCase = true))
-                }
-            }
-        }
-
-        if (waDir != null) {
-            val waChildren = try { waDir.listFiles() } catch (_: Exception) { emptyArray() }
-            val subMedia = waChildren.firstOrNull { it.isDirectory && it.name.equals("Media", ignoreCase = true) }
-            if (subMedia != null) {
-                val mediaChildren = try { subMedia.listFiles() } catch (_: Exception) { emptyArray() }
-                val statusDir = mediaChildren.firstOrNull { 
-                    it.isDirectory && (it.name.equals(".Statuses", ignoreCase = true) || it.name.equals("statuses", ignoreCase = true))
-                }
-                if (statusDir != null) {
-                    return try { statusDir.listFiles().filter { it.isFile && it.length() > 0 } } catch (_: Exception) { emptyList() }
-                }
-            }
-        }
-
-        // 5. Fallback: si el usuario seleccionó una carpeta personalizada donde están los archivos directamente
         return directChildren.filter { it.isFile && it.length() > 0 }
     }
 
@@ -233,60 +375,71 @@ object WhatsAppStatusManager {
      * descartando archivos fósiles obsoletos del almacenamiento legado.
      */
     suspend fun getStatuses(context: Context): List<WhatsAppStatusItem> = withContext(Dispatchers.IO) {
-        val resultList = withTimeoutOrNull(4500L) {
+        val resultList = withTimeoutOrNull(10000L) {
             val list = mutableListOf<WhatsAppStatusItem>()
             val seenSignatures = mutableSetOf<String>()
             val now = System.currentTimeMillis()
             val isAndroid11Plus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
-            // 1. Motor SAF (Storage Access Framework) — Máxima fiabilidad en Android 11, 12, 13, 14, 15
+            // 1. Motor SAF (Storage Access Framework) — Ultra-rápido y directo en Android 11 a 15
             val savedUris = getSavedTreeUris(context)
             for (treeUri in savedUris) {
                 try {
-                    val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
-                    if (rootDoc != null && rootDoc.exists()) {
-                        val statusDocFiles = findStatusFilesFromTree(rootDoc)
-                        for (doc in statusDocFiles) {
-                            if (doc.isFile && doc.length() > 0) {
-                                val name = doc.name?.lowercase() ?: ""
-                                if (name.startsWith(".nomedia")) continue
-                                val isVideo = name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".3gp")
-                                val isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")
-                                if (isVideo || isImage) {
-                                    val time = doc.lastModified().takeIf { it in 1L..(now + 60_000L) } ?: now
-                                    val size = doc.length()
-                                    val signature = "${doc.name}_$size"
-                                    if (seenSignatures.add(signature)) {
-                                        // Todo archivo que esté en .Statuses vía SAF en Android 11+ es un estado activo del día
-                                        list.add(
-                                            WhatsAppStatusItem(
-                                                file = null,
-                                                uri = doc.uri,
-                                                isVideo = isVideo,
-                                                timestamp = time,
-                                                size = size,
-                                                isRecent24h = true,
-                                                path = doc.uri.toString()
+                    // Consulta directa por ContentResolver (5ms)
+                    val directItems = queryStatusesDirectFromTree(context, treeUri)
+                    for (item in directItems) {
+                        val signature = "${item.path}_${item.size}"
+                        if (seenSignatures.add(signature)) {
+                            list.add(item)
+                        }
+                    }
+
+                    // Si la consulta directa no arrojó archivos, intentar fallback DocumentFile
+                    if (directItems.isEmpty()) {
+                        val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
+                        if (rootDoc != null && rootDoc.exists()) {
+                            val statusDocFiles = findStatusFilesFromTree(rootDoc)
+                            for (doc in statusDocFiles) {
+                                if (doc.isFile && doc.length() > 0) {
+                                    val name = doc.name?.lowercase() ?: ""
+                                    if (name.startsWith(".nomedia")) continue
+                                    val isVideo = name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".3gp")
+                                    val isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")
+                                    if (isVideo || isImage) {
+                                        val time = doc.lastModified().takeIf { it in 1L..(now + 60_000L) } ?: now
+                                        val size = doc.length()
+                                        val signature = "${doc.name}_$size"
+                                        if (seenSignatures.add(signature)) {
+                                            list.add(
+                                                WhatsAppStatusItem(
+                                                    file = null,
+                                                    uri = doc.uri,
+                                                    isVideo = isVideo,
+                                                    timestamp = time,
+                                                    size = size,
+                                                    isRecent24h = true,
+                                                    path = doc.uri.toString()
+                                                )
                                             )
-                                        )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    AppLog.w(TAG, "Error leyendo estados vía SAF DocumentFile: ${e.message}")
+                    AppLog.w(TAG, "Error leyendo estados vía SAF: ${e.message}")
                 }
             }
 
-            // 2. Motor de Archivos Físicos (File System)
+            // 2. Motor de Archivos Físicos (File System) — Lectura directa de almacenamiento
             val externalStorage = Environment.getExternalStorageDirectory()
             val dirsToScan = mutableListOf<File>()
 
             // Rutas directas estándar
             dirsToScan.addAll(POTENTIAL_STATUS_DIRS)
 
-            // Variaciones de mayúsculas y minúsculas comunes en fabricantes
+            // Variaciones comunes en fabricantes
             dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp/WhatsApp/media/.Statuses"))
             dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp/WhatsApp/media/.statuses"))
             dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.Statuses"))
@@ -304,37 +457,12 @@ object WhatsAppStatusManager {
                             if (isVideo || isImage) {
                                 val fileMod = file.lastModified()
 
-                                // En Android 11+, si es carpeta legada y el archivo es viejo, saltar instantáneamente sin I/O pesado
+                                // En Android 11+, si es carpeta legada y el archivo es viejo, ignorar instantáneamente
                                 if (isAndroid11Plus && isLegacyDir && (now - fileMod) > 48 * 60 * 60 * 1000L) {
                                     continue
                                 }
 
-                                // Resolver timestamp real de llegada al dispositivo
-                                val resolvedTimestamp = try {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        val attrs = java.nio.file.Files.readAttributes(
-                                            file.toPath(),
-                                            java.nio.file.attribute.BasicFileAttributes::class.java
-                                        )
-                                        val creation = attrs.creationTime().toMillis()
-                                        val modified = attrs.lastModifiedTime().toMillis()
-                                        val candidates = listOf(creation, modified, fileMod).filter { it in 1L..(now + 60_000L) }
-                                        candidates.maxOrNull() ?: fileMod
-                                    } else {
-                                        fileMod
-                                    }
-                                } catch (_: Throwable) {
-                                    fileMod
-                                }
-
-                                if (isAndroid11Plus && isLegacyDir && (now - resolvedTimestamp) > 48 * 60 * 60 * 1000L) {
-                                    continue
-                                }
-
-                                // Todo archivo que exista en una carpeta activa de WhatsApp (.Statuses en Android/media)
-                                // está presente porque el usuario lo miró en las últimas 24 horas (WhatsApp purga automáticamente lo vencido).
-                                val isRecent = !isLegacyDir || ((now - resolvedTimestamp) in -600_000L..(24L * 60 * 60 * 1000L))
-
+                                val isRecent = !isLegacyDir || ((now - fileMod) in -600_000L..(24L * 60 * 60 * 1000L))
                                 val signature = "${file.name}_${file.length()}"
                                 if (seenSignatures.add(signature)) {
                                     val uri = try {
@@ -348,7 +476,7 @@ object WhatsAppStatusManager {
                                             file = file,
                                             uri = uri,
                                             isVideo = isVideo,
-                                            timestamp = resolvedTimestamp,
+                                            timestamp = fileMod,
                                             size = file.length(),
                                             isRecent24h = isRecent,
                                             path = file.absolutePath
@@ -361,12 +489,16 @@ object WhatsAppStatusManager {
                 }
             }
 
-            // Ordenar con máxima prioridad para las últimas 24 horas, y dentro de cada grupo por el más reciente
+            // Ordenar: primero los estados de las últimas 24h, y dentro de cada grupo por el más reciente
             list.sortWith(
                 compareByDescending<WhatsAppStatusItem> { it.isRecent24h }
                     .thenByDescending { it.timestamp }
             )
             list
+        }
+
+        if (resultList == null) {
+            AppLog.w(TAG, "getStatuses excedió el límite de tiempo de 10s")
         }
         resultList ?: emptyList()
     }
@@ -507,7 +639,21 @@ object WhatsAppStatusManager {
                 if (item.file != null && item.file.exists() && item.file.canRead()) {
                     retriever.setDataSource(item.file.absolutePath)
                 } else {
-                    retriever.setDataSource(context, item.uri)
+                    var fdSet = false
+                    try {
+                        context.contentResolver.openFileDescriptor(item.uri, "r")?.use { pfd ->
+                            retriever.setDataSource(pfd.fileDescriptor)
+                            fdSet = true
+                        }
+                    } catch (_: Throwable) {}
+
+                    if (!fdSet) {
+                        try {
+                            retriever.setDataSource(context, item.uri)
+                        } catch (e: Exception) {
+                            AppLog.w(TAG, "setDataSource directo falló para ${item.path}: ${e.message}")
+                        }
+                    }
                 }
 
                 val rawFrame: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {

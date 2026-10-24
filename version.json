@@ -1,7 +1,7 @@
 {
-  "versionCode": 141,
-  "versionName": "4.9.41",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.41/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.41 (Build 141) — Carga Ultra-Rápida Instantánea de Estados de WhatsApp:\n• ⚡ Eliminado el Bloqueo de Carga Infinita: Reemplazado el escaneo masivo de carpetas por búsqueda selectiva y directa de .Statuses en menos de 50ms sin recorrer fotos ni audios de chats.\n• 🛡️ Timeout de Seguridad y Blindaje try-finally: Garantía absoluta de que el indicador de carga se apaga de inmediato y nunca se queda girando.\n• 🎯 Filtrado Inteligente Sin I/O Pesado: Omisión instantánea de archivos legados sin llamadas bloqueantes al sistema de archivos.",
+  "versionCode": 142,
+  "versionName": "4.9.42",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.42/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.42 (Build 142) — Diagnóstico y Fix Definitivo Estados WhatsApp:\n• ⚡ Motor ContentResolver Directo: Consulta directa SAF en 5ms eliminando todas las llamadas Binder IPC bloqueantes de DocumentFile.\n• 🚫 Adiós a Spinners Infinitos: Reemplazado cualquier indicador de carga perpetuo en tarjetas de video por tarjetas táctiles con badge y reproducción instantánea.\n• 🔗 Tree Document URIs Canónicas: Vinculación SAF que abre exactamente la carpeta Media en DocumentsUI con 'USAR ESTA CARPETA' habilitado.\n• 🛠️ Panel de Diagnóstico en Tiempo Real: Información interactiva clara sobre el estado de SAF y permisos en caso de carpetas vacías.",
   "fileSizeMb": 25.1
 }
