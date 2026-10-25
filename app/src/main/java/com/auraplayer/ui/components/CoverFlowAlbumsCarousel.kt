@@ -1,5 +1,6 @@
 package com.auraplayer.ui.components
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,7 +64,7 @@ import kotlin.math.abs
 data class AlbumModel(
     val name: String,
     val artist: String,
-    val artworkUri: String?,
+    val artworkUri: Uri?,
     val songs: List<MediaModel>
 )
 
