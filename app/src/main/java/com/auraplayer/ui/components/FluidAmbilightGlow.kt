@@ -56,7 +56,6 @@ fun FluidAmbilightGlow(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .blur(60.dp) // Desenfoque Gaussiano profundo estilo Mesh Gradient
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
@@ -69,7 +68,12 @@ fun FluidAmbilightGlow(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(primaryColor.copy(alpha = 0.55f), Color.Transparent),
+                    colorStops = arrayOf(
+                        0.0f to primaryColor.copy(alpha = 0.40f),
+                        0.4f to primaryColor.copy(alpha = 0.22f),
+                        0.75f to primaryColor.copy(alpha = 0.08f),
+                        1.0f to Color.Transparent
+                    ),
                     center = Offset(x1, y1),
                     radius = r1
                 ),
@@ -84,7 +88,12 @@ fun FluidAmbilightGlow(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(secondaryColor.copy(alpha = 0.45f), Color.Transparent),
+                    colorStops = arrayOf(
+                        0.0f to secondaryColor.copy(alpha = 0.35f),
+                        0.4f to secondaryColor.copy(alpha = 0.18f),
+                        0.75f to secondaryColor.copy(alpha = 0.06f),
+                        1.0f to Color.Transparent
+                    ),
                     center = Offset(x2, y2),
                     radius = r2
                 ),
@@ -99,7 +108,11 @@ fun FluidAmbilightGlow(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(primaryColor.copy(alpha = 0.25f), Color.Transparent),
+                    colorStops = arrayOf(
+                        0.0f to primaryColor.copy(alpha = 0.20f),
+                        0.5f to primaryColor.copy(alpha = 0.08f),
+                        1.0f to Color.Transparent
+                    ),
                     center = Offset(x3, y3),
                     radius = r3
                 ),

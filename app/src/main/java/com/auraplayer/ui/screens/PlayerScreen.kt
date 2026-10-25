@@ -128,6 +128,7 @@ import com.auraplayer.ui.components.CassetteTapeSkin
 import com.auraplayer.ui.components.IpodClassicSkin
 import com.auraplayer.ui.components.AuroraMeshBackground
 import com.auraplayer.ui.components.VinylTurntableSkin
+import com.auraplayer.ui.components.RetroDiscmanSkin
 import com.auraplayer.ui.components.DynamicWaveformSeekbar
 import com.auraplayer.ui.components.ExplosiveHeartBurst
 import com.auraplayer.ui.components.CanvasLoopsOverlay
@@ -301,7 +302,7 @@ fun PlayerScreen(
 
     var isEdgeLightingEnabled by remember { mutableStateOf(false) }
     var isSpatial8D by remember { mutableStateOf(EqualizerManager.instance.isSpatial8DEnabled) }
-    var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Live Spectrum Waves
+    var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Retro Discman CD 2000s, 3: Live Spectrum Waves
     var isVideoMode by rememberSaveable {
         mutableStateOf(currentMedia?.isVideo == true ||
             currentMedia?.path?.endsWith(".mp4", ignoreCase = true) == true ||
@@ -1384,6 +1385,41 @@ fun PlayerScreen(
                                                 }
                                             )
                                         }
+                                )
+                            } else if (centerVisualizerMode == 2) {
+                                // Skin Retro 2000s: Discman CD Player con Holograma y LCD
+                                RetroDiscmanSkin(
+                                    song = currentMedia,
+                                    isPlaying = isPlaying,
+                                    currentPositionMs = currentPositionMs,
+                                    durationMs = durationMs,
+                                    onTap = {
+                                        AuraHaptic.click(view)
+                                        centerVisualizerMode = 3
+                                    },
+                                    onDoubleTap = { offset ->
+                                        val w = maxArtSize.value
+                                        if (offset.x < w * 0.35f) {
+                                            onSeekRelative(-10000L)
+                                            seekBadgeText = "-10s"
+                                            seekBadgeIsForward = false
+                                            showSeekBadge = true
+                                            AuraHaptic.click(view)
+                                        } else if (offset.x > w * 0.65f) {
+                                            onSeekRelative(10000L)
+                                            seekBadgeText = "+10s"
+                                            seekBadgeIsForward = true
+                                            showSeekBadge = true
+                                            AuraHaptic.click(view)
+                                        } else {
+                                            onToggleFavorite()
+                                            showHeartBurst = true
+                                            AuraHaptic.heavy(view)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(maxArtSize)
+                                        .offset(y = levitationOffsetDp)
                                 )
                             } else {
                                 // Live Cyber Spectrum Waveform Visualizer (Real-time FFT audio engine)

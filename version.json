@@ -1,7 +1,7 @@
 {
-  "versionCode": 145,
-  "versionName": "4.9.45",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.45/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.45 (Build 145) — Nuevo Descargador de Facebook (Reels & Videos HD) & Social Media Hub Completo:\n• 📘 Descargador Nativo de Facebook: Descarga videos, reels y clips públicos en calidad HD y SD directamente a tu Galería sin marcas de agua.\n• 🎵 Extracción de Audio MP3/M4A: Opción para guardar únicamente la pista de audio de cualquier video de Facebook con 1 solo toque.\n• ⚡ Detección Automática Omnibar: Al pegar un enlace de Facebook o Instagram en la barra de búsqueda de Explorar, se abre automáticamente el descargador correspondiente.\n• 🌟 Accesos Rápidos Sociales en Explorar & Videos: Nuevas píldoras de acceso rápido para TikTok, Instagram y Facebook integradas en la cabecera.",
+  "versionCode": 146,
+  "versionName": "4.9.46",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.46/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.46 (Build 146) — Optimización de Fluidez 120 FPS, Cápsula Dinámica (Notch Pill) & Skin Discman 2000s:\n• ⚡ Fluidez Extrema a 120 FPS: Eliminación del cuello de botella de sombras GPU en listas de canciones, brushes pre-cacheados en memoria y optimización de Ambilight Glow sin sobrecosto de blur.\n• 💊 Dynamic Island / Cápsula Dinámica: Nueva píldora flotante con física de resorte elástica (Spring animation), auto-expansión al cambiar de canción, mini visualizador y controles rápidos.\n• 💽 Skin Retro Discman CD 2000s: Reproductor de disco óptico con difracción holográfica tornasol, giro de CD a alta velocidad y pantalla LCD retroiluminada con ESP Anti-Shock.",
   "fileSizeMb": 25.1
 }

@@ -3002,6 +3002,11 @@ fun HighlightedText(
     )
 }
 
+// Brushes pre-cacheados a nivel de archivo para cero asignaciones de memoria durante scroll
+private val SongItemBgSelected = Brush.verticalGradient(listOf(Color(0xFF1E2942), Color(0xFF111726)))
+private val SongItemBgUnselected = Brush.verticalGradient(listOf(Color(0xFF181F30), Color(0xFF0F1420)))
+private val SongArtBgUnselected = Brush.verticalGradient(listOf(Color(0xFF263248), Color(0xFF151C2A)))
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongListItem(
@@ -3117,30 +3122,21 @@ fun SongListItem(
             }
         }
 
-        // Foreground Song Item Row with 3D tactile embossed volume
+        // Foreground Song Item Row - Optimizado a 120 FPS con bordes nítidos y brushes pre-cacheados
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp, vertical = 3.5.dp)
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .then(swipeModifier)
-                .shadow(
-                    elevation = if (isSelected) 6.dp else 2.5.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    spotColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f) else Color.Black.copy(alpha = 0.4f),
-                    ambientColor = Color.Black.copy(alpha = 0.25f)
-                )
                 .clip(RoundedCornerShape(16.dp))
+                .border(
+                    width = if (isSelected) 1.dp else 0.5.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.65f) else Color(0x18FFFFFF),
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .background(
-                    if (isSelected) {
-                        Brush.verticalGradient(
-                            listOf(Color(0xFF1E2942), Color(0xFF111726))
-                        )
-                    } else {
-                        Brush.verticalGradient(
-                            listOf(Color(0xFF181F30), Color(0xFF0F1420))
-                        )
-                    }
+                    if (isSelected) SongItemBgSelected else SongItemBgUnselected
                 )
                 .combinedClickable(
                     onClick = onClick,
@@ -3161,12 +3157,12 @@ fun SongListItem(
             Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .shadow(
-                        elevation = if (isSelected) 5.dp else 3.dp,
-                        shape = RoundedCornerShape(12.dp),
-                        spotColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.4f)
-                    )
                     .clip(RoundedCornerShape(12.dp))
+                    .border(
+                        width = 0.5.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color(0x22FFFFFF),
+                        shape = RoundedCornerShape(12.dp)
+                    )
                     .background(
                         if (isSelected) {
                             Brush.verticalGradient(
@@ -3176,12 +3172,7 @@ fun SongListItem(
                                 )
                             )
                         } else {
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color(0xFF263248),
-                                    Color(0xFF151C2A)
-                                )
-                            )
+                            SongArtBgUnselected
                         }
                     ),
                 contentAlignment = Alignment.Center
