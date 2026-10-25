@@ -183,6 +183,8 @@ import com.auraplayer.ui.components.TagEditorDialog
 import androidx.compose.material.icons.filled.QrCode2
 import com.auraplayer.ui.components.QrShareDialog
 import com.auraplayer.ui.components.DaveMagicHubSheet
+import com.auraplayer.ui.components.SongOptionsBottomSheet
+import com.auraplayer.ui.components.DaveSortBottomSheet
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -473,62 +475,8 @@ fun MusicScreen(
             // Quick Actions Cluster
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Sort Menu Button
-                Box {
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(Color(0xFF243048), Color(0xFF131826))
-                                )
-                            )
-                            .clickable {
-                                AuraHaptic.click(view)
-                                showSortMenu = true
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Sort,
-                            contentDescription = "Ordenar",
-                            tint = themeTertiary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = showSortMenu,
-                        onDismissRequest = { showSortMenu = false },
-                        modifier = Modifier.background(Color(0xFF0F172A))
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("📥 Recién Descargadas", color = if (selectedSortMode == 0) themePrimary else Color.White, fontWeight = if (selectedSortMode == 0) FontWeight.Bold else FontWeight.Normal) },
-                            onClick = { selectedSortMode = 0; showSortMenu = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("🔤 Título (A-Z)", color = if (selectedSortMode == 1) themePrimary else Color.White, fontWeight = if (selectedSortMode == 1) FontWeight.Bold else FontWeight.Normal) },
-                            onClick = { selectedSortMode = 1; showSortMenu = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("👤 Artista", color = if (selectedSortMode == 2) themePrimary else Color.White, fontWeight = if (selectedSortMode == 2) FontWeight.Bold else FontWeight.Normal) },
-                            onClick = { selectedSortMode = 2; showSortMenu = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("⏱️ Mayor Duración", color = if (selectedSortMode == 3) themePrimary else Color.White, fontWeight = if (selectedSortMode == 3) FontWeight.Bold else FontWeight.Normal) },
-                            onClick = { selectedSortMode = 3; showSortMenu = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("🔥 Más Reproducidas", color = if (selectedSortMode == 4) themePrimary else Color.White, fontWeight = if (selectedSortMode == 4) FontWeight.Bold else FontWeight.Normal) },
-                            onClick = { selectedSortMode = 4; showSortMenu = false }
-                        )
-                    }
-                }
-
                 // Sleep Timer Button
                 Box(
                     modifier = Modifier
@@ -716,106 +664,160 @@ fun MusicScreen(
             }
         }
 
-        // Dedicated Full-Width Neon Search Input Field
-        Box(
+        // Search Input Field & Integrated Sort Action
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 6.dp)
-                .height(48.dp)
-                .shadow(
-                    elevation = 6.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    spotColor = Color.Black.copy(alpha = 0.45f),
-                    ambientColor = Color.Black.copy(alpha = 0.3f)
-                )
-                .clip(RoundedCornerShape(24.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF1F293D), Color(0xFF111726))
-                    )
-                )
-                .padding(horizontal = 14.dp),
-            contentAlignment = Alignment.CenterStart
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Buscar canciones",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
-                )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (searchQuery.isEmpty()) {
-                        Text(
-                            text = "Buscar canciones, artistas, álbumes...",
-                            fontSize = 14.sp,
-                            color = Color(0xFF94A3B8).copy(alpha = 0.7f),
-                            maxLines = 1
-                        )
-                    }
-                    androidx.compose.foundation.text.BasicTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        singleLine = true,
-                        textStyle = androidx.compose.ui.text.TextStyle(
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
-                        ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
-                        modifier = Modifier.fillMaxWidth()
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+                    .shadow(
+                        elevation = 6.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        spotColor = Color.Black.copy(alpha = 0.45f),
+                        ambientColor = Color.Black.copy(alpha = 0.3f)
                     )
-                }
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF1F293D), Color(0xFF111726))
+                        )
+                    )
+                    .padding(horizontal = 14.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Buscar canciones",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
 
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            searchQuery = ""
-                            AuraHaptic.click(view)
-                        },
-                        modifier = Modifier.size(30.dp)
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Limpiar",
-                            tint = Color(0xFF94A3B8),
-                            modifier = Modifier.size(18.dp)
+                        if (searchQuery.isEmpty()) {
+                            Text(
+                                text = "Buscar canciones, artistas, álbumes...",
+                                fontSize = 14.sp,
+                                color = Color(0xFF94A3B8).copy(alpha = 0.7f),
+                                maxLines = 1
+                            )
+                        }
+                        androidx.compose.foundation.text.BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                } else {
-                    IconButton(
-                        onClick = {
-                            AuraHaptic.click(view)
-                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                                putExtra(RecognizerIntent.EXTRA_PROMPT, "Di el nombre de una canción o artista...")
-                            }
-                            try {
-                                voiceLauncher.launch(intent)
-                            } catch (_: Exception) {
-                                Toast.makeText(context, "Reconocimiento de voz no disponible", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        modifier = Modifier.size(30.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Mic,
-                            contentDescription = "Búsqueda por voz",
-                            tint = Color(0xFF38BDF8),
-                            modifier = Modifier.size(20.dp)
-                        )
+
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchQuery = ""
+                                AuraHaptic.click(view)
+                            },
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Limpiar",
+                                tint = Color(0xFF94A3B8),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = {
+                                AuraHaptic.click(view)
+                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                    putExtra(RecognizerIntent.EXTRA_PROMPT, "Di el nombre de una canción o artista...")
+                                }
+                                try {
+                                    voiceLauncher.launch(intent)
+                                } catch (_: Exception) {
+                                    Toast.makeText(context, "Reconocimiento de voz no disponible", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Búsqueda por voz",
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Integrated Sort Button
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .shadow(
+                        elevation = 6.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        spotColor = Color.Black.copy(alpha = 0.45f)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            if (selectedSortMode != 0) listOf(Color(0xFF1E3A5F), Color(0xFF132338))
+                            else listOf(Color(0xFF1F293D), Color(0xFF111726))
+                        )
+                    )
+                    .border(
+                        androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (selectedSortMode != 0) Color(0xFF38BDF8).copy(alpha = 0.7f)
+                            else Color(0xFF26354D)
+                        ),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .clickable {
+                        AuraHaptic.click(view)
+                        showSortMenu = true
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Sort,
+                    contentDescription = "Ordenar biblioteca",
+                    tint = if (selectedSortMode != 0) Color(0xFF38BDF8) else Color(0xFF94A3B8),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+
+        if (showSortMenu) {
+            DaveSortBottomSheet(
+                selectedSortMode = selectedSortMode,
+                onSortSelected = { selectedSortMode = it },
+                onDismiss = { showSortMenu = false }
+            )
         }
 
         // Recent Search History Chips
@@ -2316,200 +2318,35 @@ fun MusicScreen(
         )
     }
 
-    // Song Options BottomSheet Modal (Musicolet Style Queuing & Tags)
+    // Song Options BottomSheet Modal
     if (selectedSongForMenu != null) {
         val song = selectedSongForMenu!!
         val isFav = favoritesManager.isFavorite(song.id)
 
-        ModalBottomSheet(
-            onDismissRequest = { selectedSongForMenu = null },
-            sheetState = rememberModalBottomSheetState(),
-            containerColor = Color(0xFF101422)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-            ) {
-                // Song Header Preview
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (song.artworkUri != null) {
-                            AsyncImage(
-                                model = song.artworkUri,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Icon(Icons.Default.MusicNote, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = song.title,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = "${song.artist} • ${song.formattedDuration}",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+        SongOptionsBottomSheet(
+            song = song,
+            isFavorite = isFav,
+            onDismiss = { selectedSongForMenu = null },
+            onPlayNext = { onPlayNext(song) },
+            onAddToQueue = { onAddToQueue(song) },
+            onAddToPlaylist = { songToAddToPlaylist = song },
+            onToggleFavorite = { favoritesManager.toggleFavorite(song.id) },
+            onEditTags = { selectedSongForTagEdit = song },
+            onFetchCover = { onFetchCover(song) },
+            onCutAudio = { songToCut = song },
+            onShowDetails = { songForDetails = song },
+            onShareSong = {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "audio/*"
+                    putExtra(Intent.EXTRA_STREAM, song.uri)
+                    putExtra(Intent.EXTRA_TEXT, "Escuchando '${song.title}' de ${song.artist} en DaVE Player")
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Musicolet Queue Options
-                MenuOptionItem(
-                    icon = Icons.Default.SkipNext,
-                    iconColor = MaterialTheme.colorScheme.primary,
-                    title = "Reproducir Siguiente (Play Next)",
-                    onClick = {
-                        selectedSongForMenu = null
-                        onPlayNext(song)
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.PlaylistAdd,
-                    iconColor = Color(0xFF06B6D4),
-                    title = "Añadir a la Cola (Queue)",
-                    onClick = {
-                        selectedSongForMenu = null
-                        onAddToQueue(song)
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.QueueMusic,
-                    iconColor = MaterialTheme.colorScheme.secondary,
-                    title = "Añadir a una Playlist...",
-                    onClick = {
-                        val target = song
-                        selectedSongForMenu = null
-                        songToAddToPlaylist = target
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.Edit,
-                    iconColor = Color(0xFFF59E0B),
-                    title = "Editar Etiquetas (ID3 Tag Editor)",
-                    onClick = {
-                        val target = song
-                        selectedSongForMenu = null
-                        selectedSongForTagEdit = target
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    iconColor = if (isFav) Color(0xFFEC4899) else MaterialTheme.colorScheme.onSurfaceVariant,
-                    title = if (isFav) "Quitar de Favoritos" else "Añadir a Favoritos",
-                    onClick = {
-                        favoritesManager.toggleFavorite(song.id)
-                        selectedSongForMenu = null
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.Share,
-                    iconColor = MaterialTheme.colorScheme.primary,
-                    title = "Compartir Canción",
-                    onClick = {
-                        selectedSongForMenu = null
-                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "audio/*"
-                            putExtra(Intent.EXTRA_STREAM, song.uri)
-                            putExtra(Intent.EXTRA_TEXT, "Escuchando '${song.title}' de ${song.artist} en Aura Player")
-                        }
-                        context.startActivity(Intent.createChooser(shareIntent, "Compartir audio"))
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.QrCode2,
-                    iconColor = Color(0xFF06B6D4),
-                    title = "Compartir con Código QR (Offline)",
-                    onClick = {
-                        val target = song
-                        selectedSongForMenu = null
-                        songForQrShare = target
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.Image,
-                    iconColor = Color(0xFF06B6D4),
-                    title = "Descargar / Actualizar Portada Oficial",
-                    onClick = {
-                        selectedSongForMenu = null
-                        onFetchCover(song)
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.Info,
-                    iconColor = MaterialTheme.colorScheme.secondary,
-                    title = "Detalles del Archivo",
-                    onClick = {
-                        selectedSongForMenu = null
-                        songForDetails = song
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.ContentCut,
-                    iconColor = Color(0xFFF59E0B),
-                    title = "Cortar Audio / Crear Tono & Alarma",
-                    onClick = {
-                        val target = song
-                        selectedSongForMenu = null
-                        songToCut = target
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.NotificationsActive,
-                    iconColor = MaterialTheme.colorScheme.primary,
-                    title = "Establecer como Tono Directo",
-                    onClick = {
-                        selectedSongForMenu = null
-                        setAsRingtone(context, song)
-                    }
-                )
-
-                MenuOptionItem(
-                    icon = Icons.Default.Delete,
-                    iconColor = MaterialTheme.colorScheme.error,
-                    title = "Eliminar del Teléfono",
-                    textColor = MaterialTheme.colorScheme.error,
-                    onClick = {
-                        selectedSongForMenu = null
-                        songToDelete = song
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
+                context.startActivity(Intent.createChooser(shareIntent, "Compartir audio"))
+            },
+            onShareQr = { songForQrShare = song },
+            onSetAsRingtone = { setAsRingtone(context, song) },
+            onDeleteSong = { songToDelete = song }
+        )
     }
 
     // Delete Confirmation Dialog

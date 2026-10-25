@@ -158,6 +158,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -228,6 +229,7 @@ import coil.compose.AsyncImage
 import com.auraplayer.data.model.MediaModel
 import com.auraplayer.data.model.RepeatMode
 import com.auraplayer.data.repository.SongLyrics
+import com.auraplayer.ui.components.PlayerMoreOptionsSheet
 import com.auraplayer.util.AppLog
 import com.auraplayer.util.ArtworkPaletteExtractor
 import com.auraplayer.util.DynamicArtworkTheme
@@ -371,6 +373,7 @@ fun PlayerScreen(
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var showLyricsView by remember { mutableStateOf(false) }
     var showQueueSheet by remember { mutableStateOf(false) }
+    var showMoreToolsSheet by remember { mutableStateOf(false) }
     var showAudioSpecSheet by remember { mutableStateOf(false) }
     var visualizerMode by remember { mutableIntStateOf(0) } // 0: Spectrum bars, 1: Neon wave, 2: Radial pulse, 3: Starfield
     var lyricsFontSizeMultiplier by remember { mutableFloatStateOf(1.0f) }
@@ -529,6 +532,8 @@ fun PlayerScreen(
             showCutterDialog = false
         } else if (showQueueSheet) {
             showQueueSheet = false
+        } else if (showMoreToolsSheet) {
+            showMoreToolsSheet = false
         } else if (showAudioSpecSheet) {
             showAudioSpecSheet = false
         } else if (showLyricsView) {
@@ -968,78 +973,11 @@ fun PlayerScreen(
                             }
                         }
                     } else {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Headphones Hub Button
-                            IconButton(onClick = onOpenHeadphones) {
-                                Icon(
-                                    imageVector = Icons.Default.Headphones,
-                                    contentDescription = "Mis Audífonos & Audio",
-                                    tint = if (isHeadphonesConnected) Color(0xFF10B981) else MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Car Mode Button (Spotify Style)
-                            IconButton(onClick = onOpenCarMode) {
-                                Icon(
-                                    imageVector = Icons.Default.DirectionsCar,
-                                    contentDescription = "Modo Conducción",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // StandBy OLED Button (Always-On Display Style)
-                            IconButton(onClick = onOpenStandBy) {
-                                Icon(
-                                    imageVector = Icons.Default.Bedtime,
-                                    contentDescription = "Modo StandBy OLED",
-                                    tint = Color(0xFFA855F7),
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Queue Button (Musicolet Style)
-                            IconButton(onClick = { showQueueSheet = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.QueueMusic,
-                                    contentDescription = "Cola de Reproducción",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-
-                            // Shake to Skip Toggle
-                            IconButton(onClick = onToggleShake) {
-                                Icon(
-                                    imageVector = Icons.Default.Vibration,
-                                    contentDescription = "Agitar para saltar",
-                                    tint = if (isShakeEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Lyrics / Vinyl Toggle
-                            IconButton(onClick = { showLyricsView = !showLyricsView }) {
-                                Icon(
-                                    imageVector = if (showLyricsView) Icons.Default.Album else Icons.Default.Mic,
-                                    contentDescription = "Letras",
-                                    tint = if (showLyricsView) Color(0xFFEC4899) else MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Sleep Timer
-                            IconButton(onClick = onOpenSleepTimer) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = "Temporizador",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Favorite Toggle
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            // 1. Favorite Toggle
                             IconButton(onClick = {
                                 AuraHaptic.heavy(view)
                                 onToggleFavorite()
@@ -1053,26 +991,46 @@ fun PlayerScreen(
                                 )
                             }
 
-                            // Delete Song
-                            IconButton(onClick = { showDeleteConfirmDialog = true }) {
+                            // 2. Lyrics / Vinyl Toggle
+                            IconButton(onClick = { showLyricsView = !showLyricsView }) {
                                 Icon(
-                                    imageVector = Icons.Outlined.DeleteOutline,
-                                    contentDescription = "Eliminar",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    imageVector = if (showLyricsView) Icons.Default.Album else Icons.Default.Mic,
+                                    contentDescription = "Letras",
+                                    tint = if (showLyricsView) Color(0xFFEC4899) else MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            // 3. Queue Button (Musicolet Style)
+                            IconButton(onClick = { showQueueSheet = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.QueueMusic,
+                                    contentDescription = "Cola de Reproducción",
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
 
-                            // Pocket Lock Mode
+                            // 4. Sleep Timer
+                            IconButton(onClick = onOpenSleepTimer) {
+                                Icon(
+                                    imageVector = Icons.Default.Timer,
+                                    contentDescription = "Temporizador",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            // 5. More Player Tools (Headphones, Car Mode, StandBy, Shake, Pocket Lock, Delete)
                             IconButton(onClick = {
                                 AuraHaptic.click(view)
-                                isPocketLocked = true
+                                showMoreToolsSheet = true
                             }) {
                                 Icon(
-                                    imageVector = Icons.Default.LockOpen,
-                                    contentDescription = "Bloqueo de bolsillo",
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "Más herramientas de reproducción",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(22.dp)
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
@@ -3736,6 +3694,21 @@ fun PlayerScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+
+    // Player Secondary Tools BottomSheet
+    if (showMoreToolsSheet) {
+        PlayerMoreOptionsSheet(
+            isHeadphonesConnected = isHeadphonesConnected,
+            isShakeEnabled = isShakeEnabled,
+            onOpenHeadphones = onOpenHeadphones,
+            onOpenCarMode = onOpenCarMode,
+            onOpenStandBy = onOpenStandBy,
+            onToggleShake = onToggleShake,
+            onPocketLock = { isPocketLocked = true },
+            onDeleteSong = { showDeleteConfirmDialog = true },
+            onDismiss = { showMoreToolsSheet = false }
+        )
     }
 
     // Delete Confirmation Dialog
