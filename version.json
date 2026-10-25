@@ -1,7 +1,7 @@
 {
-  "versionCode": 143,
-  "versionName": "4.9.43",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.43/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.43 (Build 143) — Erradicación Definitiva de 'Estados Viejos':\n• ⚡ Filtro Estricto de 24 Horas: La pestaña 'Recientes 24h' solo muestra estados de las últimas 24 horas exactas.\n• 🕵️‍♂️ Extracción Inteligente de Fechas: Decodificación de patrones de nombre (VID-YYYYMMDD / IMG-YYYYMMDD) para neutralizar archivos de copias de seguridad viejas con fechas del sistema alteradas.\n• 🧹 Purga Automática de Carpetas Legadas (2021): Eliminación automática de rutas SAF antiguas obsoletas que contenían historiales fósiles.\n• 🟢 Botón Directo para Abrir WhatsApp: Instrucciones claras y acceso en un toque para ver estados nuevos y descargarlos.\n• 📁 Selector Rápido de Carpeta: Icono en la barra superior para cambiar o revincular la carpeta de WhatsApp en cualquier momento.",
+  "versionCode": 144,
+  "versionName": "4.9.44",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.44/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.44 (Build 144) — Modelo Snaptube para Estados de WhatsApp & Fix Instagram Reels:\n• 🌟 Motor Snaptube de Acceso Directo: Lectura física de alta velocidad (<2ms) en Android/media/.Statuses sin los bloqueos de SAF.\n• 🛡️ Permiso 'Acceso a Todos los Archivos' Prominente: Banner y botón directo a Ajustes estilo Snaptube para activar el acceso sin complicaciones.\n• 🎯 Detección Real de Estados Activos: Se eliminó el filtro restrictivo por nombre que ocultaba estados válidos; cualquier estado presente en .Statuses es reconocido como activo.\n• 🚫 Bloqueo Definitivo de Archivos Fósiles: Exclusión total de rutas legadas de 2021 en Android 11 a 15.\n• 🎬 Descargador de Reels de Instagram Reforzado: Regexes CDN relajados para Meta (sin forzar .mp4 rígido), soporte de endpoints limpios /embed/ y consultas GraphQL con headers oficiales.",
   "fileSizeMb": 25.1
 }

@@ -95,12 +95,12 @@ object InstagramDownloader {
         if (text.isBlank()) return null
 
         // 1. Buscar en array video_versions (máxima calidad de reproducción en Instagram)
-        val versionsRegex = Regex(""""video_versions"\s*:\s*\[\s*\{[^}]*?"url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?\.mp4[^"]*)"""")
+        val versionsRegex = Regex(""""video_versions"\s*:\s*\[\s*\{[^}]*?"url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?)"""")
         var videoUrl = versionsRegex.find(text)?.groupValues?.get(1)
 
-        // 2. Buscar url directa .mp4
+        // 2. Buscar url directa en video_dash_manifest o video_versions anidado
         if (videoUrl.isNullOrBlank()) {
-            val urlRegex = Regex(""""url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?\.mp4[^"]*)"""")
+            val urlRegex = Regex(""""url"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?(?:\.mp4|bytestart|/t50\.)[^"]*)"""")
             videoUrl = urlRegex.find(text)?.groupValues?.get(1)
         }
 
@@ -112,7 +112,7 @@ object InstagramDownloader {
 
         // 4. Buscar contentUrl
         if (videoUrl.isNullOrBlank()) {
-            val contentUrlRegex = Regex(""""contentUrl"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?\.mp4[^"]*)"""")
+            val contentUrlRegex = Regex(""""contentUrl"\s*:\s*"(https:(?:\\/\\/|//)[^"]+?)"[,\s}]""")
             videoUrl = contentUrlRegex.find(text)?.groupValues?.get(1)
         }
 
@@ -122,9 +122,9 @@ object InstagramDownloader {
             videoUrl = ogVideoRegex.find(text)?.groupValues?.get(1)
         }
 
-        // 6. Regex directo sobre CDN de Instagram (cdninstagram / fbcdn)
+        // 6. Regex directo sobre CDN de Instagram (cdninstagram / fbcdn) para archivos de video
         if (videoUrl.isNullOrBlank()) {
-            val directCdnRegex = Regex("""https:(?:\\/\\/|//)[a-zA-Z0-9.-]+\.(?:cdninstagram|fbcdn)\.(?:com|net)(?:\\/|/)[^"'\s<>]+\.mp4[^"'\s<>]*""")
+            val directCdnRegex = Regex("""https:(?:\\/\\/|//)[a-zA-Z0-9.-]+\.(?:cdninstagram|fbcdn)\.(?:com|net)(?:\\/|/)[^"'\s<>]*(?:\.mp4|/t50\.|bytestart=)[^"'\s<>]*""")
             videoUrl = directCdnRegex.find(text)?.value
         }
 
@@ -289,14 +289,19 @@ object InstagramDownloader {
             AppLog.w(TAG, "Motor 3 (FacebookExternalHit) falló: ${e.message}")
         }
 
-        // 4. Motor 4: Embed Captioned Scraper (/embed/captioned/)
+        // 4. Motor 4: Embed Scraper (/embed/ y /embed/captioned/)
         if (shortcode != null) {
-            for (embedPrefix in listOf("p", "reel")) {
+            val embedEndpoints = listOf(
+                "https://www.instagram.com/reel/$shortcode/embed/",
+                "https://www.instagram.com/reel/$shortcode/embed/captioned/",
+                "https://www.instagram.com/p/$shortcode/embed/",
+                "https://www.instagram.com/p/$shortcode/embed/captioned/"
+            )
+            for (embedUrl in embedEndpoints) {
                 try {
-                    val embedUrl = "https://www.instagram.com/$embedPrefix/$shortcode/embed/captioned/"
                     val embedConn = (URL(embedUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 10000
-                        readTimeout = 12000
+                        connectTimeout = 8000
+                        readTimeout = 10000
                         requestMethod = "GET"
                         instanceFollowRedirects = true
                         setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
@@ -309,33 +314,35 @@ object InstagramDownloader {
 
                         val extracted = extractMediaFromText(embedHtml, shortcode)
                         if (extracted != null) {
-                            AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 4 (Embed Captioned $embedPrefix)")
+                            AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 4 (Embed $embedUrl)")
                             return@withContext Result.success(extracted)
                         }
                     } else {
                         embedConn.disconnect()
                     }
                 } catch (e: Exception) {
-                    AppLog.w(TAG, "Motor 4 (Embed $embedPrefix) falló: ${e.message}")
+                    AppLog.w(TAG, "Motor 4 falló para $embedUrl: ${e.message}")
                 }
             }
         }
 
-        // 5. Motor 5: Web Info API con App ID oficial de Instagram Web
+        // 5. Motor 5: Web Info API & GraphQL con App ID oficial de Instagram Web
         if (shortcode != null) {
             try {
                 val apiUrls = listOf(
+                    "https://www.instagram.com/graphql/query/?query_hash=b3055c2c9702560e7f346e45508c0c0e&variables=%7B%22shortcode%22%3A%22$shortcode%22%7D",
                     "https://www.instagram.com/api/v1/media/web_info/?shortcode=$shortcode",
                     "https://www.instagram.com/reel/$shortcode/?__a=1&__d=dis"
                 )
                 for (apiUrl in apiUrls) {
                     val apiConn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 10000
-                        readTimeout = 12000
+                        connectTimeout = 9000
+                        readTimeout = 10000
                         requestMethod = "GET"
                         instanceFollowRedirects = true
                         setRequestProperty("User-Agent", USER_AGENT)
                         setRequestProperty("X-IG-App-ID", "936619743392459")
+                        setRequestProperty("X-ASBD-ID", "198387")
                         setRequestProperty("X-Requested-With", "XMLHttpRequest")
                         setRequestProperty("Accept", "application/json, text/plain, */*")
                     }
@@ -346,7 +353,7 @@ object InstagramDownloader {
 
                         val extracted = extractMediaFromText(jsonText, shortcode)
                         if (extracted != null) {
-                            AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 5 (Web Info API)")
+                            AppLog.d(TAG, "Instagram resuelto con éxito vía Motor 5 (Web Info/GraphQL)")
                             return@withContext Result.success(extracted)
                         }
                     } else {

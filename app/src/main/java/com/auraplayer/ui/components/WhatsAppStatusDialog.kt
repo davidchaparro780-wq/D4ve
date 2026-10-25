@@ -238,38 +238,49 @@ fun WhatsAppStatusDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Banner de Permiso de Archivos (solo si no tiene acceso ni por sistema ni por SAF)
-                if (!hasStoragePermission && !hasSaf) {
+                // Banner estilo Snaptube: Permiso de Acceso a Todos los Archivos
+                if (!hasStoragePermission) {
+                    var showSafAlternative by remember { mutableStateOf(false) }
+
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .shadow(8.dp, RoundedCornerShape(16.dp))
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF2A1B12))
-                            .padding(12.dp)
+                            .background(Brush.verticalGradient(listOf(Color(0xFF1E293B), Color(0xFF0F172A))))
+                            .padding(14.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Permiso de Archivos Requerido",
-                                color = Color(0xFFFDE68A),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF25D366).copy(alpha = 0.2f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF25D366), modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Permiso Requerido (Estilo Snaptube)",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                )
+                                Text(
+                                    text = if (isAndroid11Plus) {
+                                        "Para detectar automáticamente los estados de WhatsApp como en Snaptube, activa el permiso 'Acceso a todos los archivos'."
+                                    } else {
+                                        "Se requiere permiso de lectura de almacenamiento para mostrar los estados de WhatsApp."
+                                    },
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 11.sp,
+                                    lineHeight = 15.sp
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = if (isAndroid11Plus) {
-                                "En Android 11+ WhatsApp guarda los estados en carpetas protegidas. Activa el permiso para poder detectarlos automáticamente."
-                            } else {
-                                "Se requiere permiso de lectura de almacenamiento para mostrar los estados de WhatsApp."
-                            },
-                            color = Color(0xFFD1D5DB),
-                            fontSize = 11.sp,
-                            lineHeight = 15.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Button(
                             onClick = {
                                 if (isAndroid11Plus) {
@@ -290,80 +301,70 @@ fun WhatsAppStatusDialog(
                                     legacyPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth().height(36.dp),
+                            modifier = Modifier.fillMaxWidth().height(38.dp),
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E0B))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))
                         ) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 if (isAndroid11Plus) "Activar Acceso a Todos los Archivos" else "Conceder Permiso de Almacenamiento",
                                 color = Color.Black,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp
+                                fontSize = 12.sp
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
 
-                // Banner de Vinculación SAF para Android 11+ (solo si no tiene SAF vinculado)
-                if (isAndroid11Plus && !hasSaf) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .shadow(8.dp, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Brush.horizontalGradient(listOf(Color(0xFF132A1C), Color(0xFF183822))))
-                            .padding(12.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF25D366).copy(alpha = 0.2f)),
-                                contentAlignment = Alignment.Center
+                        if (isAndroid11Plus) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            TextButton(
+                                onClick = { showSafAlternative = !showSafAlternative },
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                contentPadding = PaddingValues(0.dp)
                             ) {
-                                Icon(Icons.Default.FolderShared, contentDescription = null, tint = Color(0xFF25D366), modifier = Modifier.size(18.dp))
+                                Text(
+                                    if (showSafAlternative) "Ocultar opción manual" else "¿Problemas con el permiso? Vincular con SAF",
+                                    color = Color(0xFF64748B),
+                                    fontSize = 10.sp
+                                )
                             }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("Vincular Carpeta de WhatsApp (SAF)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                Text("Abre la carpeta Media en el explorador. Solo toca 'USAR ESTA CARPETA' abajo y 'Permitir'.", color = Color(0xFF86EFAC), fontSize = 10.sp)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                onClick = {
-                                    try {
-                                        val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = false)
-                                        safLauncher.launch(initialUri)
-                                    } catch (_: Exception) {
-                                        safLauncher.launch(null)
+
+                            if (showSafAlternative) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Button(
+                                        onClick = {
+                                            try {
+                                                val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = false)
+                                                safLauncher.launch(initialUri)
+                                            } catch (_: Exception) {
+                                                safLauncher.launch(null)
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f).height(34.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
+                                        contentPadding = PaddingValues(horizontal = 4.dp)
+                                    ) {
+                                        Text("Vincular WhatsApp", fontSize = 10.sp, color = Color.White)
                                     }
-                                },
-                                modifier = Modifier.weight(1f).height(36.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                                contentPadding = PaddingValues(horizontal = 6.dp)
-                            ) {
-                                Text("Conectar WhatsApp", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            }
-                            OutlinedButton(
-                                onClick = {
-                                    try {
-                                        val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = true)
-                                        safLauncher.launch(initialUri)
-                                    } catch (_: Exception) {
-                                        safLauncher.launch(null)
+                                    Button(
+                                        onClick = {
+                                            try {
+                                                val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = true)
+                                                safLauncher.launch(initialUri)
+                                            } catch (_: Exception) {
+                                                safLauncher.launch(null)
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f).height(34.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF334155)),
+                                        contentPadding = PaddingValues(horizontal = 4.dp)
+                                    ) {
+                                        Text("Vincular Business", fontSize = 10.sp, color = Color.White)
                                     }
-                                },
-                                modifier = Modifier.weight(1f).height(36.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF86EFAC)),
-                                contentPadding = PaddingValues(horizontal = 6.dp)
-                            ) {
-                                Text("WhatsApp Business", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     }
@@ -503,25 +504,12 @@ fun WhatsAppStatusDialog(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(if (hasSaf) Color(0xFF14532D) else Color(0xFF334155))
+                                            .background(if (hasStoragePermission) Color(0xFF14532D) else Color(0xFF7F1D1D))
                                             .padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            if (hasSaf) "📁 SAF Conectado" else "📁 SAF Pendiente",
-                                            color = if (hasSaf) Color(0xFF86EFAC) else Color(0xFFCBD5E1),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(if (hasStoragePermission) Color(0xFF14532D) else Color(0xFF334155))
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            if (hasStoragePermission) "🛡️ Permiso Otorgado" else "🛡️ Permiso Básico",
-                                            color = if (hasStoragePermission) Color(0xFF86EFAC) else Color(0xFFCBD5E1),
+                                            if (hasStoragePermission) "🛡️ Acceso a Archivos: Activo" else "⚠️ Acceso a Archivos: Inactivo",
+                                            color = if (hasStoragePermission) Color(0xFF86EFAC) else Color(0xFFFCA5A5),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Medium
                                         )
@@ -536,29 +524,40 @@ fun WhatsAppStatusDialog(
                                     shape = RoundedCornerShape(14.dp),
                                     modifier = Modifier.fillMaxWidth().height(44.dp)
                                 ) {
-                                    Icon(Icons.Default.PlayCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Default.PlayCircle, contentDescription = null, tint = Color.Black, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Abrir WhatsApp para Mirar Estados", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Text("Abrir WhatsApp para Mirar Estados", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 }
 
-                                if (isAndroid11Plus && !hasSaf) {
+                                if (!hasStoragePermission) {
                                     Spacer(modifier = Modifier.height(10.dp))
                                     OutlinedButton(
                                         onClick = {
-                                            try {
-                                                val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = false)
-                                                safLauncher.launch(initialUri)
-                                            } catch (_: Exception) {
-                                                safLauncher.launch(null)
+                                            if (isAndroid11Plus) {
+                                                try {
+                                                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                                        data = Uri.parse("package:${context.packageName}")
+                                                    }
+                                                    context.startActivity(intent)
+                                                } catch (_: Exception) {
+                                                    try {
+                                                        val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                                                        context.startActivity(intent)
+                                                    } catch (_: Exception) {
+                                                        Toast.makeText(context, "Abre Ajustes > Permisos para conceder acceso", Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                            } else {
+                                                legacyPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                                             }
                                         },
                                         shape = RoundedCornerShape(14.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF86EFAC)),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFF59E0B)),
                                         modifier = Modifier.fillMaxWidth().height(40.dp)
                                     ) {
-                                        Icon(Icons.Default.FolderShared, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Vincular Carpeta de WhatsApp (SAF)", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                                        Text("Activar Acceso a Todos los Archivos", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                                     }
                                 }
 
