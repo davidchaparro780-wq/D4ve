@@ -23,6 +23,8 @@ import com.auraplayer.ui.components.InstagramDownloaderDialog
 import com.auraplayer.ui.components.FacebookDownloaderDialog
 import com.auraplayer.ui.components.WhatsAppStatusDialog
 import com.auraplayer.ui.components.ViralAudioStudioDialog
+import com.auraplayer.ui.components.CoverFlowAlbumsCarousel
+import com.auraplayer.ui.components.AlbumModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -253,7 +255,7 @@ fun MusicScreen(
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("Canciones", "Playlists 📂", "Favoritos ❤️", "Carpetas", "Artistas")
+    val tabs = listOf("Canciones", "Álbumes 💿", "Playlists 📂", "Favoritos ❤️", "Carpetas", "Artistas")
 
     // Filter & Sort States
     // 0: Todas, 1: Descargas, 2: Recientes, 3: Más Escuchadas, 4: HD/Lossless, 5: Favoritas, 6: Cortas, 7: Largas
@@ -294,8 +296,9 @@ fun MusicScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedSongIds by remember { mutableStateOf(setOf<Long>()) }
 
-    // Custom Playlist view / create state
+    // Custom Playlist & Album view / create state
     var selectedPlaylistForView by remember { mutableStateOf<Playlist?>(null) }
+    var selectedAlbumForView by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedFolderForView by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedArtistForView by rememberSaveable { mutableStateOf<String?>(null) }
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
@@ -316,10 +319,12 @@ fun MusicScreen(
         }
     }
 
-    // BackHandler to handle playlist view, folder view, artist view, search query, or sub-tab navigation
-    BackHandler(enabled = selectedPlaylistForView != null || selectedFolderForView != null || selectedArtistForView != null || searchQuery.isNotBlank() || selectedTab != 0 || selectedFilterIndex != 0) {
+    // BackHandler to handle playlist view, album view, folder view, artist view, search query, or sub-tab navigation
+    BackHandler(enabled = selectedPlaylistForView != null || selectedAlbumForView != null || selectedFolderForView != null || selectedArtistForView != null || searchQuery.isNotBlank() || selectedTab != 0 || selectedFilterIndex != 0) {
         if (selectedPlaylistForView != null) {
             selectedPlaylistForView = null
+        } else if (selectedAlbumForView != null) {
+            selectedAlbumForView = null
         } else if (selectedFolderForView != null) {
             selectedFolderForView = null
         } else if (selectedArtistForView != null) {
@@ -1141,6 +1146,7 @@ fun MusicScreen(
                         AuraHaptic.tick(view)
                         selectedTab = index
                         selectedPlaylistForView = null
+                        selectedAlbumForView = null
                     },
                     modifier = Modifier.clip(RoundedCornerShape(20.dp)),
                     text = {
@@ -1642,7 +1648,124 @@ fun MusicScreen(
                             }
                         }
                     }
-                1 -> { // Playlists 📂 (Smart Playlists & Custom)
+                1 -> { // Álbumes 💿 (3D Cover Flow Carousel & Detalle)
+                    val currentAlbumName = selectedAlbumForView
+                    if (currentAlbumName != null) {
+                        val albumSongs = remember(currentAlbumName, songs) {
+                            songs.filter { (it.album.ifBlank { "Álbum Desconocido" }) == currentAlbumName }
+                        }
+                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp)) {
+                            // Sub-header with Back Button, Album Name, Artist, Play and Shuffle
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        onClick = { selectedAlbumForView = null },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = "Volver a Álbumes",
+                                            tint = Color.White
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = currentAlbumName,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = "${albumSongs.size} canciones • ${albumSongs.firstOrNull()?.artist ?: "Varios Artistas"}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF00F0FF)
+                                        )
+                                    }
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Button(
+                                        onClick = { albumSongs.firstOrNull()?.let { onSongClick(it) } },
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                        modifier = Modifier.height(34.dp)
+                                    ) {
+                                        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Reproducir", fontSize = 12.sp)
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    IconButton(
+                                        onClick = { onShuffleAll(albumSongs) },
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(Color(0xFF00F0FF).copy(alpha = 0.2f))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Shuffle,
+                                            contentDescription = "Mezclar álbum",
+                                            tint = Color(0xFF00F0FF),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (albumSongs.isEmpty()) {
+                                EmptyListMessage("Sin canciones en este álbum")
+                            } else {
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(albumSongs, key = { it.id }, contentType = { "song" }) { song ->
+                                        SongListItem(
+                                            song = song,
+                                            isSelected = currentMedia?.id == song.id,
+                                            isFavorite = favoritesManager.isFavorite(song.id),
+                                            onClick = { onSongClick(song) },
+                                            onLongClick = { selectedSongForMenu = song },
+                                            onOptionsClick = { selectedSongForMenu = song },
+                                            onSwipePlayNext = {
+                                                onPlayNext(song)
+                                                Toast.makeText(context, "Se reproducirá a continuación: ${song.title}", Toast.LENGTH_SHORT).show()
+                                            },
+                                            onSwipeToggleFavorite = {
+                                                val isFav = favoritesManager.toggleFavorite(song.id)
+                                                Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        CoverFlowAlbumsCarousel(
+                            songs = songs,
+                            onPlayAlbum = { albSongs, startIdx ->
+                                if (albSongs.isNotEmpty()) {
+                                    val songToPlay = albSongs.getOrNull(startIdx) ?: albSongs.first()
+                                    onSongClick(songToPlay)
+                                }
+                            },
+                            onOpenAlbumDetail = { album ->
+                                selectedAlbumForView = album.name
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                2 -> { // Playlists 📂 (Smart Playlists & Custom)
                     if (selectedPlaylistForView != null) {
                         // Inside a specific playlist
                         val pl = selectedPlaylistForView!!
@@ -1893,7 +2016,7 @@ fun MusicScreen(
                         }
                     }
                 }
-                2 -> { // Favoritos
+                3 -> { // Favoritos
                     if (favoriteSongs.isEmpty()) {
                         EmptyListMessage("Sin favoritos")
                     } else {
@@ -1919,7 +2042,7 @@ fun MusicScreen(
                         }
                     }
                 }
-                3 -> { // Carpetas
+                4 -> { // Carpetas
                     val folderGroups = remember(songs) {
                         songs.groupBy { it.folderName.ifEmpty { "Música" } }
                     }
@@ -2110,7 +2233,7 @@ fun MusicScreen(
                         }
                     }
                 }
-                4 -> { // Artistas
+                5 -> { // Artistas
                     val artistGroups = remember(songs) {
                         songs.groupBy { it.artist.ifEmpty { "Artista desconocido" } }
                     }
@@ -3203,6 +3326,17 @@ fun SongListItem(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+                // Live micro-equalizer overlay on active song thumbnail
+                if (isSelected) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.45f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LiveEqualizerIndicator(barColor = Color(0xFF00F0FF))
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(14.dp))
@@ -3247,6 +3381,33 @@ fun SongListItem(
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val badge = song.audioFormatBadge
+                    if (badge.isNotBlank()) {
+                        val isLossless = song.isLossless || badge == "320k"
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(
+                                    if (isLossless) Color(0xFF0284C7).copy(alpha = 0.25f)
+                                    else Color(0xFF334155).copy(alpha = 0.4f)
+                                )
+                                .border(
+                                    width = 0.5.dp,
+                                    color = if (isLossless) Color(0xFF38BDF8).copy(alpha = 0.6f)
+                                    else Color(0xFF64748B).copy(alpha = 0.4f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = badge,
+                                fontSize = 8.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isLossless) Color(0xFF38BDF8) else Color(0xFF94A3B8)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
                     HighlightedText(
                         text = song.artist,
                         query = highlightQuery,

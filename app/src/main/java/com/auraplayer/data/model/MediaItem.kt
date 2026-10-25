@@ -37,6 +37,30 @@ data class MediaModel(
                 String.format("%02d:%02d", minutes, seconds)
             }
         }
+
+    val audioFormatBadge: String
+        get() {
+            val ext = path.substringAfterLast('.', "").lowercase()
+            return when (ext) {
+                "flac" -> "FLAC"
+                "wav" -> "WAV"
+                "alac" -> "ALAC"
+                "dsf", "dff" -> "DSD"
+                "m4a", "aac" -> "AAC"
+                "ogg", "opus" -> "OPUS"
+                "mp3" -> {
+                    val sec = duration / 1000
+                    if (sec > 0 && size > 0) {
+                        val kbps = (size * 8 / sec) / 1000
+                        if (kbps >= 300) "320k" else if (kbps >= 240) "256k" else "MP3"
+                    } else "MP3"
+                }
+                else -> if (ext.isNotBlank()) ext.uppercase() else ""
+            }
+        }
+
+    val isLossless: Boolean
+        get() = audioFormatBadge in listOf("FLAC", "WAV", "ALAC", "DSD")
 }
 
 enum class RepeatMode {
