@@ -170,38 +170,24 @@ class CoverArtManager(private val context: Context) {
         songs: List<MediaModel>,
         onCoversUpdated: suspend () -> Unit
     ) = withContext(Dispatchers.IO) {
-        var updatedLocally = false
-        val missingOnline = mutableListOf<MediaModel>()
+        try {
+            var updatedLocally = false
 
-        // Fase 1: Extracción local sin red (ultra-rápida)
-        for (song in songs) {
-            val local = getLocalCoverUri(song.id, song.artist, song.title, song.path)
-            if (local == null) {
-                val extracted = extractAndSaveEmbeddedArt(song)
-                if (extracted != null) {
-                    updatedLocally = true
-                } else {
-                    missingOnline.add(song)
+            // Fase 1: Extracción local sin red (ultra-rápida, lote controlado para proteger memoria)
+            for (song in songs.take(20)) {
+                val local = getLocalCoverUri(song.id, song.artist, song.title, song.path)
+                if (local == null) {
+                    val extracted = extractAndSaveEmbeddedArt(song)
+                    if (extracted != null) {
+                        updatedLocally = true
+                    }
                 }
             }
-        }
 
-        if (updatedLocally) {
-            onCoversUpdated()
-        }
-
-        // Fase 2: Consulta de carátulas oficiales en internet (iTunes / Deezer HD 600x600)
-        if (missingOnline.isNotEmpty()) {
-            for (song in missingOnline) {
-                try {
-                    val saved = fetchFromOnlineApi(song.title, song.artist, song.id)
-                    if (saved != null) {
-                        onCoversUpdated()
-                    }
-                    kotlinx.coroutines.delay(200)
-                } catch (_: Exception) {}
+            if (updatedLocally) {
+                onCoversUpdated()
             }
-        }
+        } catch (_: Throwable) {}
     }
 
     /**
@@ -281,7 +267,7 @@ class CoverArtManager(private val context: Context) {
                                 if (!namedFile.exists()) {
                                     targetFile.copyTo(namedFile, overwrite = true)
                                 }
-                                try { coil.Coil.imageLoader(context).memoryCache?.clear() } catch (_: Exception) {}
+                                try { coil.Coil.imageLoader(context).memoryCache?.clear() } catch (_: Throwable) {}
                                 return Uri.parse("file://${targetFile.absolutePath}?t=${System.currentTimeMillis()}")
                             }
                         }

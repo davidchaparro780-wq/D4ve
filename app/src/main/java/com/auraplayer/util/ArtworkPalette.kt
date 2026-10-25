@@ -63,7 +63,7 @@ object ArtworkPaletteExtractor {
                 if (cache.size > 32) cache.clear()
                 cache[key] = extracted
                 extracted
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 AppLog.w("ArtworkPalette", "No se pudo extraer la paleta de la carátula", e)
                 null
             }

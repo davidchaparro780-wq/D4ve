@@ -16,13 +16,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 // Motor central de resolución y extracción profunda de carátulas para DaVE Player.
-// Soporta de forma unificada:
-// 1. Caché persistente local en disco (context.filesDir/covers)
-// 2. Android 10+ (API 29 a 35) ContentResolver.loadThumbnail para MediaStore Audio y Albums
-// 3. Extracción de tags ID3v2 APIC / FLAC METADATA_BLOCK_PICTURE / MP4 covr con MediaMetadataRetriever
-// 4. Detección de imágenes de carátula en la carpeta del álbum (cover.jpg, folder.jpg, front.jpg, etc.)
-// 5. Compatibilidad hacia atrás con URIs heredadas content://media/external/audio/albumart
-// 6. Generación de URIs seguras con FileProvider para MediaSession, Notificaciones y Lockscreen
+// 100% blindado contra fallos de memoria, SecurityExceptions o formatos corruptos.
 object AudioArtworkResolver {
 
     private const val TAG = "AudioArtworkResolver"
@@ -39,6 +33,19 @@ object AudioArtworkResolver {
     // Resuelve un Bitmap optimizado para la carátula solicitada, aplicando downsampling
     // para no saturar memoria RAM y garantizando 120 FPS fluidos.
     fun resolveBitmap(
+        context: Context,
+        uri: Uri?,
+        path: String? = null,
+        targetSize: Int = 512
+    ): Bitmap? {
+        return try {
+            resolveBitmapInternal(context, uri, path, targetSize)
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun resolveBitmapInternal(
         context: Context,
         uri: Uri?,
         path: String? = null,
@@ -91,7 +98,7 @@ object AudioArtworkResolver {
                             null
                         )
                         if (thumb != null) return thumb
-                    } catch (_: Exception) {}
+                    } catch (_: Throwable) {}
                 }
                 // Fallback tradicional para albumart
                 try {
@@ -99,7 +106,7 @@ object AudioArtworkResolver {
                         val bmp = BitmapFactory.decodeStream(stream)
                         if (bmp != null) return bmp
                     }
-                } catch (_: Exception) {}
+                } catch (_: Throwable) {}
             }
 
             // Caso 3B: content://media/external/audio/media/<id> (Pista de audio)
@@ -127,7 +134,7 @@ object AudioArtworkResolver {
                             if (songId > 0) saveBitmapToCoversDir(context, songId, thumb)
                             return thumb
                         }
-                    } catch (_: Exception) {}
+                    } catch (_: Throwable) {}
                 }
 
                 // C) Resolver metadatos de la pista para buscar ID3 tags o folder art
@@ -160,7 +167,7 @@ object AudioArtworkResolver {
                                 if (songId > 0) saveBitmapToCoversDir(context, songId, thumb)
                                 return thumb
                             }
-                        } catch (_: Exception) {}
+                        } catch (_: Throwable) {}
                     }
                 }
 
@@ -178,9 +185,9 @@ object AudioArtworkResolver {
                             }
                         }
                     } finally {
-                        try { retriever.release() } catch (_: Exception) {}
+                        try { retriever.release() } catch (_: Throwable) {}
                     }
-                } catch (_: Exception) {}
+                } catch (_: Throwable) {}
             }
 
             // Caso 3C: FileProvider u otro Content Provider
@@ -196,7 +203,7 @@ object AudioArtworkResolver {
                         return BitmapFactory.decodeStream(stream)
                     }
                 }
-            } catch (_: Exception) {}
+            } catch (_: Throwable) {}
         }
 
         return null
@@ -212,9 +219,9 @@ object AudioArtworkResolver {
                 val bmp = decodeSampledBitmapFromByteArray(pic, targetSize)
                 if (bmp != null) return bmp
             }
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
         } finally {
-            try { retriever.release() } catch (_: Exception) {}
+            try { retriever.release() } catch (_: Throwable) {}
         }
 
         // Buscar imagen de carátula en la misma carpeta del álbum
@@ -242,35 +249,35 @@ object AudioArtworkResolver {
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
 
         return null
     }
 
     // Extrae los bytes comprimidos (JPEG) para ser incrustados en MediaMetadata de MediaSession.
     fun resolveCoverBytes(context: Context, uri: Uri?, path: String? = null): ByteArray? {
-        // Si hay extracción directa de bytes sin decodificar
-        if (!path.isNullOrBlank()) {
-            val f = File(path)
-            if (f.exists() && isAudioExtension(path)) {
-                val retriever = MediaMetadataRetriever()
-                try {
-                    retriever.setDataSource(f.absolutePath)
-                    val pic = retriever.embeddedPicture
-                    if (pic != null && pic.isNotEmpty()) return pic
-                } catch (_: Exception) {
-                } finally {
-                    try { retriever.release() } catch (_: Exception) {}
+        return try {
+            // Si hay extracción directa de bytes sin decodificar
+            if (!path.isNullOrBlank()) {
+                val f = File(path)
+                if (f.exists() && isAudioExtension(path)) {
+                    val retriever = MediaMetadataRetriever()
+                    try {
+                        retriever.setDataSource(f.absolutePath)
+                        val pic = retriever.embeddedPicture
+                        if (pic != null && pic.isNotEmpty()) return pic
+                    } catch (_: Throwable) {
+                    } finally {
+                        try { retriever.release() } catch (_: Throwable) {}
+                    }
                 }
             }
-        }
 
-        val bmp = resolveBitmap(context, uri, path, targetSize = 256) ?: return null
-        return try {
+            val bmp = resolveBitmap(context, uri, path, targetSize = 256) ?: return null
             val stream = ByteArrayOutputStream()
             bmp.compress(Bitmap.CompressFormat.JPEG, 88, stream)
             stream.toByteArray()
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
@@ -279,24 +286,24 @@ object AudioArtworkResolver {
     // requerida por Android 7+ para MediaSession, Notificaciones del Sistema y Bluetooth AVRCP.
     fun getSafeArtworkUriForMediaSession(context: Context, uri: Uri?): Uri? {
         if (uri == null) return null
-        if (uri.scheme == "file") {
-            val path = uri.path
-            if (!path.isNullOrBlank()) {
-                val f = File(path)
-                if (f.exists() && f.length() > 0) {
-                    return try {
-                        FileProvider.getUriForFile(
+        return try {
+            if (uri.scheme == "file") {
+                val path = uri.path
+                if (!path.isNullOrBlank()) {
+                    val f = File(path)
+                    if (f.exists() && f.length() > 0) {
+                        return FileProvider.getUriForFile(
                             context,
                             "${context.packageName}.fileprovider",
                             f
                         )
-                    } catch (_: Exception) {
-                        uri
                     }
                 }
             }
+            uri
+        } catch (_: Throwable) {
+            uri
         }
-        return uri
     }
 
     private data class SongDetails(val path: String, val albumId: Long)
@@ -313,7 +320,7 @@ object AudioArtworkResolver {
                     SongDetails(path, albumId)
                 } else null
             }
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
@@ -328,7 +335,7 @@ object AudioArtworkResolver {
             options.inJustDecodeBounds = false
             options.inPreferredConfig = Bitmap.Config.ARGB_8888
             BitmapFactory.decodeFile(file.absolutePath, options)
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
@@ -343,7 +350,7 @@ object AudioArtworkResolver {
             options.inJustDecodeBounds = false
             options.inPreferredConfig = Bitmap.Config.ARGB_8888
             BitmapFactory.decodeByteArray(data, 0, data.size, options)
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
@@ -370,7 +377,7 @@ object AudioArtworkResolver {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
     }
 
     private fun isImageExtension(path: String): Boolean {

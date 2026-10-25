@@ -90,7 +90,7 @@ fun CoverFlowAlbumsCarousel(
                 AlbumModel(
                     name = albumName,
                     artist = albumSongs.firstOrNull()?.artist ?: "Varios Artistas",
-                    artworkUri = albumSongs.firstOrNull { it.artworkUri != null }?.artworkUri ?: albumSongs.firstOrNull()?.uri,
+                    artworkUri = albumSongs.firstOrNull { it.artworkUri != null }?.artworkUri,
                     songs = albumSongs
                 )
             }

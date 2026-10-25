@@ -1352,14 +1352,28 @@ fun AuraApp(
             videos = mediaRepository.loadVideoFiles()
             isLoading = false
 
-            // Sincronización proactiva y extracción profunda de carátulas en segundo plano sin congelar la UI
+            // Sincronización proactiva y extracción de carátulas en segundo plano 100% segura
             scope.launch(Dispatchers.IO) {
-                mediaRepository.coverArtManager.syncAllCoversInBackground(songs) {
-                    val reloaded = mediaRepository.loadAudioFiles()
-                    val reloadedSongs = reloaded.map(applyTagOverride)
-                    withContext(Dispatchers.Main) {
-                        songs = reloadedSongs
+                try {
+                    val missing = songs.filter { !mediaRepository.coverArtManager.hasLocalCover(it.id, it.artist, it.title, it.path) }
+                    if (missing.isNotEmpty()) {
+                        var anySaved = false
+                        missing.take(15).forEach { song ->
+                            try {
+                                val saved = mediaRepository.coverArtManager.autoFetchAndSaveCover(song)
+                                if (saved != null) anySaved = true
+                            } catch (_: Throwable) {}
+                        }
+                        if (anySaved) {
+                            val reloaded = mediaRepository.loadAudioFiles()
+                            val reloadedSongs = reloaded.map(applyTagOverride)
+                            withContext(Dispatchers.Main) {
+                                songs = reloadedSongs
+                            }
+                        }
                     }
+                } catch (t: Throwable) {
+                    AppLog.e(TAG, "Error seguro en sincronización de carátulas", t)
                 }
             }
         }

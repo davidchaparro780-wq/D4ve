@@ -8,36 +8,51 @@ import coil.memory.MemoryCache
 import com.auraplayer.notification.UpdateNotificationHelper
 import com.auraplayer.util.AudioArtworkFetcher
 import com.auraplayer.worker.UpdateWorker
+import java.io.File
 
 class DaVEApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-        // Crear canal de notificación de actualizaciones
-        UpdateNotificationHelper.createNotificationChannel(this)
-        // Iniciar detector periódico en segundo plano
-        UpdateWorker.enqueuePeriodicWork(this)
+        try {
+            // Crear canal de notificación de actualizaciones
+            UpdateNotificationHelper.createNotificationChannel(this)
+            // Iniciar detector periódico en segundo plano
+            UpdateWorker.enqueuePeriodicWork(this)
+        } catch (_: Throwable) {}
     }
 
     override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(this)
-            .components {
-                add(AudioArtworkFetcher.Factory(this@DaVEApplication))
+        return try {
+            val cacheDirectory = File(cacheDir, "image_cache").apply {
+                if (!exists()) mkdirs()
             }
-            .memoryCache {
-                MemoryCache.Builder(this)
-                    .maxSizePercent(0.25)
-                    .strongReferencesEnabled(true)
-                    .build()
-            }
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(cacheDir.resolve("image_cache"))
-                    .maxSizePercent(0.05)
-                    .build()
-            }
-            .crossfade(150)
-            .respectCacheHeaders(false)
-            .build()
+            ImageLoader.Builder(this)
+                .components {
+                    try {
+                        add(AudioArtworkFetcher.Factory(this@DaVEApplication))
+                    } catch (_: Throwable) {}
+                }
+                .memoryCache {
+                    MemoryCache.Builder(this)
+                        .maxSizePercent(0.20)
+                        .strongReferencesEnabled(true)
+                        .build()
+                }
+                .diskCache {
+                    DiskCache.Builder()
+                        .directory(cacheDirectory)
+                        .maxSizeBytes(60L * 1024L * 1024L) // 60 MB seguro sin llamadas a StatFs que puedan fallar
+                        .build()
+                }
+                .crossfade(true)
+                .respectCacheHeaders(false)
+                .build()
+        } catch (_: Throwable) {
+            // Fallback seguro: ImageLoader básico de Coil sin riesgo de cierre
+            ImageLoader.Builder(this)
+                .crossfade(true)
+                .build()
+        }
     }
 }

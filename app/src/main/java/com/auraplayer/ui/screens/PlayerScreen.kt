@@ -499,7 +499,7 @@ fun PlayerScreen(
                             dynamicArtworkColor = color
                         }
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     AppLog.d(TAG, "No se pudo extraer el color de acento de la carátula", e)
                 }
             }

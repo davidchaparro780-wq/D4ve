@@ -1,7 +1,7 @@
 {
-  "versionCode": 154,
-  "versionName": "4.9.54",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.54/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.54 (Build 154) — Rediseño Completo 'DaVE Hub' del Icono de Fuego & Eliminación de Redundancias:\n• 🔥 DaVE Hub Modal BottomSheet: Sustituye el antiguo menú desplegable saturado por un panel de comando fluido y elegante con diseño de tarjetas de 2 columnas a 120 FPS.\n• 🔍 Buscador Rápido de Herramientas: Barra de búsqueda en tiempo real para saltar al instante a cualquier función (TikTok, Stem Mixer, 8D, Quiz, Linterna, etc.).\n• 🏷️ 5 Categorías Organizadas: Filtrado táctil inmediato por categorías: '🔥 Todo', '📥 Descargas', '🎛️ Audio Lab', '🎉 Fiesta & Juegos', '🧰 Utilidades'.\n• 🟢 Badges de Estado en Vivo: Indicadores 'ACTIVO' en tiempo real para Linterna Rítmica, Servidor Wi-Fi, Locutor DJ, Burbuja Flotante, Gestos y Detector de Sueño.\n• 🧹 Cero Redundancias: Se eliminaron accesos repetidos innecesarios (Perfil, Ajustes, Modo Coche duplicado, AI Playlists duplicado y se unificaron limpiadores en Diagnóstico & Limpieza).",
+  "versionCode": 155,
+  "versionName": "4.9.55",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.55/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.55 (Build 155) — Corrección Crítica de Cierre Inesperado al Iniciar la App:\n• 🛡️ Blindaje Total en DaVEApplication & Coil ImageLoader: Eliminado cálculo maxSizePercent que fallaba en StatFs al no existir el directorio; asegurado con try-catch y fallback infalible.\n• ⚡ Prevención de Saturación de Memoria: MediaRepository ahora asigna artworkUri exclusivamente a imágenes reales y carátulas cacheadas, evitando decodificar archivos de audio completos como imágenes.\n• 🔄 Sincronización en Segundo Plano Segura: Protegida la corrutina de inicio de MainActivity con límite de lote e inmunidad total a excepciones para evitar cierres en el hilo principal.\n• 🛡️ AudioArtworkResolver & Fetcher a Prueba de Balas: Captura integral de Throwable (incluyendo OutOfMemoryError y SecurityException) en todos los métodos de extracción.",
   "fileSizeMb": 25.2
 }
