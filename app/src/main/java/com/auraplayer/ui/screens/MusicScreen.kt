@@ -20,6 +20,7 @@ import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.ui.components.StoryCardDialog
 import com.auraplayer.ui.components.TikTokDownloaderDialog
 import com.auraplayer.ui.components.InstagramDownloaderDialog
+import com.auraplayer.ui.components.FacebookDownloaderDialog
 import com.auraplayer.ui.components.WhatsAppStatusDialog
 import com.auraplayer.ui.components.ViralAudioStudioDialog
 import kotlinx.coroutines.launch
@@ -268,6 +269,7 @@ fun MusicScreen(
     var showStemMixer by remember { mutableStateOf(false) }
     var showTikTokDownloader by remember { mutableStateOf(false) }
     var showInstagramDownloader by remember { mutableStateOf(false) }
+    var showFacebookDownloader by remember { mutableStateOf(false) }
     var showWhatsAppStatusDialog by remember { mutableStateOf(false) }
     var songForStoryMaker by remember { mutableStateOf<MediaModel?>(null) }
     val stemManager = remember { StemMixerManager.getInstance(context) }
@@ -610,6 +612,10 @@ fun MusicScreen(
                         DropdownMenuItem(
                             text = { Text("📸 Descargar de Instagram (Reels)", color = Color(0xFFE1306C), fontWeight = FontWeight.Bold) },
                             onClick = { showToolsMenu = false; showInstagramDownloader = true }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("📘 Descargar de Facebook (Reels / Video)", color = Color(0xFF1877F2), fontWeight = FontWeight.Bold) },
+                            onClick = { showToolsMenu = false; showFacebookDownloader = true }
                         )
                         DropdownMenuItem(
                             text = { Text("🟢 Guardar Estados de WhatsApp", color = Color(0xFF25D366), fontWeight = FontWeight.Bold) },
@@ -2747,6 +2753,17 @@ fun MusicScreen(
         InstagramDownloaderDialog(
             initialUrl = "",
             onDismiss = { showInstagramDownloader = false },
+            onDownloadCompleted = { _ ->
+                onRefreshLibrary()
+            }
+        )
+    }
+
+    // Facebook Reels / Video Downloader Dialog
+    if (showFacebookDownloader) {
+        FacebookDownloaderDialog(
+            initialUrl = "",
+            onDismiss = { showFacebookDownloader = false },
             onDownloadCompleted = { _ ->
                 onRefreshLibrary()
             }

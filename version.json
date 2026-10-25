@@ -1,7 +1,7 @@
 {
-  "versionCode": 144,
-  "versionName": "4.9.44",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.44/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.44 (Build 144) — Modelo Snaptube para Estados de WhatsApp & Fix Instagram Reels:\n• 🌟 Motor Snaptube de Acceso Directo: Lectura física de alta velocidad (<2ms) en Android/media/.Statuses sin los bloqueos de SAF.\n• 🛡️ Permiso 'Acceso a Todos los Archivos' Prominente: Banner y botón directo a Ajustes estilo Snaptube para activar el acceso sin complicaciones.\n• 🎯 Detección Real de Estados Activos: Se eliminó el filtro restrictivo por nombre que ocultaba estados válidos; cualquier estado presente en .Statuses es reconocido como activo.\n• 🚫 Bloqueo Definitivo de Archivos Fósiles: Exclusión total de rutas legadas de 2021 en Android 11 a 15.\n• 🎬 Descargador de Reels de Instagram Reforzado: Regexes CDN relajados para Meta (sin forzar .mp4 rígido), soporte de endpoints limpios /embed/ y consultas GraphQL con headers oficiales.",
+  "versionCode": 145,
+  "versionName": "4.9.45",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.45/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.45 (Build 145) — Nuevo Descargador de Facebook (Reels & Videos HD) & Social Media Hub Completo:\n• 📘 Descargador Nativo de Facebook: Descarga videos, reels y clips públicos en calidad HD y SD directamente a tu Galería sin marcas de agua.\n• 🎵 Extracción de Audio MP3/M4A: Opción para guardar únicamente la pista de audio de cualquier video de Facebook con 1 solo toque.\n• ⚡ Detección Automática Omnibar: Al pegar un enlace de Facebook o Instagram en la barra de búsqueda de Explorar, se abre automáticamente el descargador correspondiente.\n• 🌟 Accesos Rápidos Sociales en Explorar & Videos: Nuevas píldoras de acceso rápido para TikTok, Instagram y Facebook integradas en la cabecera.",
   "fileSizeMb": 25.1
 }

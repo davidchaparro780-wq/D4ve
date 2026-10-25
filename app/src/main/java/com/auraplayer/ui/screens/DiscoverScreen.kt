@@ -59,8 +59,12 @@ import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import com.auraplayer.data.repository.FacebookDownloader
+import com.auraplayer.data.repository.InstagramDownloader
 import com.auraplayer.data.repository.TikTokDownloader
 import com.auraplayer.ui.components.DaveRadarDialog
+import com.auraplayer.ui.components.FacebookDownloaderDialog
+import com.auraplayer.ui.components.InstagramDownloaderDialog
 import com.auraplayer.ui.components.RytDownloadBottomSheet
 import com.auraplayer.ui.components.TikTokDownloaderDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -157,6 +161,10 @@ fun DiscoverScreen(
     var trackForDownloadChoice by remember { mutableStateOf<OnlineTrack?>(null) }
     var showTikTokDialog by remember { mutableStateOf(false) }
     var tiktokInitialUrl by remember { mutableStateOf("") }
+    var showInstagramDialog by remember { mutableStateOf(false) }
+    var instagramInitialUrl by remember { mutableStateOf("") }
+    var showFacebookDialog by remember { mutableStateOf(false) }
+    var facebookInitialUrl by remember { mutableStateOf("") }
     var showRadarDialog by remember { mutableStateOf(false) }
 
     // When searching or viewing specific genre, BackHandler resets to Trending
@@ -225,6 +233,16 @@ fun DiscoverScreen(
         if (TikTokDownloader.isTikTokUrl(searchQuery)) {
             tiktokInitialUrl = searchQuery.trim()
             showTikTokDialog = true
+            return
+        }
+        if (InstagramDownloader.isInstagramUrl(searchQuery)) {
+            instagramInitialUrl = searchQuery.trim()
+            showInstagramDialog = true
+            return
+        }
+        if (FacebookDownloader.isFacebookUrl(searchQuery)) {
+            facebookInitialUrl = searchQuery.trim()
+            showFacebookDialog = true
             return
         }
         runSearch()
@@ -327,6 +345,7 @@ fun DiscoverScreen(
                 }
 
                 Row(
+                    modifier = Modifier.weight(1f, fill = false).horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -352,6 +371,56 @@ fun DiscoverScreen(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.Black
+                        )
+                    }
+
+                    // Instagram Reels Shortcut Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFFCB045))
+                                )
+                            )
+                            .clickable {
+                                AuraHaptic.click(view)
+                                instagramInitialUrl = if (InstagramDownloader.isInstagramUrl(searchQuery)) searchQuery.trim() else ""
+                                showInstagramDialog = true
+                            }
+                            .padding(horizontal = 7.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "📸 Insta",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
+                        )
+                    }
+
+                    // Facebook Reels & Video Shortcut Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFF1877F2), Color(0xFF0D55BE))
+                                )
+                            )
+                            .clickable {
+                                AuraHaptic.click(view)
+                                facebookInitialUrl = if (FacebookDownloader.isFacebookUrl(searchQuery)) searchQuery.trim() else ""
+                                showFacebookDialog = true
+                            }
+                            .padding(horizontal = 7.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "📘 FB",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
                         )
                     }
 
@@ -983,6 +1052,22 @@ fun DiscoverScreen(
             initialUrl = tiktokInitialUrl,
             onDismiss = { showTikTokDialog = false },
             onDownloadCompleted = { _, _ -> }
+        )
+    }
+
+    if (showInstagramDialog) {
+        InstagramDownloaderDialog(
+            initialUrl = instagramInitialUrl,
+            onDismiss = { showInstagramDialog = false },
+            onDownloadCompleted = { _ -> }
+        )
+    }
+
+    if (showFacebookDialog) {
+        FacebookDownloaderDialog(
+            initialUrl = facebookInitialUrl,
+            onDismiss = { showFacebookDialog = false },
+            onDownloadCompleted = { _ -> }
         )
     }
 

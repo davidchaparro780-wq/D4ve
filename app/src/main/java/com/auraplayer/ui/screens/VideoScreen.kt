@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import android.net.Uri
 import com.auraplayer.ui.components.TikTokDownloaderDialog
 import com.auraplayer.ui.components.InstagramDownloaderDialog
+import com.auraplayer.ui.components.FacebookDownloaderDialog
 import com.auraplayer.ui.components.WhatsAppStatusDialog
 import com.auraplayer.data.repository.WhatsAppStatusItem
 import androidx.compose.material.icons.Icons
@@ -232,6 +233,7 @@ fun VideoScreen(
     var videoForMenu by remember { mutableStateOf<MediaModel?>(null) }
     var showWhatsAppStatusDialog by remember { mutableStateOf(false) }
     var showInstagramDownloader by remember { mutableStateOf(false) }
+    var showFacebookDownloader by remember { mutableStateOf(false) }
     var showTikTokDownloader by remember { mutableStateOf(false) }
 
     Column(
@@ -381,6 +383,28 @@ fun VideoScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF38BDF8)
+                    )
+            // Facebook Reels Chip
+            Box(
+                modifier = Modifier
+                    .shadow(3.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFF1877F2).copy(alpha = 0.35f))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF132A4A), Color(0xFF091626))
+                        )
+                    )
+                    .clickable { showFacebookDownloader = true }
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("📘", fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "Facebook Reels",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF60A5FA)
                     )
                 }
             }
@@ -696,6 +720,20 @@ fun VideoScreen(
                     onRefreshVideos()
                     onPlayDownloadedUri(uri)
                 }
+            }
+        )
+    }
+
+    // Facebook Downloader Dialog
+    if (showFacebookDownloader) {
+        FacebookDownloaderDialog(
+            initialUrl = "",
+            onDismiss = { showFacebookDownloader = false },
+            onDownloadCompleted = { uri ->
+                onRefreshVideos()
+            },
+            onPlayDownloadedVideo = { uri ->
+                onPlayDownloadedUri(uri)
             }
         )
     }

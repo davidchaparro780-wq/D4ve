@@ -59,6 +59,8 @@
         <package android:name="com.infinix.packageinstaller" />
         <package android:name="com.whatsapp" />
         <package android:name="com.whatsapp.w4b" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.facebook.orca" />
         <intent>
             <action android:name="android.intent.action.SEND" />
             <data android:mimeType="video/*" />
