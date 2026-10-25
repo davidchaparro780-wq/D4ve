@@ -1290,9 +1290,10 @@ fun PlayerScreen(
                             },
                             label = "visualizer_song_transition"
                         ) { _ ->
+                            val liveBassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying)
                             if (centerVisualizerMode == 0) {
                                 // Glowing Ambient Aura Disc with Vinyl Record Grooves (Dynamic Palette Glow)
-                                val bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying)
+                                val bassEnergy = liveBassEnergy
                                 val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
                                 val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
 
@@ -1414,7 +1415,7 @@ fun PlayerScreen(
                                         .size(maxArtSize)
                                         .then(levitationModifier)
                                 )
-                            } else {
+                            } else if (centerVisualizerMode == 3) {
                                 // Live Cyber Spectrum Waveform Visualizer (Real-time FFT audio engine)
                                 Box(
                                     modifier = Modifier
@@ -1516,7 +1517,7 @@ fun PlayerScreen(
                                 AnalogVuMetersSkin(
                                     song = currentMedia,
                                     isPlaying = isPlaying,
-                                    bassEnergy = bassEnergy,
+                                    bassEnergy = liveBassEnergy,
                                     onTap = {
                                         AuraHaptic.click(view)
                                         centerVisualizerMode = 0
