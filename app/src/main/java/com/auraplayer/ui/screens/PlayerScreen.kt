@@ -129,6 +129,8 @@ import com.auraplayer.ui.components.IpodClassicSkin
 import com.auraplayer.ui.components.AuroraMeshBackground
 import com.auraplayer.ui.components.VinylTurntableSkin
 import com.auraplayer.ui.components.RetroDiscmanSkin
+import com.auraplayer.ui.components.RetroIpodSkin
+import com.auraplayer.ui.components.AnalogVuMetersSkin
 import com.auraplayer.ui.components.DynamicWaveformSeekbar
 import com.auraplayer.ui.components.ExplosiveHeartBurst
 import com.auraplayer.ui.components.CanvasLoopsOverlay
@@ -1429,7 +1431,7 @@ fun PlayerScreen(
                                             detectTapGestures(
                                                 onTap = {
                                                     AuraHaptic.click(view)
-                                                    centerVisualizerMode = 0
+                                                    centerVisualizerMode = 4
                                                 },
                                                 onDoubleTap = { offset ->
                                                     val w = size.width
@@ -1483,13 +1485,66 @@ fun PlayerScreen(
                                     }
 
                                     Text(
-                                        text = "⚡ ESPECTRO CYBER EN VIVO (Toca para Vinilo)",
+                                        text = "⚡ ESPECTRO CYBER EN VIVO (Toca para iPod Classic)",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = Color(0xFF00F0FF).copy(alpha = 0.85f),
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp)
                                     )
                                 }
+                            } else if (centerVisualizerMode == 4) {
+                                // Skin Retro iPod Classic con Click Wheel Háptica
+                                RetroIpodSkin(
+                                    song = currentMedia,
+                                    isPlaying = isPlaying,
+                                    currentPositionMs = currentPositionMs,
+                                    durationMs = durationMs,
+                                    onTap = {
+                                        AuraHaptic.click(view)
+                                        centerVisualizerMode = 5
+                                    },
+                                    onTogglePlay = onPlayPauseClick,
+                                    onNext = onNextClick,
+                                    onPrev = onPreviousClick,
+                                    onSeekRelative = onSeekRelative,
+                                    modifier = Modifier
+                                        .size(maxArtSize)
+                                        .then(levitationModifier)
+                                )
+                            } else {
+                                // Skin Vintage Hi-Fi: Vúmetros Analógicos de Aguja Mecánica (Canal L & R)
+                                AnalogVuMetersSkin(
+                                    song = currentMedia,
+                                    isPlaying = isPlaying,
+                                    bassEnergy = bassEnergy,
+                                    onTap = {
+                                        AuraHaptic.click(view)
+                                        centerVisualizerMode = 0
+                                    },
+                                    onDoubleTap = { offset ->
+                                        val w = maxArtSize.value
+                                        if (offset.x < w * 0.35f) {
+                                            onSeekRelative(-10000L)
+                                            seekBadgeText = "-10s"
+                                            seekBadgeIsForward = false
+                                            showSeekBadge = true
+                                            AuraHaptic.click(view)
+                                        } else if (offset.x > w * 0.65f) {
+                                            onSeekRelative(10000L)
+                                            seekBadgeText = "+10s"
+                                            seekBadgeIsForward = true
+                                            showSeekBadge = true
+                                            AuraHaptic.click(view)
+                                        } else {
+                                            onToggleFavorite()
+                                            showHeartBurst = true
+                                            AuraHaptic.heavy(view)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(maxArtSize)
+                                        .then(levitationModifier)
+                                )
                             }
                         }
                     } else {

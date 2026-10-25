@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.PlaybackParameters
 import com.auraplayer.audio.EqualizerManager
 import com.auraplayer.audio.LoudnessNormalizerManager
 import com.auraplayer.audio.SilenceTrimmerManager
@@ -37,6 +38,17 @@ fun QuickEqDialog(
     val playlistManager = remember { PlaylistManager(context) }
     val loudnessManager = remember { LoudnessNormalizerManager.getInstance(context) }
     val silenceManager = remember { SilenceTrimmerManager.getInstance(context) }
+
+    val initialSpeed = com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters?.speed ?: 1.0f
+    var activeDjEffect by remember {
+        mutableIntStateOf(
+            when {
+                initialSpeed < 0.90f -> 1 // Slowed
+                initialSpeed > 1.10f -> 2 // Nightcore
+                else -> 0 // Original
+            }
+        )
+    }
 
     var crossfadeSec by remember { mutableIntStateOf(playlistManager.getCrossfadeSeconds()) }
     var is8D by remember { mutableStateOf(eq.isSpatial8DEnabled) }
@@ -114,6 +126,122 @@ fun QuickEqDialog(
                                 eq.setLoudnessGain(it.toInt())
                             }
                         )
+                    }
+                }
+
+                // 3.5. Efectos Virales 1-Tap DJ (Slowed + Reverb / Nightcore / Hi-Fi)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
+                        )
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Efectos Virales DJ (1-Tap) 🎛️", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(
+                                text = when (activeDjEffect) {
+                                    1 -> "🐢 SLOWED"
+                                    2 -> "⚡ NIGHTCORE"
+                                    else -> "🎵 ORIGINAL"
+                                },
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = when (activeDjEffect) {
+                                    1 -> Color(0xFF8B5CF6)
+                                    2 -> Color(0xFFEC4899)
+                                    else -> Color(0xFF38BDF8)
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            listOf(
+                                Triple(0, "🎵 Original", "1.0x Hi-Fi"),
+                                Triple(1, "🐢 Slowed", "0.85x + Reverb"),
+                                Triple(2, "⚡ Nightcore", "1.25x Sped Up")
+                            ).forEach { (modeIdx, label, sub) ->
+                                val isSelected = activeDjEffect == modeIdx
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .shadow(if (isSelected) 4.dp else 2.dp, RoundedCornerShape(8.dp))
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            if (isSelected) {
+                                                when (modeIdx) {
+                                                    1 -> Brush.verticalGradient(listOf(Color(0xFF7C3AED), Color(0xFF6D28D9)))
+                                                    2 -> Brush.verticalGradient(listOf(Color(0xFFDB2777), Color(0xFFBE185D)))
+                                                    else -> Brush.verticalGradient(listOf(Color(0xFF0284C7), Color(0xFF0369A1)))
+                                                }
+                                            } else {
+                                                Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF141926)))
+                                            }
+                                        )
+                                        .clickable {
+                                            activeDjEffect = modeIdx
+                                            when (modeIdx) {
+                                                1 -> {
+                                                    // Slowed + Reverb
+                                                    com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters =
+                                                        PlaybackParameters(0.85f, 0.85f)
+                                                    eq.setBassBoostStrength(450)
+                                                    eq.setVirtualizerStrength(550)
+                                                    bassBoost = 450f
+                                                    virtualizer = 550f
+                                                }
+                                                2 -> {
+                                                    // Nightcore
+                                                    com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters =
+                                                        PlaybackParameters(1.25f, 1.25f)
+                                                    eq.setBassBoostStrength(200)
+                                                    eq.setLoudnessGain(350)
+                                                    bassBoost = 200f
+                                                    loudness = 350f
+                                                }
+                                                else -> {
+                                                    // Original
+                                                    com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters =
+                                                        PlaybackParameters(1.0f, 1.0f)
+                                                    eq.setBassBoostStrength(0)
+                                                    eq.setVirtualizerStrength(0)
+                                                    bassBoost = 0f
+                                                    virtualizer = 0f
+                                                }
+                                            }
+                                        }
+                                        .padding(vertical = 7.dp, horizontal = 2.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = label,
+                                            color = if (isSelected) Color.White else Color(0xFF94A3B8),
+                                            fontSize = 10.5.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                        Text(
+                                            text = sub,
+                                            color = if (isSelected) Color.White.copy(alpha = 0.85f) else Color(0xFF64748B),
+                                            fontSize = 8.5.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -334,6 +462,7 @@ fun QuickEqDialog(
                         isKaraoke = false
                         isLoudnessNormalized = false
                         isSilenceTrimmed = false
+                        activeDjEffect = 0
                         eq.setBassBoostStrength(0)
                         eq.setVirtualizerStrength(0)
                         eq.setLoudnessGain(0)
@@ -343,6 +472,7 @@ fun QuickEqDialog(
                         loudnessManager.isEnabled = false
                         silenceManager.isEnabled = false
                         com.auraplayer.service.PlaybackService.activePlayer?.skipSilenceEnabled = false
+                        com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters = PlaybackParameters(1.0f, 1.0f)
                     }
                 ) {
                     Icon(Icons.Default.RestartAlt, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(16.dp))

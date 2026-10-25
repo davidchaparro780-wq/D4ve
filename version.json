@@ -1,7 +1,7 @@
 {
-  "versionCode": 148,
-  "versionName": "4.9.48",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.48/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.48 (Build 148) — Rendimiento 120 FPS Real & Control de Audio Pro:\n• ⚡ Cero Fugas de Recomposición en PlayerScreen y MiniPlayer: animaciones migradas a RenderThread/graphicsLayer con 0 recomposiciones continuas en CPU a 120 FPS.\n• 🎛️ Feedback Háptico Táctil en Waveform Seekbar: vibración micro-táctil mecánica al fregar la barra de ondas armónicas.\n• 🔊 Normalizador de Volumen Inteligente (-14 LUFS) y Recorte de Silencios accesibles directamente desde la Consola DJ / Quick EQ.",
+  "versionCode": 149,
+  "versionName": "4.9.49",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.49/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.49 (Build 149) — Pack Retro Legendario & Efectos Virales 1-Tap DJ:\n• 🕹️ Nueva Skin iPod Classic Click Wheel: Rueda táctil con detección angular 360° y micro-ticks hápticos analógicos en PlayerScreen.\n• 📻 Nueva Skin Hi-Fi Vintage: Vúmetros estéreo L/R analógicos con agujas balísticas con física de resorte y LED PEAK.\n• 🎛️ Efectos Virales 1-Tap DJ: Convierte cualquier canción al instante a Slowed + Reverb Lo-Fi o Nightcore Sped Up con 1 toque en Quick EQ con cero impacto en batería ni rendimiento.",
   "fileSizeMb": 25.1
 }
