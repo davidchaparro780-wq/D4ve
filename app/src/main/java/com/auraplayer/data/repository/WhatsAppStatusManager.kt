@@ -30,7 +30,7 @@ data class WhatsAppStatusItem(
     val isVideo: Boolean,
     val timestamp: Long,
     val size: Long,
-    val isRecent24h: Boolean = (System.currentTimeMillis() - timestamp) in 0L..(24L * 60 * 60 * 1000L),
+    val isRecent24h: Boolean = (System.currentTimeMillis() - timestamp) in -600_000L..(24L * 60 * 60 * 1000L),
     val path: String = file?.absolutePath ?: uri.toString()
 ) {
     fun getRelativeTimeSpan(): String {
@@ -58,22 +58,59 @@ object WhatsAppStatusManager {
     private const val PREFS_NAME = "dave_whatsapp_prefs"
     private const val KEY_SAF_TREE_URIS = "saf_tree_uris"
 
+    /**
+     * Extrae la fecha real del nombre del archivo si tiene el formato estándar de WhatsApp
+     * (por ejemplo: VID-20210315-WA0001.mp4 o IMG-20220810-WA0002.jpg).
+     * Esto evita que archivos restaurados de copias de seguridad viejas aparezcan falsamente como recientes.
+     */
+    fun extractDateFromFileName(name: String): Long? {
+        val regexClassic = Regex("(?:VID|IMG)[-_](\\d{4})(\\d{2})(\\d{2})", RegexOption.IGNORE_CASE)
+        val matchClassic = regexClassic.find(name)
+        if (matchClassic != null) {
+            try {
+                val (year, month, day) = matchClassic.destructured
+                val y = year.toInt()
+                if (y in 2015..2035) {
+                    val cal = java.util.Calendar.getInstance()
+                    cal.set(y, month.toInt() - 1, day.toInt(), 12, 0, 0)
+                    return cal.timeInMillis
+                }
+            } catch (_: Exception) {}
+        }
+        val regexDash = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
+        val matchDash = regexDash.find(name)
+        if (matchDash != null) {
+            try {
+                val (year, month, day) = matchDash.destructured
+                val y = year.toInt()
+                if (y in 2015..2035) {
+                    val cal = java.util.Calendar.getInstance()
+                    cal.set(y, month.toInt() - 1, day.toInt(), 12, 0, 0)
+                    return cal.timeInMillis
+                }
+            } catch (_: Exception) {}
+        }
+        return null
+    }
+
     private val POTENTIAL_STATUS_DIRS = listOf(
         // WhatsApp estándar en Android 11+
         File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp/WhatsApp/Media/.Statuses"),
         File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp/WhatsApp/Media/.statuses"),
+        File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp/WhatsApp/media/.Statuses"),
+        File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp/WhatsApp/media/.statuses"),
         // WhatsApp Business en Android 11+
         File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp.w4b/WhatsApp Business/Media/.Statuses"),
         File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp.w4b/WhatsApp Business/Media/.statuses"),
+        File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.Statuses"),
+        File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.statuses"),
         // Clones y Dual App
         File(Environment.getExternalStorageDirectory(), "DualApp/WhatsApp/Media/.Statuses"),
+        File(Environment.getExternalStorageDirectory(), "DualApp/com.whatsapp/WhatsApp/Media/.Statuses"),
         File(File("/storage/emulated/999"), "Android/media/com.whatsapp/WhatsApp/Media/.Statuses"),
         // GBWhatsApp / Mods comunes
         File(Environment.getExternalStorageDirectory(), "Android/media/com.gbwhatsapp/GBWhatsApp/Media/.Statuses"),
-        File(Environment.getExternalStorageDirectory(), "GBWhatsApp/Media/.Statuses"),
-        // WhatsApp legado en raíz de almacenamiento (Solo útil en Android 10 o inferior)
-        File(Environment.getExternalStorageDirectory(), "WhatsApp/Media/.Statuses"),
-        File(Environment.getExternalStorageDirectory(), "WhatsApp Business/Media/.Statuses")
+        File(Environment.getExternalStorageDirectory(), "GBWhatsApp/Media/.Statuses")
     )
 
     fun saveTreeUri(context: Context, treeUri: Uri) {
@@ -87,12 +124,67 @@ object WhatsAppStatusManager {
         }
     }
 
+    fun clearSavedTreeUris(context: Context) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val set = prefs.getStringSet(KEY_SAF_TREE_URIS, emptySet()) ?: emptySet()
+            for (uriStr in set) {
+                try {
+                    val uri = Uri.parse(uriStr)
+                    context.contentResolver.releasePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                } catch (_: Exception) {}
+            }
+            prefs.edit().remove(KEY_SAF_TREE_URIS).apply()
+        } catch (e: Exception) {
+            AppLog.e(TAG, "Error limpiando URIs de SAF", e)
+        }
+    }
+
     fun getSavedTreeUris(context: Context): List<Uri> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val set = prefs.getStringSet(KEY_SAF_TREE_URIS, emptySet()) ?: emptySet()
-        return set.mapNotNull {
-            try { Uri.parse(it) } catch (_: Exception) { null }
+        val validUris = mutableListOf<Uri>()
+        val cleanedSet = mutableSetOf<String>()
+        var modified = false
+
+        for (uriStr in set) {
+            try {
+                val uri = Uri.parse(uriStr)
+                val docId = try { DocumentsContract.getTreeDocumentId(uri) } catch (_: Exception) { uriStr }
+                val decoded = Uri.decode(docId).lowercase()
+
+                // En Android 11+, si la URI apunta a la carpeta vieja de raíz "primary:WhatsApp" sin "Android/media",
+                // es un residuo obsoleto de 2021 que bloquea la detección moderna y contiene solo archivos viejos.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                    (decoded.startsWith("primary:whatsapp") || decoded.startsWith("primary:whatsapp business")) &&
+                    !decoded.contains("android/media")
+                ) {
+                    AppLog.w(TAG, "Purgando SAF Tree URI obsoleto de 2021: $uriStr")
+                    try {
+                        context.contentResolver.releasePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        )
+                    } catch (_: Exception) {}
+                    modified = true
+                    continue
+                }
+
+                validUris.add(uri)
+                cleanedSet.add(uriStr)
+            } catch (_: Exception) {
+                modified = true
+            }
         }
+
+        if (modified) {
+            prefs.edit().putStringSet(KEY_SAF_TREE_URIS, cleanedSet).apply()
+        }
+
+        return validUris
     }
 
     fun hasSafAccess(context: Context): Boolean {
@@ -102,11 +194,6 @@ object WhatsAppStatusManager {
         return persisted.any { it.isReadPermission && uris.any { u -> u == it.uri } }
     }
 
-    /**
-     * URI inicial para el selector SAF.
-     * Apuntamos a la carpeta visible Media para que el selector del sistema se abra
-     * con el botón "USAR ESTA CARPETA" habilitado y accesible en Android 11 a 15.
-     */
     /**
      * URI inicial para el selector SAF.
      * Retorna una Tree Document URI válida que cumple con DocumentsContract.isTreeUri()
@@ -311,15 +398,22 @@ object WhatsAppStatusManager {
 
                     if (isVideo || isImage) {
                         val docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
-                        val time = if (mod in 1L..(now + 60_000L)) mod else now
+                        val nameDate = extractDateFromFileName(name)
+                        val rawTime = if (mod in 1L..(now + 60_000L)) mod else 0L
+                        val effectiveTime = when {
+                            rawTime <= 0L -> nameDate ?: 0L
+                            nameDate != null && nameDate < rawTime -> nameDate
+                            else -> rawTime
+                        }
+                        val isRecent = effectiveTime > 0L && (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
                         list.add(
                             WhatsAppStatusItem(
                                 file = null,
                                 uri = docUri,
                                 isVideo = isVideo,
-                                timestamp = time,
+                                timestamp = effectiveTime,
                                 size = size,
-                                isRecent24h = true,
+                                isRecent24h = isRecent,
                                 path = docUri.toString()
                             )
                         )
@@ -406,7 +500,14 @@ object WhatsAppStatusManager {
                                     val isVideo = name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".3gp")
                                     val isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")
                                     if (isVideo || isImage) {
-                                        val time = doc.lastModified().takeIf { it in 1L..(now + 60_000L) } ?: now
+                                        val nameDate = extractDateFromFileName(doc.name ?: "")
+                                        val rawTime = doc.lastModified().takeIf { it in 1L..(now + 60_000L) } ?: 0L
+                                        val effectiveTime = when {
+                                            rawTime <= 0L -> nameDate ?: 0L
+                                            nameDate != null && nameDate < rawTime -> nameDate
+                                            else -> rawTime
+                                        }
+                                        val isRecent = effectiveTime > 0L && (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
                                         val size = doc.length()
                                         val signature = "${doc.name}_$size"
                                         if (seenSignatures.add(signature)) {
@@ -415,9 +516,9 @@ object WhatsAppStatusManager {
                                                     file = null,
                                                     uri = doc.uri,
                                                     isVideo = isVideo,
-                                                    timestamp = time,
+                                                    timestamp = effectiveTime,
                                                     size = size,
-                                                    isRecent24h = true,
+                                                    isRecent24h = isRecent,
                                                     path = doc.uri.toString()
                                                 )
                                             )
@@ -436,18 +537,17 @@ object WhatsAppStatusManager {
             val externalStorage = Environment.getExternalStorageDirectory()
             val dirsToScan = mutableListOf<File>()
 
-            // Rutas directas estándar
+            // Rutas directas estándar modernas
             dirsToScan.addAll(POTENTIAL_STATUS_DIRS)
 
-            // Variaciones comunes en fabricantes
-            dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp/WhatsApp/media/.Statuses"))
-            dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp/WhatsApp/media/.statuses"))
-            dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.Statuses"))
-            dirsToScan.add(File(externalStorage, "Android/media/com.whatsapp.w4b/WhatsApp Business/media/.statuses"))
+            // Solo en Android 10 o inferior agregar rutas de almacenamiento legado
+            if (!isAndroid11Plus) {
+                dirsToScan.add(File(externalStorage, "WhatsApp/Media/.Statuses"))
+                dirsToScan.add(File(externalStorage, "WhatsApp Business/Media/.Statuses"))
+            }
 
             for (dir in dirsToScan.distinctBy { it.absolutePath }) {
                 if (dir.exists() && dir.isDirectory) {
-                    val isLegacyDir = !dir.absolutePath.contains("Android/media") && !dir.absolutePath.contains("DualApp")
                     val files = try { dir.listFiles() } catch (_: Exception) { null } ?: continue
                     for (file in files) {
                         if (file.isFile && !file.name.startsWith(".nomedia") && file.length() > 0) {
@@ -455,14 +555,16 @@ object WhatsAppStatusManager {
                             val isVideo = name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".3gp")
                             val isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")
                             if (isVideo || isImage) {
+                                val nameDate = extractDateFromFileName(file.name)
                                 val fileMod = file.lastModified()
-
-                                // En Android 11+, si es carpeta legada y el archivo es viejo, ignorar instantáneamente
-                                if (isAndroid11Plus && isLegacyDir && (now - fileMod) > 48 * 60 * 60 * 1000L) {
-                                    continue
+                                val rawTime = if (fileMod in 1L..(now + 60_000L)) fileMod else 0L
+                                val effectiveTime = when {
+                                    rawTime <= 0L -> nameDate ?: 0L
+                                    nameDate != null && nameDate < rawTime -> nameDate
+                                    else -> rawTime
                                 }
+                                val isRecent = effectiveTime > 0L && (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
 
-                                val isRecent = !isLegacyDir || ((now - fileMod) in -600_000L..(24L * 60 * 60 * 1000L))
                                 val signature = "${file.name}_${file.length()}"
                                 if (seenSignatures.add(signature)) {
                                     val uri = try {
@@ -476,7 +578,7 @@ object WhatsAppStatusManager {
                                             file = file,
                                             uri = uri,
                                             isVideo = isVideo,
-                                            timestamp = fileMod,
+                                            timestamp = effectiveTime,
                                             size = file.length(),
                                             isRecent24h = isRecent,
                                             path = file.absolutePath

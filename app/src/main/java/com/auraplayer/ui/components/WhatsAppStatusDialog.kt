@@ -98,9 +98,6 @@ fun WhatsAppStatusDialog(
             try {
                 val loaded = WhatsAppStatusManager.getStatuses(context)
                 statuses = loaded
-                if (loaded.isNotEmpty() && !loaded.any { it.isRecent24h } && selectedFilter == 0) {
-                    selectedFilter = 1
-                }
             } catch (e: Throwable) {
                 AppLog.e("WhatsAppStatusDialog", "Error cargando estados", e)
             } finally {
@@ -213,6 +210,22 @@ fun WhatsAppStatusDialog(
                     }
 
                     Row {
+                        if (isAndroid11Plus) {
+                            IconButton(
+                                onClick = {
+                                    WhatsAppStatusManager.clearSavedTreeUris(context)
+                                    hasSaf = false
+                                    try {
+                                        val initialUri = WhatsAppStatusManager.getStatusesFolderInitialUri(isBusiness = false)
+                                        safLauncher.launch(initialUri)
+                                    } catch (_: Exception) {
+                                        safLauncher.launch(null)
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Default.FolderOpen, contentDescription = "Cambiar Carpeta", tint = Color(0xFF94A3B8))
+                            }
+                        }
                         IconButton(onClick = { load() }) {
                             Icon(Icons.Default.Refresh, contentDescription = "Recargar", tint = Color(0xFF94A3B8))
                         }
@@ -291,8 +304,8 @@ fun WhatsAppStatusDialog(
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                // Banner de Vinculación SAF para Android 11+ (si no tiene SAF vinculado o no hay estados recientes)
-                if (isAndroid11Plus && (!hasSaf || recentStatuses.isEmpty())) {
+                // Banner de Vinculación SAF para Android 11+ (solo si no tiene SAF vinculado)
+                if (isAndroid11Plus && !hasSaf) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -408,21 +421,55 @@ fun WhatsAppStatusDialog(
                             modifier = Modifier.padding(24.dp)
                         ) {
                             if (selectedFilter == 0 && statuses.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF25D366).copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Default.Download, contentDescription = null, tint = Color(0xFF25D366), modifier = Modifier.size(30.dp))
+                                }
+                                Spacer(modifier = Modifier.height(14.dp))
                                 Text("⚡ Sin estados en las últimas 24h", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    "Tienes ${statuses.size} estados en tu historial. Puedes verlos todos en la pestaña 'Todos'.",
+                                    "Tienes ${statuses.size} estados en tu historial antiguo.\n\nWhatsApp solo descarga a tu celular los estados que abres y miras. Abre WhatsApp, mira los estados de tus contactos, y luego regresa aquí.",
                                     color = Color(0xFF94A3B8),
                                     fontSize = 13.sp,
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 18.sp
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
-                                    onClick = { selectedFilter = 1 },
+                                    onClick = { WhatsAppStatusManager.openWhatsApp(context) },
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                                    shape = RoundedCornerShape(14.dp)
+                                    shape = RoundedCornerShape(14.dp),
+                                    modifier = Modifier.fillMaxWidth().height(44.dp)
                                 ) {
-                                    Text("Ver Historial Completo (${statuses.size})", color = Color.White, fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.PlayCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Abrir WhatsApp para Mirar Estados", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                OutlinedButton(
+                                    onClick = { load() },
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF86EFAC)),
+                                    modifier = Modifier.fillMaxWidth().height(40.dp)
+                                ) {
+                                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Ya los miré, Recargar Estados", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                OutlinedButton(
+                                    onClick = { selectedFilter = 1 },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF94A3B8)),
+                                    shape = RoundedCornerShape(14.dp),
+                                    modifier = Modifier.fillMaxWidth().height(38.dp)
+                                ) {
+                                    Text("Ver Historial Antiguo (${statuses.size})", fontWeight = FontWeight.Medium, fontSize = 12.sp)
                                 }
                             } else {
                                 Box(
