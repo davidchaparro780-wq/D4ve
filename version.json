@@ -1,7 +1,7 @@
 {
-  "versionCode": 153,
-  "versionName": "4.9.53",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.53/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.53 (Build 153) — Sistema Profundo de Extracción y Resolución de Carátulas (Coil 2.x + MediaStore + ID3 + Scoped Storage):\n• 🖼️ Motor de Carátulas Profundo AudioArtworkResolver: Extracción multi-nivel para Android 10-15 (API 29-35), tags ID3v2 APIC/FLAC, carátulas de carpeta (cover/folder.jpg) y MediaStore loadThumbnail.\n• ⚡ Fetcher Nativo para Coil 2.x: AudioArtworkFetcher intercepta URIs de audio para renderizado inmediato en GPU a 120 FPS sin bloqueos en el hilo principal.\n• 💿 Soporte Total en 3D Cover Flow y Lista: Resuelve y muestra carátulas en carrusel de álbumes, pantallas de reproducción (Vinilo, Discman, Cassette, iPod) y MiniPlayer.\n• 🔄 Sincronización Proactiva en Segundo Plano: Escaneo inteligente de pistas sin carátula y descarga oficial en alta resolución (iTunes/Deezer 600x600 HD).",
-  "fileSizeMb": 25.1
+  "versionCode": 154,
+  "versionName": "4.9.54",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.54/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.54 (Build 154) — Rediseño Completo 'DaVE Hub' del Icono de Fuego & Eliminación de Redundancias:\n• 🔥 DaVE Hub Modal BottomSheet: Sustituye el antiguo menú desplegable saturado por un panel de comando fluido y elegante con diseño de tarjetas de 2 columnas a 120 FPS.\n• 🔍 Buscador Rápido de Herramientas: Barra de búsqueda en tiempo real para saltar al instante a cualquier función (TikTok, Stem Mixer, 8D, Quiz, Linterna, etc.).\n• 🏷️ 5 Categorías Organizadas: Filtrado táctil inmediato por categorías: '🔥 Todo', '📥 Descargas', '🎛️ Audio Lab', '🎉 Fiesta & Juegos', '🧰 Utilidades'.\n• 🟢 Badges de Estado en Vivo: Indicadores 'ACTIVO' en tiempo real para Linterna Rítmica, Servidor Wi-Fi, Locutor DJ, Burbuja Flotante, Gestos y Detector de Sueño.\n• 🧹 Cero Redundancias: Se eliminaron accesos repetidos innecesarios (Perfil, Ajustes, Modo Coche duplicado, AI Playlists duplicado y se unificaron limpiadores en Diagnóstico & Limpieza).",
+  "fileSizeMb": 25.2
 }
