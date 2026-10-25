@@ -415,7 +415,7 @@ private fun QuickActionButton(
             )
             .clickable(onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
