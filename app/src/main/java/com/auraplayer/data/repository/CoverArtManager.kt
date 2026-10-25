@@ -155,20 +155,74 @@ class CoverArtManager(private val context: Context) {
     }
 
     /**
+     * Verifica si una pista ya cuenta con una carátula local guardada en disco.
+     */
+    fun hasLocalCover(id: Long, artist: String, title: String, path: String? = null): Boolean {
+        return getLocalCoverUri(id, artist, title, path) != null
+    }
+
+    /**
+     * Sincroniza y extrae todas las carátulas en segundo plano:
+     * 1. Extracción local inmediata (tags ID3, loadThumbnail de Android 10+, carátulas de carpeta).
+     * 2. Búsqueda remota vía iTunes y Deezer para pistas huérfanas sin carátula local.
+     */
+    suspend fun syncAllCoversInBackground(
+        songs: List<MediaModel>,
+        onCoversUpdated: () -> Unit
+    ) = withContext(Dispatchers.IO) {
+        var updatedLocally = false
+        val missingOnline = mutableListOf<MediaModel>()
+
+        // Fase 1: Extracción local sin red (ultra-rápida)
+        for (song in songs) {
+            val local = getLocalCoverUri(song.id, song.artist, song.title, song.path)
+            if (local == null) {
+                val extracted = extractAndSaveEmbeddedArt(song)
+                if (extracted != null) {
+                    updatedLocally = true
+                } else {
+                    missingOnline.add(song)
+                }
+            }
+        }
+
+        if (updatedLocally) {
+            withContext(Dispatchers.Main) {
+                onCoversUpdated()
+            }
+        }
+
+        // Fase 2: Consulta de carátulas oficiales en internet (iTunes / Deezer HD 600x600)
+        if (missingOnline.isNotEmpty()) {
+            for (song in missingOnline) {
+                try {
+                    val saved = fetchFromOnlineApi(song.title, song.artist, song.id)
+                    if (saved != null) {
+                        withContext(Dispatchers.Main) {
+                            onCoversUpdated()
+                        }
+                    }
+                    kotlinx.coroutines.delay(200)
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    /**
      * Auto-fetches and permanently saves cover art for any audio file.
      * 1. Checks embedded tags first (saves extracted bytes locally for fast access).
      * 2. If missing, queries iTunes / Apple Music online search API for high-res 600x600 artwork.
      * 3. Downloads and saves to persistent storage.
      */
     suspend fun autoFetchAndSaveCover(media: MediaModel): Uri? = withContext(Dispatchers.IO) {
-        val existing = getLocalCoverUri(media.id, media.artist, media.title)
+        val existing = getLocalCoverUri(media.id, media.artist, media.title, media.path)
         if (existing != null) return@withContext existing
 
-        // 1. Try extracting embedded picture first
+        // 1. Try extracting embedded picture / local thumbnail / folder art
         val embeddedSaved = extractAndSaveEmbeddedArt(media)
         if (embeddedSaved != null) return@withContext embeddedSaved
 
-        // 2. Try fetching from online iTunes Search API
+        // 2. Try fetching from online iTunes Search API / Deezer
         val onlineSaved = fetchFromOnlineApi(media.title, media.artist, media.id)
         if (onlineSaved != null) return@withContext onlineSaved
 
@@ -176,28 +230,24 @@ class CoverArtManager(private val context: Context) {
     }
 
     private fun extractAndSaveEmbeddedArt(media: MediaModel): Uri? {
-        val retriever = MediaMetadataRetriever()
-        return try {
-            retriever.setDataSource(context, media.uri)
-            val picture = retriever.embeddedPicture
-
-            if (picture != null && picture.isNotEmpty()) {
+        val bmp = com.auraplayer.util.AudioArtworkResolver.resolveBitmap(context, media.uri, media.path, 512)
+        if (bmp != null) {
+            try {
                 val targetFile = File(coversDir, "${media.id}.jpg")
-                FileOutputStream(targetFile).use { it.write(picture) }
+                FileOutputStream(targetFile).use { out ->
+                    bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+                }
                 val cleanKey = sanitize("${media.artist}_${media.title}")
                 val namedFile = File(coversDir, "$cleanKey.jpg")
-                FileOutputStream(namedFile).use { it.write(picture) }
-                Uri.fromFile(targetFile)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        } finally {
-            try {
-                retriever.release()
+                if (!namedFile.exists()) {
+                    FileOutputStream(namedFile).use { out ->
+                        bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+                    }
+                }
+                return Uri.fromFile(targetFile)
             } catch (_: Exception) {}
         }
+        return null
     }
 
     private fun fetchFromOnlineApi(title: String, artist: String, id: Long): Uri? {

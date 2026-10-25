@@ -1,7 +1,7 @@
 {
-  "versionCode": 152,
-  "versionName": "4.9.52",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.52/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.52 (Build 152) — Dynamic Ambilight, Waveform Live Flutter & Car View Instantáneo (120 FPS):\n• 🌈 Aurora Ambilight Reactivo al Bajo: Luz ambiental inmersiva en el fondo del reproductor que se expande y pulsa orgánicamente con los bombos y graves (bassEnergy) en tiempo real por GPU.\n• 🌊 Barra de Onda Musical con Agitación Armónica: La seekbar reactiva ahora modula su altura al ritmo de la música y responde al roce táctil con lente de magnificación háptica.\n• 🚗 Acceso Directo 1-Tap a Modo Auto/Conducción: Nuevo botón en la cabecera del reproductor para activar la interfaz simplificada para automóvil con botones gigantes y gestos ciegos.\n• 🗣️ Nuevos Presets Acústicos DJ: 'Voz Clara' (Vocal Boost) y 'Concierto 3D' (Reverb espacial) en consola rápida Quick EQ.",
+  "versionCode": 153,
+  "versionName": "4.9.53",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.53/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.53 (Build 153) — Sistema Profundo de Extracción y Resolución de Carátulas (Coil 2.x + MediaStore + ID3 + Scoped Storage):\n• 🖼️ Motor de Carátulas Profundo AudioArtworkResolver: Extracción multi-nivel para Android 10-15 (API 29-35), tags ID3v2 APIC/FLAC, carátulas de carpeta (cover/folder.jpg) y MediaStore loadThumbnail.\n• ⚡ Fetcher Nativo para Coil 2.x: AudioArtworkFetcher intercepta URIs de audio para renderizado inmediato en GPU a 120 FPS sin bloqueos en el hilo principal.\n• 💿 Soporte Total en 3D Cover Flow y Lista: Resuelve y muestra carátulas en carrusel de álbumes, pantallas de reproducción (Vinilo, Discman, Cassette, iPod) y MiniPlayer.\n• 🔄 Sincronización Proactiva en Segundo Plano: Escaneo inteligente de pistas sin carátula y descarga oficial en alta resolución (iTunes/Deezer 600x600 HD).",
   "fileSizeMb": 25.1
 }

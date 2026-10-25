@@ -492,6 +492,7 @@ fun PlayerScreen(
                         .build()
                     val result = (loader.execute(req) as? coil.request.SuccessResult)?.drawable
                     val bmp = (result as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                        ?: com.auraplayer.util.AudioArtworkResolver.resolveBitmap(context, uri, targetSize = 256)
                     if (bmp != null) {
                         val color = DynamicPaletteManager.extractAccentColor(bmp)
                         withContext(Dispatchers.Main) {

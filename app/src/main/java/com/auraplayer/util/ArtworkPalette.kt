@@ -44,8 +44,9 @@ object ArtworkPaletteExtractor {
                     .allowHardware(false)
                     .build()
                 val result = context.imageLoader.execute(request)
-                val drawable = (result as? SuccessResult)?.drawable ?: return@withContext null
+                val drawable = (result as? SuccessResult)?.drawable
                 val bitmap = (drawable as? BitmapDrawable)?.bitmap
+                    ?: AudioArtworkResolver.resolveBitmap(context, uri, targetSize = 160)
                 if (bitmap == null || bitmap.isRecycled) return@withContext null
                 val palette = Palette.from(bitmap)
                     .maximumColorCount(24)

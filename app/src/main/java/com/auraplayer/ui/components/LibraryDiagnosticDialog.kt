@@ -37,13 +37,14 @@ fun LibraryDiagnosticDialog(
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
     var isScanning by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<DiagnosticResult?>(null) }
     var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         isScanning = true
-        result = withContext(Dispatchers.IO) { runDiagnostic(songs) }
+        result = withContext(Dispatchers.IO) { runDiagnostic(context, songs) }
         isScanning = false
     }
 
@@ -174,7 +175,7 @@ private fun DiagCard(count: String, label: String, color: Color, modifier: Modif
     }
 }
 
-private fun runDiagnostic(songs: List<MediaModel>): DiagnosticResult {
+private fun runDiagnostic(context: android.content.Context, songs: List<MediaModel>): DiagnosticResult {
     val duplicates = mutableListOf<Pair<MediaModel, MediaModel>>()
     val noCover = mutableListOf<MediaModel>()
     val corruptFiles = mutableListOf<MediaModel>()
@@ -195,8 +196,15 @@ private fun runDiagnostic(songs: List<MediaModel>): DiagnosticResult {
             if (!f.exists() || f.length() == 0L) corruptFiles.add(song)
         } catch (_: Exception) { corruptFiles.add(song) }
 
-        // No cover: artworkUri is null
-        if (song.artworkUri == null) noCover.add(song)
+        // No cover: neither persistent file in covers/ nor embedded/folder artwork
+        val hasCover = File(context.filesDir, "covers/${song.id}.jpg").exists() ||
+                (song.artworkUri != null && song.artworkUri.scheme == "file")
+        if (!hasCover) {
+            val extracted = com.auraplayer.util.AudioArtworkResolver.resolveBitmap(
+                context, song.artworkUri, song.path, targetSize = 64
+            )
+            if (extracted == null) noCover.add(song)
+        }
     }
 
     return DiagnosticResult(

@@ -112,15 +112,15 @@ class MediaRepository(private val context: Context) {
                 } else rawAlbum
 
                 val contentUri = ContentUris.withAppendedId(collection, id)
-                
-                val mediaStoreArtUri = if (albumId > 0) {
-                    ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)
-                } else null
 
-                // Check local saved persistent cover art first (by ID, parsed artist/title, raw title, path, etc.)
+                // 1. Verificar carátula local persistente guardada previamente en disco
                 val localCoverUri = coverArtManager.getLocalCoverUri(id, finalArtist, finalTitle, data)
                     ?: coverArtManager.getLocalCoverUri(id, rawArtist, rawTitle, data)
-                    ?: mediaStoreArtUri
+
+                // 2. Si aún no está guardada en disco, pasamos contentUri. Nuestro AudioArtworkFetcher
+                // en Coil interceptará esta URI para extraer el thumbnail oficial de MediaStore (Android 10+),
+                // las etiquetas ID3 incrustadas o el arte de carpeta sin bloqueo de UI.
+                val finalArtworkUri = localCoverUri ?: contentUri
 
                 val folderName = try {
                     if (data.isNotBlank()) File(data).parentFile?.name ?: "Música" else "Música"
@@ -135,7 +135,7 @@ class MediaRepository(private val context: Context) {
                     album = album,
                     duration = duration,
                     uri = contentUri,
-                    artworkUri = localCoverUri,
+                    artworkUri = finalArtworkUri,
                     isVideo = false,
                     folderName = folderName,
                     path = data,

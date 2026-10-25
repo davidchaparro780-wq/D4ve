@@ -90,7 +90,7 @@ fun CoverFlowAlbumsCarousel(
                 AlbumModel(
                     name = albumName,
                     artist = albumSongs.firstOrNull()?.artist ?: "Varios Artistas",
-                    artworkUri = albumSongs.firstOrNull { it.artworkUri != null }?.artworkUri,
+                    artworkUri = albumSongs.firstOrNull { it.artworkUri != null }?.artworkUri ?: albumSongs.firstOrNull()?.uri,
                     songs = albumSongs
                 )
             }
@@ -181,19 +181,18 @@ fun CoverFlowAlbumsCarousel(
                             .border(1.5.dp, Color(0x33FFFFFF), RoundedCornerShape(16.dp)),
                         contentAlignment = Alignment.Center
                     ) {
+                        Icon(
+                            Icons.Default.Album,
+                            contentDescription = null,
+                            tint = Color(0xFF38BDF8),
+                            modifier = Modifier.size(72.dp)
+                        )
                         if (album.artworkUri != null) {
                             AsyncImage(
                                 model = album.artworkUri,
                                 contentDescription = album.name,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.Album,
-                                contentDescription = null,
-                                tint = Color(0xFF38BDF8),
-                                modifier = Modifier.size(72.dp)
                             )
                         }
                     }
@@ -333,6 +332,7 @@ fun CoverFlowAlbumsCarousel(
                             .background(Color(0xFF334155)),
                         contentAlignment = Alignment.Center
                     ) {
+                        Icon(Icons.Default.Album, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(24.dp))
                         if (album.artworkUri != null) {
                             AsyncImage(
                                 model = album.artworkUri,
@@ -340,8 +340,6 @@ fun CoverFlowAlbumsCarousel(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
-                        } else {
-                            Icon(Icons.Default.Album, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(24.dp))
                         }
                     }
 

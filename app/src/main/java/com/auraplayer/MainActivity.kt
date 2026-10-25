@@ -1352,24 +1352,12 @@ fun AuraApp(
             videos = mediaRepository.loadVideoFiles()
             isLoading = false
 
-            // Auto-fetch & save cover art in background coroutine without blocking UI (optimized: only for songs without artwork)
+            // Sincronización proactiva y extracción profunda de carátulas en segundo plano sin congelar la UI
             scope.launch(Dispatchers.IO) {
-                val songsWithoutArt = songs.filter { it.artworkUri == null }.take(15)
-                if (songsWithoutArt.isNotEmpty()) {
-                    var updated = false
-                    songsWithoutArt.forEach { song ->
-                        val savedCover = mediaRepository.coverArtManager.autoFetchAndSaveCover(song)
-                        if (savedCover != null && song.artworkUri != savedCover) {
-                            updated = true
-                        }
-                    }
-                    if (updated) {
-                        val reloaded = mediaRepository.loadAudioFiles()
-                        val reloadedSongs = reloaded.map(applyTagOverride)
-                        withContext(Dispatchers.Main) {
-                            songs = reloadedSongs
-                        }
-                    }
+                mediaRepository.coverArtManager.syncAllCoversInBackground(songs) {
+                    val reloaded = mediaRepository.loadAudioFiles()
+                    val reloadedSongs = reloaded.map(applyTagOverride)
+                    songs = reloadedSongs
                 }
             }
         }
@@ -1705,7 +1693,9 @@ fun AuraApp(
 
     // Batch Cover Art Fetcher Dialog
     if (showBatchCoversDialog) {
-        val songsWithoutArt = remember(songs) { songs.filter { it.artworkUri == null } }
+        val songsWithoutArt = remember(songs) {
+            songs.filter { !mediaRepository.coverArtManager.hasLocalCover(it.id, it.artist, it.title, it.path) }
+        }
         com.auraplayer.ui.components.BatchCoverFetcherDialog(
             songsWithoutCover = songsWithoutArt,
             onFetchSingleCover = { song ->
