@@ -7,6 +7,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
@@ -111,7 +112,7 @@ fun DynamicIslandPill(
         label = "dynamic_island_height"
     )
 
-    val pillWidthFraction by animateFloat(
+    val pillWidthFraction by animateFloatAsState(
         targetValue = if (isExpanded) 0.92f else 0.40f,
         animationSpec = spring(
             dampingRatio = 0.72f,
