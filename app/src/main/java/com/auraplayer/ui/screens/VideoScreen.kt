@@ -384,6 +384,9 @@ fun VideoScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF38BDF8)
                     )
+                }
+            }
+
             // Facebook Reels Chip
             Box(
                 modifier = Modifier
