@@ -141,10 +141,12 @@ fun DynamicWaveformSeekbar(
 
                 var normalizedHeight = baseHeights[i]
 
-                // Animación sutil de respiración armónica si está reproduciendo
+                // Animación sutil de respiración armónica y reacción al bajo si está reproduciendo
                 if (isPlaying) {
-                    val flutter = 0.12f * sin(shimmerPhase + i * 0.3f)
-                    normalizedHeight = (normalizedHeight + flutter).coerceIn(0.18f, 1.0f)
+                    val liveBass = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true)
+                    val proximityToPlayhead = (1f - abs(barCenterX - currentPlayX) / (w * 0.25f)).coerceIn(0f, 1f)
+                    val flutter = (0.10f * sin(shimmerPhase + i * 0.35f)) + (liveBass * 0.22f * proximityToPlayhead)
+                    normalizedHeight = (normalizedHeight + flutter).coerceIn(0.18f, 1.25f)
                 }
 
                 // Efecto de lente de magnificación al arrastrar con el dedo

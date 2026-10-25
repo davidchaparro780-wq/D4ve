@@ -739,7 +739,8 @@ fun PlayerScreen(
 
                     FluidAmbilightGlow(
                         primaryColor = dynamicBg.firstOrNull() ?: MaterialTheme.colorScheme.primary,
-                        secondaryColor = dynamicBg.getOrNull(1) ?: MaterialTheme.colorScheme.secondary
+                        secondaryColor = dynamicBg.getOrNull(1) ?: MaterialTheme.colorScheme.secondary,
+                        isPlaying = isPlaying
                     )
 
                     EdgeAuroraGlow(
@@ -908,6 +909,25 @@ fun PlayerScreen(
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+
+                            // Pill Modo Conducción / Coche 🚗
+                            Surface(
+                                onClick = {
+                                    AuraHaptic.click(view)
+                                    showCarDriveModeDialog = true
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xFFF59E0B).copy(alpha = 0.22f),
+                                border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.55f))
+                            ) {
+                                Text(
+                                    text = "🚗 Auto",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFF59E0B),
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }

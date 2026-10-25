@@ -1,7 +1,7 @@
 {
-  "versionCode": 151,
-  "versionName": "4.9.51",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.51/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.51 (Build 151) — Super Pack UI & 3D Cover Flow de Álbumes (120 FPS):\n• 💿 Nuevo 3D Cover Flow de Álbumes: Pestaña dedicada 'Álbumes 💿' con carrusel 3D de discos estilo iTunes/iPod, reflejos en suelo de cristal espejado, física de resorte y micro-ticks hápticos a 120 FPS.\n• 🎚️ Micro-Ecualizador Neón en Miniatura: Animación de ecualizador reactivo superpuesto sobre la carátula de la pista en reproducción activa.\n• 💎 Badges de Formato y Fidelidad de Audio: Píldoras visuales elegantes en cada canción (FLAC, Hi-Res, 320k, WAV, AAC, OPUS, MP3) con distinción luminosa para audio sin pérdidas.",
+  "versionCode": 152,
+  "versionName": "4.9.52",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.52/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.52 (Build 152) — Dynamic Ambilight, Waveform Live Flutter & Car View Instantáneo (120 FPS):\n• 🌈 Aurora Ambilight Reactivo al Bajo: Luz ambiental inmersiva en el fondo del reproductor que se expande y pulsa orgánicamente con los bombos y graves (bassEnergy) en tiempo real por GPU.\n• 🌊 Barra de Onda Musical con Agitación Armónica: La seekbar reactiva ahora modula su altura al ritmo de la música y responde al roce táctil con lente de magnificación háptica.\n• 🚗 Acceso Directo 1-Tap a Modo Auto/Conducción: Nuevo botón en la cabecera del reproductor para activar la interfaz simplificada para automóvil con botones gigantes y gestos ciegos.\n• 🗣️ Nuevos Presets Acústicos DJ: 'Voz Clara' (Vocal Boost) y 'Concierto 3D' (Reverb espacial) en consola rápida Quick EQ.",
   "fileSizeMb": 25.1
 }

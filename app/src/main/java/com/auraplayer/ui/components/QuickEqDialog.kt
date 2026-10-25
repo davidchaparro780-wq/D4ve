@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -148,11 +150,13 @@ fun QuickEqDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Efectos Virales DJ (1-Tap) 🎛️", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("Efectos Virales & Acústica DJ 🎛️", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
                             Text(
                                 text = when (activeDjEffect) {
                                     1 -> "🐢 SLOWED"
                                     2 -> "⚡ NIGHTCORE"
+                                    3 -> "🗣️ VOZ CLARA"
+                                    4 -> "🏛️ CONCIERTO"
                                     else -> "🎵 ORIGINAL"
                                 },
                                 fontSize = 11.sp,
@@ -160,24 +164,28 @@ fun QuickEqDialog(
                                 color = when (activeDjEffect) {
                                     1 -> Color(0xFF8B5CF6)
                                     2 -> Color(0xFFEC4899)
+                                    3 -> Color(0xFF10B981)
+                                    4 -> Color(0xFF00F0FF)
                                     else -> Color(0xFF38BDF8)
                                 }
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Row(
+                        LazyRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            listOf(
+                            val effects = listOf(
                                 Triple(0, "🎵 Original", "1.0x Hi-Fi"),
                                 Triple(1, "🐢 Slowed", "0.85x + Reverb"),
-                                Triple(2, "⚡ Nightcore", "1.25x Sped Up")
-                            ).forEach { (modeIdx, label, sub) ->
+                                Triple(2, "⚡ Nightcore", "1.25x Sped Up"),
+                                Triple(3, "🗣️ Voz Clara", "Vocal Boost"),
+                                Triple(4, "🏛️ Concierto", "3D Space")
+                            )
+                            items(effects) { (modeIdx, label, sub) ->
                                 val isSelected = activeDjEffect == modeIdx
                                 Box(
                                     modifier = Modifier
-                                        .weight(1f)
                                         .shadow(if (isSelected) 4.dp else 2.dp, RoundedCornerShape(8.dp))
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(
@@ -185,6 +193,8 @@ fun QuickEqDialog(
                                                 when (modeIdx) {
                                                     1 -> Brush.verticalGradient(listOf(Color(0xFF7C3AED), Color(0xFF6D28D9)))
                                                     2 -> Brush.verticalGradient(listOf(Color(0xFFDB2777), Color(0xFFBE185D)))
+                                                    3 -> Brush.verticalGradient(listOf(Color(0xFF059669), Color(0xFF047857)))
+                                                    4 -> Brush.verticalGradient(listOf(Color(0xFF0891B2), Color(0xFF0E7490)))
                                                     else -> Brush.verticalGradient(listOf(Color(0xFF0284C7), Color(0xFF0369A1)))
                                                 }
                                             } else {
@@ -212,18 +222,42 @@ fun QuickEqDialog(
                                                     bassBoost = 200f
                                                     loudness = 350f
                                                 }
+                                                3 -> {
+                                                    // Voz Clara (Vocal Boost)
+                                                    com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters =
+                                                        PlaybackParameters(1.0f, 1.0f)
+                                                    eq.setBassBoostStrength(60)
+                                                    eq.setVirtualizerStrength(180)
+                                                    eq.setLoudnessGain(420)
+                                                    bassBoost = 60f
+                                                    virtualizer = 180f
+                                                    loudness = 420f
+                                                }
+                                                4 -> {
+                                                    // Concierto 3D Reverb Space
+                                                    com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters =
+                                                        PlaybackParameters(1.0f, 1.0f)
+                                                    eq.setBassBoostStrength(320)
+                                                    eq.setVirtualizerStrength(850)
+                                                    eq.setLoudnessGain(150)
+                                                    bassBoost = 320f
+                                                    virtualizer = 850f
+                                                    loudness = 150f
+                                                }
                                                 else -> {
                                                     // Original
                                                     com.auraplayer.service.PlaybackService.activePlayer?.playbackParameters =
                                                         PlaybackParameters(1.0f, 1.0f)
                                                     eq.setBassBoostStrength(0)
                                                     eq.setVirtualizerStrength(0)
+                                                    eq.setLoudnessGain(0)
                                                     bassBoost = 0f
                                                     virtualizer = 0f
+                                                    loudness = 0f
                                                 }
                                             }
                                         }
-                                        .padding(vertical = 7.dp, horizontal = 2.dp),
+                                        .padding(vertical = 7.dp, horizontal = 10.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
