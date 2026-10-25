@@ -70,8 +70,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import androidx.compose.foundation.layout.statusBarsPadding
-import com.auraplayer.ui.components.DynamicIslandPill
 import com.auraplayer.ui.components.bounceClick
 import com.auraplayer.audio.AuraHaptic
 import androidx.compose.material.icons.Icons
@@ -2806,35 +2804,6 @@ fun AuraApp(
         }
     }
 }
-
-    // 💊 Dynamic Island / Cápsula Dinámica Notch Pill (120 FPS Spring Motion)
-    if (!showPlayerScreen && currentMedia != null) {
-        DynamicIslandPill(
-            currentMedia = currentMedia,
-            isPlaying = isPlaying,
-            onPlayPauseClick = {
-                controller?.let {
-                    if (it.isPlaying) it.pause() else it.play()
-                }
-            },
-            onNextClick = {
-                controller?.let {
-                    if (it.hasNextMediaItem()) it.seekToNextMediaItem()
-                }
-            },
-            onPreviousClick = {
-                controller?.let {
-                    if (it.hasPreviousMediaItem()) it.seekToPreviousMediaItem()
-                }
-            },
-            onPillClick = {
-                showPlayerScreen = true
-            },
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .statusBarsPadding()
-        )
-    }
 
     // Animated Fullscreen Audio Player Screen (Slides up smoothly with spring physics)
     AnimatedVisibility(

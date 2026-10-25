@@ -1,7 +1,7 @@
 {
-  "versionCode": 146,
-  "versionName": "4.9.46",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.46/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.46 (Build 146) — Optimización de Fluidez 120 FPS, Cápsula Dinámica (Notch Pill) & Skin Discman 2000s:\n• ⚡ Fluidez Extrema a 120 FPS: Eliminación del cuello de botella de sombras GPU en listas de canciones, brushes pre-cacheados en memoria y optimización de Ambilight Glow sin sobrecosto de blur.\n• 💊 Dynamic Island / Cápsula Dinámica: Nueva píldora flotante con física de resorte elástica (Spring animation), auto-expansión al cambiar de canción, mini visualizador y controles rápidos.\n• 💽 Skin Retro Discman CD 2000s: Reproductor de disco óptico con difracción holográfica tornasol, giro de CD a alta velocidad y pantalla LCD retroiluminada con ESP Anti-Shock.",
+  "versionCode": 147,
+  "versionName": "4.9.47",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.47/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.47 (Build 147) — Limpieza de Interfaz & Optimización 120 FPS:\n• 🧹 Eliminada Cápsula Superior (Dynamic Island) para evitar duplicidad de controles con el MiniPlayer inferior.\n• ⚡ Máxima Fluidez a 120 FPS: Brushes pre-cacheados en memoria, cero sobrecosto de sombras GPU en LazyColumn y optimización de Ambilight Glow sin blur pesado.\n• 💽 Skin Retro Discman CD 2000s: Reproductor de CD óptico giratorio con difracción holográfica tornasol y pantalla LCD retroiluminada con ESP Anti-Shock.",
   "fileSizeMb": 25.1
 }
