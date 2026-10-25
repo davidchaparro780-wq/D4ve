@@ -12,22 +12,20 @@ import coil.request.Options
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/**
- * Fetcher personalizado para Coil 2.x que intercepta solicitudes de imágenes
- * asociadas a archivos y URIs de audio en Android.
- *
- * Intercepta:
- * - content://media/external/audio/media/* (MediaStore Audio Tracks)
- * - content://media/external/audio/albumart/* (Legacy Album Art)
- * - content://media/external/audio/albums/* (MediaStore Album Collection)
- * - dave-cover://*
- * - file://*.mp3, *.m4a, *.flac, *.ogg, etc.
- *
- * Utiliza AudioArtworkResolver para extraer la carátula desde la caché local,
- * MediaStore loadThumbnail (Android 10+), tags ID3 APIC incrustados o carátulas
- * de carpeta (cover.jpg/folder.jpg), y retorna un DrawableResult directo que Coil
- * almacena en su MemoryCache para rendering inmediato a 120 FPS.
- */
+// Fetcher personalizado para Coil 2.x que intercepta solicitudes de imágenes
+// asociadas a archivos y URIs de audio en Android.
+//
+// Intercepta:
+// - content://media/external/audio/media/
+// - content://media/external/audio/albumart/
+// - content://media/external/audio/albums/
+// - dave-cover://
+// - file:// con extensiones .mp3, .m4a, .flac, .ogg, etc.
+//
+// Utiliza AudioArtworkResolver para extraer la carátula desde la caché local,
+// MediaStore loadThumbnail (Android 10+), tags ID3 APIC incrustados o carátulas
+// de carpeta (cover.jpg/folder.jpg), y retorna un DrawableResult directo que Coil
+// almacena en su MemoryCache para rendering inmediato a 120 FPS.
 class AudioArtworkFetcher(
     private val data: Uri,
     private val options: Options,

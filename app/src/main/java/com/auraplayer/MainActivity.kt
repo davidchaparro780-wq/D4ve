@@ -1357,7 +1357,9 @@ fun AuraApp(
                 mediaRepository.coverArtManager.syncAllCoversInBackground(songs) {
                     val reloaded = mediaRepository.loadAudioFiles()
                     val reloadedSongs = reloaded.map(applyTagOverride)
-                    songs = reloadedSongs
+                    withContext(Dispatchers.Main) {
+                        songs = reloadedSongs
+                    }
                 }
             }
         }

@@ -15,16 +15,14 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
-/**
- * Motor central de resolución y extracción profunda de carátulas para DaVE Player.
- * Soporta de forma unificada:
- * 1. Caché persistente local en disco (context.filesDir/covers)
- * 2. Android 10+ (API 29 a 35) ContentResolver.loadThumbnail para MediaStore Audio y Albums
- * 3. Extracción de tags ID3v2 APIC / FLAC METADATA_BLOCK_PICTURE / MP4 covr con MediaMetadataRetriever
- * 4. Detección de imágenes de carátula en la carpeta del álbum (cover.jpg, folder.jpg, front.jpg, etc.)
- * 5. Compatibilidad hacia atrás con URIs heredadas content://media/external/audio/albumart/*
- * 6. Generación de URIs seguras con FileProvider para MediaSession, Notificaciones y Lockscreen
- */
+// Motor central de resolución y extracción profunda de carátulas para DaVE Player.
+// Soporta de forma unificada:
+// 1. Caché persistente local en disco (context.filesDir/covers)
+// 2. Android 10+ (API 29 a 35) ContentResolver.loadThumbnail para MediaStore Audio y Albums
+// 3. Extracción de tags ID3v2 APIC / FLAC METADATA_BLOCK_PICTURE / MP4 covr con MediaMetadataRetriever
+// 4. Detección de imágenes de carátula en la carpeta del álbum (cover.jpg, folder.jpg, front.jpg, etc.)
+// 5. Compatibilidad hacia atrás con URIs heredadas content://media/external/audio/albumart
+// 6. Generación de URIs seguras con FileProvider para MediaSession, Notificaciones y Lockscreen
 object AudioArtworkResolver {
 
     private const val TAG = "AudioArtworkResolver"
@@ -38,10 +36,8 @@ object AudioArtworkResolver {
         "artwork.jpg", "artwork.png"
     )
 
-    /**
-     * Resuelve un Bitmap optimizado para la carátula solicitada, aplicando downsampling
-     * para no saturar memoria RAM y garantizando 120 FPS fluidos.
-     */
+    // Resuelve un Bitmap optimizado para la carátula solicitada, aplicando downsampling
+    // para no saturar memoria RAM y garantizando 120 FPS fluidos.
     fun resolveBitmap(
         context: Context,
         uri: Uri?,
@@ -206,9 +202,7 @@ object AudioArtworkResolver {
         return null
     }
 
-    /**
-     * Extrae la imagen incrustada de un archivo de audio o una imagen en su carpeta contenedora.
-     */
+    // Extrae la imagen incrustada de un archivo de audio o una imagen en su carpeta contenedora.
     private fun extractFromAudioFile(context: Context, file: File, targetSize: Int): Bitmap? {
         val retriever = MediaMetadataRetriever()
         try {
@@ -253,9 +247,7 @@ object AudioArtworkResolver {
         return null
     }
 
-    /**
-     * Extrae los bytes comprimidos (JPEG) para ser incrustados en MediaMetadata de MediaSession.
-     */
+    // Extrae los bytes comprimidos (JPEG) para ser incrustados en MediaMetadata de MediaSession.
     fun resolveCoverBytes(context: Context, uri: Uri?, path: String? = null): ByteArray? {
         // Si hay extracción directa de bytes sin decodificar
         if (!path.isNullOrBlank()) {
@@ -283,10 +275,8 @@ object AudioArtworkResolver {
         }
     }
 
-    /**
-     * Convierte una URI local 'file://' a una URI 'content://' pública y segura de FileProvider,
-     * requerida por Android 7+ para MediaSession, Notificaciones del Sistema y Bluetooth AVRCP.
-     */
+    // Convierte una URI local 'file://' a una URI 'content://' pública y segura de FileProvider,
+    // requerida por Android 7+ para MediaSession, Notificaciones del Sistema y Bluetooth AVRCP.
     fun getSafeArtworkUriForMediaSession(context: Context, uri: Uri?): Uri? {
         if (uri == null) return null
         if (uri.scheme == "file") {

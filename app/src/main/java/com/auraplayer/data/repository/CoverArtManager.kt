@@ -168,7 +168,7 @@ class CoverArtManager(private val context: Context) {
      */
     suspend fun syncAllCoversInBackground(
         songs: List<MediaModel>,
-        onCoversUpdated: () -> Unit
+        onCoversUpdated: suspend () -> Unit
     ) = withContext(Dispatchers.IO) {
         var updatedLocally = false
         val missingOnline = mutableListOf<MediaModel>()
@@ -187,9 +187,7 @@ class CoverArtManager(private val context: Context) {
         }
 
         if (updatedLocally) {
-            withContext(Dispatchers.Main) {
-                onCoversUpdated()
-            }
+            onCoversUpdated()
         }
 
         // Fase 2: Consulta de carátulas oficiales en internet (iTunes / Deezer HD 600x600)
@@ -198,9 +196,7 @@ class CoverArtManager(private val context: Context) {
                 try {
                     val saved = fetchFromOnlineApi(song.title, song.artist, song.id)
                     if (saved != null) {
-                        withContext(Dispatchers.Main) {
-                            onCoversUpdated()
-                        }
+                        onCoversUpdated()
                     }
                     kotlinx.coroutines.delay(200)
                 } catch (_: Exception) {}
@@ -230,7 +226,7 @@ class CoverArtManager(private val context: Context) {
     }
 
     private fun extractAndSaveEmbeddedArt(media: MediaModel): Uri? {
-        val bmp = com.auraplayer.util.AudioArtworkResolver.resolveBitmap(context, media.uri, media.path, 512)
+        val bmp: android.graphics.Bitmap? = com.auraplayer.util.AudioArtworkResolver.resolveBitmap(context, media.uri, media.path, 512)
         if (bmp != null) {
             try {
                 val targetFile = File(coversDir, "${media.id}.jpg")
