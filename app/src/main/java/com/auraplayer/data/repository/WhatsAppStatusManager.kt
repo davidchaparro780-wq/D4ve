@@ -14,6 +14,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.LruCache
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import com.auraplayer.util.AppLog
@@ -122,7 +123,7 @@ object WhatsAppStatusManager {
 
         // 2. Tarjetas MicroSD y volúmenes de almacenamiento secundarios
         try {
-            val extDirs = ContextCompat.getExternalFilesDirs(context, null)
+            val extDirs = context.getExternalFilesDirs(null) ?: emptyArray()
             for (appDir in extDirs) {
                 if (appDir != null) {
                     val path = appDir.absolutePath
