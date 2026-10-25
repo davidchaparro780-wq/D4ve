@@ -628,19 +628,8 @@ fun PlayerScreen(
         }
     }
 
-    // Visualizer wave phase animation
+    // Anti-Gravity Levitation Oscillation (RenderThread zero-recomposition animation)
     val infiniteTransition = rememberInfiniteTransition(label = "player_infinite")
-    val visualizerPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = (2 * Math.PI).toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = AnimRepeatMode.Restart
-        ),
-        label = "visualizerPhase"
-    )
-
-    // Anti-Gravity Levitation Oscillation (Organic Floating)
     val levitationPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = (2 * Math.PI).toFloat(),
@@ -650,7 +639,9 @@ fun PlayerScreen(
         ),
         label = "levitationPhase"
     )
-    val levitationOffsetDp = (kotlin.math.sin(levitationPhase) * 6f).dp
+    val levitationModifier = Modifier.graphicsLayer {
+        translationY = kotlin.math.sin(levitationPhase) * 6.dp.toPx()
+    }
 
     val audioBadgeText = remember(currentMedia.path) {
         val ext = File(currentMedia.path).extension.lowercase()
@@ -1201,7 +1192,7 @@ fun PlayerScreen(
                         Box(
                             modifier = Modifier
                                 .size(maxArtSize)
-                                .offset(y = levitationOffsetDp)
+                                .then(levitationModifier)
                                 .shadow(16.dp, RoundedCornerShape(26.dp), spotColor = activeAccent.copy(alpha = 0.55f))
                                 .clip(RoundedCornerShape(26.dp))
                                 .background(Color.Black),
@@ -1303,10 +1294,10 @@ fun PlayerScreen(
                                 val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
                                 val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
 
-                                Box(
+                                 Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset(y = levitationOffsetDp)
+                                        .then(levitationModifier)
                                         .padding(vertical = 4.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -1376,7 +1367,7 @@ fun PlayerScreen(
                                     modifier = Modifier
                                         .width(maxArtSize)
                                         .height(maxArtSize * 0.65f)
-                                        .offset(y = levitationOffsetDp)
+                                        .then(levitationModifier)
                                         .pointerInput(Unit) {
                                             detectTapGestures(
                                                 onTap = {
@@ -1419,14 +1410,14 @@ fun PlayerScreen(
                                     },
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset(y = levitationOffsetDp)
+                                        .then(levitationModifier)
                                 )
                             } else {
                                 // Live Cyber Spectrum Waveform Visualizer (Real-time FFT audio engine)
                                 Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .offset(y = levitationOffsetDp)
+                                        .then(levitationModifier)
                                         .shadow(16.dp, RoundedCornerShape(28.dp), spotColor = Color(0xFF00F0FF).copy(alpha = 0.5f))
                                         .clip(RoundedCornerShape(28.dp))
                                         .background(

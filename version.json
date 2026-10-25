@@ -1,7 +1,7 @@
 {
-  "versionCode": 147,
-  "versionName": "4.9.47",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.47/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.47 (Build 147) — Limpieza de Interfaz & Optimización 120 FPS:\n• 🧹 Eliminada Cápsula Superior (Dynamic Island) para evitar duplicidad de controles con el MiniPlayer inferior.\n• ⚡ Máxima Fluidez a 120 FPS: Brushes pre-cacheados en memoria, cero sobrecosto de sombras GPU en LazyColumn y optimización de Ambilight Glow sin blur pesado.\n• 💽 Skin Retro Discman CD 2000s: Reproductor de CD óptico giratorio con difracción holográfica tornasol y pantalla LCD retroiluminada con ESP Anti-Shock.",
+  "versionCode": 148,
+  "versionName": "4.9.48",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.48/app-debug.apk",
+  "changelog": "🚀 DaVE Player v4.9.48 (Build 148) — Rendimiento 120 FPS Real & Control de Audio Pro:\n• ⚡ Cero Fugas de Recomposición en PlayerScreen y MiniPlayer: animaciones migradas a RenderThread/graphicsLayer con 0 recomposiciones continuas en CPU a 120 FPS.\n• 🎛️ Feedback Háptico Táctil en Waveform Seekbar: vibración micro-táctil mecánica al fregar la barra de ondas armónicas.\n• 🔊 Normalizador de Volumen Inteligente (-14 LUFS) y Recorte de Silencios accesibles directamente desde la Consola DJ / Quick EQ.",
   "fileSizeMb": 25.1
 }

@@ -85,17 +85,6 @@ fun MiniPlayer(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 0.6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glowAlpha"
-    )
-
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val dragOffsetX = remember { Animatable(0f) }
@@ -241,7 +230,7 @@ fun MiniPlayer(
                                     .shadow(
                                         elevation = if (isPlaying) 12.dp else 4.dp,
                                         shape = RoundedCornerShape(12.dp),
-                                        spotColor = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha) else Color.Black.copy(alpha = 0.4f)
+                                        spotColor = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f) else Color.Black.copy(alpha = 0.4f)
                                     )
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(

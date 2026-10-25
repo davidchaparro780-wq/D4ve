@@ -15,10 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
+import com.auraplayer.audio.AuraHaptic
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -57,8 +60,10 @@ fun DynamicWaveformSeekbar(
         label = "shimmerPhase"
     )
 
+    val view = LocalView.current
     var isDragging by remember { mutableStateOf(false) }
     var touchX by remember { mutableFloatStateOf(0f) }
+    var lastHapticBarIndex by remember { mutableIntStateOf(-1) }
 
     // Generar alturas armónicas pseudo-musicales fijas para consistencia visual
     val baseHeights = remember {
@@ -79,6 +84,11 @@ fun DynamicWaveformSeekbar(
                     onPress = { offset ->
                         touchX = offset.x
                         val newProgress = (offset.x / size.width.toFloat()).coerceIn(0f, 1f)
+                        val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
+                        if (barIdx != lastHapticBarIndex) {
+                            lastHapticBarIndex = barIdx
+                            AuraHaptic.tick(view)
+                        }
                         onSeek(newProgress)
                     }
                 )
@@ -89,6 +99,9 @@ fun DynamicWaveformSeekbar(
                         isDragging = true
                         touchX = offset.x
                         val newProgress = (offset.x / size.width.toFloat()).coerceIn(0f, 1f)
+                        val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
+                        lastHapticBarIndex = barIdx
+                        AuraHaptic.tick(view)
                         onSeek(newProgress)
                     },
                     onDragEnd = {
@@ -101,6 +114,11 @@ fun DynamicWaveformSeekbar(
                         change.consume()
                         touchX = change.position.x
                         val newProgress = (change.position.x / size.width.toFloat()).coerceIn(0f, 1f)
+                        val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
+                        if (barIdx != lastHapticBarIndex) {
+                            lastHapticBarIndex = barIdx
+                            AuraHaptic.tick(view)
+                        }
                         onSeek(newProgress)
                     }
                 )

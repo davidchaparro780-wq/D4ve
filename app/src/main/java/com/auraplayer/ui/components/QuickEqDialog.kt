@@ -16,11 +16,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import com.auraplayer.audio.EqualizerManager
+import com.auraplayer.audio.LoudnessNormalizerManager
+import com.auraplayer.audio.SilenceTrimmerManager
 import com.auraplayer.data.repository.PlaylistManager
 
 @Composable
@@ -31,9 +35,14 @@ fun QuickEqDialog(
 
     val context = LocalContext.current
     val playlistManager = remember { PlaylistManager(context) }
+    val loudnessManager = remember { LoudnessNormalizerManager.getInstance(context) }
+    val silenceManager = remember { SilenceTrimmerManager.getInstance(context) }
+
     var crossfadeSec by remember { mutableIntStateOf(playlistManager.getCrossfadeSeconds()) }
     var is8D by remember { mutableStateOf(eq.isSpatial8DEnabled) }
     var isKaraoke by remember { mutableStateOf(eq.isKaraokeMode) }
+    var isLoudnessNormalized by remember { mutableStateOf(loudnessManager.isEnabled) }
+    var isSilenceTrimmed by remember { mutableStateOf(silenceManager.isEnabled) }
 
     // Read current values
     var bassBoost by remember { mutableFloatStateOf(eq.bassStrength.toFloat()) }
@@ -56,7 +65,9 @@ fun QuickEqDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // 1, 2, 3: Sliders Console Tile
@@ -233,6 +244,79 @@ fun QuickEqDialog(
                         )
                     }
                 }
+
+                // 7. Normalizador de Volumen Inteligente (-14 LUFS)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
+                        )
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("Normalizador de Volumen 🔊", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("Nivela a -14 LUFS para evitar saltos de volumen", fontSize = 10.5.sp, color = Color(0xFF94A3B8))
+                        }
+                        Switch(
+                            checked = isLoudnessNormalized,
+                            onCheckedChange = {
+                                isLoudnessNormalized = it
+                                loudnessManager.isEnabled = it
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFF10B981)
+                            )
+                        )
+                    }
+                }
+
+                // 8. Recorte Inteligente de Silencios
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1B2338), Color(0xFF101524))
+                            )
+                        )
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("Recorte de Silencios ✂️", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("Salta intros y outros inaudibles", fontSize = 10.5.sp, color = Color(0xFF94A3B8))
+                        }
+                        Switch(
+                            checked = isSilenceTrimmed,
+                            onCheckedChange = {
+                                isSilenceTrimmed = it
+                                silenceManager.isEnabled = it
+                                com.auraplayer.service.PlaybackService.activePlayer?.skipSilenceEnabled = it
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFFF59E0B)
+                            )
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
@@ -248,12 +332,17 @@ fun QuickEqDialog(
                         crossfadeSec = 0
                         is8D = false
                         isKaraoke = false
+                        isLoudnessNormalized = false
+                        isSilenceTrimmed = false
                         eq.setBassBoostStrength(0)
                         eq.setVirtualizerStrength(0)
                         eq.setLoudnessGain(0)
                         playlistManager.setCrossfadeSeconds(0)
                         eq.setSpatial8DEnabled(false)
                         eq.setKaraokeMode(false)
+                        loudnessManager.isEnabled = false
+                        silenceManager.isEnabled = false
+                        com.auraplayer.service.PlaybackService.activePlayer?.skipSilenceEnabled = false
                     }
                 ) {
                     Icon(Icons.Default.RestartAlt, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(16.dp))
