@@ -1,6 +1,5 @@
 package com.auraplayer.ui.components
 
-import androidx.compose.animation.core.AnimRepeatMode
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -71,7 +70,7 @@ fun ArcaneRunicOrbit(
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 3200, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-            repeatMode = AnimRepeatMode.Reverse
+            repeatMode = RepeatMode.Reverse
         ),
         label = "glow_pulse"
     )
