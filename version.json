@@ -1,7 +1,7 @@
 {
-  "versionCode": 164,
-  "versionName": "4.9.64",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.64/app-release.apk",
-  "changelog": "🔧 DaVE Player v4.9.64 (Build 164) — Corrección de la Barra Superior:\n• ⚙️ El botón de Ajustes (y el de Perfil) volvieron a ser visibles: desde la v4.9.62 los nuevos botones de Temas Arcanos y Fase Lunar empujaban el final de la barra fuera del borde derecho de la pantalla en celulares de 360dp.\n• ✨ El acceso rápido a Temas Arcanos se retiró de la cabecera porque estaba duplicado (sigue disponible en el Magic Hub 🔥 → Temas & Atmósferas).\n• 📱 La barra de acciones rápidas ahora es desplazable horizontalmente en pantallas muy estrechas, así ningún botón queda inaccesible.\n• 🎚️ Incluye las correcciones de v4.9.63: frecuencias Solfeggio con ratio real (Hz/440), tamaño del APK en el updater sin errores de idioma y partículas de Phantom Mist sin desaparecer en los bordes.",
+  "versionCode": 165,
+  "versionName": "4.9.65",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.65/app-release.apk",
+  "changelog": "🔮 DaVE Player v4.9.65 (Build 165) — Mystic Overdrive: el misterio invade toda la app:\n• 🌌 Biblioteca: fondo Void Obsidiano, runa ᛟ en el branding y franja de susurros arcanos rotativos (NecronomicScrollText) bajo la cabecera.\n• ✨ Explorar: nebulosa de constelación estelar reactiva al audio y fondo de vacío cósmico.\n• 💫 Mini Reproductor: aura arcana con borde rúnico de gradiente esotérico y resplandor del acento.\n• 🧭 Los temas misteriosos (Mystic Obsidian, Midnight Eclipse, Phantom Specter y Nebula Enigma) ahora transforman TODA la app de forma consistente, no solo el reproductor.\n• 🔧 Incluye las correcciones de v4.9.63/64: frecuencias Solfeggio reales, updater sin errores de idioma y botón de Ajustes siempre visible.",
   "fileSizeMb": 17.7
 }
