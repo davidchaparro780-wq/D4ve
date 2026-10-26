@@ -1563,7 +1563,8 @@ fun PlayerScreen(
                                 )
                             }
                         }
-                    } else {
+                    }
+                } else {
                         // Apple Music-Style Frosted Glass Synchronized & Plain Lyrics View
                         Box(
                             modifier = Modifier
