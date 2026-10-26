@@ -41,6 +41,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -76,6 +78,9 @@ fun VinylTurntableSkin(
     // Chasis exterior del tocadiscos
     Box(
         modifier = modifier
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Skin Tornamesa de Vinilo. Toca para cambiar de skin. Doble toque en los bordes adelanta o retrocede 10 segundos, al centro marca favorito. Arrastra el disco para scrubbing."
+            }
             .aspectRatio(1f)
             .shadow(
                 elevation = 20.dp,

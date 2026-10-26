@@ -409,22 +409,6 @@ tr:hover{background:#1e293b}
 .btn-dl{color:#38bdf8;text-decoration:none;font-weight:600}
 .btn-dl:hover{text-decoration:underline}
 footer{text-align:center;color:#64748b;font-size:13px;margin-top:30px}
-
-/* Modal Iniciar Sesion */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(5,7,14,0.92);backdrop-filter:blur(10px);display:none;justify-content:center;align-items:center;z-index:9999;padding:20px}
-.modal-card{background:linear-gradient(135deg,#111827 0%,#0f172a 100%);border:1px solid #00f0ff;box-shadow:0 0 45px rgba(0,240,255,0.3);border-radius:22px;max-width:460px;width:100%;padding:28px;text-align:center}
-.modal-title{font-size:20px;font-weight:800;color:#fff;margin-bottom:8px}
-.modal-alert{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:12px;padding:12px;margin-bottom:18px;text-align:left;color:#fca5a5;font-size:13px;line-height:1.4}
-.modal-alert strong{color:#fff;display:block;margin-bottom:3px;font-size:14px}
-.form-group{margin-bottom:14px;text-align:left}
-.form-group label{display:block;font-size:12px;color:#94a3b8;margin-bottom:5px;font-weight:600}
-.form-input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:14px;outline:none}
-.form-input:focus{border-color:#00f0ff}
-.btn-submit-login{background:#00f0ff;color:#000;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;width:100%;cursor:pointer;transition:all 0.2s;box-shadow:0 0 20px rgba(0,240,255,0.35);margin-top:6px}
-.btn-submit-login:hover{background:#38bdf8}
-.btn-aux{background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:10px;padding:10px 14px;font-size:13px;cursor:pointer;flex:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
-.btn-aux:hover{background:#334155;color:#fff}
-.cover-thumb{width:40px;height:40px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:10px}
 </style>
 </head>
 <body>
@@ -435,7 +419,6 @@ footer{text-align:center;color:#64748b;font-size:13px;margin-top:30px}
 </div>
 <div style='display:flex;align-items:center;gap:10px;'>
 <div id='connectionBadge' class='badge'>🟢 Conectado</div>
-<button id='btnHeaderLogout' class='btn-aux' style='background:rgba(239,68,68,0.15);color:#ef4444;border-color:rgba(239,68,68,0.3);padding:6px 12px;font-size:12px;font-weight:700;' onclick='onServerDisconnected()'>🚪 Cerrar Sesión</button>
 </div>
 </header>
 
@@ -447,7 +430,6 @@ footer{text-align:center;color:#64748b;font-size:13px;margin-top:30px}
 <button class='btn-ctrl btn-main' id='btnPlayPause' onclick='togglePlayback()'>⏯️ Play / Pausa</button>
 <button class='btn-ctrl' onclick='sendCmd("next")'>⏭️ Siguiente</button>
 </div>
-<audio id='cloudAudioPlayer' style='display:none;' onended='playNextCloudSong()'></audio>
 </div>
 
 <div class='search-container'>
@@ -459,83 +441,12 @@ footer{text-align:center;color:#64748b;font-size:13px;margin-top:30px}
 <tbody id='songTbody'>$rows</tbody>
 </table>
 
-<footer>DaVE Player Legendary Edition • Transmisión Directa & Sincronización Cloud</footer>
-
-<!-- Modal Iniciar Sesion por Desconexion -->
-<div id='disconnectLoginModal' class='modal-overlay'>
-  <div class='modal-card'>
-    <div style='font-size:36px;margin-bottom:10px;'>🔒</div>
-    <div class='modal-title'>Iniciar Sesión en DaVE Cloud</div>
-    
-    <div class='modal-alert'>
-      <strong>⚠️ Servidor del teléfono desconectado</strong>
-      Se ha cerrado el servidor de tu teléfono para esta PC. Inicia sesión para cargar y reproducir todas las canciones que tenías en la nube.
-    </div>
-
-    <form onsubmit='submitCloudLogin(event)'>
-      <div class='form-group'>
-        <label>Correo Electrónico</label>
-        <input type='email' id='loginEmail' class='form-input' value='david.chaparro@daveplayer.app' required>
-      </div>
-      <div class='form-group'>
-        <label>Contraseña / PIN</label>
-        <input type='password' id='loginPass' class='form-input' value='••••••••' required>
-      </div>
-      <button type='submit' class='btn-submit-login'>☁️ Iniciar Sesión y Cargar Canciones de la Nube</button>
-    </form>
-
-    <div style='display:flex;gap:8px;margin-top:14px;'>
-      <button class='btn-aux' onclick='quickDemoLogin()'>⚡ Cuenta Rápida</button>
-      <a class='btn-aux' href='https://davidchaparro780-wq.github.io/AuraPlayer/' target='_blank'>🌐 Abrir App Web</a>
-    </div>
-  </div>
-</div>
+<footer>DaVE Player Legendary Edition • Transmisión Directa WiFi</footer>
 
 <script>
-var isCloudMode = false;
-var currentCloudIndex = -1;
 var failedChecks = 0;
-var cloudAudio = document.getElementById('cloudAudioPlayer');
-
-var cloudTracks = [
-  { title: 'Happy Nation', artist: 'Ace of Base', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Ace%20of%20Base%20-%20Happy%20Nation.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music3/v4/fb/fd/a8/fbfda872-a03c-4c01-c3f1-8e185c081f7b/cover.jpg/600x600bb.jpg' },
-  { title: 'NADIE SABE', artist: 'Bad Bunny', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/BAD%20BUNNY%20-%20%20NADIE%20SABE%20(Visualizer)%20_%20nadie%20sabe%20lo%20que%20va%20a%20pasar%20ma%C3%B1ana.mp3', coverUrl: 'https://upload.wikimedia.org/wikipedia/en/7/74/Bad_Bunny_-_Nadie_Sabe_Lo_Que_Va_a_Pasar_Ma%C3%B1ana.png' },
-  { title: 'Dos Mil 16', artist: 'Bad Bunny', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Bad%20Bunny%20-%20Dos%20Mil%2016%20(360%C2%B0%20Visualizer)%20_%20Un%20Verano%20Sin%20Ti.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/3e/04/eb/3e04ebf6-370f-f59d-ec84-2c2643db92f1/196626945068.jpg/600x600bb.jpg' },
-  { title: 'Breakin\' Dishes', artist: 'Rihanna', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Breakin_%20Dishes(M4A_128K).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/2b/c0/81/2bc081c8-25f0-ba43-d451-587a54613778/16UMGIM59202.rgb.jpg/600x600bb.jpg' },
-  { title: 'QUÉ LÍO', artist: 'Blessd', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Blessd%20%20-%20QU%C3%89%20L%C3%8DO%20(Lyric%20Video)%20_%20CantoYo.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/b4/8f/cc/b48fccb4-aaf0-913f-1dd6-bd4aa9c8ac2d/827568017680.jpg/600x600bb.jpg' },
-  { title: 'Después De La Una', artist: 'Cris MJ, FloyyMenor, LOUKI', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Cris%20MJ_%20FloyyMenor_%20LOUKI%20-%20Despu%C3%A9s%20De%20La%20Una%20(Vi(M4A_128K).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/47/64/f9/4764f901-1f97-26c4-61cf-fcf3dc016c09/430931.jpg/600x600bb.jpg' },
-  { title: 'Guardian', artist: 'Curly & QORA', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Curly%20%26%20QORA%20-%20Guardian.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/73/5c/46/735c4661-ce10-71f4-1021-5a8efe0e9173/73589bec-0d08-4524-addf-e7d684335c1d.jpg/600x600bb.jpg' },
-  { title: 'Let You Down (Ending Theme)', artist: 'Dawid Podsiadło', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Cyberpunk_%20Edgerunners%20%E2%80%94%20Ending%20Theme%20_%20Let%20You%20Down%20by%20Dawid%20Podsiad%C5%82o%20_%20Netflix.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/82/35/0e/82350ed4-f66f-600b-f572-c7507fc66a10/196589453082.jpg/600x600bb.jpg' },
-  { title: 'Phantom Liberty', artist: 'Dawid Podsiadło, P.T. Adamczyk', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Dawid%20Podsiad%C5%82o%2C%20P.T.%20Adamczyk%20%E2%80%94%20Phantom%20Liberty%20(Official%20Cyberpunk%202077%20Music%20Video).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/e1/6e/79/e16e7907-1a77-8e18-64df-6a5d28ecc17d/196871442299.jpg/600x600bb.jpg' },
-  { title: 'Pose', artist: 'Daddy Yankee', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Daddy%20Yankee%20_%20Pose%20%5BLetra%5D(M4A_128K).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f9/95/52/f99552d9-b212-a3a0-cea4-fe0c5dc26243/24CRGIM46809.rgb.jpg/600x600bb.jpg' },
-  { title: 'L\'Amour Toujours (Tanzen Vision Rmx)', artist: 'Gigi D\'Agostino', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Topic%20-%20L%27Amour%20Toujours%20(Tanzen%20Vision%20Rmx).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/86/4c/46/864c4651-6277-6126-f58f-fec0ef34109f/090204669776_neu.jpg/600x600bb.jpg' },
-  { title: 'Paparazzi (Dubstep Remix)', artist: 'Lady Gaga (Alximo / Kareto)', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Lady%20Gaga%20%3B%20Paparazzi%20Dubstep%20remix%20(Alximo)%20-%20(Sub.%20Espa%C3%B1ol).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/e0/80/34/e080341a-b442-72cd-1d0f-eb6863e8cb88/10UMGIM11335.rgb.jpg/600x600bb.jpg' },
-  { title: 'Abracadabra', artist: 'Lady Gaga', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Lady%20Gaga%20-%20Abracadabra%20(Official%20Music%20Video).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/08/12/80/08128053-d7df-489d-bfde-be6f45f075be/26UMGIM57129.rgb.jpg/600x600bb.jpg' },
-  { title: 'Bad Romance', artist: 'Lady Gaga', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Lady%20Gaga%20-%20Bad%20Romance%20(Official%20Music%20Video).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/1f/25/c4/1f25c4bf-7f7a-ff26-8769-20ab6052dadf/09UMGIM40719.rgb.jpg/600x600bb.jpg' },
-  { title: 'Bloody Mary', artist: 'Lady Gaga', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Lady%20Gaga%20-%20Bloody%20Mary%20(Official%20Audio).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/42/9f/0f/429f0fd2-30bd-b64e-27fc-76d8fbbd0988/11UMGIM12476.rgb.jpg/600x600bb.jpg' },
-  { title: 'Just Dance', artist: 'Lady Gaga ft. Colby O\'Donis', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Lady%20Gaga%20-%20Just%20Dance%20(Official%20Music%20Video)%20ft.%20Colby%20O%27Donis.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/a6/68/28/a66828c0-3fe3-5419-374d-ad98739f3166/08UMGIM13954.rgb.jpg/600x600bb.jpg' },
-  { title: 'Paparazzi (Original)', artist: 'Lady Gaga', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Lady%20Gaga%20-%20Paparazzi%20(Official%20Music%20Video).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/1b/98/88/1b9888da-6a1f-bff0-ec03-518f445019f6/19UMGIM73435.rgb.jpg/600x600bb.jpg' },
-  { title: 'Color Your Night', artist: 'Lotus Juice', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Topic%20-%20Color%20Your%20Night.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/d7/0e/72/d70e724e-d8c0-8043-516a-ba47299b1554/PA00136839_1_185077_jacket.jpg/600x600bb.jpg' },
-  { title: 'A Phantom Pain', artist: 'Ludvig Forssell', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Topic%20-%20A%20Phantom%20Pain.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music49/v4/c2/87/60/c2876016-b688-18cc-7649-c44049450c79/007725_4988602168907.jpg/600x600bb.jpg' },
-  { title: 'Somos de Calle', artist: 'Daddy Yankee', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Somos%20de%20Calle.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f9/95/52/f99552d9-b212-a3a0-cea4-fe0c5dc26243/24CRGIM46809.rgb.jpg/600x600bb.jpg' },
-  { title: 'Duvet (Serial Experiments Lain)', artist: 'Bôa (sweetblue.)', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/B%C3%B4a%20-%20Duvet%20(Sub.%20Espa%C3%B1ol%20%2B%20Lyrics).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/45/44/15/45441528-0288-eedc-f6fc-93137b8cfe96/067003248969.png/600x600bb.jpg' },
-  { title: 'LA PLENA (W Sound 05)', artist: 'Beéle, Westcol, Ovy On The Drums', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/W%20Sound%2005%20_LA%20PLENA_%20-%20Be%C3%A9le%2C%20Westcol%2C%20Ovy%20On%20The%20Drums.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/76/c1/83/76c18371-1a13-b500-12a5-da71f33a8d25/0.jpg/600x600bb.jpg' },
-  { title: 'original sound (el_bonitillo_rb)', artist: 'Wuancho_dr430', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/original%20sound%20-%20el_bonitillo_rb.mp3', coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80' },
-  { title: 'original sound (papo_yt1)', artist: 'Audios Más Virales', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/original%20sound%20-%20papo_yt1.mp3', coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80' },
-  { title: 'SSRHD (Remix)', artist: 'Ziraki', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Ziraki%20-%20SSRHD%20(Remix).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/25/b9/d0/25b9d0a5-323a-fd54-bce4-6c768c8b00e4/8721056924288.png/600x600bb.jpg' },
-  { title: 'Verdades (TikTok)', artist: 'Westcol', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Westcol%20-%20Verdades%20(TikTok).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/76/c1/83/76c18371-1a13-b500-12a5-da71f33a8d25/0.jpg/600x600bb.jpg' },
-  { title: 'HJ-S', artist: 'Ziraki', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Ziraki%20-%20HJ-S.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/25/b9/d0/25b9d0a5-323a-fd54-bce4-6c768c8b00e4/8721056924288.png/600x600bb.jpg' },
-  { title: 'Dame Fuerza (Intro Doña Bárbara)', artist: 'Marta Sánchez', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Martha%20Sanchez%20-%20Dame%20Fuerza%20(Intro%20Dona%20Barbara).mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music/v4/7d/53/7d/7d537dfa-2cb0-b08e-5b12-58133ce745c4/00602517871379.rgb.jpg/600x600bb.jpg' },
-  { title: 'Gritona (Efecto de Sonido)', artist: 'Jorge Murguía Quiroz', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Jorge%20Murguia%20Quiroz%20-%20Gritona%20(Efecto).mp3', coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80' },
-  { title: 'Let You Down (Extended)', artist: 'Dawid Podsiadło', streamUrl: 'https://davidchaparro780-wq.github.io/AuraPlayer/music/Let%20You%20Down.mp3', coverUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/82/35/0e/82350ed4-f66f-600b-f572-c7507fc66a10/196589453082.jpg/600x600bb.jpg' }
-];
 
 function sendCmd(cmd){
-  if(isCloudMode){
-    if(cmd === 'prev') playPrevCloudSong();
-    else if(cmd === 'next') playNextCloudSong();
-    return;
-  }
   fetch('/api/' + cmd + '?code=$pairingCode').then(()=>updateStatus());
 }
 
@@ -544,36 +455,7 @@ function playSong(id){
 }
 
 function togglePlayback(){
-  if(isCloudMode){
-    if(cloudAudio.paused) cloudAudio.play();
-    else cloudAudio.pause();
-    document.getElementById('btnPlayPause').innerText = cloudAudio.paused ? '▶️ Reproducir' : '⏸️ Pausar';
-    return;
-  }
   sendCmd('playpause');
-}
-
-function playCloudSong(index){
-  currentCloudIndex = index;
-  var track = cloudTracks[index];
-  if(!track) return;
-  cloudAudio.src = track.streamUrl;
-  cloudAudio.play().catch(function(e){ console.log(e); });
-  document.getElementById('nowTitle').innerText = track.title;
-  document.getElementById('nowArtist').innerText = track.artist + ' • Nube DaVE';
-  document.getElementById('btnPlayPause').innerText = '⏸️ Pausar';
-}
-
-function playNextCloudSong(){
-  if(cloudTracks.length === 0) return;
-  var next = (currentCloudIndex + 1) % cloudTracks.length;
-  playCloudSong(next);
-}
-
-function playPrevCloudSong(){
-  if(cloudTracks.length === 0) return;
-  var prev = (currentCloudIndex - 1 + cloudTracks.length) % cloudTracks.length;
-  playCloudSong(prev);
 }
 
 function filterSongs(){
@@ -586,79 +468,13 @@ function filterSongs(){
 }
 
 function onServerDisconnected(){
-  // 1. Vaciar completamente la lista de canciones para que no aparezca nada
-  var tbody = document.getElementById('songTbody');
-  if (tbody) tbody.innerHTML = '';
-
-  // 2. Ocultar la tabla de musica y los controles
-  var table = document.querySelector('table');
-  if (table) table.style.display = 'none';
-  var pcard = document.querySelector('.player-card');
-  if (pcard) pcard.style.display = 'none';
-  var sbox = document.querySelector('.search-container');
-  if (sbox) sbox.style.display = 'none';
-
-  // 3. Detener reproduccion
-  if (cloudAudio) { cloudAudio.pause(); cloudAudio.src = ''; }
-
-  // 4. Mostrar exclusivamente la ventana de inicio de sesion (100% opaca)
-  var btnHLogout = document.getElementById('btnHeaderLogout');
-  if (btnHLogout) btnHLogout.style.display = 'none';
-  var modal = document.getElementById('disconnectLoginModal');
-  if (modal) {
-    modal.style.display = 'flex';
-    modal.style.background = '#0a0e1a';
-  }
-}
-
-function submitCloudLogin(e){
-  e.preventDefault();
-  restoreCloudLibrary();
-}
-
-function quickDemoLogin(){
-  restoreCloudLibrary();
-}
-
-function restoreCloudLibrary(){
-  isCloudMode = true;
-  document.getElementById('disconnectLoginModal').style.display = 'none';
-  var btnHLogout = document.getElementById('btnHeaderLogout');
-  if (btnHLogout) btnHLogout.style.display = 'inline-block';
-
-  // Re-mostrar tabla y reproductor
-  var table = document.querySelector('table');
-  if (table) table.style.display = 'table';
-  var pcard = document.querySelector('.player-card');
-  if (pcard) pcard.style.display = 'block';
-  var sbox = document.querySelector('.search-container');
-  if (sbox) sbox.style.display = 'block';
-
-  document.getElementById('pageHeaderTitle').innerText = '☁️ DaVE Player Cloud';
-  document.getElementById('pageHeaderSub').innerText = 'Sesión iniciada con éxito • ' + cloudTracks.length + ' canciones de la nube sincronizadas';
-  document.getElementById('connectionBadge').className = 'badge badge-cloud';
-  document.getElementById('connectionBadge').innerText = '☁️ Nube Activa';
-
-  var tbody = document.getElementById('songTbody');
-  tbody.innerHTML = '';
-  cloudTracks.forEach(function(track, idx){
-    var tr = document.createElement('tr');
-    tr.className = 'song-row';
-    tr.setAttribute('data-name', (track.title + ' ' + track.artist).toLowerCase());
-    tr.innerHTML = "<td><img src='" + track.coverUrl + "' class='cover-thumb'><b>" + track.title + "</b></td>" +
-                   "<td>" + track.artist + "</td>" +
-                   "<td><button class='btn-play' onclick='playCloudSong(" + idx + ")'>▶ Reproducir</button></td>" +
-                   "<td><a class='btn-dl' href='" + track.streamUrl + "' target='_blank' download>⬇ Descargar</a></td>";
-    tbody.appendChild(tr);
-  });
-
-  if(cloudTracks.length > 0){
-    playCloudSong(0);
-  }
+  document.getElementById('connectionBadge').className = 'badge';
+  document.getElementById('connectionBadge').innerText = 'RED CIRCULO DESCONECTADO';
+  document.getElementById('nowTitle').innerText = 'Servidor desconectado';
+  document.getElementById('nowArtist').innerText = 'Abre DaVE Player en el celular y activa el servidor WiFi';
 }
 
 function updateStatus(){
-  if(isCloudMode) return;
   fetch('/api/status?code=$pairingCode', { cache: 'no-store' })
     .then(function(r){
       if(!r.ok) throw new Error('status err');
@@ -667,8 +483,8 @@ function updateStatus(){
     .then(function(data){
       failedChecks = 0;
       document.getElementById('nowTitle').innerText = data.title;
-      document.getElementById('nowArtist').innerText = data.artist + (data.album ? ' • ' + data.album : '');
-      document.getElementById('btnPlayPause').innerText = data.isPlaying ? '⏸️ Pausar' : '▶️ Reproducir';
+      document.getElementById('nowArtist').innerText = data.artist + (data.album ? ' - ' + data.album : '');
+      document.getElementById('btnPlayPause').innerText = data.isPlaying ? 'PAUSAR' : 'REPRODUCIR';
     })
     .catch(function(){
       failedChecks++;

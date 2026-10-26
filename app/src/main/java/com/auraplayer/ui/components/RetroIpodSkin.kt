@@ -38,6 +38,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,6 +85,9 @@ fun RetroIpodSkin(
     // Chasis exterior iPod de aluminio satinado
     Box(
         modifier = modifier
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Skin iPod Clásico Retro. Toca para cambiar de skin. Gira la rueda para cambiar de pista, doble toque en los bordes adelanta o retrocede 10 segundos, al centro marca favorito."
+            }
             .shadow(20.dp, RoundedCornerShape(26.dp), spotColor = Color(0xFF64748B).copy(alpha = 0.5f))
             .clip(RoundedCornerShape(26.dp))
             .background(

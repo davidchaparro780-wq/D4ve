@@ -1,40 +1,58 @@
-# ✨ Aura Player - Aesthetic & Ad-Free Music & Video Player
+# 🎵 DaVE Player — Reproductor Multimedia Místico, Potente y Sin Anuncios
 
-[![Android Build](https://github.com/davidchaparro780-wq/AuraPlayer/actions/workflows/build-apk.yml/badge.svg)](https://github.com/davidchaparro780-wq/AuraPlayer/actions/workflows/build-apk.yml)
+[![Android Build](https://github.com/davidchaparro780-wq/D4ve/actions/workflows/build-apk.yml/badge.svg)](https://github.com/davidchaparro780-wq/D4ve/actions/workflows/build-apk.yml)
 [![Platform](https://img.shields.io/badge/Platform-Android_8.0+-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com)
 [![Ads](https://img.shields.io/badge/Ads-0%20(Sin%20Anuncios)-brightgreen.svg)]()
-[![Performance](https://img.shields.io/badge/UI-120_FPS_Compose-blue.svg)]()
-[![Theme](https://img.shields.io/badge/Design-Velvet_Noir_%26_Neon-purple.svg)]()
+[![Release](https://img.shields.io/badge/Versi%C3%B3n-4.9.x-8B5CF6.svg)](https://github.com/davidchaparro780-wq/D4ve/releases)
 
-> **Aura Player** es un reproductor multimedia con diseño *aesthetic* (Velvet Noir & Cyber Neon), ultra ligero y 100% libre de anuncios. Creado como la evolución fluida y limpia de reproductores saturados como Lark Player.
-
----
-
-## 📱 ¿Cómo descargarlo en tu teléfono Android?
-
-1. Entra a la sección **[Releases](https://github.com/davidchaparro780-wq/AuraPlayer/releases)** o **[Actions](https://github.com/davidchaparro780-wq/AuraPlayer/actions)** de este repositorio desde tu celular.
-2. Descarga el archivo **`AuraPlayer-debug.apk`**.
-3. Abre el archivo y presiona **Instalar**.
-4. ¡Listo! Todo tu contenido local con sonido de alta fidelidad y sin interrupciones.
+> **DaVE Player** es un reproductor de música y video para Android con una suite visual arcano-misteriosa completa, motor de audio de estudio y descargas online — 100% libre de anuncios.
 
 ---
 
-## ✨ Características y Estética
+## 📱 Cómo instalarlo
 
-* **💜 Diseño Aesthetic (Velvet Noir & Neon Glow):** Paleta oscura inmersiva con acentos neón violeta y cian, bordes luminosos y animaciones fluidas a 120 FPS con Jetpack Compose.
-* **🚫 0 Publicidad, 0 Rastreadores:** Sin banners, sin anuncios emergentes de bienvenida (splash) ni procesos ocultos de telemetría.
-* **🎧 Reproducción Continua en Segundo Plano:** Impulsado por **AndroidX Media3 (ExoPlayer)**. La música continúa reproduciéndose con la pantalla apagada o mientras usas otras apps, con soporte para auriculares y Bluetooth.
-* **🔀 Cola de Reproducción Inteligente:** Reproduce álbumes y listas continuas de forma ininterrumpida con controles de modo aleatorio (Shuffle) y repetición.
-* **🎬 Reproductor de Video con Picture-in-Picture (PiP):** Mira tus videos en una elegante ventana flotante mientras respondes mensajes o navegas en tu celular.
-* **🎛️ Aura Studio Equalizer:** Ecualizador gráfico de 5 bandas con presets de audio (Cyber Bass, Vocal Glow, Neon Pop, Rock Velvet, Lo-Fi Lounge) y refuerzo dinámico de graves.
-* **📁 Explorador Rápido por Carpetas y Artistas:** Navegación organizada sin complicaciones.
+1. Entra a **[Releases](https://github.com/davidchaparro780-wq/D4ve/releases)** desde tu celular.
+2. Descarga el **`app-release.apk`** (firmado) o el `app-debug.apk`.
+3. Instálalo. La app se **auto-actualiza** sola cuando hay versión nueva (con tu permiso).
+
+---
+
+## ✨ Lo que hace DaVE Player
+
+### 🎧 Audio de estudio
+- **Ecualizador de 10 bandas** con presets, Refuerzo de Graves, Espacial 8D, Crossfeed, Normalización de Volumen (ReplayGain) y Realismo de Válvulas.
+- **Loop A-B de estudio**, recorte de silencios, crossfade DJ inteligente, BPM workout y mezclador de stems con IA.
+- **Modo ZAP DJ**, scrubbing de vinilo, speed/pitch independientes y Consola de Resonancia Arcana (frecuencias Solfeggio con fase lunar real).
+
+### 🌌 Suite Visual Misteriosa
+- 7 skins de reproductor: Tornamesa de Vinilo, Cassette, Discman, iPod Classic, Vúmetros Vintage, Monolito Arcano y más.
+- Fondos reactivos al FFT real: Phantom Mist, constelaciones estelares, órbitas rúnicas y transiciones de velo.
+- 4 temas misteriosos (Mystic Obsidian, Midnight Eclipse, Phantom Specter, Nebula Enigma) que transforman toda la app.
+
+### 🌐 Descubre y Descarga
+- Búsqueda y descarga desde YouTube (RYT), TikTok, Instagram, Facebook y estados de WhatsApp.
+- Explorar con tendencias por género (Jamendo / Deezer / Archive).
+- Extractor de audio desde videos locales.
+
+### 🧰 Herramientas Pro
+- **Caja Fuerte** con PIN y biometría, Escudo de Carpetas, limpia-duplicados, editor de tags y carátulas por lotes.
+- **Servidor WiFi** con código de invocación de 4 dígitos: controla tu música desde la PC y descarga tu biblioteca de forma segura.
+- Party Link (discoteca silenciosa), Karaoke DJ, quiz musical, ruleta, torneo de canciones, Wrapped e Insights.
+- Widget de escritorio, Quick Tile, modos Auto y Sueño Etéreo con despedida de niebla.
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-* **Lenguaje:** Kotlin 2.0+
-* **UI:** Jetpack Compose + Material Design 3
-* **Motor Multimedia:** AndroidX Media3 (ExoPlayer 1.5.1 + MediaSessionService)
-* **Gestión de Carátulas:** Coil Compose
-* **CI/CD:** GitHub Actions (Compilación automática de APKs en cada push)
+* **Lenguaje:** Kotlin 2.0 + Jetpack Compose (Material 3)
+* **Audio:** AndroidX Media3 (ExoPlayer + MediaSessionService) + Visualizer FFT en tiempo real
+* **Extracción:** NewPipeExtractor + Cobalt + espejos Invidious (con auto-detección de cambios de API de YouTube)
+* **Red:** OkHttp + servidor HTTP propio con token de emparejamiento
+* **CI/CD:** GitHub Actions — build de APK firmado y release en cada versión
+
+## 🚀 Publicar una versión nueva
+
+```powershell
+.\Publicar_DaVE.ps1 -NuevaVersion "4.9.67" -Changelog "Descripcion del release..."
+```
+El script hace el bump de versión, pushea, espera el CI, crea el release, lee el tamaño real del APK firmado y actualiza `version.json` (el manifiesto del auto-updater).

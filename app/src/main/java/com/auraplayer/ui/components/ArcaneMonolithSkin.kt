@@ -39,6 +39,8 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,6 +97,9 @@ fun ArcaneMonolithSkin(
 
     Box(
         modifier = modifier
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Skin Monolito Arcano. Toca para cambiar de skin. Doble toque en los bordes adelanta o retrocede 10 segundos, al centro marca favorito. Mantén pulsado para abrir la Consola de Resonancia Arcana."
+            }
             .aspectRatio(1f)
             .shadow(
                 elevation = 24.dp,

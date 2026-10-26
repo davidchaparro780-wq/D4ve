@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,6 +82,9 @@ fun AnalogVuMetersSkin(
     // Chasis vintage con borde de aluminio y panel oscuro
     Box(
         modifier = modifier
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Skin Vúmetros Analógicos Vintage. Toca para cambiar de skin. Doble toque en los bordes adelanta o retrocede 10 segundos, al centro marca favorito."
+            }
             .shadow(18.dp, RoundedCornerShape(26.dp), spotColor = Color(0xFFD97706).copy(alpha = 0.35f))
             .clip(RoundedCornerShape(26.dp))
             .background(

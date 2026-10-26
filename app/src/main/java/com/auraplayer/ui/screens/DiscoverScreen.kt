@@ -424,8 +424,9 @@ fun DiscoverScreen(
 
             // Nebulosa de constelación arcano reactiva al audio (Suite Misteriosa)
             if (isMysterious) {
+                val liveBass by com.auraplayer.audio.RealtimeVisualizerManager.instance.bassEnergyState.collectAsState()
                 com.auraplayer.ui.components.StellarConstellationBanner(
-                    bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying),
+                    bassEnergy = if (isPlaying) liveBass else 0.05f,
                     accentColor = MaterialTheme.colorScheme.primary
                 )
             }
