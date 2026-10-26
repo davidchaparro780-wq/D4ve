@@ -57,6 +57,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -471,46 +472,17 @@ fun MusicScreen(
                 )
             }
 
-            // Quick Actions Cluster
+            // Quick Actions Cluster (desplazable en pantallas estrechas para que Perfil y Ajustes siempre queden accesibles)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
             ) {
-                // Arcane Mystery Themes Button
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFF2E1B4E), Color(0xFF130924))
-                            )
-                        )
-                        .border(
-                            1.dp,
-                            Brush.linearGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF))),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .clickable {
-                            AuraHaptic.click(view)
-                            showMysteriousThemeDialog = true
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = "Temas Misteriosos Arcanos",
-                        tint = Color(0xFFB388FF),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
                 // Real-time Lunar Phase Button
                 val lunarPhase = remember { com.auraplayer.audio.LunarPhaseManager.getCurrentPhase() }
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
                         .background(
@@ -542,7 +514,7 @@ fun MusicScreen(
                 // Sleep Timer Button
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
                         .background(
@@ -568,7 +540,7 @@ fun MusicScreen(
                 Box {
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(36.dp)
                             .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                             .clip(RoundedCornerShape(12.dp))
                             .background(
@@ -673,7 +645,7 @@ fun MusicScreen(
                 val activeUser = userManager.currentUser
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
                         .background(
@@ -702,7 +674,7 @@ fun MusicScreen(
                 // Settings Button
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
                         .clip(RoundedCornerShape(12.dp))
                         .background(
