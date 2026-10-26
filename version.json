@@ -1,7 +1,7 @@
 {
-  "versionCode": 155,
-  "versionName": "4.9.55",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.55/app-debug.apk",
-  "changelog": "🚀 DaVE Player v4.9.55 (Build 155) — Corrección Crítica de Cierre Inesperado al Iniciar la App:\n• 🛡️ Blindaje Total en DaVEApplication & Coil ImageLoader: Eliminado cálculo maxSizePercent que fallaba en StatFs al no existir el directorio; asegurado con try-catch y fallback infalible.\n• ⚡ Prevención de Saturación de Memoria: MediaRepository ahora asigna artworkUri exclusivamente a imágenes reales y carátulas cacheadas, evitando decodificar archivos de audio completos como imágenes.\n• 🔄 Sincronización en Segundo Plano Segura: Protegida la corrutina de inicio de MainActivity con límite de lote e inmunidad total a excepciones para evitar cierres en el hilo principal.\n• 🛡️ AudioArtworkResolver & Fetcher a Prueba de Balas: Captura integral de Throwable (incluyendo OutOfMemoryError y SecurityException) en todos los métodos de extracción.",
-  "fileSizeMb": 25.2
+  "versionCode": 163,
+  "versionName": "4.9.63",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.63/app-release.apk",
+  "changelog": "🐛 DaVE Player v4.9.63 (Build 163) — Correcciones de Precisión:\n• 🎚️ Consola de Resonancia Arcana: las frecuencias Solfeggio ahora aplican el ratio de re-afinación real (Hz/440) — antes solo 432 Hz era exacto (528 Hz aplicaba 1.05 en vez de 1.20, 396 Hz 0.94 en vez de 0.90, etc.).\n• 📦 Auto-Updater: el tamaño del APK ya no cae al valor por defecto (24.5 MB) en dispositivos con configuración regional de coma decimal.\n• ✨ Phantom Mist: las partículas de bruma ya no desaparecen al cruzar el borde izquierdo de la pantalla.\n• Incluye todo lo de v4.9.62: Arcane Monolith, Lunar Phase, Solfeggio Console, Phantom Mist, Stellar Constellation y Necronomic Scroll.",
+  "fileSizeMb": 17.7
 }
