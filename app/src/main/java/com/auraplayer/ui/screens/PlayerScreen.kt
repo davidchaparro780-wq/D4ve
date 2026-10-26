@@ -279,6 +279,7 @@ fun PlayerScreen(
     onOpenWrapped: () -> Unit = {},
     onAudioFxChange: (speed: Float, pitch: Float) -> Unit,
     onOpenSleepTimer: () -> Unit,
+    sleepTimerManager: com.auraplayer.audio.SleepTimerManager? = null,
     onOpenCarMode: () -> Unit = {},
     onOpenStandBy: () -> Unit = {},
     onDeleteSong: (MediaModel) -> Unit,
@@ -1336,7 +1337,9 @@ fun PlayerScreen(
                             },
                             label = "visualizer_song_transition"
                         ) { _ ->
-                            val liveBassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying)
+                                // Bajo fluido: recolectado del FFT real (~20 Hz) en vez del tick de posición (400 ms)
+                                val rawBassEnergy by com.auraplayer.audio.RealtimeVisualizerManager.instance.bassEnergyState.collectAsState()
+                                val liveBassEnergy = if (isPlaying) rawBassEnergy else 0.05f
 
                             // Audiophile Stage: Dynamic Ambient Bloom multi-layer halo
                             Box(
@@ -4215,6 +4218,31 @@ fun PlayerScreen(
             },
             onDismiss = { showArcaneFrequencyDialog = false }
         )
+    }
+
+    // Sueño Etéreo: despedida esotérica — el velo se espesa mientras el volumen se desvanece (últimos 120 s)
+    if (sleepTimerManager != null) {
+        val sleepActive by sleepTimerManager.isTimerActive.collectAsState()
+        val sleepRemaining by sleepTimerManager.remainingSeconds.collectAsState()
+        val veilAlpha = if (sleepActive && sleepRemaining in 1..120) {
+            ((120 - sleepRemaining) / 120f).coerceIn(0f, 1f)
+        } else 0f
+        if (veilAlpha > 0.01f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF05030B).copy(alpha = veilAlpha * 0.72f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "ᛉ  El velo te llama…",
+                    color = Color(0xFFB388FF).copy(alpha = 0.4f + veilAlpha * 0.6f),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 3.sp
+                )
+            }
+        }
     }
 }
 

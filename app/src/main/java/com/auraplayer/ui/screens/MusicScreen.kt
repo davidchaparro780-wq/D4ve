@@ -149,6 +149,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -433,9 +434,27 @@ fun MusicScreen(
     val themeSecondary = MaterialTheme.colorScheme.secondary
     val themeTertiary = MaterialTheme.colorScheme.tertiary
     val isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)
+    val liveMistBass by com.auraplayer.audio.RealtimeVisualizerManager.instance.bassEnergyState.collectAsState()
+
+    // Canción destinada por el azar cósmico: cambia cada día del año
+    val dailyArcaneSong = remember(songs) {
+        if (songs.isEmpty()) null
+        else songs[java.time.LocalDate.now().dayOfYear % songs.size]
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        // Niebla espectral flotando detrás de todo el contenido de la biblioteca (Suite Misteriosa)
+        if (isMysterious) {
+            com.auraplayer.ui.components.PhantomMistOverlay(
+                accentColor = themePrimary,
+                secondaryColor = themeSecondary,
+                bassEnergy = liveMistBass,
+                isPlaying = com.auraplayer.service.PlaybackService.isCurrentlyPlaying
+            )
+        }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(
                 if (isMysterious) {
@@ -657,7 +676,12 @@ fun MusicScreen(
                                 }
                             },
                             onOpenThemes = { showToolsMenu = false; showMysteriousThemeDialog = true },
-                            onOpenOledSaver = { showToolsMenu = false; showOledSaver = true }
+                            onOpenOledSaver = { showToolsMenu = false; showOledSaver = true },
+                            dailySong = if (isMysterious) dailyArcaneSong else null,
+                            onPlayDailySong = { daily ->
+                                showToolsMenu = false
+                                onSongClick(daily)
+                            }
                         )
                     }
                 }
@@ -1160,7 +1184,7 @@ fun MusicScreen(
                                     }
                                 }
                             } else {
-                                EmptyListMessage("Sin canciones")
+                                EmptyListMessage("Sin canciones", isMysterious)
                             }
                         } else {
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -2285,7 +2309,7 @@ fun MusicScreen(
                             }
 
                             if (artistSongs.isEmpty()) {
-                                EmptyListMessage("Sin canciones")
+                                EmptyListMessage("Sin canciones", isMysterious)
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -2405,7 +2429,8 @@ fun MusicScreen(
             }
         }
     }
-}
+    } // Cierre del Column raíz
+    } // Cierre del Box raíz: niebla espectral de la Suite Misteriosa
 
     // Create Playlist Dialog
     if (showCreatePlaylistDialog) {
@@ -3270,15 +3295,27 @@ fun SongListItem(
 }
 
 @Composable
-private fun EmptyListMessage(message: String) {
+private fun EmptyListMessage(message: String, isMysterious: Boolean = false) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(32.dp)
-        )
+        ) {
+            if (isMysterious) {
+                Text(
+                    text = "ᛟ",
+                    fontSize = 34.sp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            Text(
+                text = if (isMysterious) "$message · el vacío primordial aguarda" else message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
     }
 }
 

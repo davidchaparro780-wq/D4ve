@@ -51,11 +51,18 @@ class LocalMusicServer {
     var isRunning = false
         private set
 
+    // Código de invocación: se regenera en cada arranque y protege /api/* y /stream/*
+    // contra control y descarga no autorizada desde la red local
+    @Volatile
+    var pairingCode: String = "----"
+        private set
+
     fun start(songs: List<MediaModel>, ctrl: ServerController, context: Context? = null) {
         if (isRunning) return
         songList = songs
         controller = ctrl
         appContext = context?.applicationContext
+        pairingCode = (1000..9999).random().toString()
 
         serverScope?.cancel()
         serverScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -220,6 +227,20 @@ class LocalMusicServer {
             val rawPath = parts.getOrNull(1) ?: "/"
             val path = rawPath.substringBefore("?")
 
+            // Guardia de invocación: comandos y streaming exigen el código de emparejamiento
+            val queryParams = rawPath.substringAfter("?", "")
+                .split("&")
+                .mapNotNull { p ->
+                    val kv = p.split("=")
+                    if (kv.size == 2) kv[0] to kv[1] else null
+                }
+                .toMap()
+            val isProtectedRoute = path.startsWith("/api/") || path.startsWith("/stream")
+            if (isProtectedRoute && queryParams["code"] != pairingCode) {
+                serve401(socket)
+                return
+            }
+
             if (method.equals("OPTIONS", ignoreCase = true)) {
                 sendOptionsResponse(socket)
                 return
@@ -350,7 +371,7 @@ class LocalMusicServer {
             "<td><b>${escHtml(song.title)}</b></td>" +
             "<td>${escHtml(song.artist)}</td>" +
             "<td><button class='btn-play' onclick='playSong(${song.id})'>▶ Reproducir</button></td>" +
-            "<td><a class='btn-dl' href='/stream/${song.id}' download='${escHtml(song.title)}.mp3'>⬇ Descargar</a></td>" +
+            "<td><a class='btn-dl' href='/stream/${song.id}?code=$pairingCode' download='${escHtml(song.title)}.mp3'>⬇ Descargar</a></td>" +
             "</tr>"
         }
 
@@ -515,11 +536,11 @@ function sendCmd(cmd){
     else if(cmd === 'next') playNextCloudSong();
     return;
   }
-  fetch('/api/' + cmd).then(()=>updateStatus());
+  fetch('/api/' + cmd + '?code=$pairingCode').then(()=>updateStatus());
 }
 
 function playSong(id){
-  fetch('/api/playid/' + id).then(()=>updateStatus());
+  fetch('/api/playid/' + id + '?code=$pairingCode').then(()=>updateStatus());
 }
 
 function togglePlayback(){
@@ -638,7 +659,7 @@ function restoreCloudLibrary(){
 
 function updateStatus(){
   if(isCloudMode) return;
-  fetch('/api/status', { cache: 'no-store' })
+  fetch('/api/status?code=$pairingCode', { cache: 'no-store' })
     .then(function(r){
       if(!r.ok) throw new Error('status err');
       return r.json();
@@ -703,16 +724,16 @@ var audio = document.getElementById('partyAudio');
 var currentId = -1;
 function joinParty(){
   audio.style.display = 'block';
-  audio.src = '/stream/current?t=' + Date.now();
+  audio.src = '/stream/current?code=$pairingCode&t=' + Date.now();
   audio.play();
   document.getElementById('btnJoin').innerText = '🟢 En Sintonía';
 }
 function checkSong(){
-  fetch('/api/status').then(r=>r.json()).then(data=>{
+  fetch('/api/status?code=$pairingCode').then(r=>r.json()).then(data=>{
     document.getElementById('title').innerText = data.title;
     document.getElementById('artist').innerText = data.artist;
     if(currentId !== -1 && currentId !== data.id && audio.src){
-      audio.src = '/stream/current?t=' + Date.now();
+      audio.src = '/stream/current?code=$pairingCode&t=' + Date.now();
       audio.play();
     }
     currentId = data.id;
@@ -824,6 +845,11 @@ checkSong();
 
         out.flush()
         try { socket.shutdownOutput() } catch (e: Exception) { AppLog.d(TAG, "No se pudo hacer shutdownOutput del socket", e) }
+    }
+
+    private fun serve401(socket: Socket) {
+        val json = JSONObject().put("error", "Código de invocación incorrecto").toString()
+        sendResponse(socket, "401 Unauthorized", "application/json", json.toByteArray(Charsets.UTF_8))
     }
 
     private fun serve404(socket: Socket) {

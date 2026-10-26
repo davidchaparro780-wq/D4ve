@@ -3,6 +3,9 @@ package com.auraplayer.audio
 import android.media.audiofx.Visualizer
 import android.os.SystemClock
 import com.auraplayer.util.AppLog
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.sin
@@ -33,6 +36,11 @@ class RealtimeVisualizerManager private constructor() {
     private var bassEnergy: Float = 0.08f
     private var trebleEnergy: Float = 0.06f
     private var lastDataTime: Long = 0L
+
+    // Energía de bajo publicada como estado observable: los Canvas que la recolectan
+    // redibujan al ritmo real del FFT (~20 Hz) en vez de esperar la recomposición del positionMs (400 ms)
+    private val _bassEnergyState = MutableStateFlow(0.08f)
+    val bassEnergyState: StateFlow<Float> = _bassEnergyState.asStateFlow()
 
     @Synchronized
     fun attachToAudioSession(audioSessionId: Int) {
@@ -154,6 +162,7 @@ class RealtimeVisualizerManager private constructor() {
 
         bassEnergy = (totalBass / 6f).coerceIn(0.05f, 1.0f)
         trebleEnergy = (totalTreble / 12f).coerceIn(0.04f, 1.0f)
+        _bassEnergyState.value = (bassEnergy * getSensitivity()).coerceIn(0.05f, 1.0f)
     }
 
     /**

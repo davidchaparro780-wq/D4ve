@@ -17,8 +17,13 @@ object LunarPhaseManager {
     private const val KNOWN_NEW_MOON_EPOCH_S = 947182440L
     private const val SYNODIC_MONTH_S = 29.53058867 * 86400.0
 
-    fun getCurrentPhase(): LunarPhase {
-        val nowS = System.currentTimeMillis() / 1000L
+    fun getCurrentPhase(): LunarPhase = getPhaseAt(System.currentTimeMillis())
+
+    /**
+     * Fase lunar para un instante dado — separada del reloj para poder testearla.
+     */
+    fun getPhaseAt(timeMillis: Long): LunarPhase {
+        val nowS = timeMillis / 1000L
         val elapsed = (nowS - KNOWN_NEW_MOON_EPOCH_S).toDouble()
         val cyclePos = ((elapsed % SYNODIC_MONTH_S) + SYNODIC_MONTH_S) % SYNODIC_MONTH_S
         val progress = cyclePos / SYNODIC_MONTH_S // 0.0 -> 1.0

@@ -1,6 +1,12 @@
 package com.auraplayer.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -47,6 +53,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Radio
@@ -76,6 +83,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -151,6 +159,8 @@ fun DaveMagicHubSheet(
     onToggleSleepSensor: () -> Unit = {},
     onOpenThemes: () -> Unit,
     onOpenOledSaver: () -> Unit,
+    dailySong: com.auraplayer.data.model.MediaModel? = null,
+    onPlayDailySong: (com.auraplayer.data.model.MediaModel) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -548,6 +558,22 @@ fun DaveMagicHubSheet(
                 .fillMaxHeight(0.85f)
                 .padding(horizontal = 16.dp)
         ) {
+            // Carta del Día: fase lunar + canción destinada por el azar cósmico (Suite Misteriosa)
+            val daily = dailySong
+            if (daily != null) {
+                val lunar = androidx.compose.runtime.remember { com.auraplayer.audio.LunarPhaseManager.getCurrentPhase() }
+                DailyArcaneCard(
+                    song = daily,
+                    lunarText = "${lunar.phaseEmoji} ${lunar.phaseName} · ${lunar.illuminationPercent}%",
+                    rune = lunar.runeSymbol,
+                    onPlay = {
+                        AuraHaptic.heavy(view)
+                        onPlayDailySong(daily)
+                    }
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
             // Header: Icon + Title + Close
             Row(
                 modifier = Modifier
@@ -818,5 +844,99 @@ private fun HubToolCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DailyArcaneCard(
+    song: com.auraplayer.data.model.MediaModel,
+    lunarText: String,
+    rune: String,
+    onPlay: () -> Unit
+) {
+    val glowPulse by rememberInfiniteTransition(label = "daily_arcane").animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(10.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFB388FF).copy(alpha = glowPulse))
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF221438), Color(0xFF0F081E))
+                )
+            )
+            .border(
+                1.dp,
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFFB388FF).copy(alpha = 0.7f),
+                        Color(0xFF00E5FF).copy(alpha = 0.35f)
+                    )
+                ),
+                RoundedCornerShape(16.dp)
+            )
+            .clickable { onPlay() }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Sello rúnico
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF31194F))
+                .border(1.2.dp, Color(0xFFB388FF).copy(alpha = 0.6f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = rune,
+                color = Color(0xFFE2D4FF),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "CARTA DEL DÍA",
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.5.sp,
+                color = Color(0xFFB388FF)
+            )
+            Text(
+                text = song.title,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${song.artist} · $lunarText",
+                fontSize = 10.sp,
+                color = Color(0xFF94A3B8),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Default.PlayArrow,
+            contentDescription = "Invocar canción del día",
+            tint = Color(0xFF00E5FF),
+            modifier = Modifier.size(26.dp)
+        )
     }
 }

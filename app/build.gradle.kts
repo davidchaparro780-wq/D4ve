@@ -14,8 +14,8 @@ android {
         applicationId = "com.auraplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 165
-        versionName = "4.9.65"
+        versionCode = 166
+        versionName = "4.9.66"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -115,4 +115,7 @@ dependencies {
 
     // Storage Access Framework (SAF) DocumentFile for Android 11+ WhatsApp Statuses
     implementation("androidx.documentfile:documentfile:1.0.1")
+
+    // Unit Testing
+    testImplementation("junit:junit:4.13.2")
 }

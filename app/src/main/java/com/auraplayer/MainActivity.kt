@@ -1481,7 +1481,8 @@ fun AuraApp(
             onDismiss = { showSleepTimerDialog = false },
             onFinish = {
                 controller?.pause()
-            }
+            },
+            isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)
         )
     }
 
@@ -2315,7 +2316,13 @@ fun AuraApp(
         AnimatedContent(
             targetState = selectedNavTab,
             transitionSpec = {
-                if (targetState > initialState) {
+                if (com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)) {
+                    // Velo arcano: las pantallas se desvanecen entre bruma y escalan suavemente
+                    (fadeIn(animationSpec = tween(420, easing = FastOutSlowInEasing)) +
+                        scaleIn(initialScale = 0.97f, animationSpec = tween(420, easing = FastOutSlowInEasing))) togetherWith (
+                        fadeOut(animationSpec = tween(280, easing = FastOutSlowInEasing))
+                    )
+                } else if (targetState > initialState) {
                     (slideInHorizontally(
                         animationSpec = tween(220, easing = FastOutSlowInEasing),
                         initialOffsetX = { fullWidth -> fullWidth / 3 }
@@ -2860,6 +2867,7 @@ fun AuraApp(
                 isPlaying = isPlaying,
                 currentPositionMs = positionState.value,
                 durationMs = if (durationMs > 0L) durationMs else media.duration,
+                sleepTimerManager = sleepTimerManager,
                 isShuffle = isShuffle,
                 repeatMode = repeatMode,
                 isFavorite = isFav,

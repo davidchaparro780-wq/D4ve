@@ -122,7 +122,7 @@ fun WifiServerDialog(
                                 onClick = {
                                     val sendIntent = Intent().apply {
                                         action = Intent.ACTION_SEND
-                                        putExtra(Intent.EXTRA_TEXT, fullUrl)
+                                        putExtra(Intent.EXTRA_TEXT, "$fullUrl?code=${wifiServer.pairingCode}")
                                         type = "text/plain"
                                     }
                                     context.startActivity(Intent.createChooser(sendIntent, "Compartir enlace para PC"))
@@ -157,6 +157,33 @@ fun WifiServerDialog(
                                 )
                             )
                         }
+                    }
+                }
+
+                // Código de invocación: protege comandos y descargas en la red
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1226)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text("🔑 Código de invocación", color = Color(0xFFB388FF), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Escríbelo en la web para controlar y descargar", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        }
+                        Text(
+                            text = wifiServer.pairingCode,
+                            color = Color(0xFF00F0FF),
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 4.sp
+                        )
                     }
                 }
 

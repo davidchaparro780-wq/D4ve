@@ -688,7 +688,11 @@ fun EqualizerScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "Graves (Bass)", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = if (com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)) "Latido del Abismo ᛟ" else "Graves (Bass)",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
                             Text(text = "${bassBoost.toInt()}%", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
                         }
                         Slider(

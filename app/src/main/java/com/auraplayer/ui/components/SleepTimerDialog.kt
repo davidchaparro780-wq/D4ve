@@ -51,7 +51,8 @@ import com.auraplayer.audio.SleepTimerManager
 fun SleepTimerDialog(
     sleepTimerManager: SleepTimerManager,
     onDismiss: () -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    isMysterious: Boolean = false
 ) {
     val context = LocalContext.current
     val isTimerActive by sleepTimerManager.isTimerActive.collectAsState()
@@ -81,7 +82,7 @@ fun SleepTimerDialog(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Temporizador de Apagado",
+                        text = if (isMysterious) "Sueño Etéreo ᛉ" else "Temporizador de Apagado",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White

@@ -26,6 +26,27 @@ data class UpdateInfo(
     val versionCode: Long = 0L
 )
 
+/**
+ * Comparación semántica de versiones "X.Y.Z" (ignora prefijo 'v' y sufijos no numéricos).
+ * Función de nivel superior para poder testearla sin un Context de Android.
+ */
+fun isVersionNewer(remote: String, current: String): Boolean {
+    if (remote.isBlank() || current.isBlank()) return false
+    val cleanRemote = remote.removePrefix("v").trim()
+    val cleanCurrent = current.removePrefix("v").trim()
+    val remoteParts = cleanRemote.split(".").mapNotNull { it.replace(Regex("[^0-9]"), "").toIntOrNull() }
+    val currentParts = cleanCurrent.split(".").mapNotNull { it.replace(Regex("[^0-9]"), "").toIntOrNull() }
+
+    val length = maxOf(remoteParts.size, currentParts.size)
+    for (i in 0 until length) {
+        val r = remoteParts.getOrElse(i) { 0 }
+        val c = currentParts.getOrElse(i) { 0 }
+        if (r > c) return true
+        if (r < c) return false
+    }
+    return false
+}
+
 class UpdateManager(private val context: Context) {
 
     private val rawVersionJson = "https://raw.githubusercontent.com/davidchaparro780-wq/D4ve/main/version.json"
@@ -431,22 +452,5 @@ class UpdateManager(private val context: Context) {
             AppLog.w(tag, "No se pudo verificar la URL de actualización: ${e.message}")
             false
         }
-    }
-
-    private fun isVersionNewer(remote: String, current: String): Boolean {
-        if (remote.isBlank() || current.isBlank()) return false
-        val cleanRemote = remote.removePrefix("v").trim()
-        val cleanCurrent = current.removePrefix("v").trim()
-        val remoteParts = cleanRemote.split(".").mapNotNull { it.replace(Regex("[^0-9]"), "").toIntOrNull() }
-        val currentParts = cleanCurrent.split(".").mapNotNull { it.replace(Regex("[^0-9]"), "").toIntOrNull() }
-
-        val length = maxOf(remoteParts.size, currentParts.size)
-        for (i in 0 until length) {
-            val r = remoteParts.getOrElse(i) { 0 }
-            val c = currentParts.getOrElse(i) { 0 }
-            if (r > c) return true
-            if (r < c) return false
-        }
-        return false
     }
 }

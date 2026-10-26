@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -108,6 +109,19 @@ fun DaveSplashIntro(
         label = "AuraAlpha"
     )
 
+    // Círculo de invocación: anillo rúnico rotatorio alrededor del logo
+    val invokeRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(14000, easing = androidx.compose.animation.core.LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "InvokeRotation"
+    )
+
+    val lunarPhase = remember { com.auraplayer.audio.LunarPhaseManager.getCurrentPhase() }
+
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn(tween(200)),
@@ -151,6 +165,62 @@ fun DaveSplashIntro(
                         )
                     )
             )
+
+            // Círculo de invocación arcano: geometría esotérica rotando tras el badge
+            androidx.compose.foundation.Canvas(
+                modifier = Modifier
+                    .size(230.dp)
+                    .graphicsLayer { rotationZ = invokeRotation }
+            ) {
+                val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+                val radius = size.minDimension * 0.46f
+                val ringColor = Color(0xFF818CF8).copy(alpha = 0.5f)
+
+                // Anillo punteado exterior
+                drawCircle(
+                    color = ringColor,
+                    radius = radius,
+                    center = center,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(
+                        width = 1.2f,
+                        pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(16f, 22f), 0f)
+                    )
+                )
+
+                // 6 nodos rúnicos (circulitos) sobre el anillo
+                for (k in 0 until 6) {
+                    val rad = Math.toRadians((k * 60).toDouble()).toFloat()
+                    val nx = center.x + radius * kotlin.math.cos(rad)
+                    val ny = center.y + radius * kotlin.math.sin(rad)
+                    drawCircle(
+                        color = Color(0xFFC084FC).copy(alpha = 0.8f),
+                        radius = 3f,
+                        center = androidx.compose.ui.geometry.Offset(nx, ny)
+                    )
+                    drawCircle(
+                        color = Color(0xFF38BDF8).copy(alpha = 0.4f),
+                        radius = 6f,
+                        center = androidx.compose.ui.geometry.Offset(nx, ny),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f)
+                    )
+                }
+
+                // Triángulo de invocación interior
+                val triPath = androidx.compose.ui.graphics.Path().apply {
+                    for (k in 0 until 3) {
+                        val rad = Math.toRadians((k * 120 - 90).toDouble()).toFloat()
+                        val px = center.x + radius * 0.72f * kotlin.math.cos(rad)
+                        val py = center.y + radius * 0.72f * kotlin.math.sin(rad)
+                        if (k == 0) moveTo(px, py) else lineTo(px, py)
+                    }
+                    close()
+                }
+                drawPath(
+                    triPath,
+                    color = Color(0xFF8B5CF6).copy(alpha = 0.30f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f)
+                )
+            }
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -222,6 +292,17 @@ fun DaveSplashIntro(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 3.sp,
                     color = Color(0xFF94A3B8)
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Fase lunar real del día: el cielo acompaña la invocación
+                Text(
+                    text = "${lunarPhase.phaseEmoji} ${lunarPhase.illuminationPercent}% · ᛟ",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 2.sp,
+                    color = Color(0xFF818CF8)
                 )
 
                 Spacer(modifier = Modifier.height(22.dp))
