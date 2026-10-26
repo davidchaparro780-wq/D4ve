@@ -432,19 +432,32 @@ fun MusicScreen(
     val themePrimary = MaterialTheme.colorScheme.primary
     val themeSecondary = MaterialTheme.colorScheme.secondary
     val themeTertiary = MaterialTheme.colorScheme.tertiary
+    val isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    listOf(
-                        themePrimary.copy(alpha = 0.22f),
-                        themeSecondary.copy(alpha = 0.10f),
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.background
+                if (isMysterious) {
+                    // Void Obsidiano: gradiente esotérico profundo para la Suite Misteriosa
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFF170B2E).copy(alpha = 0.55f),
+                            Color(0xFF07030F),
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.background
+                        )
                     )
-                )
+                } else {
+                    Brush.verticalGradient(
+                        listOf(
+                            themePrimary.copy(alpha = 0.22f),
+                            themeSecondary.copy(alpha = 0.10f),
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                }
             )
     ) {
         // Top Header Bar: Branding & Quick Action Controls
@@ -457,6 +470,14 @@ fun MusicScreen(
         ) {
             // App Branding
             Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isMysterious) {
+                    Text(
+                        text = "ᛟ",
+                        fontSize = 19.sp,
+                        color = themeSecondary,
+                        modifier = Modifier.padding(end = 6.dp)
+                    )
+                }
                 Text(
                     text = "DaVE",
                     fontSize = 22.sp,
@@ -696,6 +717,14 @@ fun MusicScreen(
                     )
                 }
             }
+        }
+
+        // Necronomic Scroll: susurros esotéricos rotativos bajo la cabecera
+        if (isMysterious) {
+            com.auraplayer.ui.components.NecronomicScrollText(
+                accentColor = themeSecondary,
+                modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)
+            )
         }
 
         // Search Input Field & Integrated Sort Action

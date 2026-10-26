@@ -377,9 +377,7 @@ fun PlayerScreen(
 
     val playerPlaylistManager = remember { PlaylistManager(context) }
     var currentThemeAccentState by remember { mutableStateOf(playerPlaylistManager.getThemeAccent()) }
-    val isMysteriousTheme = currentThemeAccentState in listOf(
-        "MYSTIC_OBSIDIAN", "MIDNIGHT_ECLIPSE", "PHANTOM_SPECTER", "NEBULA_ENIGMA"
-    )
+    val isMysteriousTheme = com.auraplayer.ui.theme.isMysteriousAccent(currentThemeAccentState)
     val lunarPhase = remember { LunarPhaseManager.getCurrentPhase() }
     var currentArcaneHz by remember { mutableIntStateOf(432) }
     var showArcaneFrequencyDialog by remember { mutableStateOf(false) }

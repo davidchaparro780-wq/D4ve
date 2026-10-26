@@ -145,6 +145,13 @@ private data class PaletteDefinition(
     val onSurface: Color
 )
 
+// Acentos canónicos de la Suite Misteriosa: activan la ambientación arcano en toda la app
+val MysteriousAccents = setOf(
+    "MYSTIC_OBSIDIAN", "MIDNIGHT_ECLIPSE", "PHANTOM_SPECTER", "NEBULA_ENIGMA"
+)
+
+fun isMysteriousAccent(accent: String): Boolean = accent.uppercase() in MysteriousAccents
+
 @Composable
 fun AuraTheme(
     accent: String = "MYSTIC_OBSIDIAN",

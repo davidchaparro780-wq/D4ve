@@ -134,6 +134,7 @@ fun DiscoverScreen(
     onDownloadComplete: () -> Unit,
     currentPlayingTitle: String? = null,
     isPlaying: Boolean = false,
+    currentAccent: String = "MYSTIC_OBSIDIAN",
     onAddToQueue: ((OnlineTrack) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -275,6 +276,8 @@ fun DiscoverScreen(
         }
     }
 
+    val isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -283,14 +286,26 @@ fun DiscoverScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background
+                    if (isMysterious) {
+                        // Void esotérico para la Suite Misteriosa
+                        Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF1B0D33).copy(alpha = 0.6f),
+                                Color(0xFF070310),
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.background
+                            )
                         )
-                    )
+                    } else {
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.background
+                            )
+                        )
+                    }
                 )
                 .padding(horizontal = 14.dp)
         ) {
@@ -405,6 +420,14 @@ fun DiscoverScreen(
                         )
                     }
                 }
+            }
+
+            // Nebulosa de constelación arcano reactiva al audio (Suite Misteriosa)
+            if (isMysterious) {
+                com.auraplayer.ui.components.StellarConstellationBanner(
+                    bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying),
+                    accentColor = MaterialTheme.colorScheme.primary
+                )
             }
 
             Spacer(modifier = Modifier.height(6.dp))

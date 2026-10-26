@@ -83,6 +83,7 @@ fun MiniPlayer(
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit = {},
     onClick: () -> Unit,
+    isMysterious: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
@@ -159,13 +160,27 @@ fun MiniPlayer(
                         .shadow(
                             elevation = 14.dp,
                             shape = RoundedCornerShape(22.dp),
-                            spotColor = Color.Black.copy(alpha = 0.65f),
+                            spotColor = if (isMysterious) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.65f),
                             ambientColor = Color.Black.copy(alpha = 0.5f)
                         )
                         .clip(RoundedCornerShape(22.dp))
                         .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.10f),
+                            width = if (isMysterious) 1.2.dp else 1.dp,
+                            brush = if (isMysterious) {
+                                // Borde rúnico: gradiente esotérico primario -> secundario -> terciario
+                                Brush.linearGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
+                                        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f),
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                    )
+                                )
+                            } else {
+                                Brush.linearGradient(
+                                    listOf(Color.White.copy(alpha = 0.10f), Color.White.copy(alpha = 0.10f))
+                                )
+                            },
                             shape = RoundedCornerShape(22.dp)
                         )
                         .semantics {

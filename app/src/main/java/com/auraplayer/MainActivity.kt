@@ -2190,6 +2190,7 @@ fun AuraApp(
                     currentMedia = currentMedia,
                     isPlaying = isPlaying,
                     progress = progress,
+                    isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent),
                     onPlayPauseClick = {
                         controller?.let {
                             if (it.isPlaying) it.pause() else it.play()
@@ -2629,6 +2630,7 @@ fun AuraApp(
                 onPendingSearchQueryConsumed = { pendingDiscoverQuery = null },
                 currentPlayingTitle = currentMedia?.title,
                 isPlaying = isPlaying,
+                currentAccent = currentAccent,
                 onOpenDownloads = { showDownloadsScreen = true },
                 onPreviewTrack = { onlineTrack ->
                     scope.launch {
