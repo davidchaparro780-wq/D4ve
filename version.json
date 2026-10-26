@@ -1,7 +1,7 @@
 {
-  "versionCode": 166,
-  "versionName": "4.9.66",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.66/app-release.apk",
-  "changelog": "🔮 DaVE Player v4.9.66 (Build 166) — Full Mystic Suite:\n• 🌫️ Phantom Mist en la Biblioteca: bruma espectral flotando detrás de tus canciones.\n• 🎭 Transición de Velo: las pantallas se funden entre bruma al cambiar de pestaña.\n• 🃏 Carta del Día en el Magic Hub 🔥: fase lunar + canción destinada por el azar cósmico.\n• ✨ Splash de Invocación: círculo rúnico rotatorio y fase lunar al abrir la app.\n• 🌙 Sueño Etéreo: despedida de niebla con 'ᛉ El velo te llama…' en el fade-out del temporizador.\n• ⚡ Visuales reactivos fluidos: bloom, niebla y constelaciones respiran al ritmo real del FFT (~20 Hz).\n• 🔑 Servidor WiFi con Código de Invocación de 4 dígitos que protege comandos y descargas.\n• 🏷️ Renombrado Ritual: 'Latido del Abismo ᛟ', 'Sueño Etéreo ᛉ' y vacíos primordiales en estados vacíos.\n• 🧪 Primeros tests unitarios: updater y fase lunar blindados.\n• Incluye las correcciones de v4.9.63-65.",
+  "versionCode": 167,
+  "versionName": "4.9.67",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.67/app-release.apk",
+  "changelog": "🛡️ DaVE Player v4.9.67 (Build 167) — Seguridad, Accesibilidad y Limpieza:\n• 🔐 Página del servidor WiFi renovada: eliminado el modal falso de inicio de sesión y el modo cloud mock; solo tu biblioteca real con el código de invocación.\n• ♿ Accesibilidad TalkBack en los 4 skins con gestos (Monolito, Tornamesa, Vúmetros, iPod).\n• ⚡ Constelación de Explorar con bajo fluido vía FFT real (~20 Hz).\n• 📦 Repositorio renovado, README actualizado y Publicar_DaVE.ps1 (pipeline de publicación automatizado).\n• ✅ Auditoría edge-to-edge para Android 15 superada.\n• Incluye todo lo de v4.9.63-66: Mystic Overdrive, Full Mystic Suite y correcciones.",
   "fileSizeMb": 17.7
 }
