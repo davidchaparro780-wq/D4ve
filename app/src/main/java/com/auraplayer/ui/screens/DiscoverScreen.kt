@@ -166,6 +166,7 @@ fun DiscoverScreen(
     var showFacebookDialog by remember { mutableStateOf(false) }
     var facebookInitialUrl by remember { mutableStateOf("") }
     var showRadarDialog by remember { mutableStateOf(false) }
+    var showSocialDownloaderSheet by remember { mutableStateOf(false) }
 
     // When searching or viewing specific genre, BackHandler resets to Trending
     BackHandler(enabled = searchQuery.isNotBlank() || selectedGenre != "Trending") {
@@ -345,106 +346,31 @@ fun DiscoverScreen(
                 }
 
                 Row(
-                    modifier = Modifier.weight(1f, fill = false).horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // TikTok No-Watermark Shortcut Pill
+                    // Unified Social Tools Button
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
+                            .shadow(3.dp, RoundedCornerShape(14.dp), spotColor = Color(0xFFFE2C55).copy(alpha = 0.35f))
+                            .clip(RoundedCornerShape(14.dp))
                             .background(
                                 Brush.horizontalGradient(
-                                    listOf(Color(0xFF00F2FE), Color(0xFFFE2C55))
+                                    listOf(Color(0xFFFE2C55), Color(0xFF833AB4))
                                 )
                             )
                             .clickable {
                                 AuraHaptic.click(view)
-                                tiktokInitialUrl = if (TikTokDownloader.isTikTokUrl(searchQuery)) searchQuery.trim() else ""
-                                showTikTokDialog = true
+                                showSocialDownloaderSheet = true
                             }
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
+                            .padding(horizontal = 9.dp, vertical = 6.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "🎬 TikTok",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.Black
-                        )
-                    }
-
-                    // Instagram Reels Shortcut Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFFCB045))
-                                )
-                            )
-                            .clickable {
-                                AuraHaptic.click(view)
-                                instagramInitialUrl = if (InstagramDownloader.isInstagramUrl(searchQuery)) searchQuery.trim() else ""
-                                showInstagramDialog = true
-                            }
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "📸 Insta",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.ExtraBold,
+                            text = "📥 Redes",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
                             color = Color.White
-                        )
-                    }
-
-                    // Facebook Reels & Video Shortcut Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFF1877F2), Color(0xFF0D55BE))
-                                )
-                            )
-                            .clickable {
-                                AuraHaptic.click(view)
-                                facebookInitialUrl = if (FacebookDownloader.isFacebookUrl(searchQuery)) searchQuery.trim() else ""
-                                showFacebookDialog = true
-                            }
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "📘 FB",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
-                    }
-
-                    // DaVE Radar Shortcut Pill
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFF00F0FF), Color(0xFF8B5CF6))
-                                )
-                            )
-                            .clickable {
-                                AuraHaptic.click(view)
-                                showRadarDialog = true
-                            }
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "🔍 Radar",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.Black
                         )
                     }
 
@@ -452,8 +378,8 @@ fun DiscoverScreen(
                     val is320 = downloadQuality == "320"
                     Box(
                         modifier = Modifier
-                            .shadow(3.dp, RoundedCornerShape(16.dp), spotColor = if (is320) Color(0xFF38BDF8).copy(alpha = 0.35f) else Color(0xFFF59E0B).copy(alpha = 0.35f))
-                            .clip(RoundedCornerShape(16.dp))
+                            .shadow(3.dp, RoundedCornerShape(14.dp), spotColor = if (is320) Color(0xFF38BDF8).copy(alpha = 0.35f) else Color(0xFFF59E0B).copy(alpha = 0.35f))
+                            .clip(RoundedCornerShape(14.dp))
                             .background(
                                 Brush.verticalGradient(
                                     if (is320) listOf(Color(0xFF1E2642), Color(0xFF0F1524))
@@ -468,12 +394,12 @@ fun DiscoverScreen(
                                 val msg = if (next == "320") "💎 Calidad: 320 kbps (Hi-Fi)" else "⚡ Calidad: 160 kbps (Rápido)"
                                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                             }
-                            .padding(horizontal = 7.dp, vertical = 4.dp),
+                            .padding(horizontal = 9.dp, vertical = 6.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (is320) "💎 320k" else "⚡ 160k",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (is320) Color(0xFF38BDF8) else Color(0xFFF59E0B)
                         )
@@ -1044,6 +970,131 @@ fun DiscoverScreen(
             onPlayTrackNow = { completedTrack ->
                 onPreviewTrack(completedTrack)
             }
+        )
+    }
+
+    if (showSocialDownloaderSheet) {
+        AlertDialog(
+            onDismissRequest = { showSocialDownloaderSheet = false },
+            title = {
+                Text(
+                    text = "📥 Descargar de Redes",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Selecciona una red para descargar videos o audio directamente:",
+                        color = Color(0xFF94A3B8),
+                        fontSize = 12.sp
+                    )
+
+                    // TikTok
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Brush.horizontalGradient(listOf(Color(0xFF00F2FE).copy(alpha = 0.15f), Color(0xFFFE2C55).copy(alpha = 0.25f))))
+                            .border(1.dp, Color(0xFFFE2C55).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showSocialDownloaderSheet = false
+                                tiktokInitialUrl = if (TikTokDownloader.isTikTokUrl(searchQuery)) searchQuery.trim() else ""
+                                showTikTokDialog = true
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🎬", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = "TikTok Downloader", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(text = "Sin marca de agua en MP4 o MP3", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        }
+                    }
+
+                    // Instagram
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Brush.horizontalGradient(listOf(Color(0xFF833AB4).copy(alpha = 0.2f), Color(0xFFFD1D1D).copy(alpha = 0.2f))))
+                            .border(1.dp, Color(0xFFFD1D1D).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showSocialDownloaderSheet = false
+                                instagramInitialUrl = if (InstagramDownloader.isInstagramUrl(searchQuery)) searchQuery.trim() else ""
+                                showInstagramDialog = true
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "📸", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = "Instagram Reels", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(text = "Reels, audios y publicaciones HD", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        }
+                    }
+
+                    // Facebook
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF1877F2).copy(alpha = 0.18f))
+                            .border(1.dp, Color(0xFF1877F2).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showSocialDownloaderSheet = false
+                                facebookInitialUrl = if (FacebookDownloader.isFacebookUrl(searchQuery)) searchQuery.trim() else ""
+                                showFacebookDialog = true
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "📘", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = "Facebook Watch", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(text = "Videos y reels públicos en HD", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        }
+                    }
+
+                    // Radar
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Brush.horizontalGradient(listOf(Color(0xFF00F0FF).copy(alpha = 0.18f), Color(0xFF8B5CF6).copy(alpha = 0.18f))))
+                            .border(1.dp, Color(0xFF00F0FF).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showSocialDownloaderSheet = false
+                                showRadarDialog = true
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🔍", fontSize = 20.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = "DaVE Radar", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(text = "Buscador global multi-plataforma", color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSocialDownloaderSheet = false }) {
+                    Text("Cerrar", color = Color(0xFF38BDF8))
+                }
+            },
+            containerColor = Color(0xFF101626),
+            tonalElevation = 8.dp
         )
     }
 

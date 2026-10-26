@@ -393,12 +393,8 @@ fun MusicScreen(
                 val ext = File(it.path).extension.lowercase()
                 ext in listOf("flac", "wav", "m4a", "alac", "dsf", "dff")
             }
-            5 -> {
-                val favs = favoritesManager.getFavoriteIds()
-                list.filter { favs.contains(it.id) }
-            }
-            6 -> list.filter { it.duration in 1..150000L } // < 2.5 min
-            7 -> list.filter { it.duration >= 240000L } // > 4 min
+            5 -> list.filter { it.duration in 1..150000L } // < 2.5 min
+            6 -> list.filter { it.duration >= 240000L } // > 4 min
             else -> list
         }
 
@@ -947,7 +943,7 @@ fun MusicScreen(
                     .padding(horizontal = 14.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val filters = listOf("Todas", "📥 Descargas", "🕒 Recientes", "🔥 Más Escuchadas", "💎 Lossless", "❤️ Favoritas", "⚡ Cortas", "☕ Largas")
+                val filters = listOf("Todas", "📥 Descargas", "🕒 Recientes", "🔥 Más Escuchadas", "💎 Lossless", "⚡ Cortas", "☕ Largas")
                 itemsIndexed(filters) { index, label ->
                     val isSelected = selectedFilterIndex == index
                     Box(
@@ -1692,27 +1688,68 @@ fun MusicScreen(
                                                             modifier = Modifier.weight(1f),
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
+                                                            val firstSong = remember(pl.songIds, songs) {
+                                                                songs.firstOrNull { it.id in pl.songIds }
+                                                            }
                                                             Box(
                                                                 modifier = Modifier
-                                                                    .size(46.dp)
+                                                                    .size(48.dp)
                                                                     .shadow(3.dp, RoundedCornerShape(12.dp))
                                                                     .clip(RoundedCornerShape(12.dp))
-                                                                    .background(
-                                                                        Brush.verticalGradient(
-                                                                            listOf(
-                                                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                                                            )
-                                                                        )
-                                                                    ),
+                                                                    .background(Color(0xFF1E2840)),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                Icon(
-                                                                    Icons.Default.QueueMusic,
-                                                                    contentDescription = null,
-                                                                    tint = MaterialTheme.colorScheme.primary,
-                                                                    modifier = Modifier.size(24.dp)
-                                                                )
+                                                                if (firstSong?.albumArtUri != null) {
+                                                                    val imageRequest = remember(firstSong.albumArtUri) {
+                                                                        coil.request.ImageRequest.Builder(context)
+                                                                            .data(firstSong.albumArtUri)
+                                                                            .crossfade(150)
+                                                                            .build()
+                                                                    }
+                                                                    coil.compose.AsyncImage(
+                                                                        model = imageRequest,
+                                                                        contentDescription = null,
+                                                                        contentScale = ContentScale.Crop,
+                                                                        modifier = Modifier.fillMaxSize()
+                                                                    )
+                                                                    Box(
+                                                                        modifier = Modifier
+                                                                            .align(Alignment.BottomEnd)
+                                                                            .padding(3.dp)
+                                                                            .size(16.dp)
+                                                                            .clip(CircleShape)
+                                                                            .background(Color.Black.copy(alpha = 0.65f)),
+                                                                        contentAlignment = Alignment.Center
+                                                                    ) {
+                                                                        Icon(
+                                                                            Icons.Default.QueueMusic,
+                                                                            contentDescription = null,
+                                                                            tint = Color.White,
+                                                                            modifier = Modifier.size(10.dp)
+                                                                        )
+                                                                    }
+                                                                } else {
+                                                                    Box(
+                                                                        modifier = Modifier
+                                                                            .fillMaxSize()
+                                                                            .background(
+                                                                                Brush.verticalGradient(
+                                                                                    listOf(
+                                                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                                                                    )
+                                                                                )
+                                                                            ),
+                                                                        contentAlignment = Alignment.Center
+                                                                    ) {
+                                                                        Icon(
+                                                                            Icons.Default.QueueMusic,
+                                                                            contentDescription = null,
+                                                                            tint = MaterialTheme.colorScheme.primary,
+                                                                            modifier = Modifier.size(24.dp)
+                                                                        )
+                                                                    }
+                                                                }
                                                             }
                                                             Spacer(modifier = Modifier.width(14.dp))
                                                             Column {

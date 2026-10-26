@@ -180,331 +180,297 @@ fun SettingsScreen(
                 // Section 1: Audio & Reproducción
                 item {
                     SettingsSectionHeader(title = "AUDIO & REPRODUCCIÓN", icon = Icons.Default.Audiotrack)
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Fundido Cruzado (Crossfade)",
-                        subtitle = if (currentCrossfadeSec == 0) "Desactivado (Reproducción directa)" else "Transición suave de ${currentCrossfadeSec}s entre canciones",
-                        icon = Icons.Default.GraphicEq,
-                        actionText = if (currentCrossfadeSec == 0) "OFF" else "${currentCrossfadeSec}s",
-                        onClick = {
-                            AuraHaptic.click(null)
-                            showCrossfadeDialog = true
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Pausa y reanudación suave (Fade In/Out)",
-                        subtitle = "Sube y baja el volumen gradualmente sin cortes bruscos",
-                        icon = Icons.Default.VolumeUp,
-                        checked = settings.fadePlayback,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setFadePlaybackEnabled(it)
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Pausar al desconectar audífonos",
-                        subtitle = "Detiene la música al desconectar auriculares o Bluetooth",
-                        icon = Icons.Default.Headphones,
-                        checked = settings.pauseOnHeadphonesDisconnect,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setPauseOnHeadphonesDisconnectEnabled(it)
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Reanudar al conectar audífonos",
-                        subtitle = "Continúa reproduciendo automáticamente al conectar audífonos",
-                        icon = Icons.Default.TouchApp,
-                        checked = settings.resumeOnHeadphonesConnect,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setResumeOnHeadphonesConnectEnabled(it)
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Normalización de Volumen (ReplayGain)",
-                        subtitle = "Nivela automáticamente la ganancia a -14 LUFS para evitar saltos bruscos entre canciones",
-                        icon = Icons.Default.VolumeUp,
-                        checked = isLoudnessEnabled,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            isLoudnessEnabled = it
-                            loudnessNormalizer.isEnabled = it
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Omitir Silencios Muertos (Smart Silence Skip)",
-                        subtitle = "Salta automáticamente los silencios inaudibles al inicio y final de las canciones",
-                        icon = Icons.Default.ContentCut,
-                        checked = isSilenceTrimmerEnabled,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            isSilenceTrimmerEnabled = it
-                            silenceTrimmer.isEnabled = it
-                            com.auraplayer.service.PlaybackService.activePlayer?.skipSilenceEnabled = it
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Burbuja Flotante Multitarea (Dynamic Mini Player)",
-                        subtitle = "Muestra un reproductor flotante en pantalla para controlar tu música sobre cualquier app",
-                        icon = Icons.Default.PictureInPictureAlt,
-                        checked = isFloatingBubbleRunning,
-                        onCheckedChange = { enable ->
-                            AuraHaptic.click(null)
-                            if (enable) {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(context)) {
-                                    Toast.makeText(context, "Concede el permiso para mostrar la burbuja flotante", Toast.LENGTH_LONG).show()
-                                    val intent = Intent(
-                                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        android.net.Uri.parse("package:${context.packageName}")
-                                    )
-                                    context.startActivity(intent)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    SettingsGroupCard {
+                        SettingsActionRow(
+                            title = "Fundido Cruzado (Crossfade)",
+                            subtitle = if (currentCrossfadeSec == 0) "Desactivado (Reproducción directa)" else "Transición suave de ${currentCrossfadeSec}s entre canciones",
+                            icon = Icons.Default.GraphicEq,
+                            actionText = if (currentCrossfadeSec == 0) "OFF" else "${currentCrossfadeSec}s",
+                            onClick = {
+                                AuraHaptic.click(null)
+                                showCrossfadeDialog = true
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Pausa y reanudación suave (Fade In/Out)",
+                            subtitle = "Sube y baja el volumen gradualmente sin cortes bruscos",
+                            icon = Icons.Default.VolumeUp,
+                            checked = settings.fadePlayback,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setFadePlaybackEnabled(it)
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Pausar al desconectar audífonos",
+                            subtitle = "Detiene la música al desconectar auriculares o Bluetooth",
+                            icon = Icons.Default.Headphones,
+                            checked = settings.pauseOnHeadphonesDisconnect,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setPauseOnHeadphonesDisconnectEnabled(it)
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Reanudar al conectar audífonos",
+                            subtitle = "Continúa reproduciendo automáticamente al conectar audífonos",
+                            icon = Icons.Default.TouchApp,
+                            checked = settings.resumeOnHeadphonesConnect,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setResumeOnHeadphonesConnectEnabled(it)
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Normalización de Volumen (ReplayGain)",
+                            subtitle = "Nivela automáticamente la ganancia a -14 LUFS para evitar saltos bruscos entre canciones",
+                            icon = Icons.Default.VolumeUp,
+                            checked = isLoudnessEnabled,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                isLoudnessEnabled = it
+                                loudnessNormalizer.isEnabled = it
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Omitir Silencios Muertos (Smart Silence Skip)",
+                            subtitle = "Salta automáticamente los silencios inaudibles al inicio y final de las canciones",
+                            icon = Icons.Default.ContentCut,
+                            checked = isSilenceTrimmerEnabled,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                isSilenceTrimmerEnabled = it
+                                silenceTrimmer.isEnabled = it
+                                com.auraplayer.service.PlaybackService.activePlayer?.skipSilenceEnabled = it
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Burbuja Flotante Multitarea (Dynamic Mini Player)",
+                            subtitle = "Muestra un reproductor flotante en pantalla para controlar tu música sobre cualquier app",
+                            icon = Icons.Default.PictureInPictureAlt,
+                            checked = isFloatingBubbleRunning,
+                            onCheckedChange = { enable ->
+                                AuraHaptic.click(null)
+                                if (enable) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.canDrawOverlays(context)) {
+                                        Toast.makeText(context, "Concede el permiso para mostrar la burbuja flotante", Toast.LENGTH_LONG).show()
+                                        val intent = Intent(
+                                            android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                            android.net.Uri.parse("package:${context.packageName}")
+                                        )
+                                        context.startActivity(intent)
+                                    } else {
+                                        val bubbleIntent = Intent(context, com.auraplayer.service.FloatingBubbleService::class.java)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            context.startForegroundService(bubbleIntent)
+                                        } else {
+                                            context.startService(bubbleIntent)
+                                        }
+                                        isFloatingBubbleRunning = true
+                                    }
                                 } else {
                                     val bubbleIntent = Intent(context, com.auraplayer.service.FloatingBubbleService::class.java)
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        context.startForegroundService(bubbleIntent)
-                                    } else {
-                                        context.startService(bubbleIntent)
-                                    }
-                                    isFloatingBubbleRunning = true
+                                    context.stopService(bubbleIntent)
+                                    isFloatingBubbleRunning = false
                                 }
-                            } else {
-                                val bubbleIntent = Intent(context, com.auraplayer.service.FloatingBubbleService::class.java)
-                                context.stopService(bubbleIntent)
-                                isFloatingBubbleRunning = false
                             }
-                        }
-                    )
+                        )
+                    }
                 }
 
                 // Section 2: Filtro de Biblioteca
                 item {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     SettingsSectionHeader(title = "BIBLIOTECA & LIMPIEZA", icon = Icons.Default.GraphicEq)
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Ocultar audios cortos (Notas de voz)",
-                        subtitle = when (settings.hideShortAudioDurationSec) {
-                            0 -> "Desactivado (mostrar todos los audios)"
-                            else -> "Ocultar audios de menos de ${settings.hideShortAudioDurationSec} segundos"
-                        },
-                        icon = Icons.Default.Settings,
-                        actionText = if (settings.hideShortAudioDurationSec == 0) "Desactivado" else "${settings.hideShortAudioDurationSec}s",
-                        onClick = {
-                            AuraHaptic.click(null)
-                            showShortAudioDialog = true
-                        }
-                    )
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Re-escanear biblioteca musical",
-                        subtitle = "Busca nuevas canciones descargadas o añadidas al dispositivo",
-                        icon = Icons.Default.Refresh,
-                        actionText = "Escanear",
-                        onClick = {
-                            AuraHaptic.heavy(null)
-                            onRescanLibrary()
-                        }
-                    )
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Copia de Seguridad y Restauración",
-                        subtitle = "Exporta o restaura listas, favoritos, cola y ajustes en un archivo .json",
-                        icon = Icons.Default.Backup,
-                        actionText = "Gestionar",
-                        onClick = {
-                            AuraHaptic.click(null)
-                            showBackupDialog = true
-                        }
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    SettingsGroupCard {
+                        SettingsActionRow(
+                            title = "Ocultar audios cortos (Notas de voz)",
+                            subtitle = when (settings.hideShortAudioDurationSec) {
+                                0 -> "Desactivado (mostrar todos los audios)"
+                                else -> "Ocultar audios de menos de ${settings.hideShortAudioDurationSec} segundos"
+                            },
+                            icon = Icons.Default.Settings,
+                            actionText = if (settings.hideShortAudioDurationSec == 0) "Desactivado" else "${settings.hideShortAudioDurationSec}s",
+                            onClick = {
+                                AuraHaptic.click(null)
+                                showShortAudioDialog = true
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsActionRow(
+                            title = "Re-escanear biblioteca musical",
+                            subtitle = "Busca nuevas canciones descargadas o añadidas al dispositivo",
+                            icon = Icons.Default.Refresh,
+                            actionText = "Escanear",
+                            onClick = {
+                                AuraHaptic.heavy(null)
+                                onRescanLibrary()
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsActionRow(
+                            title = "Copia de Seguridad y Restauración",
+                            subtitle = "Exporta o restaura listas, favoritos, cola y ajustes en un archivo .json",
+                            icon = Icons.Default.Backup,
+                            actionText = "Gestionar",
+                            onClick = {
+                                AuraHaptic.click(null)
+                                showBackupDialog = true
+                            }
+                        )
+                    }
                 }
 
                 // Section 3: Gestos & Pantalla
                 item {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     SettingsSectionHeader(title = "GESTOS & PANTALLA", icon = Icons.Default.TouchApp)
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Vibración Háptica",
-                        subtitle = "Respuesta táctil suave en botones, deslizamiento y listas",
-                        icon = Icons.Default.Vibration,
-                        checked = settings.hapticFeedbackEnabled,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setHapticEnabled(it)
-                        }
-                    )
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Mantener pantalla encendida en reproductor",
-                        subtitle = "Evita que la pantalla se bloquee mientras miras el reproductor",
-                        icon = Icons.Default.ScreenLockPortrait,
-                        checked = settings.keepScreenOnInPlayer,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setKeepScreenOnInPlayerEnabled(it)
-                        }
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    SettingsGroupCard {
+                        SettingsToggleRow(
+                            title = "Vibración Háptica",
+                            subtitle = "Respuesta táctil suave en botones, deslizamiento y listas",
+                            icon = Icons.Default.Vibration,
+                            checked = settings.hapticFeedbackEnabled,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setHapticEnabled(it)
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Mantener pantalla encendida en reproductor",
+                            subtitle = "Evita que la pantalla se bloquee mientras miras el reproductor",
+                            icon = Icons.Default.ScreenLockPortrait,
+                            checked = settings.keepScreenOnInPlayer,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setKeepScreenOnInPlayerEnabled(it)
+                            }
+                        )
+                    }
                 }
 
                 // Section 4: Visual & Visualizador
                 item {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     SettingsSectionHeader(title = "INTERFAZ & VISUALIZADOR", icon = Icons.Default.ColorLens)
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Fondo dinámico adaptativo",
-                        subtitle = "Extrae los colores de la carátula para ambientar el reproductor",
-                        icon = Icons.Default.ColorLens,
-                        checked = settings.dynamicPaletteEnabled,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setDynamicPalette(it)
-                        }
-                    )
-                }
-
-                item {
-                    val supportsDynamicColor = android.os.Build.VERSION.SDK_INT >= 31
-                    SettingsToggleCard(
-                        title = "Color del sistema (Material You)",
-                        subtitle = if (supportsDynamicColor) "Usa los colores de tu fondo de pantalla. Solo Android 12 o superior." else "No disponible en esta versión de Android",
-                        icon = Icons.Default.ColorLens,
-                        checked = settings.isDynamicColorEnabled(),
-                        enabled = supportsDynamicColor,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setDynamicColorEnabled(it)
-                        }
-                    )
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Sensibilidad del visualizador de audio",
-                        subtitle = when (settings.visualizerSensitivity) {
-                            0.6f -> "Suave (Reacción moderada)"
-                            1.5f -> "Intensa (Máxima potencia)"
-                            else -> "Normal (Equilibrada)"
-                        },
-                        icon = Icons.Default.GraphicEq,
-                        actionText = when (settings.visualizerSensitivity) {
-                            0.6f -> "Suave"
-                            1.5f -> "Intensa"
-                            else -> "Normal"
-                        },
-                        onClick = {
-                            AuraHaptic.click(null)
-                            showSensitivityDialog = true
-                        }
-                    )
-                }
-
-                // Section 5: Seguridad & Bóveda
-                item {
                     Spacer(modifier = Modifier.height(6.dp))
-                    SettingsSectionHeader(title = "SEGURIDAD & BÓVEDA", icon = Icons.Default.Security)
+                    SettingsGroupCard {
+                        SettingsToggleRow(
+                            title = "Fondo dinámico adaptativo",
+                            subtitle = "Extrae los colores de la carátula para ambientar el reproductor",
+                            icon = Icons.Default.ColorLens,
+                            checked = settings.dynamicPaletteEnabled,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setDynamicPalette(it)
+                            }
+                        )
+                        SettingsDivider()
+                        val supportsDynamicColor = android.os.Build.VERSION.SDK_INT >= 31
+                        SettingsToggleRow(
+                            title = "Color del sistema (Material You)",
+                            subtitle = if (supportsDynamicColor) "Usa los colores de tu fondo de pantalla. Solo Android 12 o superior." else "No disponible en esta versión de Android",
+                            icon = Icons.Default.ColorLens,
+                            checked = settings.isDynamicColorEnabled(),
+                            enabled = supportsDynamicColor,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setDynamicColorEnabled(it)
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsActionRow(
+                            title = "Sensibilidad del visualizador de audio",
+                            subtitle = when (settings.visualizerSensitivity) {
+                                0.6f -> "Suave (Reacción moderada)"
+                                1.5f -> "Intensa (Máxima potencia)"
+                                else -> "Normal (Equilibrada)"
+                            },
+                            icon = Icons.Default.GraphicEq,
+                            actionText = when (settings.visualizerSensitivity) {
+                                0.6f -> "Suave"
+                                1.5f -> "Intensa"
+                                else -> "Normal"
+                            },
+                            onClick = {
+                                AuraHaptic.click(null)
+                                showSensitivityDialog = true
+                            }
+                        )
+                    }
                 }
 
+                // Section 5: Seguridad, Bóveda & Actualizaciones
                 item {
-                    SettingsToggleCard(
-                        title = "Desbloqueo Biométrico (Huella Digital)",
-                        subtitle = "Acceso instantáneo a tu bóveda con lector de huella o biometría",
-                        icon = Icons.Default.Fingerprint,
-                        checked = isBiometricVaultEnabled,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            vaultManager.setBiometricEnabled(it)
-                            isBiometricVaultEnabled = it
-                            Toast.makeText(
-                                context,
-                                if (it) "Huella digital habilitada para la Bóveda" else "Huella digital deshabilitada",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    )
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Bóveda Señuelo (Decoy PIN)",
-                        subtitle = "El PIN 0000 abre una bóveda camuflada vacía para máxima privacidad",
-                        icon = Icons.Default.Shield,
-                        actionText = "PIN: 0000",
-                        onClick = {
-                            AuraHaptic.click(null)
-                            Toast.makeText(
-                                context,
-                                "Si alguien te obliga a abrir la bóveda, introduce '0000' para mostrarla completamente vacía.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    )
-                }
-
-                // Section 6: Notificaciones & Actualizaciones
-                item {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    SettingsSectionHeader(title = "SEGURIDAD & SISTEMA", icon = Icons.Default.Security)
                     Spacer(modifier = Modifier.height(6.dp))
-                    SettingsSectionHeader(title = "NOTIFICACIONES & ACTUALIZACIONES", icon = Icons.Default.Notifications)
-                }
-
-                item {
-                    SettingsToggleCard(
-                        title = "Notificaciones de nuevas versiones",
-                        subtitle = "Recibe una alerta en el celular cuando salga una nueva actualización de DaVE",
-                        icon = Icons.Default.Notifications,
-                        checked = settings.notifyUpdates,
-                        onCheckedChange = {
-                            AuraHaptic.click(null)
-                            settings.setNotifyUpdatesEnabled(it)
-                        }
-                    )
-                }
-
-                item {
-                    SettingsActionCard(
-                        title = "Buscar actualizaciones ahora",
-                        subtitle = "Comprobar si hay una nueva versión disponible en GitHub",
-                        icon = Icons.Default.SystemUpdate,
-                        actionText = if (isCheckingUpdate) "Buscando..." else "Comprobar",
-                        isLoading = isCheckingUpdate,
-                        onClick = {
-                            AuraHaptic.heavy(null)
-                            onCheckUpdate()
-                        }
-                    )
+                    SettingsGroupCard {
+                        SettingsToggleRow(
+                            title = "Desbloqueo Biométrico (Huella Digital)",
+                            subtitle = "Acceso instantáneo a tu bóveda con lector de huella o biometría",
+                            icon = Icons.Default.Fingerprint,
+                            checked = isBiometricVaultEnabled,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                vaultManager.setBiometricEnabled(it)
+                                isBiometricVaultEnabled = it
+                                Toast.makeText(
+                                    context,
+                                    if (it) "Huella digital habilitada para la Bóveda" else "Huella digital deshabilitada",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsActionRow(
+                            title = "Bóveda Señuelo (Decoy PIN)",
+                            subtitle = "El PIN 0000 abre una bóveda camuflada vacía para máxima privacidad",
+                            icon = Icons.Default.Shield,
+                            actionText = "PIN: 0000",
+                            onClick = {
+                                AuraHaptic.click(null)
+                                Toast.makeText(
+                                    context,
+                                    "Si alguien te obliga a abrir la bóveda, introduce '0000' para mostrarla completamente vacía.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Notificaciones de nuevas versiones",
+                            subtitle = "Recibe una alerta en el celular cuando salga una nueva actualización de DaVE",
+                            icon = Icons.Default.Notifications,
+                            checked = settings.notifyUpdates,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setNotifyUpdatesEnabled(it)
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsActionRow(
+                            title = "Buscar actualizaciones ahora",
+                            subtitle = "Comprobar si hay una nueva versión disponible en GitHub",
+                            icon = Icons.Default.SystemUpdate,
+                            actionText = if (isCheckingUpdate) "Buscando..." else "Comprobar",
+                            isLoading = isCheckingUpdate,
+                            onClick = {
+                                AuraHaptic.heavy(null)
+                                onCheckUpdate()
+                            }
+                        )
+                    }
                 }
 
                 // Section 6: Acerca de DaVE Player
@@ -833,7 +799,35 @@ private fun SettingsSectionHeader(title: String, icon: ImageVector) {
 }
 
 @Composable
-private fun SettingsToggleCard(
+private fun SettingsGroupCard(
+    modifier: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF101626)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B)),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SettingsDivider() {
+    androidx.compose.material3.HorizontalDivider(
+        modifier = Modifier.padding(start = 66.dp, end = 16.dp),
+        thickness = 0.8.dp,
+        color = Color(0xFF1E293B).copy(alpha = 0.8f)
+    )
+}
+
+@Composable
+private fun SettingsToggleRow(
     title: String,
     subtitle: String,
     icon: ImageVector,
@@ -841,71 +835,63 @@ private fun SettingsToggleCard(
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(enabled = enabled) { onCheckedChange(!checked) },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF101626)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+            .clickable(enabled = enabled) { onCheckedChange(!checked) }
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFF1E293B).copy(alpha = 0.7f)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF1E293B).copy(alpha = 0.7f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = if (checked) Color(0xFF38BDF8) else Color(0xFF94A3B8),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = subtitle,
-                    color = Color(0xFF94A3B8),
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                enabled = enabled,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Color(0xFF38BDF8),
-                    uncheckedThumbColor = Color(0xFF94A3B8),
-                    uncheckedTrackColor = Color(0xFF1E293B)
-                )
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (checked) Color(0xFF38BDF8) else Color(0xFF94A3B8),
+                modifier = Modifier.size(20.dp)
             )
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = subtitle,
+                color = Color(0xFF94A3B8),
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF38BDF8),
+                uncheckedThumbColor = Color(0xFF94A3B8),
+                uncheckedTrackColor = Color(0xFF1E293B)
+            )
+        )
     }
 }
 
 @Composable
-private fun SettingsActionCard(
+private fun SettingsActionRow(
     title: String,
     subtitle: String,
     icon: ImageVector,
@@ -913,80 +899,72 @@ private fun SettingsActionCard(
     isLoading: Boolean = false,
     onClick: () -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF101626)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFF1E293B).copy(alpha = 0.7f)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF1E293B).copy(alpha = 0.7f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color(0xFF38BDF8),
-                    modifier = Modifier.size(20.dp)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color(0xFF38BDF8),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = subtitle,
+                color = Color(0xFF94A3B8),
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Box(
+            modifier = Modifier
+                .shadow(3.dp, RoundedCornerShape(10.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f))
+                .clip(RoundedCornerShape(10.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1E2840), Color(0xFF101626))
+                    )
                 )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    color = Color(0xFF38BDF8),
+                    strokeWidth = 2.dp
+                )
+            } else {
                 Text(
-                    text = title,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = actionText,
+                    color = Color(0xFF38BDF8),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = subtitle,
-                    color = Color(0xFF94A3B8),
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .shadow(3.dp, RoundedCornerShape(10.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f))
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color(0xFF1E2840), Color(0xFF101626))
-                        )
-                    )
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = Color(0xFF38BDF8),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = actionText,
-                        color = Color(0xFF38BDF8),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
         }
     }
