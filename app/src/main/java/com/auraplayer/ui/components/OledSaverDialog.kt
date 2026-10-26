@@ -66,11 +66,26 @@ fun OledSaverDialog(
 ) {
     val view = LocalView.current
     var currentTime by remember { mutableStateOf("") }
+    var currentDateStr by remember { mutableStateOf("") }
+
+    val infinitePulse = androidx.compose.animation.core.rememberInfiniteTransition(label = "standby_pulse")
+    val pulseAlpha by infinitePulse.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.95f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween(2400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "pulse_alpha"
+    )
 
     LaunchedEffect(Unit) {
-        val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("EEEE, d 'de' MMMM", Locale("es", "ES"))
         while (true) {
-            currentTime = format.format(Date())
+            val now = Date()
+            currentTime = timeFormat.format(now)
+            currentDateStr = dateFormat.format(now).replaceFirstChar { it.uppercase() }
             delay(1000)
         }
     }
@@ -86,10 +101,10 @@ fun OledSaverDialog(
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures { _, dragAmount ->
                         if (dragAmount > 50) {
-                            AuraHaptic.click(view)
+                            AuraHaptic.heavy(view)
                             onPrevious()
                         } else if (dragAmount < -50) {
-                            AuraHaptic.click(view)
+                            AuraHaptic.heavy(view)
                             onNext()
                         }
                     }
@@ -105,11 +120,11 @@ fun OledSaverDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF1E293B).copy(alpha = 0.5f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF0F172A).copy(alpha = 0.6f))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
-                    Text("🔋 Modo OLED (0% Consumo)", color = Color(0xFF10B981), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("🌙 StandBy OLED (0% Consumo)", color = Color(0xFF38BDF8), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
 
                 IconButton(onClick = onDismiss) {
@@ -122,42 +137,53 @@ fun OledSaverDialog(
                 }
             }
 
-            // Centro: Reloj Minimalista y Pista
+            // Centro: Reloj StandBy & Reproducción
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Reloj digital fino
+                // Reloj digital StandBy grande
                 Text(
                     text = currentTime,
-                    fontSize = 54.sp,
+                    fontSize = 72.sp,
                     fontWeight = FontWeight.ExtraLight,
                     fontFamily = FontFamily.Monospace,
-                    color = Color.White.copy(alpha = 0.85f)
+                    color = Color.White.copy(alpha = pulseAlpha),
+                    letterSpacing = 2.sp
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                if (currentDateStr.isNotBlank()) {
+                    Text(
+                        text = currentDateStr,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF94A3B8).copy(alpha = 0.75f),
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
 
-                // Título y artista en texto sutil
+                Spacer(modifier = Modifier.height(28.dp))
+
+                // Título y artista
                 Text(
                     text = currentSong?.title ?: "Reproduciendo música",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White.copy(alpha = 0.92f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = currentSong?.artist ?: "DaVE Player",
-                    fontSize = 13.sp,
-                    color = Color(0xFF00F0FF).copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    color = Color(0xFF38BDF8).copy(alpha = 0.85f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
                 // Controles táctiles minimalistas
                 Row(

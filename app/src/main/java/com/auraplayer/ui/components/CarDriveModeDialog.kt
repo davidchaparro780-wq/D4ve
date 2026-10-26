@@ -148,8 +148,12 @@ fun CarDriveModeDialog(
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(
+                        onTap = {
+                            AuraHaptic.heavy(view)
+                            onPlayPause()
+                        },
                         onDoubleTap = {
-                            AuraHaptic.click(view)
+                            AuraHaptic.heavy(view)
                             onPlayPause()
                         }
                     )

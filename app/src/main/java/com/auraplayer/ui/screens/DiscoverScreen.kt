@@ -924,6 +924,91 @@ fun DiscoverScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = 130.dp, top = 4.dp)
                 ) {
+                    if (searchQuery.isBlank()) {
+                        item(key = "bento_categories_hub") {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = "✨ Explorar por Categorías",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(bottom = 10.dp)
+                                )
+
+                                // Asymmetrical Bento Grid
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    BentoCard(
+                                        title = "🔥 Top TikTok",
+                                        subtitle = "Audios virales en tendencia",
+                                        gradient = listOf(Color(0xFF00F2FE), Color(0xFF4FACFE)),
+                                        modifier = Modifier.weight(1.2f).height(94.dp),
+                                        onClick = {
+                                            AuraHaptic.click(view)
+                                            selectedGenre = "TikTok"
+                                            executeSearch()
+                                        }
+                                    )
+                                    BentoCard(
+                                        title = "🌴 Urbano & Flow",
+                                        subtitle = "Trap & Reggaetón",
+                                        gradient = listOf(Color(0xFFF12711), Color(0xFFF5AF19)),
+                                        modifier = Modifier.weight(1f).height(94.dp),
+                                        onClick = {
+                                            AuraHaptic.click(view)
+                                            selectedGenre = "Reggaeton"
+                                            executeSearch()
+                                        }
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    BentoCard(
+                                        title = "🎧 Lo-Fi Chill",
+                                        subtitle = "Relax y concentración",
+                                        gradient = listOf(Color(0xFF654EA3), Color(0xFFEAAFC8)),
+                                        modifier = Modifier.weight(1f).height(90.dp),
+                                        onClick = {
+                                            AuraHaptic.click(view)
+                                            selectedGenre = "Lo-Fi"
+                                            executeSearch()
+                                        }
+                                    )
+                                    BentoCard(
+                                        title = "⚡ EDM & Hi-Fi",
+                                        subtitle = "Electrónica 320 kbps",
+                                        gradient = listOf(Color(0xFF11998E), Color(0xFF38EF7D)),
+                                        modifier = Modifier.weight(1f).height(90.dp),
+                                        onClick = {
+                                            AuraHaptic.click(view)
+                                            selectedGenre = "Electronic"
+                                            executeSearch()
+                                        }
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    text = "🎵 Pistas Destacadas ($selectedGenre)",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.9f)
+                                )
+                            }
+                        }
+                    }
+
                     items(trackList, key = { it.id }, contentType = { "online_track" }) { track ->
                         val status = downloadStates[track.id] ?: DownloadStatus.Idle
                         val isPlayingThis = isPlaying && !currentPlayingTitle.isNullOrBlank() &&
@@ -1130,6 +1215,46 @@ fun DiscoverScreen(
                 executeSearch()
             }
         )
+    }
+}
+
+@Composable
+fun BentoCard(
+    title: String,
+    subtitle: String,
+    gradient: List<Color>,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .shadow(6.dp, RoundedCornerShape(18.dp), spotColor = gradient.first().copy(alpha = 0.45f))
+            .clip(RoundedCornerShape(18.dp))
+            .background(Brush.linearGradient(gradient))
+            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        contentAlignment = Alignment.BottomStart
+    ) {
+        Column {
+            Text(
+                text = title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.88f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
@@ -1348,12 +1473,33 @@ fun OnlineTrackCard(
                         color = Color.White.copy(alpha = 0.75f)
                     )
                 }
+
+                // Audio Waveform Preview Indicator
+                if (isPlayingThis) {
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0xFF38BDF8).copy(alpha = 0.22f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        AnimatedEqualizerBars(modifier = Modifier.size(10.dp), color = Color(0xFF38BDF8))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "▶ Preview",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF38BDF8)
+                        )
+                    }
+                }
             }
         }
 
         Spacer(modifier = Modifier.width(6.dp))
 
-        // Right Actions: Sleek Download Action + More Options Menu
+        // Right Actions: Liquid Download Action + More Options Menu
         Row(verticalAlignment = Alignment.CenterVertically) {
             when (status) {
                 is DownloadStatus.Idle -> {
@@ -1387,23 +1533,26 @@ fun OnlineTrackCard(
                     }
                 }
                 is DownloadStatus.Downloading -> {
+                    // Liquid Download Pulse Indicator
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
+                            .shadow(8.dp, CircleShape, spotColor = Color(0xFF38BDF8).copy(alpha = 0.55f))
                             .clip(CircleShape)
-                            .background(Color(0xFF1E293B)),
+                            .background(Color(0xFF0F172A))
+                            .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.5f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
                             progress = { status.progress / 100f },
                             color = Color(0xFF38BDF8),
-                            modifier = Modifier.size(30.dp),
+                            modifier = Modifier.size(32.dp),
                             strokeWidth = 2.5.dp
                         )
                         Text(
                             text = "${status.progress}%",
                             fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Black,
                             color = Color(0xFF38BDF8)
                         )
                     }
@@ -1411,36 +1560,39 @@ fun OnlineTrackCard(
                 is DownloadStatus.Tagging -> {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
+                            .shadow(6.dp, CircleShape, spotColor = Color(0xFFEC4899).copy(alpha = 0.5f))
                             .clip(CircleShape)
                             .background(Color(0xFF1E293B)),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
                             color = Color(0xFFEC4899),
-                            modifier = Modifier.size(26.dp),
+                            modifier = Modifier.size(28.dp),
                             strokeWidth = 2.dp
                         )
                     }
                 }
                 is DownloadStatus.Completed -> {
+                    // Liquid Completion Shockwave Badge
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
-                            .shadow(3.dp, CircleShape, spotColor = Color(0xFF10B981).copy(alpha = 0.4f))
+                            .size(38.dp)
+                            .shadow(8.dp, CircleShape, spotColor = Color(0xFF10B981).copy(alpha = 0.75f))
                             .clip(CircleShape)
                             .background(
-                                Brush.verticalGradient(
-                                    listOf(Color(0xFF064E3B), Color(0xFF022C22))
+                                Brush.linearGradient(
+                                    listOf(Color(0xFF059669), Color(0xFF10B981))
                                 )
-                            ),
+                            )
+                            .border(1.2.dp, Color(0xFF34D399), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Descargado",
-                            tint = Color(0xFF10B981),
-                            modifier = Modifier.size(18.dp)
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }

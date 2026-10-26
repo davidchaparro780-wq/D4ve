@@ -1270,43 +1270,79 @@ fun PlayerScreen(
                             label = "visualizer_song_transition"
                         ) { _ ->
                             val liveBassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying)
-                            if (centerVisualizerMode == 0) {
-                                // Glowing Ambient Aura Disc with Vinyl Record Grooves (Dynamic Palette Glow)
-                                val bassEnergy = liveBassEnergy
-                                val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
-                                val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
 
-                                 Box(
-                                    modifier = Modifier
-                                        .size(maxArtSize)
-                                        .then(levitationModifier)
-                                        .padding(vertical = 4.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    SupernovaShockwave(
-                                        trigger = supernovaTrigger,
-                                        accentColor = activeAccent,
-                                        secondaryColor = MaterialTheme.colorScheme.secondary
+                            // Audiophile Stage: Dynamic Ambient Bloom multi-layer halo
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isPlaying) {
+                                    val bloomTransition = rememberInfiniteTransition(label = "ambient_stage_bloom")
+                                    val bloomPulse by bloomTransition.animateFloat(
+                                        initialValue = 0.94f,
+                                        targetValue = 1.06f,
+                                        animationSpec = infiniteRepeatable(
+                                            animation = tween(2600, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                                            repeatMode = RepeatMode.Reverse
+                                        ),
+                                        label = "stage_bloom_pulse"
                                     )
+                                    val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse
+                                    val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
 
-                                    if (isPlaying) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(maxArtSize * (0.94f + bassEnergy * 0.18f))
-                                                .clip(androidx.compose.foundation.shape.CircleShape)
-                                                .background(
-                                                    androidx.compose.ui.graphics.Brush.radialGradient(
-                                                        colors = listOf(
-                                                            activeAccent.copy(alpha = (0.32f + bassEnergy * 0.42f).coerceIn(0.15f, 0.85f)),
-                                                            Color(0xFF8B5CF6).copy(alpha = (0.18f + bassEnergy * 0.28f).coerceIn(0.08f, 0.55f)),
-                                                            Color.Transparent
-                                                        )
+                                    // Outer atmospheric diffusion halo
+                                    Box(
+                                        modifier = Modifier
+                                            .size(maxArtSize * (bloomScale * 1.15f))
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(
+                                                androidx.compose.ui.graphics.Brush.radialGradient(
+                                                    colors = listOf(
+                                                        activeAccent.copy(alpha = bloomAlpha * 0.45f),
+                                                        MaterialTheme.colorScheme.secondary.copy(alpha = bloomAlpha * 0.22f),
+                                                        Color(0xFF8B5CF6).copy(alpha = bloomAlpha * 0.12f),
+                                                        Color.Transparent
                                                     )
                                                 )
-                                        )
-                                    }
+                                            )
+                                    )
+                                    // Core glowing aura
+                                    Box(
+                                        modifier = Modifier
+                                            .size(maxArtSize * bloomScale)
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(
+                                                androidx.compose.ui.graphics.Brush.radialGradient(
+                                                    colors = listOf(
+                                                        activeAccent.copy(alpha = bloomAlpha * 0.65f),
+                                                        Color(0xFF38BDF8).copy(alpha = bloomAlpha * 0.32f),
+                                                        Color.Transparent
+                                                    )
+                                                )
+                                            )
+                                    )
+                                }
 
-                                    VinylTurntableSkin(
+                                if (centerVisualizerMode == 0) {
+                                    // Glowing Ambient Aura Disc with Vinyl Record Grooves (Dynamic Palette Glow)
+                                    val bassEnergy = liveBassEnergy
+                                    val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
+                                    val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
+
+                                     Box(
+                                        modifier = Modifier
+                                            .size(maxArtSize)
+                                            .then(levitationModifier)
+                                            .padding(vertical = 4.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        SupernovaShockwave(
+                                            trigger = supernovaTrigger,
+                                            accentColor = activeAccent,
+                                            secondaryColor = MaterialTheme.colorScheme.secondary
+                                        )
+
+                                        VinylTurntableSkin(
                                         song = currentMedia,
                                         isPlaying = isPlaying,
                                         vinylRotation = vinylRotation.value,
@@ -1528,19 +1564,37 @@ fun PlayerScreen(
                             }
                         }
                     } else {
-                        // Karaoke Synced & Plain Lyrics View
+                        // Apple Music-Style Frosted Glass Synchronized & Plain Lyrics View
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .shadow(14.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xFF0B0E17).copy(alpha = 0.95f))
+                                .shadow(20.dp, RoundedCornerShape(24.dp), spotColor = activeAccent.copy(alpha = 0.35f))
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color(0xFF090E1A).copy(alpha = 0.94f),
+                                            Color(0xFF04060C).copy(alpha = 0.98f)
+                                        )
+                                    )
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    brush = Brush.verticalGradient(
+                                        listOf(
+                                            activeAccent.copy(alpha = 0.35f),
+                                            Color.White.copy(alpha = 0.08f),
+                                            Color.Transparent
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(24.dp)
+                                )
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             if (isLoadingLyrics) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(36.dp))
+                                    CircularProgressIndicator(color = activeAccent, modifier = Modifier.size(36.dp))
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
                                         text = "Buscando letras en vivo...",
@@ -1641,14 +1695,22 @@ fun PlayerScreen(
                                                 contentType = { _, _ -> "lyric_line" }
                                             ) { index, line ->
                                                 val isActive = index == activeIndex
+                                                val lyricScale by androidx.compose.animation.core.animateFloatAsState(
+                                                    targetValue = if (isActive) 1.04f else 0.96f,
+                                                    animationSpec = androidx.compose.animation.core.spring(
+                                                        dampingRatio = 0.8f,
+                                                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                                                    ),
+                                                    label = "lyric_scale"
+                                                )
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .then(
                                                             if (isActive) Modifier.shadow(
-                                                                elevation = 6.dp,
+                                                                elevation = 8.dp,
                                                                 shape = RoundedCornerShape(16.dp),
-                                                                spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f),
+                                                                spotColor = activeAccent.copy(alpha = 0.45f),
                                                                 ambientColor = Color.Black
                                                             ) else Modifier
                                                         )
@@ -1656,10 +1718,20 @@ fun PlayerScreen(
                                                         .background(
                                                             if (isActive) Brush.verticalGradient(
                                                                 listOf(
-                                                                    Color(0x3538BDF8),
-                                                                    Color(0x208B5CF6)
+                                                                    activeAccent.copy(alpha = 0.28f),
+                                                                    Color(0x228B5CF6)
                                                                 )
                                                             ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                                                        )
+                                                        .border(
+                                                            width = if (isActive) 1.dp else 0.dp,
+                                                            brush = if (isActive) Brush.horizontalGradient(
+                                                                listOf(
+                                                                    activeAccent.copy(alpha = 0.5f),
+                                                                    Color(0xFF8B5CF6).copy(alpha = 0.3f)
+                                                                )
+                                                            ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
+                                                            shape = RoundedCornerShape(16.dp)
                                                         )
                                                         .clickable {
                                                             AuraHaptic.click(null)
@@ -1674,11 +1746,21 @@ fun PlayerScreen(
                                                     ) {
                                                         Text(
                                                             text = line.text,
-                                                            fontSize = if (isActive) (22 * lyricsFontSizeMultiplier).sp else (15 * lyricsFontSizeMultiplier).sp,
-                                                            fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Normal,
-                                                            color = if (isActive) Color.White else Color.White.copy(alpha = 0.38f),
+                                                            fontSize = if (isActive) (23 * lyricsFontSizeMultiplier).sp else (15 * lyricsFontSizeMultiplier).sp,
+                                                            fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Medium,
+                                                            color = if (isActive) Color.White else Color.White.copy(alpha = 0.32f),
                                                             textAlign = TextAlign.Center,
-                                                            lineHeight = if (isActive) (28 * lyricsFontSizeMultiplier).sp else (22 * lyricsFontSizeMultiplier).sp
+                                                            lineHeight = if (isActive) (30 * lyricsFontSizeMultiplier).sp else (22 * lyricsFontSizeMultiplier).sp,
+                                                            style = androidx.compose.ui.text.TextStyle(
+                                                                shadow = if (isActive) androidx.compose.ui.graphics.Shadow(
+                                                                    color = activeAccent.copy(alpha = 0.85f),
+                                                                    blurRadius = 18f
+                                                                ) else null
+                                                            ),
+                                                            modifier = Modifier.graphicsLayer {
+                                                                scaleX = lyricScale
+                                                                scaleY = lyricScale
+                                                            }
                                                         )
                                                         if (isPlayerTranslationEnabled) {
                                                             val trans = playerLyricsTranslations[line.text]

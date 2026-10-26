@@ -1310,89 +1310,157 @@ fun MusicScreen(
                                     }
                                 }
 
+                                // Velocity Flow: Holographic Multi-Select Floating Action Capsule
                                 if (isSelectionMode && selectedSongIds.isNotEmpty()) {
-                                    Row(
+                                    val selectedSongs = filteredSongs.filter { selectedSongIds.contains(it.id) }
+                                    Surface(
+                                        shape = RoundedCornerShape(28.dp),
+                                        color = Color(0xFF0C1324).copy(alpha = 0.96f),
+                                        border = androidx.compose.foundation.BorderStroke(
+                                            width = 1.dp,
+                                            brush = Brush.horizontalGradient(
+                                                listOf(Color(0xFF38BDF8).copy(alpha = 0.6f), Color(0xFF8B5CF6).copy(alpha = 0.6f))
+                                            )
+                                        ),
+                                        shadowElevation = 18.dp,
                                         modifier = Modifier
                                             .align(Alignment.BottomCenter)
                                             .fillMaxWidth()
-                                            .padding(horizontal = 12.dp, vertical = 12.dp)
-                                            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                                            .background(Color(0xFF0D1222))
-                                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                                        horizontalArrangement = Arrangement.SpaceEvenly,
-                                        verticalAlignment = Alignment.CenterVertically
+                                            .padding(horizontal = 14.dp, vertical = 20.dp)
                                     ) {
-                                        val selectedSongs = filteredSongs.filter { selectedSongIds.contains(it.id) }
-                                        TextButton(
-                                            onClick = {
-                                                selectedSongs.forEach { onAddToQueue(it) }
-                                                Toast.makeText(context, "${selectedSongs.size} canciones añadidas a la cola", Toast.LENGTH_SHORT).show()
-                                                isSelectionMode = false
-                                                selectedSongIds = emptySet()
-                                            }
+                                        Row(
+                                            modifier = Modifier
+                                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                Icon(
-                                                    imageVector = Icons.Default.QueueMusic,
-                                                    contentDescription = null,
-                                                    tint = Color(0xFF38BDF8),
-                                                    modifier = Modifier.size(20.dp)
-                                                )
+                                            // Selection Counter Badge
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(30.dp)
+                                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                                        .background(
+                                                            Brush.linearGradient(
+                                                                listOf(Color(0xFF00F0FF), Color(0xFF8B5CF6))
+                                                            )
+                                                        ),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(
+                                                        text = "${selectedSongIds.size}",
+                                                        color = Color.White,
+                                                        fontSize = 12.sp,
+                                                        fontWeight = FontWeight.Black
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.width(8.dp))
                                                 Text(
-                                                    text = "Añadir a la cola",
-                                                    fontSize = 9.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.White,
-                                                    maxLines = 1
+                                                    text = if (selectedSongIds.size == 1) "canción" else "canciones",
+                                                    color = Color.White.copy(alpha = 0.85f),
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold
                                                 )
                                             }
-                                        }
-                                        TextButton(
-                                            onClick = {
-                                                selectedSongs.reversed().forEach { onPlayNext(it) }
-                                                Toast.makeText(context, "${selectedSongs.size} canciones se reproducirán a continuación", Toast.LENGTH_SHORT).show()
-                                                isSelectionMode = false
-                                                selectedSongIds = emptySet()
-                                            }
-                                        ) {
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                Icon(
-                                                    imageVector = Icons.Default.SkipNext,
-                                                    contentDescription = null,
-                                                    tint = Color(0xFFA855F7),
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                                Text(
-                                                    text = "Reproducir siguiente",
-                                                    fontSize = 9.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.White,
-                                                    maxLines = 1
-                                                )
-                                            }
-                                        }
-                                        TextButton(
-                                            onClick = {
-                                                selectedSongs.forEach { favoritesManager.toggleFavorite(it.id) }
-                                                Toast.makeText(context, "${selectedSongs.size} canciones actualizadas en Favoritos", Toast.LENGTH_SHORT).show()
-                                                isSelectionMode = false
-                                                selectedSongIds = emptySet()
-                                            }
-                                        ) {
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Favorite,
-                                                    contentDescription = null,
-                                                    tint = Color(0xFFEC4899),
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                                Text(
-                                                    text = "Favorito",
-                                                    fontSize = 9.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.White,
-                                                    maxLines = 1
-                                                )
+
+                                            // Action Buttons
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                // 1. Play All Selected
+                                                IconButton(
+                                                    onClick = {
+                                                        AuraHaptic.click(view)
+                                                        selectedSongs.firstOrNull()?.let { onSongClick(it) }
+                                                        selectedSongs.drop(1).forEach { onAddToQueue(it) }
+                                                        Toast.makeText(context, "Reproduciendo ${selectedSongs.size} canciones", Toast.LENGTH_SHORT).show()
+                                                        isSelectionMode = false
+                                                        selectedSongIds = emptySet()
+                                                    },
+                                                    modifier = Modifier.size(36.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.PlayArrow,
+                                                        contentDescription = "Reproducir Todo",
+                                                        tint = Color(0xFF10B981),
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
+
+                                                // 2. Add to Queue
+                                                IconButton(
+                                                    onClick = {
+                                                        AuraHaptic.click(view)
+                                                        selectedSongs.forEach { onAddToQueue(it) }
+                                                        Toast.makeText(context, "${selectedSongs.size} añadidas a la cola", Toast.LENGTH_SHORT).show()
+                                                        isSelectionMode = false
+                                                        selectedSongIds = emptySet()
+                                                    },
+                                                    modifier = Modifier.size(36.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.QueueMusic,
+                                                        contentDescription = "Añadir a la cola",
+                                                        tint = Color(0xFF38BDF8),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+
+                                                // 3. Play Next
+                                                IconButton(
+                                                    onClick = {
+                                                        AuraHaptic.click(view)
+                                                        selectedSongs.reversed().forEach { onPlayNext(it) }
+                                                        Toast.makeText(context, "${selectedSongs.size} se reproducirán a continuación", Toast.LENGTH_SHORT).show()
+                                                        isSelectionMode = false
+                                                        selectedSongIds = emptySet()
+                                                    },
+                                                    modifier = Modifier.size(36.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.SkipNext,
+                                                        contentDescription = "Siguiente",
+                                                        tint = Color(0xFFA855F7),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+
+                                                // 4. Toggle Favorite
+                                                IconButton(
+                                                    onClick = {
+                                                        AuraHaptic.heavy(view)
+                                                        selectedSongs.forEach { favoritesManager.toggleFavorite(it.id) }
+                                                        Toast.makeText(context, "${selectedSongs.size} actualizadas en Favoritos ❤️", Toast.LENGTH_SHORT).show()
+                                                        isSelectionMode = false
+                                                        selectedSongIds = emptySet()
+                                                    },
+                                                    modifier = Modifier.size(36.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Favorite,
+                                                        contentDescription = "Favoritos",
+                                                        tint = Color(0xFFEC4899),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+
+                                                // 5. Dismiss selection
+                                                IconButton(
+                                                    onClick = {
+                                                        AuraHaptic.click(view)
+                                                        isSelectionMode = false
+                                                        selectedSongIds = emptySet()
+                                                    },
+                                                    modifier = Modifier.size(36.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Close,
+                                                        contentDescription = "Cancelar",
+                                                        tint = Color(0xFF94A3B8),
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -2841,12 +2909,20 @@ fun SongListItem(
         // Swipe Background Hints
         val currentOffset = offsetX.value
         if (currentOffset > 0) {
-            // Right Swipe: Play Next
+            // Right Swipe: Play Next (Emerald Green)
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(0xFF0284C7).copy(alpha = (currentOffset / 100f).coerceIn(0.15f, 0.85f)))
-                    .padding(start = 20.dp),
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFF059669).copy(alpha = (currentOffset / 90f).coerceIn(0.25f, 0.95f)),
+                                Color(0xFF10B981).copy(alpha = (currentOffset / 90f).coerceIn(0.15f, 0.85f))
+                            )
+                        )
+                    )
+                    .padding(start = 22.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2856,32 +2932,40 @@ fun SongListItem(
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
-                    if (currentOffset > 50f) {
+                    if (currentOffset > 45f) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Reproducir Siguiente",
+                            text = "Siguiente en la Cola",
                             color = Color.White,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp
                         )
                     }
                 }
             }
         } else if (currentOffset < 0) {
-            // Left Swipe: Toggle Favorite
+            // Left Swipe: Toggle Favorite (Neon Violet / Pink)
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(0xFFEC4899).copy(alpha = ((-currentOffset) / 100f).coerceIn(0.15f, 0.85f)))
-                    .padding(end = 20.dp),
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFF8B5CF6).copy(alpha = ((-currentOffset) / 90f).coerceIn(0.15f, 0.85f)),
+                                Color(0xFFEC4899).copy(alpha = ((-currentOffset) / 90f).coerceIn(0.25f, 0.95f))
+                            )
+                        )
+                    )
+                    .padding(end = 22.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (-currentOffset > 50f) {
+                    if (-currentOffset > 45f) {
                         Text(
                             text = if (isFavorite) "Quitar Favorito" else "Favorito",
                             color = Color.White,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.width(8.dp))

@@ -51,43 +51,65 @@ fun AlphabetFastScroller(
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.CenterEnd
     ) {
-        // Floating Letter Preview Bubble
+        // Holographic Floating Letter Preview Bubble
         AnimatedVisibility(
             visible = selectedLetter != null,
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut(),
-            modifier = Modifier.padding(end = 36.dp)
+            modifier = Modifier.padding(end = 40.dp)
         ) {
             selectedLetter?.let { letter ->
                 Box(
                     modifier = Modifier
-                        .size(54.dp)
+                        .size(58.dp)
+                        .androidx.compose.ui.draw.shadow(
+                            elevation = 14.dp,
+                            shape = CircleShape,
+                            spotColor = Color(0xFF38BDF8).copy(alpha = 0.55f),
+                            ambientColor = Color.Black
+                        )
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                listOf(Color(0xFF38BDF8), Color(0xFF8B5CF6))
+                                listOf(Color(0xFF00F0FF), Color(0xFF7C3AED))
                             )
+                        )
+                        .androidx.compose.foundation.border(
+                            width = 1.5.dp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = letter.toString(),
                         color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        style = androidx.compose.ui.text.TextStyle(
+                            shadow = androidx.compose.ui.graphics.Shadow(
+                                color = Color.Black.copy(alpha = 0.6f),
+                                blurRadius = 8f
+                            )
+                        )
                     )
                 }
             }
         }
 
-        // Slim Alphabet Rail
+        // Holographic Slim Alphabet Rail
         Column(
             modifier = Modifier
-                .width(22.dp)
+                .width(24.dp)
                 .fillMaxHeight()
                 .padding(vertical = 12.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF0F172A).copy(alpha = 0.65f))
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xFF090E1A).copy(alpha = 0.75f))
+                .androidx.compose.foundation.border(
+                    width = 0.5.dp,
+                    color = Color.White.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(14.dp)
+                )
                 .onGloballyPositioned { coordinates ->
                     columnHeight = coordinates.size.height.toFloat()
                 }
@@ -115,9 +137,9 @@ fun AlphabetFastScroller(
                 val isCurrent = selectedLetter == char
                 Text(
                     text = char.toString(),
-                    fontSize = 9.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = if (isCurrent) FontWeight.ExtraBold else FontWeight.Bold,
-                    color = if (isCurrent) Color(0xFF38BDF8) else Color(0xFF94A3B8).copy(alpha = 0.8f)
+                    color = if (isCurrent) Color(0xFF38BDF8) else Color(0xFF94A3B8).copy(alpha = 0.75f)
                 )
             }
         }
