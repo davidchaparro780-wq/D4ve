@@ -143,6 +143,8 @@ import com.auraplayer.ui.components.ArcaneMonolithSkin
 import com.auraplayer.ui.components.ArcaneFrequencyDialog
 import com.auraplayer.ui.components.PhantomMistOverlay
 import com.auraplayer.audio.LunarPhaseManager
+import com.auraplayer.ui.components.StellarConstellationBanner
+import com.auraplayer.ui.components.NecronomicScrollText
 import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastRewind
@@ -1609,7 +1611,7 @@ fun PlayerScreen(
                                         .size(maxArtSize)
                                         .then(levitationModifier)
                                 )
-                            } else {
+                            } else if (centerVisualizerMode == 5) {
                                 // Skin Vintage Hi-Fi: Vúmetros Analógicos de Aguja Mecánica (Canal L & R)
                                 AnalogVuMetersSkin(
                                     song = currentMedia,
