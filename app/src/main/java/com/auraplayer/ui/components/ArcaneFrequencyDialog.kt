@@ -50,7 +50,6 @@ data class ArcaneFrequency(
     val name: String,
     val subtitle: String,
     val rune: String,
-    val pitchRatio: Float,
     val color: Color
 )
 
@@ -70,7 +69,6 @@ fun ArcaneFrequencyDialog(
             name = "432 Hz: Resonancia Pitagorica",
             subtitle = "Alineacion natural del universo, claridad y calma profunda",
             rune = "ᛟ",
-            pitchRatio = 0.9818f,
             color = Color(0xFFB388FF)
         ),
         ArcaneFrequency(
@@ -78,7 +76,6 @@ fun ArcaneFrequencyDialog(
             name = "528 Hz: Frecuencia Milagrosa",
             subtitle = "Transformacion armonica, reparacion y vitalidad celular",
             rune = "ᚢ",
-            pitchRatio = 1.0500f,
             color = Color(0xFF00FF9D)
         ),
         ArcaneFrequency(
@@ -86,7 +83,6 @@ fun ArcaneFrequencyDialog(
             name = "396 Hz: Vacio Primordial",
             subtitle = "Liberacion de cargas emocionales y arraigo energetico",
             rune = "ᚱ",
-            pitchRatio = 0.9400f,
             color = Color(0xFFFF2A55)
         ),
         ArcaneFrequency(
@@ -94,7 +90,6 @@ fun ArcaneFrequencyDialog(
             name = "639 Hz: Conexion Aurica",
             subtitle = "Apertura del corazon, empatia y sintonia interpersonal",
             rune = "ᛏ",
-            pitchRatio = 1.0800f,
             color = Color(0xFF00E5FF)
         ),
         ArcaneFrequency(
@@ -102,7 +97,6 @@ fun ArcaneFrequencyDialog(
             name = "741 Hz: Despertar Intuitivo",
             subtitle = "Purificacion mental, creatividad y resolucion de enigmas",
             rune = "ᛈ",
-            pitchRatio = 1.1200f,
             color = Color(0xFFE040FB)
         ),
         ArcaneFrequency(
@@ -110,7 +104,6 @@ fun ArcaneFrequencyDialog(
             name = "852 Hz: Orden Espiritual",
             subtitle = "Vision trascendental y retorno al orden cosmico supremo",
             rune = "ᛉ",
-            pitchRatio = 1.1500f,
             color = Color(0xFF38BDF8)
         ),
         ArcaneFrequency(
@@ -118,7 +111,6 @@ fun ArcaneFrequencyDialog(
             name = "440 Hz: Afinacion Estandar",
             subtitle = "Concierto moderno ISO 16 sin alteracion de tono",
             rune = "ᚨ",
-            pitchRatio = 1.0000f,
             color = Color(0xFF94A3B8)
         )
     )
@@ -259,7 +251,8 @@ fun ArcaneFrequencyDialog(
                                 )
                                 .clickable {
                                     AuraHaptic.click(view)
-                                    onApplyFrequency(freq.hz, freq.pitchRatio)
+                                    // Ratio real de re-afinación: la música se re-muestrea de 440 Hz a la frecuencia objetivo
+                                    onApplyFrequency(freq.hz, freq.hz / 440f)
                                 }
                                 .padding(horizontal = 14.dp, vertical = 10.dp)
                         ) {

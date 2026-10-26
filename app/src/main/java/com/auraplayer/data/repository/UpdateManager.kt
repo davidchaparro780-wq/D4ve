@@ -144,7 +144,8 @@ class UpdateManager(private val context: Context) {
                             versionName = rawTagName,
                             changelog = body,
                             downloadUrl = apkUrl,
-                            fileSizeMb = String.format("%.1f", apkSize / (1024.0 * 1024.0)).toDoubleOrNull() ?: 24.5
+                            // Cálculo aritmético directo: sin formateo de texto no hay riesgo de locale con coma decimal
+                            fileSizeMb = Math.round(apkSize / (1024.0 * 1024.0) * 10.0) / 10.0
                         )
                         com.auraplayer.notification.UpdateNotificationHelper.showUpdateNotification(context, info)
                         return@withContext info

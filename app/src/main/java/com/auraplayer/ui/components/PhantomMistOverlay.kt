@@ -56,7 +56,8 @@ fun PhantomMistOverlay(
             val offsetX = sin(driftPhase * speedFactor + (i * 1.5f)) * (24f + energyBoost * 20f)
             val offsetY = ((driftPhase * speedFactor * 15f + seedY * h) % h)
 
-            val px = (seedX * w + offsetX) % w
+            // Modulo ajustado a positivo: evita partículas invisibles con offset negativo
+            val px = ((seedX * w + offsetX) % w + w) % w
             val py = offsetY
 
             val alpha = ((0.15f + (i % 4) * 0.12f) + energyBoost).coerceIn(0.1f, 0.75f)
