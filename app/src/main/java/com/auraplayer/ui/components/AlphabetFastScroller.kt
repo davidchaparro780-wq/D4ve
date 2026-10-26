@@ -21,6 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,7 +66,7 @@ fun AlphabetFastScroller(
                 Box(
                     modifier = Modifier
                         .size(58.dp)
-                        .androidx.compose.ui.draw.shadow(
+                        .shadow(
                             elevation = 14.dp,
                             shape = CircleShape,
                             spotColor = Color(0xFF38BDF8).copy(alpha = 0.55f),
@@ -74,7 +78,7 @@ fun AlphabetFastScroller(
                                 listOf(Color(0xFF00F0FF), Color(0xFF7C3AED))
                             )
                         )
-                        .androidx.compose.foundation.border(
+                        .border(
                             width = 1.5.dp,
                             color = Color.White.copy(alpha = 0.4f),
                             shape = CircleShape
@@ -86,8 +90,8 @@ fun AlphabetFastScroller(
                         color = Color.White,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        style = androidx.compose.ui.text.TextStyle(
-                            shadow = androidx.compose.ui.graphics.Shadow(
+                        style = TextStyle(
+                            shadow = Shadow(
                                 color = Color.Black.copy(alpha = 0.6f),
                                 blurRadius = 8f
                             )
@@ -105,7 +109,7 @@ fun AlphabetFastScroller(
                 .padding(vertical = 12.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(Color(0xFF090E1A).copy(alpha = 0.75f))
-                .androidx.compose.foundation.border(
+                .border(
                     width = 0.5.dp,
                     color = Color.White.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(14.dp)

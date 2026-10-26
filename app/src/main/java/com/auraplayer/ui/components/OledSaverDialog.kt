@@ -1,5 +1,11 @@
 package com.auraplayer.ui.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -68,13 +74,13 @@ fun OledSaverDialog(
     var currentTime by remember { mutableStateOf("") }
     var currentDateStr by remember { mutableStateOf("") }
 
-    val infinitePulse = androidx.compose.animation.core.rememberInfiniteTransition(label = "standby_pulse")
+    val infinitePulse = rememberInfiniteTransition(label = "standby_pulse")
     val pulseAlpha by infinitePulse.animateFloat(
         initialValue = 0.4f,
         targetValue = 0.95f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(2400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        animationSpec = infiniteRepeatable(
+            animation = tween(2400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
         ),
         label = "pulse_alpha"
     )

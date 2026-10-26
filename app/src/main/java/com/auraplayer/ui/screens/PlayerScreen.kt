@@ -1283,7 +1283,7 @@ fun PlayerScreen(
                                         targetValue = 1.06f,
                                         animationSpec = infiniteRepeatable(
                                             animation = tween(2600, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-                                            repeatMode = RepeatMode.Reverse
+                                            repeatMode = AnimRepeatMode.Reverse
                                         ),
                                         label = "stage_bloom_pulse"
                                     )
