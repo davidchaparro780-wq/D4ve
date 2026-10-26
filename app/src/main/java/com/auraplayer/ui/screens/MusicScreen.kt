@@ -506,6 +506,39 @@ fun MusicScreen(
                     )
                 }
 
+                // Real-time Lunar Phase Button
+                val lunarPhase = remember { com.auraplayer.audio.LunarPhaseManager.getCurrentPhase() }
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF1E1438), Color(0xFF0F0B1E))
+                            )
+                        )
+                        .border(
+                            1.dp,
+                            Color(0xFF6366F1).copy(alpha = 0.5f),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .clickable {
+                            AuraHaptic.click(view)
+                            android.widget.Toast.makeText(
+                                context,
+                                "${lunarPhase.phaseEmoji} ${lunarPhase.phaseName} (${lunarPhase.illuminationPercent}% iluminada)\n🔮 ${lunarPhase.mysticAuraDescription}",
+                                android.widget.Toast.LENGTH_LONG
+                            ).show()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = lunarPhase.phaseEmoji,
+                        fontSize = 17.sp
+                    )
+                }
+
                 // Sleep Timer Button
                 Box(
                     modifier = Modifier

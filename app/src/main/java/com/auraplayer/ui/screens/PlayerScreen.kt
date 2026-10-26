@@ -139,6 +139,10 @@ import com.auraplayer.ui.components.AudioQualityDialog
 import com.auraplayer.ui.components.WaveformVisualizer
 import com.auraplayer.ui.components.MysteriousThemeDialog
 import com.auraplayer.ui.components.ArcaneRunicOrbit
+import com.auraplayer.ui.components.ArcaneMonolithSkin
+import com.auraplayer.ui.components.ArcaneFrequencyDialog
+import com.auraplayer.ui.components.PhantomMistOverlay
+import com.auraplayer.audio.LunarPhaseManager
 import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastRewind
@@ -374,6 +378,9 @@ fun PlayerScreen(
     val isMysteriousTheme = currentThemeAccentState in listOf(
         "MYSTIC_OBSIDIAN", "MIDNIGHT_ECLIPSE", "PHANTOM_SPECTER", "NEBULA_ENIGMA"
     )
+    val lunarPhase = remember { LunarPhaseManager.getCurrentPhase() }
+    var currentArcaneHz by remember { mutableIntStateOf(432) }
+    var showArcaneFrequencyDialog by remember { mutableStateOf(false) }
 
     var showFxDialog by remember { mutableStateOf(false) }
     var showCutterDialog by remember { mutableStateOf(false) }
@@ -756,6 +763,19 @@ fun PlayerScreen(
                         isPlaying = isPlaying
                     )
 
+                    if (isMysteriousTheme) {
+                        PhantomMistOverlay(
+                            accentColor = activeAccent,
+                            secondaryColor = MaterialTheme.colorScheme.secondary,
+                            bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying),
+                            isPlaying = isPlaying
+                        )
+                        StellarConstellationBanner(
+                            bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying),
+                            accentColor = activeAccent
+                        )
+                    }
+
                     EdgeAuroraGlow(
                         isPlaying = isPlaying,
                         primaryColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary,
@@ -1041,6 +1061,46 @@ fun PlayerScreen(
                                 )
                             }
                         }
+                    }
+                }
+
+                // Celestial Lunar Phase Pill
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 1.dp, bottom = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF130924).copy(alpha = 0.75f))
+                            .border(
+                                0.8.dp,
+                                Brush.horizontalGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF))),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showArcaneFrequencyDialog = true
+                            }
+                            .padding(horizontal = 10.dp, vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Text(text = lunarPhase.phaseEmoji, fontSize = 12.sp)
+                        Text(
+                            text = "${lunarPhase.phaseName} (${lunarPhase.illuminationPercent}%)",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFE2D4FF)
+                        )
+                        Text(
+                            text = "• ${lunarPhase.recommendedFrequencyHz} Hz ${lunarPhase.runeSymbol}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF00E5FF)
+                        )
                     }
                 }
 
@@ -1557,7 +1617,46 @@ fun PlayerScreen(
                                     bassEnergy = liveBassEnergy,
                                     onTap = {
                                         AuraHaptic.click(view)
+                                        centerVisualizerMode = 6
+                                    },
+                                    onDoubleTap = { offset ->
+                                        val w = maxArtSize.value
+                                        if (offset.x < w * 0.35f) {
+                                            onSeekRelative(-10000L)
+                                            seekBadgeText = "-10s"
+                                            seekBadgeIsForward = false
+                                            showSeekBadge = true
+                                            AuraHaptic.click(view)
+                                        } else if (offset.x > w * 0.65f) {
+                                            onSeekRelative(10000L)
+                                            seekBadgeText = "+10s"
+                                            seekBadgeIsForward = true
+                                            showSeekBadge = true
+                                            AuraHaptic.click(view)
+                                        } else {
+                                            onToggleFavorite()
+                                            showHeartBurst = true
+                                            AuraHaptic.heavy(view)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(maxArtSize)
+                                        .then(levitationModifier)
+                                )
+                            } else {
+                                // Skin Monolito Arcano: Obelisco de Obsidiana Cuántica & Runas
+                                ArcaneMonolithSkin(
+                                    song = currentMedia,
+                                    isPlaying = isPlaying,
+                                    bassEnergy = liveBassEnergy,
+                                    accentColor = activeAccent,
+                                    secondaryColor = MaterialTheme.colorScheme.secondary,
+                                    onTap = {
+                                        AuraHaptic.click(view)
                                         centerVisualizerMode = 0
+                                    },
+                                    onLongPress = {
+                                        showArcaneFrequencyDialog = true
                                     },
                                     onDoubleTap = { offset ->
                                         val w = maxArtSize.value
@@ -1951,7 +2050,7 @@ fun PlayerScreen(
                         Surface(
                             modifier = Modifier.clickable {
                                 AuraHaptic.click(view)
-                                showMysteriousThemeDialog = true
+                                showArcaneFrequencyDialog = true
                             },
                             color = Color(0xFF1E1135).copy(alpha = 0.7f),
                             shape = RoundedCornerShape(8.dp),
@@ -1964,7 +2063,7 @@ fun PlayerScreen(
                             ) {
                                 Text(text = "ᛟ", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                 Text(
-                                    text = "RESONANCIA ARCANA • 432 Hz",
+                                    text = "RESONANCIA ARCANA • $currentArcaneHz Hz",
                                     color = Color(0xFFE2D4FF),
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.SemiBold,
@@ -1976,7 +2075,13 @@ fun PlayerScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+
+                if (isMysteriousTheme) {
+                    NecronomicScrollText(accentColor = activeAccent)
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
 
                 // 4-Mode Interactive Visualizer
                 Box(
@@ -4096,6 +4201,19 @@ fun PlayerScreen(
                 onAccentChange(newAccent)
             },
             onDismiss = { showMysteriousThemeDialog = false }
+        )
+    }
+
+    // Consola de Resonancia Arcana & Frecuencias Solfeggio
+    if (showArcaneFrequencyDialog) {
+        ArcaneFrequencyDialog(
+            currentHz = currentArcaneHz,
+            onApplyFrequency = { hz, pitchRatio ->
+                currentArcaneHz = hz
+                onAudioFxChange(1.0f, pitchRatio)
+                showArcaneFrequencyDialog = false
+            },
+            onDismiss = { showArcaneFrequencyDialog = false }
         )
     }
 }
