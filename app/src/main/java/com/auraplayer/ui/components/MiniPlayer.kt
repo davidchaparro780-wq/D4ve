@@ -151,25 +151,22 @@ fun MiniPlayer(
                     }
                 }
 
-                // Interactive Mini Player Card with Real-time Spring Drag Offset & Glassmorphism Aero
+                // Precision Floating Dock Mini Player Card with Real-time Spring Drag Offset
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .offset { IntOffset(dragOffsetX.value.roundToInt(), 0) }
                         .shadow(
-                            elevation = 20.dp,
-                            shape = RoundedCornerShape(24.dp),
-                            spotColor = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f) else Color.Black.copy(alpha = 0.5f),
-                            ambientColor = Color.Black.copy(alpha = 0.4f)
+                            elevation = 14.dp,
+                            shape = RoundedCornerShape(22.dp),
+                            spotColor = Color.Black.copy(alpha = 0.65f),
+                            ambientColor = Color.Black.copy(alpha = 0.5f)
                         )
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color(0xFF1E2840),
-                                    Color(0xFF101524)
-                                )
-                            )
+                        .clip(RoundedCornerShape(22.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.10f),
+                            shape = RoundedCornerShape(22.dp)
                         )
                         .semantics {
                             contentDescription = "Reproductor mini: ${currentMedia.title} de ${currentMedia.artist}. Toca para abrir el reproductor completo."
@@ -214,33 +211,27 @@ fun MiniPlayer(
                         },
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp,
-                    color = Color(0xF40C1220)
+                    color = Color(0xFF0F1524)
                 ) {
                     Column {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 9.dp),
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Artwork with glowing ambient ring when playing
+                            // Artwork with subtle outline
                             Box(
                                 modifier = Modifier
                                     .size(46.dp)
                                     .shadow(
-                                        elevation = if (isPlaying) 12.dp else 4.dp,
+                                        elevation = if (isPlaying) 8.dp else 2.dp,
                                         shape = RoundedCornerShape(12.dp),
-                                        spotColor = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f) else Color.Black.copy(alpha = 0.4f)
+                                        spotColor = Color.Black.copy(alpha = 0.5f)
                                     )
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
-                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f)
-                                            )
-                                        )
-                                    ),
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                                    .background(Color(0xFF182032)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (currentMedia.artworkUri != null) {
@@ -307,10 +298,10 @@ fun MiniPlayer(
                                 }
                             }
 
-                            // Interactive Playback Controls with Bounce Micro-interactions
+                            // Interactive Playback Controls - 44dp Accessible Tap Targets (WCAG AA / R-03)
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(44.dp)
                                     .clip(CircleShape)
                                     .bounceClick(scaleDown = 0.88f) { onPreviousClick() },
                                 contentAlignment = Alignment.Center
@@ -319,25 +310,18 @@ fun MiniPlayer(
                                     imageVector = Icons.Default.SkipPrevious,
                                     contentDescription = "Anterior",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
 
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(2.dp))
 
-                            // Play/Pause Button with gradient
+                            // Play/Pause Button with High Contrast
                             Box(
                                 modifier = Modifier
-                                    .size(42.dp)
+                                    .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.secondary
-                                            )
-                                        )
-                                    )
+                                    .background(MaterialTheme.colorScheme.primary)
                                     .bounceClick(scaleDown = 0.88f) { onPlayPauseClick() },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -352,18 +336,18 @@ fun MiniPlayer(
                                     Icon(
                                         imageVector = if (playing) Icons.Default.Pause else Icons.Default.PlayArrow,
                                         contentDescription = if (playing) "Pausar" else "Reproducir",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(22.dp)
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(2.dp))
 
-                            // Next Track Button
+                            // Next Track Button - 44dp Accessible Tap Target
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(44.dp)
                                     .clip(CircleShape)
                                     .bounceClick(scaleDown = 0.88f) { onNextClick() },
                                 contentAlignment = Alignment.Center
@@ -372,12 +356,12 @@ fun MiniPlayer(
                                     imageVector = Icons.Default.SkipNext,
                                     contentDescription = "Siguiente",
                                     tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
                         }
 
-                        // Ultra Neon Liquid Progress Bar with Ambient Glow
+                        // Precision Progress Bar with Single Purposeful Accent
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -393,15 +377,7 @@ fun MiniPlayer(
                                     .fillMaxWidth(progress.coerceIn(0f, 1f))
                                     .fillMaxHeight()
                                     .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.secondary,
-                                                MaterialTheme.colorScheme.tertiary
-                                            )
-                                        )
-                                    )
+                                    .background(MaterialTheme.colorScheme.primary)
                             )
                         }
                     }

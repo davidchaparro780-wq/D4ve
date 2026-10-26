@@ -53,6 +53,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -81,11 +86,11 @@ fun EqualizerScreen(
     )
 
     val deviceProfiles = listOf(
-        "🎧 In-Ear Earbuds",
-        "🦻 Over-Ear Bass",
-        "🚗 Car Audio",
-        "🎙️ Studio Flat",
-        "🔊 Altavoz Móvil"
+        "In-Ear Earbuds",
+        "Over-Ear Bass",
+        "Car Audio",
+        "Studio Flat",
+        "Altavoz Móvil"
     )
 
     val bandFrequencies = EqualizerManager.TEN_BAND_FREQUENCIES
@@ -195,7 +200,7 @@ fun EqualizerScreen(
                 .border(1.dp, Color(0xFF1E293B), RoundedCornerShape(14.dp))
                 .padding(4.dp)
         ) {
-            val tabs = listOf("🎚️ Ecualizador & Presets", "🌌 Efectos & Inmersión")
+            val tabs = listOf("Ecualizador y Presets", "Efectos e Inmersión")
             tabs.forEachIndexed { index, title ->
                 val isSelected = selectedEqTab == index
                 val tabModifier = if (isSelected) {
@@ -344,6 +349,148 @@ fun EqualizerScreen(
                 letterSpacing = 1.5.sp
             )
             Spacer(modifier = Modifier.height(12.dp))
+
+            // Studio Parametric Frequency Response Spline
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp)
+                    .shadow(6.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFF0C101A))
+                    .border(1.dp, Color(0x1FFFFFFF), RoundedCornerShape(20.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                        val w = size.width
+                        val h = size.height
+                        val padH = 16f
+                        val centerY = h / 2f
+                        val curveHeight = h * 0.40f
+
+                        // Grid baseline 0dB
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.15f),
+                            start = Offset(padH, centerY),
+                            end = Offset(w - padH, centerY),
+                            strokeWidth = 1.dp.toPx(),
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                        )
+                        // Grid lines for +12dB and -12dB
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.06f),
+                            start = Offset(padH, centerY - curveHeight),
+                            end = Offset(w - padH, centerY - curveHeight),
+                            strokeWidth = 1f
+                        )
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.06f),
+                            start = Offset(padH, centerY + curveHeight),
+                            end = Offset(w - padH, centerY + curveHeight),
+                            strokeWidth = 1f
+                        )
+
+                        // Compute points
+                        val points = mutableListOf<Offset>()
+                        val stepX = (w - 2 * padH) / 9f
+                        for (i in 0 until 10) {
+                            val level = if (isEqEnabled && i < bandLevels.size) bandLevels[i] else 0f
+                            val px = padH + i * stepX
+                            val py = centerY - (level / 12f) * curveHeight
+                            points.add(Offset(px, py))
+                        }
+
+                        // Build smooth cubic curve
+                        val strokePath = Path()
+                        val fillPath = Path()
+
+                        if (points.isNotEmpty()) {
+                            strokePath.moveTo(points[0].x, points[0].y)
+                            fillPath.moveTo(points[0].x, centerY)
+                            fillPath.lineTo(points[0].x, points[0].y)
+
+                            for (i in 0 until points.size - 1) {
+                                val p0 = points[i]
+                                val p1 = points[i + 1]
+                                val cpX1 = p0.x + (p1.x - p0.x) / 2f
+                                val cpY1 = p0.y
+                                val cpX2 = p0.x + (p1.x - p0.x) / 2f
+                                val cpY2 = p1.y
+                                strokePath.cubicTo(cpX1, cpY1, cpX2, cpY2, p1.x, p1.y)
+                                fillPath.cubicTo(cpX1, cpY1, cpX2, cpY2, p1.x, p1.y)
+                            }
+
+                            fillPath.lineTo(points.last().x, centerY)
+                            fillPath.close()
+
+                            // Draw Fill Gradient
+                            drawPath(
+                                path = fillPath,
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        themePrimary.copy(alpha = if (isEqEnabled) 0.35f else 0.08f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+
+                            // Draw Smooth Spline Line
+                            drawPath(
+                                path = strokePath,
+                                color = if (isEqEnabled) themePrimary else Color(0xFF64748B),
+                                style = Stroke(
+                                    width = 2.5.dp.toPx(),
+                                    cap = StrokeCap.Round
+                                )
+                            )
+
+                            // Draw Nodes
+                            for (p in points) {
+                                drawCircle(
+                                    color = if (isEqEnabled) themePrimary else Color(0xFF64748B),
+                                    radius = 3.5.dp.toPx(),
+                                    center = p
+                                )
+                                drawCircle(
+                                    color = Color.White,
+                                    radius = 1.5.dp.toPx(),
+                                    center = p
+                                )
+                            }
+                        }
+                    }
+
+                    // dB Legends
+                    Text(
+                        text = "+12 dB",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White.copy(alpha = 0.35f),
+                        modifier = Modifier.align(Alignment.TopStart)
+                    )
+                    Text(
+                        text = "0 dB",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White.copy(alpha = 0.25f),
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                    Text(
+                        text = "-12 dB",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White.copy(alpha = 0.35f),
+                        modifier = Modifier.align(Alignment.BottomStart)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             Card(
                 modifier = Modifier

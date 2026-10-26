@@ -7,6 +7,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalView
+import com.auraplayer.audio.AuraHaptic
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,8 +57,11 @@ fun VinylTurntableSkin(
     accentColor: Color,
     onTap: () -> Unit,
     onDoubleTap: (Offset) -> Unit,
+    onSeekRelative: ((Long) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val view = LocalView.current
+    var dragAccX by remember { mutableFloatStateOf(0f) }
     // Ángulo de la aguja: reposo (-28°) vs sobre el vinilo (+18°)
     val tonearmAngle by animateFloatAsState(
         targetValue = if (isPlaying) 18f else -28f,
@@ -148,6 +157,27 @@ fun VinylTurntableSkin(
                         onTap = { onTap() },
                         onDoubleTap = { offset -> onDoubleTap(offset) }
                     )
+                }
+                .pointerInput(onSeekRelative) {
+                    if (onSeekRelative != null) {
+                        detectHorizontalDragGestures(
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                dragAccX += dragAmount
+                                if (dragAccX > 22f) {
+                                    onSeekRelative(2000L)
+                                    AuraHaptic.tick(view)
+                                    dragAccX = 0f
+                                } else if (dragAccX < -22f) {
+                                    onSeekRelative(-2000L)
+                                    AuraHaptic.tick(view)
+                                    dragAccX = 0f
+                                }
+                            },
+                            onDragEnd = { dragAccX = 0f },
+                            onDragCancel = { dragAccX = 0f }
+                        )
+                    }
                 }
                 .graphicsLayer {
                     rotationZ = vinylRotation

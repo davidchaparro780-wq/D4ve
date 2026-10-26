@@ -1347,6 +1347,7 @@ fun PlayerScreen(
                                         isPlaying = isPlaying,
                                         vinylRotation = vinylRotation.value,
                                         accentColor = activeAccent,
+                                        onSeekRelative = onSeekRelative,
                                         onTap = {
                                             AuraHaptic.click(view)
                                             centerVisualizerMode = 1
