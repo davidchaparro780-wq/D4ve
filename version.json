@@ -1,7 +1,7 @@
 {
-  "versionCode": 165,
-  "versionName": "4.9.65",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.65/app-release.apk",
-  "changelog": "🔮 DaVE Player v4.9.65 (Build 165) — Mystic Overdrive: el misterio invade toda la app:\n• 🌌 Biblioteca: fondo Void Obsidiano, runa ᛟ en el branding y franja de susurros arcanos rotativos (NecronomicScrollText) bajo la cabecera.\n• ✨ Explorar: nebulosa de constelación estelar reactiva al audio y fondo de vacío cósmico.\n• 💫 Mini Reproductor: aura arcana con borde rúnico de gradiente esotérico y resplandor del acento.\n• 🧭 Los temas misteriosos (Mystic Obsidian, Midnight Eclipse, Phantom Specter y Nebula Enigma) ahora transforman TODA la app de forma consistente, no solo el reproductor.\n• 🔧 Incluye las correcciones de v4.9.63/64: frecuencias Solfeggio reales, updater sin errores de idioma y botón de Ajustes siempre visible.",
+  "versionCode": 166,
+  "versionName": "4.9.66",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.66/app-release.apk",
+  "changelog": "🔮 DaVE Player v4.9.66 (Build 166) — Full Mystic Suite:\n• 🌫️ Phantom Mist en la Biblioteca: bruma espectral flotando detrás de tus canciones.\n• 🎭 Transición de Velo: las pantallas se funden entre bruma al cambiar de pestaña.\n• 🃏 Carta del Día en el Magic Hub 🔥: fase lunar + canción destinada por el azar cósmico.\n• ✨ Splash de Invocación: círculo rúnico rotatorio y fase lunar al abrir la app.\n• 🌙 Sueño Etéreo: despedida de niebla con 'ᛉ El velo te llama…' en el fade-out del temporizador.\n• ⚡ Visuales reactivos fluidos: bloom, niebla y constelaciones respiran al ritmo real del FFT (~20 Hz).\n• 🔑 Servidor WiFi con Código de Invocación de 4 dígitos que protege comandos y descargas.\n• 🏷️ Renombrado Ritual: 'Latido del Abismo ᛟ', 'Sueño Etéreo ᛉ' y vacíos primordiales en estados vacíos.\n• 🧪 Primeros tests unitarios: updater y fase lunar blindados.\n• Incluye las correcciones de v4.9.63-65.",
   "fileSizeMb": 17.7
 }
