@@ -70,6 +70,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
@@ -117,6 +118,7 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -474,6 +476,36 @@ fun MusicScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Arcane Mystery Themes Button
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF2E1B4E), Color(0xFF130924))
+                            )
+                        )
+                        .border(
+                            1.dp,
+                            Brush.linearGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF))),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .clickable {
+                            AuraHaptic.click(view)
+                            showMysteriousThemeDialog = true
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = "Temas Misteriosos Arcanos",
+                        tint = Color(0xFFB388FF),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
                 // Sleep Timer Button
                 Box(
                     modifier = Modifier
@@ -1100,7 +1132,8 @@ fun MusicScreen(
                             Box(modifier = Modifier.fillMaxSize()) {
                                 LazyColumn(
                                     state = songsListState,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(bottom = 140.dp)
                                 ) {
                                     item {
                                         if (isSelectionMode) {
@@ -1570,7 +1603,10 @@ fun MusicScreen(
                             if (albumSongs.isEmpty()) {
                                 EmptyListMessage("Sin canciones en este álbum")
                             } else {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(bottom = 140.dp)
+                                ) {
                                     items(albumSongs, key = { it.id }, contentType = { "song" }) { song ->
                                         SongListItem(
                                             song = song,
@@ -1645,7 +1681,10 @@ fun MusicScreen(
                             if (plSongs.isEmpty()) {
                                 EmptyListMessage("Playlist vacía")
                             } else {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(bottom = 140.dp)
+                                ) {
                                     items(plSongs, key = { it.id }, contentType = { "song" }) { song ->
                                         SongListItem(
                                             song = song,
@@ -1724,7 +1763,10 @@ fun MusicScreen(
                                     if (playlists.isEmpty()) {
                                         EmptyListMessage("Sin playlists")
                                     } else {
-                                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentPadding = PaddingValues(bottom = 140.dp)
+                                        ) {
                                             items(playlists, key = { it.id }) { pl ->
                                                 Box(
                                                     modifier = Modifier
@@ -1855,7 +1897,10 @@ fun MusicScreen(
                                     if (topSongs.isEmpty()) {
                                         EmptyListMessage("Sin reproducciones")
                                     } else {
-                                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentPadding = PaddingValues(bottom = 140.dp)
+                                        ) {
                                             items(topSongs, key = { it.id }, contentType = { "song" }) { song ->
                                                 val count = playlistManager.getPlayCount(song.id)
                                                 SongListItem(
@@ -1881,7 +1926,10 @@ fun MusicScreen(
                                     if (recentSongs.isEmpty()) {
                                         EmptyListMessage("Historial vacío")
                                     } else {
-                                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentPadding = PaddingValues(bottom = 140.dp)
+                                        ) {
                                             items(recentSongs, key = { it.id }, contentType = { "song" }) { song ->
                                                 SongListItem(
                                                     song = song,
@@ -1904,7 +1952,10 @@ fun MusicScreen(
                     if (favoriteSongs.isEmpty()) {
                         EmptyListMessage("Sin favoritos")
                     } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 140.dp)
+                        ) {
                             items(favoriteSongs, key = { it.id }, contentType = { "song" }) { song ->
                                 SongListItem(
                                     song = song,
@@ -2008,7 +2059,10 @@ fun MusicScreen(
                             if (folderSongs.isEmpty()) {
                                 EmptyListMessage("Carpeta vacía")
                             } else {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(bottom = 140.dp)
+                                ) {
                                     items(folderSongs, key = { it.id }, contentType = { "song" }) { song ->
                                         SongListItem(
                                             song = song,
@@ -2023,7 +2077,10 @@ fun MusicScreen(
                             }
                         }
                     } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 140.dp)
+                        ) {
                             items(folderGroups.keys.toList()) { folderName ->
                                 val folderSongs = folderGroups[folderName] ?: emptyList()
                                 Box(
@@ -2196,7 +2253,10 @@ fun MusicScreen(
                             if (artistSongs.isEmpty()) {
                                 EmptyListMessage("Sin canciones")
                             } else {
-                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(bottom = 140.dp)
+                                ) {
                                     items(artistSongs, key = { it.id }, contentType = { "song" }) { song ->
                                         SongListItem(
                                             song = song,
@@ -2211,7 +2271,10 @@ fun MusicScreen(
                             }
                         }
                     } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 140.dp)
+                        ) {
                             items(artistGroups.keys.toList()) { artistName ->
                                 val artistSongs = artistGroups[artistName] ?: emptyList()
                                 Box(

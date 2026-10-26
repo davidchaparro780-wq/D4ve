@@ -138,6 +138,7 @@ import com.auraplayer.ui.components.CanvasLoopTheme
 import com.auraplayer.ui.components.AudioQualityDialog
 import com.auraplayer.ui.components.WaveformVisualizer
 import com.auraplayer.ui.components.MysteriousThemeDialog
+import com.auraplayer.ui.components.ArcaneRunicOrbit
 import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastRewind
@@ -367,6 +368,12 @@ fun PlayerScreen(
     val tubeAmpManager = remember { com.auraplayer.audio.TubeAmpManager.getInstance(context) }
     var isTubeAmpActive by remember { mutableStateOf(tubeAmpManager.isTubeAmpEnabled) }
     var isNightDrcActive by remember { mutableStateOf(tubeAmpManager.isNightDrcEnabled) }
+
+    val playerPlaylistManager = remember { PlaylistManager(context) }
+    var currentThemeAccentState by remember { mutableStateOf(playerPlaylistManager.getThemeAccent()) }
+    val isMysteriousTheme = currentThemeAccentState in listOf(
+        "MYSTIC_OBSIDIAN", "MIDNIGHT_ECLIPSE", "PHANTOM_SPECTER", "NEBULA_ENIGMA"
+    )
 
     var showFxDialog by remember { mutableStateOf(false) }
     var showCutterDialog by remember { mutableStateOf(false) }
@@ -1323,6 +1330,16 @@ fun PlayerScreen(
                                     )
                                 }
 
+                                if (isMysteriousTheme) {
+                                    ArcaneRunicOrbit(
+                                        accentColor = activeAccent,
+                                        secondaryColor = MaterialTheme.colorScheme.secondary,
+                                        bassEnergy = liveBassEnergy,
+                                        isPlaying = isPlaying,
+                                        size = maxArtSize * 1.15f
+                                    )
+                                }
+
                                 if (centerVisualizerMode == 0) {
                                     // Glowing Ambient Aura Disc with Vinyl Record Grooves (Dynamic Palette Glow)
                                     val bassEnergy = liveBassEnergy
@@ -1351,6 +1368,10 @@ fun PlayerScreen(
                                         onTap = {
                                             AuraHaptic.click(view)
                                             centerVisualizerMode = 1
+                                        },
+                                        onLongPress = {
+                                            Toast.makeText(context, "🔮 Resonancia Arcana: Ecos del Vacío Estelar", Toast.LENGTH_SHORT).show()
+                                            showMysteriousThemeDialog = true
                                         },
                                         onDoubleTap = { offset ->
                                             val w = 300f
@@ -1922,6 +1943,35 @@ fun PlayerScreen(
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
+                        }
+                    }
+
+                    if (isMysteriousTheme) {
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Surface(
+                            modifier = Modifier.clickable {
+                                AuraHaptic.click(view)
+                                showMysteriousThemeDialog = true
+                            },
+                            color = Color(0xFF1E1135).copy(alpha = 0.7f),
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(0.8.dp, androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF))))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(text = "ᛟ", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "RESONANCIA ARCANA • 432 Hz",
+                                    color = Color(0xFFE2D4FF),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.6.sp
+                                )
+                                Text(text = "✧", color = Color(0xFFB388FF), fontSize = 10.sp)
+                            }
                         }
                     }
                 }
@@ -4038,13 +4088,11 @@ fun PlayerScreen(
 
     // Mysterious Themes & Colors In-Player Dialog
     if (showMysteriousThemeDialog) {
-        val playlistManager = remember { PlaylistManager(context) }
-        var currentAccent by remember { mutableStateOf(playlistManager.getThemeAccent()) }
         MysteriousThemeDialog(
-            currentAccent = currentAccent,
+            currentAccent = currentThemeAccentState,
             onAccentChange = { newAccent ->
-                currentAccent = newAccent
-                playlistManager.setThemeAccent(newAccent)
+                currentThemeAccentState = newAccent
+                playerPlaylistManager.setThemeAccent(newAccent)
                 onAccentChange(newAccent)
             },
             onDismiss = { showMysteriousThemeDialog = false }

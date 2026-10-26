@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,7 +42,9 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.auraplayer.data.model.MediaModel
 
@@ -57,6 +60,7 @@ fun VinylTurntableSkin(
     accentColor: Color,
     onTap: () -> Unit,
     onDoubleTap: (Offset) -> Unit,
+    onLongPress: (() -> Unit)? = null,
     onSeekRelative: ((Long) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -155,12 +159,17 @@ fun VinylTurntableSkin(
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { onTap() },
-                        onDoubleTap = { offset -> onDoubleTap(offset) }
+                        onDoubleTap = { offset -> onDoubleTap(offset) },
+                        onLongPress = {
+                            AuraHaptic.heavy(view)
+                            onLongPress?.invoke()
+                        }
                     )
                 }
                 .pointerInput(onSeekRelative) {
                     if (onSeekRelative != null) {
                         detectHorizontalDragGestures(
+                            onDragStart = { dragAccX = 0f },
                             onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
                                 dragAccX += dragAmount
@@ -233,14 +242,22 @@ fun VinylTurntableSkin(
                 )
             }
 
-            // Orificio central del eje (Spindle hole)
+            // Orificio central del eje (Spindle hole) con Glifo Arcano
             Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(22.dp)
                     .clip(CircleShape)
                     .background(Color(0xFF0A0D16))
-                    .border(1.5.dp, Color(0xFFC0C7D8), CircleShape)
-            )
+                    .border(1.5.dp, accentColor.copy(alpha = 0.85f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "✧",
+                    color = accentColor,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         // Brazo y Aguja Fonocaptora (Tonearm) superpuesto en la esquina superior derecha
