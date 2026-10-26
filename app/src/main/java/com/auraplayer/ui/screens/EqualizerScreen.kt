@@ -197,6 +197,7 @@ fun EqualizerScreen(
         ) {
             val tabs = listOf("🎚️ Ecualizador & Presets", "🌌 Efectos & Inmersión")
             tabs.forEachIndexed { index, title ->
+                val isSelected = selectedEqTab == index
                 val tabModifier = if (isSelected) {
                     Modifier
                         .weight(1f)
