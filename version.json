@@ -1,7 +1,7 @@
 {
-  "versionCode": 163,
-  "versionName": "4.9.63",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.63/app-release.apk",
-  "changelog": "🐛 DaVE Player v4.9.63 (Build 163) — Correcciones de Precisión:\n• 🎚️ Consola de Resonancia Arcana: las frecuencias Solfeggio ahora aplican el ratio de re-afinación real (Hz/440) — antes solo 432 Hz era exacto (528 Hz aplicaba 1.05 en vez de 1.20, 396 Hz 0.94 en vez de 0.90, etc.).\n• 📦 Auto-Updater: el tamaño del APK ya no cae al valor por defecto (24.5 MB) en dispositivos con configuración regional de coma decimal.\n• ✨ Phantom Mist: las partículas de bruma ya no desaparecen al cruzar el borde izquierdo de la pantalla.\n• Incluye todo lo de v4.9.62: Arcane Monolith, Lunar Phase, Solfeggio Console, Phantom Mist, Stellar Constellation y Necronomic Scroll.",
+  "versionCode": 164,
+  "versionName": "4.9.64",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.64/app-release.apk",
+  "changelog": "🔧 DaVE Player v4.9.64 (Build 164) — Corrección de la Barra Superior:\n• ⚙️ El botón de Ajustes (y el de Perfil) volvieron a ser visibles: desde la v4.9.62 los nuevos botones de Temas Arcanos y Fase Lunar empujaban el final de la barra fuera del borde derecho de la pantalla en celulares de 360dp.\n• ✨ El acceso rápido a Temas Arcanos se retiró de la cabecera porque estaba duplicado (sigue disponible en el Magic Hub 🔥 → Temas & Atmósferas).\n• 📱 La barra de acciones rápidas ahora es desplazable horizontalmente en pantallas muy estrechas, así ningún botón queda inaccesible.\n• 🎚️ Incluye las correcciones de v4.9.63: frecuencias Solfeggio con ratio real (Hz/440), tamaño del APK en el updater sin errores de idioma y partículas de Phantom Mist sin desaparecer en los bordes.",
   "fileSizeMb": 17.7
 }
