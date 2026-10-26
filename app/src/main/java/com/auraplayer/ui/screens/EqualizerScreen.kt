@@ -197,23 +197,25 @@ fun EqualizerScreen(
         ) {
             val tabs = listOf("🎚️ Ecualizador & Presets", "🌌 Efectos & Inmersión")
             tabs.forEachIndexed { index, title ->
-                val isSelected = selectedEqTab == index
-                Box(
-                    modifier = Modifier
+                val tabModifier = if (isSelected) {
+                    Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(10.dp))
                         .background(
-                            if (isSelected) {
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
-                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f)
-                                    )
+                            Brush.horizontalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f)
                                 )
-                            } else {
-                                Color.Transparent
-                            }
+                            )
                         )
+                } else {
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                }
+                Box(
+                    modifier = tabModifier
                         .clickable {
                             com.auraplayer.audio.AuraHaptic.click(view)
                             selectedEqTab = index

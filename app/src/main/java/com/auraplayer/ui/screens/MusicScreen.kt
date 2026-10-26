@@ -33,6 +33,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.filled.CheckCircle
@@ -1699,10 +1700,10 @@ fun MusicScreen(
                                                                     .background(Color(0xFF1E2840)),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                if (firstSong?.albumArtUri != null) {
-                                                                    val imageRequest = remember(firstSong.albumArtUri) {
+                                                                if (firstSong?.artworkUri != null) {
+                                                                    val imageRequest = remember(firstSong.artworkUri) {
                                                                         coil.request.ImageRequest.Builder(context)
-                                                                            .data(firstSong.albumArtUri)
+                                                                            .data(firstSong.artworkUri)
                                                                             .crossfade(150)
                                                                             .build()
                                                                     }
