@@ -155,6 +155,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -263,7 +264,14 @@ fun MusicScreen(
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("Canciones", "Álbumes 💿", "Playlists 📂", "Favoritos ❤️", "Carpetas", "Artistas")
+    val tabs = listOf(
+    stringResource(com.auraplayer.R.string.tab_songs),
+    stringResource(com.auraplayer.R.string.tab_albums),
+    stringResource(com.auraplayer.R.string.tab_playlists),
+    stringResource(com.auraplayer.R.string.tab_favorites),
+    stringResource(com.auraplayer.R.string.tab_folders),
+    stringResource(com.auraplayer.R.string.tab_artists)
+)
 
     // Filter & Sort States
     // 0: Todas, 1: Descargas, 2: Recientes, 3: Más Escuchadas, 4: HD/Lossless, 5: Favoritas, 6: Cortas, 7: Largas
@@ -783,7 +791,7 @@ fun MusicScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar canciones",
+                        contentDescription = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_search),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp)
                     )
@@ -796,7 +804,7 @@ fun MusicScreen(
                     ) {
                         if (searchQuery.isEmpty()) {
                             Text(
-                                text = "Buscar canciones, artistas, álbumes...",
+                                text = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.search_hint),
                                 fontSize = 14.sp,
                                 color = Color(0xFF94A3B8).copy(alpha = 0.7f),
                                 maxLines = 1
@@ -1184,7 +1192,7 @@ fun MusicScreen(
                                     }
                                 }
                             } else {
-                                EmptyListMessage("Sin canciones", isMysterious)
+                                EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.no_songs), isMysterious)
                             }
                         } else {
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -1638,7 +1646,7 @@ fun MusicScreen(
                                     ) {
                                         Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Reproducir", fontSize = 12.sp)
+                                        Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_play), fontSize = 12.sp)
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     IconButton(
@@ -1659,7 +1667,7 @@ fun MusicScreen(
                             }
 
                             if (albumSongs.isEmpty()) {
-                                EmptyListMessage("Sin canciones en este álbum")
+                                EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_album_songs))
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -1729,7 +1737,7 @@ fun MusicScreen(
                                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        Text("Reproducir", fontWeight = FontWeight.Bold)
+                                        Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_play), fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -1737,7 +1745,7 @@ fun MusicScreen(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             if (plSongs.isEmpty()) {
-                                EmptyListMessage("Playlist vacía")
+                                EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_playlist))
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -1819,7 +1827,7 @@ fun MusicScreen(
 
                                     val playlists = playlistManager.getPlaylists()
                                     if (playlists.isEmpty()) {
-                                        EmptyListMessage("Sin playlists")
+                                        EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_playlists))
                                     } else {
                                         LazyColumn(
                                             modifier = Modifier.fillMaxSize(),
@@ -1953,7 +1961,7 @@ fun MusicScreen(
                                     }
 
                                     if (topSongs.isEmpty()) {
-                                        EmptyListMessage("Sin reproducciones")
+                                        EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_history_plays))
                                     } else {
                                         LazyColumn(
                                             modifier = Modifier.fillMaxSize(),
@@ -1982,7 +1990,7 @@ fun MusicScreen(
                                     }
 
                                     if (recentSongs.isEmpty()) {
-                                        EmptyListMessage("Historial vacío")
+                                        EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_history))
                                     } else {
                                         LazyColumn(
                                             modifier = Modifier.fillMaxSize(),
@@ -2008,7 +2016,7 @@ fun MusicScreen(
                 }
                 3 -> { // Favoritos
                     if (favoriteSongs.isEmpty()) {
-                        EmptyListMessage("Sin favoritos")
+                        EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_favorites))
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -2093,7 +2101,7 @@ fun MusicScreen(
                                     ) {
                                         Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Reproducir", fontSize = 12.sp)
+                                        Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_play), fontSize = 12.sp)
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     // Shuffle Folder
@@ -2115,7 +2123,7 @@ fun MusicScreen(
                             }
 
                             if (folderSongs.isEmpty()) {
-                                EmptyListMessage("Carpeta vacía")
+                                EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.empty_folder))
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -2288,7 +2296,7 @@ fun MusicScreen(
                                     ) {
                                         Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Reproducir", fontSize = 12.sp)
+                                        Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_play), fontSize = 12.sp)
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     IconButton(
@@ -2309,7 +2317,7 @@ fun MusicScreen(
                             }
 
                             if (artistSongs.isEmpty()) {
-                                EmptyListMessage("Sin canciones", isMysterious)
+                                EmptyListMessage(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.no_songs), isMysterious)
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),

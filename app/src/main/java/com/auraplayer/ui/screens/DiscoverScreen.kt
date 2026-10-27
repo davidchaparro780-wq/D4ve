@@ -186,9 +186,9 @@ fun DiscoverScreen(
     val downloadStates by downloadEngine.downloadStates.collectAsState()
 
     val sourceFilters = listOf(
-        "Todas" to "🌐 Todas (Completas)",
-        "YouTube" to "🔴 YouTube (RYT)",
-        "Jamendo" to "⚡ Jamendo (Full)"
+        "Todas" to androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_source_all),
+        "YouTube" to androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_source_youtube),
+        "Jamendo" to androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_source_jamendo)
     )
 
     val genres = listOf(
@@ -342,7 +342,7 @@ fun DiscoverScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Explorar y Descargar",
+                            text = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -351,7 +351,7 @@ fun DiscoverScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = "Top TikTok, Pop y MP3 HD",
+                            text = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_subtitle),
                             fontSize = 10.sp,
                             color = Color(0xFF94A3B8),
                             maxLines = 1,
@@ -382,7 +382,7 @@ fun DiscoverScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "📥 Redes",
+                            text = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_social),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -453,7 +453,7 @@ fun DiscoverScreen(
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
                         Text(
-                            "Buscar canción, artista o pegar enlace...",
+                            androidx.compose.ui.res.stringResource(com.auraplayer.R.string.discover_search_hint),
                             color = Color(0xFF94A3B8).copy(alpha = 0.7f),
                             fontSize = 12.sp,
                             maxLines = 1,

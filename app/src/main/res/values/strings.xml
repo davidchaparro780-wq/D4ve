@@ -18,18 +18,38 @@
     <string name="action_back">Atrás</string>
     <string name="action_close">Cerrar</string>
 
-    <!-- Biblioteca -->
+    <!-- Buscador -->
+    <string name="search_hint">Buscar canciones, artistas, álbumes...</string>
+
+    <!-- Pestañas de la biblioteca -->
     <string name="tab_songs">Canciones</string>
-    <string name="tab_albums">Álbumes</string>
-    <string name="tab_playlists">Playlists</string>
-    <string name="tab_favorites">Favoritos</string>
+    <string name="tab_albums">Álbumes 💿</string>
+    <string name="tab_playlists">Playlists 📂</string>
+    <string name="tab_favorites">Favoritos ❤️</string>
     <string name="tab_folders">Carpetas</string>
     <string name="tab_artists">Artistas</string>
+
+    <!-- Estados vacíos -->
+    <string name="no_songs">Sin canciones</string>
+    <string name="empty_playlist">Playlist vacía</string>
+    <string name="empty_album_songs">Sin canciones en este álbum</string>
+    <string name="empty_playlists">Sin playlists</string>
+    <string name="empty_history_plays">Sin reproducciones</string>
+    <string name="empty_history">Historial vacío</string>
+    <string name="empty_favorites">Sin favoritos</string>
+    <string name="empty_folder">Carpeta vacía</string>
     <string name="unknown_artist">Artista desconocido</string>
     <string name="unknown_album">Álbum desconocido</string>
     <string name="no_media_found">No se encontraron archivos multimedia.</string>
-    <string name="empty_playlist">Playlist vacía</string>
-    <string name="no_songs">Sin canciones</string>
+
+    <!-- Explorar -->
+    <string name="discover_title">Explorar y Descargar</string>
+    <string name="discover_subtitle">Top TikTok, Pop y MP3 HD</string>
+    <string name="discover_search_hint">Buscar canción, artista o pegar enlace...</string>
+    <string name="discover_social">📥 Redes</string>
+    <string name="discover_source_all">🌐 Todas (Completas)</string>
+    <string name="discover_source_youtube">🔴 YouTube (RYT)</string>
+    <string name="discover_source_jamendo">⚡ Jamendo (Full)</string>
 
     <!-- Permisos -->
     <string name="permission_required">Se requieren permisos para explorar tu biblioteca de música y videos.</string>

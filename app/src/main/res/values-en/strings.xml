@@ -18,18 +18,38 @@
     <string name="action_back">Back</string>
     <string name="action_close">Close</string>
 
-    <!-- Library -->
+    <!-- Search -->
+    <string name="search_hint">Search songs, artists, albums...</string>
+
+    <!-- Library tabs -->
     <string name="tab_songs">Songs</string>
-    <string name="tab_albums">Albums</string>
-    <string name="tab_playlists">Playlists</string>
-    <string name="tab_favorites">Favorites</string>
+    <string name="tab_albums">Albums 💿</string>
+    <string name="tab_playlists">Playlists 📂</string>
+    <string name="tab_favorites">Favorites ❤️</string>
     <string name="tab_folders">Folders</string>
     <string name="tab_artists">Artists</string>
+
+    <!-- Empty states -->
+    <string name="no_songs">No songs</string>
+    <string name="empty_playlist">Empty playlist</string>
+    <string name="empty_album_songs">No songs in this album</string>
+    <string name="empty_playlists">No playlists</string>
+    <string name="empty_history_plays">No plays yet</string>
+    <string name="empty_history">Empty history</string>
+    <string name="empty_favorites">No favorites</string>
+    <string name="empty_folder">Empty folder</string>
     <string name="unknown_artist">Unknown artist</string>
     <string name="unknown_album">Unknown album</string>
     <string name="no_media_found">No media files found.</string>
-    <string name="empty_playlist">Empty playlist</string>
-    <string name="no_songs">No songs</string>
+
+    <!-- Discover -->
+    <string name="discover_title">Discover &amp; Download</string>
+    <string name="discover_subtitle">Top TikTok, Pop and HD MP3</string>
+    <string name="discover_search_hint">Search song, artist or paste link...</string>
+    <string name="discover_social">📥 Social</string>
+    <string name="discover_source_all">🌐 All (Complete)</string>
+    <string name="discover_source_youtube">🔴 YouTube (RYT)</string>
+    <string name="discover_source_jamendo">⚡ Jamendo (Full)</string>
 
     <!-- Permissions -->
     <string name="permission_required">Permissions are required to browse your music and video library.</string>

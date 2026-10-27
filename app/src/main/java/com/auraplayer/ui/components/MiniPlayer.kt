@@ -113,7 +113,7 @@ fun MiniPlayer(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                "Siguiente",
+                                androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_next),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -143,7 +143,7 @@ fun MiniPlayer(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                "Anterior",
+                                androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_previous),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.secondary
@@ -323,7 +323,7 @@ fun MiniPlayer(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SkipPrevious,
-                                    contentDescription = "Anterior",
+                                    contentDescription = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_previous),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(22.dp)
                                 )
@@ -369,7 +369,7 @@ fun MiniPlayer(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SkipNext,
-                                    contentDescription = "Siguiente",
+                                    contentDescription = androidx.compose.ui.res.stringResource(com.auraplayer.R.string.action_next),
                                     tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(22.dp)
                                 )
