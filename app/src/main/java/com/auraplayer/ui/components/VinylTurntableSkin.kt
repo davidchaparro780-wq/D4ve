@@ -58,7 +58,7 @@ import com.auraplayer.data.model.MediaModel
 fun VinylTurntableSkin(
     song: MediaModel,
     isPlaying: Boolean,
-    vinylRotationState: androidx.compose.runtime.State<Float>,
+    vinylRotationState: () -> Float,
     accentColor: Color,
     onTap: () -> Unit,
     onDoubleTap: (Offset) -> Unit,
@@ -194,8 +194,8 @@ fun VinylTurntableSkin(
                     }
                 }
                 .graphicsLayer {
-                    // Lectura diferida del State: el disco gira sin recomposición (solo GPU)
-                    rotationZ = vinylRotationState.value
+                    // Lectura diferida: el disco gira sin recomposición (solo GPU)
+                    rotationZ = vinylRotationState()
                 },
             contentAlignment = Alignment.Center
         ) {

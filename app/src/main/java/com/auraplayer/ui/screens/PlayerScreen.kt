@@ -1425,7 +1425,7 @@ fun PlayerScreen(
                                         VinylTurntableSkin(
                                         song = currentMedia,
                                         isPlaying = isPlaying,
-                                        vinylRotationState = vinylRotation,
+                                        vinylRotationState = { vinylRotation.value },
                                         accentColor = activeAccent,
                                         onSeekRelative = onSeekRelative,
                                         onTap = {
