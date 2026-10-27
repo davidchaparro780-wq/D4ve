@@ -1,7 +1,7 @@
 {
-    "versionCode":  172,
-    "versionName":  "4.9.72",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.72/app-release.apk",
-    "changelog":  "🌍 DaVE Player v4.9.72 (Build 172) - Ola 3 de internacionalizacion:\r\n• 🌐 Magic Hub completamente bilingue: las 36 herramientas (titulos y descripciones) respetan el idioma del sistema (espanol/ingles).\r\n• ⚙️ El hub ahora reconstruye su lista al recomponer (permite recursos por idioma).\r\n• ✅ Incluye todo lo de v4.9.63-71.",
-    "fileSizeMb":  0
+  "versionCode": 172,
+  "versionName": "4.9.72",
+  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.72/app-release.apk",
+  "changelog": "🌍 DaVE Player v4.9.72 (Build 172) - Ola 3 de internacionalizacion:\n• 🌐 Magic Hub completamente bilingue: las 36 herramientas (titulos y descripciones) respetan el idioma del sistema (espanol/ingles).\n• ⚙️ El hub ahora reconstruye su lista al recomponer (permite recursos por idioma).\n• ✅ Incluye todo lo de v4.9.63-71.",
+  "fileSizeMb": 5.9
 }
