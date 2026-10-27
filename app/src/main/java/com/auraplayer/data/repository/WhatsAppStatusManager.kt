@@ -442,7 +442,9 @@ object WhatsAppStatusManager {
                             nameDate != null && nameDate < rawTime -> nameDate
                             else -> rawTime
                         }
-                        val isRecent = effectiveTime > 0L && (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
+                        // Todo archivo hallado dentro de una carpeta .Statuses es un estado vigente:
+                        // WhatsApp purga los expirados, aunque preserve mtimes originales viejos
+                        val isRecent = true
                         list.add(
                             WhatsAppStatusItem(
                                 file = null,
@@ -518,6 +520,10 @@ object WhatsAppStatusManager {
 
             for (dir in dirsToScan) {
                 if (dir.exists() && dir.isDirectory) {
+                    // La ruta activa (Android/media/...) la limpia WhatsApp cada 24h: si el archivo existe,
+                    // es un estado vigente AUNQUE WhatsApp preserve el lastModified del archivo original
+                    // (comportamiento conocido: contactos que re-publican fotos viejas nacen con mtime viejo).
+                    val isActiveScoped = dir.absolutePath.replace('\\', '/').contains("/android/media/", ignoreCase = true)
                     val files = try { dir.listFiles() } catch (_: Exception) { null } ?: continue
                     for (file in files) {
                         if (file.isFile && !file.name.startsWith(".nomedia") && file.length() > 0) {
@@ -527,8 +533,12 @@ object WhatsAppStatusManager {
                             if (isVideo || isImage) {
                                 val fileMod = file.lastModified()
                                 val effectiveTime = if (fileMod in 1L..(now + 60_000L)) fileMod else now
-                                // Los archivos en Android/media/.Statuses son estados activos descargados por WhatsApp
-                                val isRecent = (now - effectiveTime) in -600_000L..(48L * 60 * 60 * 1000L)
+                                // Fósiles: solo posibles en la ruta legado (raíz del almacenamiento), que WhatsApp ya no limpia
+                                val isLegacyFossil = !isActiveScoped && (now - effectiveTime) > (48L * 60 * 60 * 1000L)
+                                if (isLegacyFossil) continue
+                                val isRecent = isActiveScoped || ((now - effectiveTime) in -600_000L..(48L * 60 * 60 * 1000L))
+                                // Nunca mostrar un estado vigente con fecha de hace días: se clamp a ahora
+                                val displayTime = if ((now - effectiveTime) <= (24L * 60 * 60 * 1000L)) effectiveTime else now
 
                                 val signature = "${file.name}_${file.length()}"
                                 if (seenSignatures.add(signature)) {
@@ -543,7 +553,7 @@ object WhatsAppStatusManager {
                                             file = file,
                                             uri = uri,
                                             isVideo = isVideo,
-                                            timestamp = effectiveTime,
+                                            timestamp = displayTime,
                                             size = file.length(),
                                             isRecent24h = isRecent,
                                             path = file.absolutePath
