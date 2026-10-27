@@ -2245,7 +2245,7 @@ fun AuraApp(
                                 }
                             },
                             icon = { Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(22.dp)) },
-                            label = { Text("Música", fontWeight = if (selectedNavTab == 0) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_biblioteca), fontWeight = if (selectedNavTab == 0) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -2263,7 +2263,7 @@ fun AuraApp(
                                 }
                             },
                             icon = { Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(22.dp)) },
-                            label = { Text("Explorar", fontWeight = if (selectedNavTab == 1) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_explorar), fontWeight = if (selectedNavTab == 1) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -2281,7 +2281,7 @@ fun AuraApp(
                                 }
                             },
                             icon = { Icon(Icons.Default.VideoLibrary, contentDescription = null, modifier = Modifier.size(22.dp)) },
-                            label = { Text("Videos", fontWeight = if (selectedNavTab == 2) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_videos), fontWeight = if (selectedNavTab == 2) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -2299,7 +2299,7 @@ fun AuraApp(
                                 }
                             },
                             icon = { Icon(Icons.Default.Equalizer, contentDescription = null, modifier = Modifier.size(22.dp)) },
-                            label = { Text("Ecualizador", fontWeight = if (selectedNavTab == 3) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
+                            label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_equalizer), fontWeight = if (selectedNavTab == 3) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,

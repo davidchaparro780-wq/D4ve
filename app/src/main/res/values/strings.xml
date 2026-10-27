@@ -1,16 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DaVE</string>
-    <string name="tab_songs">Canciones</string>
-    <string name="tab_albums">Álbumes</string>
-    <string name="tab_artists">Artistas</string>
-    <string name="tab_folders">Carpetas</string>
-    <string name="nav_music">Música</string>
+
+    <!-- Navegación principal -->
+    <string name="nav_biblioteca">Biblioteca</string>
+    <string name="nav_explorar">Explorar</string>
     <string name="nav_videos">Videos</string>
     <string name="nav_equalizer">Ecualizador</string>
-    <string name="search_hint">Buscar en DaVE…</string>
-    <string name="permission_required">Se requieren permisos para explorar tu biblioteca de música y videos.</string>
-    <string name="grant_permission">Permitir Acceso</string>
-    <string name="no_media_found">No se encontraron archivos multimedia.</string>
+
+    <!-- Acciones comunes -->
+    <string name="action_play">Reproducir</string>
+    <string name="action_pause">Pausar</string>
+    <string name="action_next">Siguiente</string>
+    <string name="action_previous">Anterior</string>
+    <string name="action_search">Buscar</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_back">Atrás</string>
+    <string name="action_close">Cerrar</string>
+
+    <!-- Biblioteca -->
+    <string name="tab_songs">Canciones</string>
+    <string name="tab_albums">Álbumes</string>
+    <string name="tab_playlists">Playlists</string>
+    <string name="tab_favorites">Favoritos</string>
+    <string name="tab_folders">Carpetas</string>
+    <string name="tab_artists">Artistas</string>
     <string name="unknown_artist">Artista desconocido</string>
     <string name="unknown_album">Álbum desconocido</string>
+    <string name="no_media_found">No se encontraron archivos multimedia.</string>
+    <string name="empty_playlist">Playlist vacía</string>
+    <string name="no_songs">Sin canciones</string>
+
+    <!-- Permisos -->
+    <string name="permission_required">Se requieren permisos para explorar tu biblioteca de música y videos.</string>
+    <string name="grant_permission">Permitir Acceso</string>
 </resources>
