@@ -14,6 +14,11 @@
 -keep class org.schabi.newpipe.extractor.services.** { *; }
 -dontwarn org.schabi.newpipe.**
 
+# Rhino referencia APIs de JVM desktop que no existen en Android y nunca se invocan en el dispositivo
+-dontwarn javax.script.**
+-dontwarn java.beans.**
+-dontwarn jdk.dynalink.**
+
 # ---- OkHttp / Okio ----
 -dontwarn okhttp3.**
 -dontwarn okio.**
