@@ -32,8 +32,9 @@ data class UpdateInfo(
  */
 fun isVersionNewer(remote: String, current: String): Boolean {
     if (remote.isBlank() || current.isBlank()) return false
-    val cleanRemote = remote.removePrefix("v").trim()
-    val cleanCurrent = current.removePrefix("v").trim()
+    // Trunca sufijos de pre-release ("-beta", "-rc2") para que "4.9.66-beta" compare como "4.9.66"
+    val cleanRemote = remote.removePrefix("v").trim().substringBefore("-")
+    val cleanCurrent = current.removePrefix("v").trim().substringBefore("-")
     val remoteParts = cleanRemote.split(".").mapNotNull { it.replace(Regex("[^0-9]"), "").toIntOrNull() }
     val currentParts = cleanCurrent.split(".").mapNotNull { it.replace(Regex("[^0-9]"), "").toIntOrNull() }
 

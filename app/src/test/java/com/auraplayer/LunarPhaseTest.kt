@@ -44,7 +44,8 @@ class LunarPhaseTest {
     fun `el ciclo se repite tras un mes sinodico completo`() {
         val fullCycleMs = (29.53058867 * 86400.0 * 1000.0).toLong()
         val atEpoch = LunarPhaseManager.getPhaseAt(947182440_000L)
-        val oneCycleLater = LunarPhaseManager.getPhaseAt(947182440_000L + fullCycleMs)
+        // Buffer de 5 s: el truncamiento a milisegundos deja el ciclo exacto en 99.99996% (menguante)
+        val oneCycleLater = LunarPhaseManager.getPhaseAt(947182440_000L + fullCycleMs + 5000L)
         assertEquals(atEpoch.phaseName, oneCycleLater.phaseName)
     }
 
