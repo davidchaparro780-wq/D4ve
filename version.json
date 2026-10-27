@@ -3,5 +3,5 @@
     "versionName":  "4.9.70",
     "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.70/app-release.apk",
     "changelog":  "🌍 DaVE Player v4.9.70 (Build 170) - Base bilingue:\r\n• 🌐 Internacionalizacion: la barra de navegacion ahora respeta el idioma del sistema (espanol/ingles) y el proyecto cuenta con infraestructura completa de recursos es/en para migrar el resto de la app de forma incremental.\r\n• ✅ Incluye todo lo de v4.9.63-69.",
-    "fileSizeMb":  0
+    "fileSizeMb":  5.9
 }
