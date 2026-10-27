@@ -1,7 +1,7 @@
-{
-  "versionCode": 168,
-  "versionName": "4.9.68",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.68/app-release.apk",
-  "changelog": "⚡ DaVE Player v4.9.68 (Build 168) — Optimización profunda:\n• 📦 APK 67% más liviano: de 17.7 MB a 5.9 MB gracias a R8 (minificado + recursos recortados) con reglas de seguridad para Media3, NewPipeExtractor, Coil y ZXing.\n• 🎡 Giro de vinilo a GPU pura: el disco gira sin recomponer ni un solo composable (antes 60 veces por segundo).\n• ✅ Verificado por el CI con tests unitarios en cada build.\n• Incluye todo lo de v4.9.63-67.",
-  "fileSizeMb": 5.9
+﻿{
+    "versionCode":  169,
+    "versionName":  "4.9.69",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.69/app-release.apk",
+    "changelog":  "🛡️ DaVE Player v4.9.69 (Build 169) — Copias completas y repo sano:`n• 💾 La copia de seguridad ahora incluye el tema visual, el crossfade DJ y ReplayGain — nada se pierde al cambiar de celular.`n• 🖥️ Reproductor web desktop: caché del Service Worker desatascada (v4.3.0 → v4.9.68).`n• 📦 110 MB de música de demostración removida del repositorio público (sigue en tu disco para el reproductor PC).`n• ✅ Incluye todo lo de v4.9.63-68: Mystic Overdrive, Full Mystic Suite, R8 y optimizaciones.",
+    "fileSizeMb":  0
 }
