@@ -174,7 +174,6 @@ fun DaveMagicHubSheet(
     val categories = listOf("🔥 Todo", "📥 Descargas", "🎛️ Audio Lab", "🎉 Fiesta & Juegos", "🧰 Utilidades")
 
     val allTools = listOf(
-        listOf(
             // 1. Descargas & Redes
             HubToolItem(
                 id = "tiktok",
