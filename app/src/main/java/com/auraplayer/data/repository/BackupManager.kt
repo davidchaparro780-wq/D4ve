@@ -198,6 +198,18 @@ class BackupManager(private val context: Context) {
             settingsManager.setNotifyUpdatesEnabled(obj.optBoolean("notify_updates", true))
             restored++
         }
+        if (obj.has("theme_accent")) {
+            playlistManager.setThemeAccent(obj.optString("theme_accent", "MYSTIC_OBSIDIAN"))
+            restored++
+        }
+        if (obj.has("crossfade_seconds")) {
+            playlistManager.setCrossfadeSeconds(obj.optInt("crossfade_seconds", 0))
+            restored++
+        }
+        if (obj.has("replaygain_enabled")) {
+            playlistManager.setReplayGainEnabled(obj.optBoolean("replaygain_enabled", false))
+            restored++
+        }
         return restored
     }
 
@@ -297,6 +309,9 @@ class BackupManager(private val context: Context) {
         obj.put("dynamic_palette_enabled", settingsManager.dynamicPaletteEnabled)
         obj.put("visualizer_sensitivity", settingsManager.visualizerSensitivity.toDouble())
         obj.put("notify_updates", settingsManager.notifyUpdates)
+        obj.put("theme_accent", playlistManager.getThemeAccent())
+        obj.put("crossfade_seconds", playlistManager.getCrossfadeSeconds())
+        obj.put("replaygain_enabled", playlistManager.isReplayGainEnabled())
         obj.put("equalizer", buildEqualizerJson())
         return obj
     }

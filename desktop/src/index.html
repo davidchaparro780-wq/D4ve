@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DaVE Player — Web & Desktop Edition</title>
-  <meta name="description" content="DaVE Player: Reproductor de música profesional con AI Stem Mixer, Ecualizador 10-Bandas y Sincronización con Celular.">
+  <title>DaVE Player â€” Web & Desktop Edition</title>
+  <meta name="description" content="DaVE Player: Reproductor de mÃºsica profesional con AI Stem Mixer, Ecualizador 10-Bandas y SincronizaciÃ³n con Celular.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=4.3.0">
+  <link rel="stylesheet" href="style.css?v=4.9.68">
 
   <style>
     /* CRITICAL INLINE STYLES (Guarantees zero-cache rendering) */
@@ -2893,7 +2893,7 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Pantalla Completa Inicial de Iniciar Sesión (Visible por defecto hasta iniciar sesión) -->
+  <!-- Pantalla Completa Inicial de Iniciar SesiÃ³n (Visible por defecto hasta iniciar sesiÃ³n) -->
   <div id="full-login-screen" class="full-login-screen">
     <div class="full-login-container">
       <div class="login-brand">
@@ -2905,29 +2905,29 @@
       <div id="full-login-status-box" class="full-login-status-box">
         <i class="fa-solid fa-cloud-arrow-down" style="color:var(--accent-cyan); font-size:1.4rem; margin-top:0.15rem;"></i>
         <div>
-          <strong id="full-login-status-title">Iniciar Sesión en DaVE Cloud</strong>
-          <p id="full-login-status-desc">Inicia sesión con tu cuenta para acceder y escuchar todas las canciones que tienes guardadas en la nube.</p>
+          <strong id="full-login-status-title">Iniciar SesiÃ³n en DaVE Cloud</strong>
+          <p id="full-login-status-desc">Inicia sesiÃ³n con tu cuenta para acceder y escuchar todas las canciones que tienes guardadas en la nube.</p>
         </div>
       </div>
 
       <form id="full-login-form">
         <div class="form-field">
-          <label><i class="fa-regular fa-envelope"></i> Correo Electrónico</label>
+          <label><i class="fa-regular fa-envelope"></i> Correo ElectrÃ³nico</label>
           <input type="email" id="full-login-email" value="david.chaparro@daveplayer.app" required placeholder="ejemplo@correo.com">
         </div>
         <div class="form-field" style="margin-top:0.75rem;">
-          <label><i class="fa-solid fa-lock"></i> Contraseña o PIN</label>
-          <input type="password" id="full-login-password" value="••••••••" required placeholder="••••••••">
+          <label><i class="fa-solid fa-lock"></i> ContraseÃ±a o PIN</label>
+          <input type="password" id="full-login-password" value="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
         </div>
         
         <button type="submit" class="btn-glow-primary btn-block" style="margin-top:1.1rem; padding:0.85rem; font-size:0.95rem;">
-          <i class="fa-solid fa-cloud-arrow-down"></i> Iniciar Sesión y Cargar Canciones de la Nube
+          <i class="fa-solid fa-cloud-arrow-down"></i> Iniciar SesiÃ³n y Cargar Canciones de la Nube
         </button>
       </form>
 
       <div class="full-login-actions">
         <button id="btn-full-login-demo" class="btn-outline-secondary btn-block" style="font-size:0.85rem;">
-          <i class="fa-solid fa-bolt" style="color:var(--accent-cyan);"></i> Acceso Rápido (David Chaparro)
+          <i class="fa-solid fa-bolt" style="color:var(--accent-cyan);"></i> Acceso RÃ¡pido (David Chaparro)
         </button>
         <button id="btn-full-login-google" class="btn-outline-secondary btn-block" style="font-size:0.85rem;">
           <i class="fa-brands fa-google"></i> Continuar con Google
@@ -2939,14 +2939,14 @@
   <!-- Full Window Drag & Drop Overlay -->
   <div id="drag-drop-overlay" class="drag-drop-overlay">
     <i class="fa-solid fa-cloud-arrow-up"></i>
-    <h2>Suelta tus canciones aquí</h2>
-    <p>Se añadirán y reproducirán automáticamente en tu biblioteca</p>
+    <h2>Suelta tus canciones aquÃ­</h2>
+    <p>Se aÃ±adirÃ¡n y reproducirÃ¡n automÃ¡ticamente en tu biblioteca</p>
   </div>
 
   <!-- Ambient Glow -->
   <div id="ambient-glow" class="ambient-glow"></div>
 
-  <!-- Fullscreen App Viewport (Oculto por defecto hasta autenticación) -->
+  <!-- Fullscreen App Viewport (Oculto por defecto hasta autenticaciÃ³n) -->
   <div class="app-viewport hidden" id="app-viewport">
     
     <!-- Topbar -->
@@ -2959,12 +2959,12 @@
 
       <div class="search-wrapper">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="search-input" class="search-input" placeholder="Buscar canciones, artistas, géneros... (Presiona '/')">
-        <button id="search-clear-btn" class="search-clear-btn" title="Limpiar búsqueda"><i class="fa-solid fa-xmark"></i></button>
+        <input type="text" id="search-input" class="search-input" placeholder="Buscar canciones, artistas, gÃ©neros... (Presiona '/')">
+        <button id="search-clear-btn" class="search-clear-btn" title="Limpiar bÃºsqueda"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="top-actions">
-        <button id="btn-open-palette" class="btn-action-pill" title="Búsqueda Rápida & Comandos (Ctrl+K)" style="border-color: rgba(6, 182, 212, 0.35); background: rgba(6, 182, 212, 0.08);">
+        <button id="btn-open-palette" class="btn-action-pill" title="BÃºsqueda RÃ¡pida & Comandos (Ctrl+K)" style="border-color: rgba(6, 182, 212, 0.35); background: rgba(6, 182, 212, 0.08);">
           <i class="fa-solid fa-bolt" style="color:var(--accent-cyan);"></i> <span>Comandos</span>
         </button>
 
@@ -2976,7 +2976,7 @@
           <i class="fa-solid fa-scissors" style="color:var(--accent-pink);"></i> <span>Ringtone</span>
         </button>
 
-        <button id="btn-theme-selector" class="btn-action-pill" title="Cambiar Tema Neón">
+        <button id="btn-theme-selector" class="btn-action-pill" title="Cambiar Tema NeÃ³n">
           <i class="fa-solid fa-palette" style="color:#eab308;"></i> <span>Tema</span>
         </button>
 
@@ -2984,9 +2984,9 @@
           <i class="fa-solid fa-mobile-screen-button"></i> <span>Mi Celular</span>
         </button>
 
-        <!-- Menú Desplegable Herramientas Compacto & Uniforme -->
+        <!-- MenÃº Desplegable Herramientas Compacto & Uniforme -->
         <div class="more-tools-wrapper">
-          <button id="btn-more-tools" class="btn-action-pill" title="Más herramientas y opciones">
+          <button id="btn-more-tools" class="btn-action-pill" title="MÃ¡s herramientas y opciones">
             <i class="fa-solid fa-sliders" style="color:var(--accent-cyan);"></i> <span>Herramientas</span> <i class="fa-solid fa-chevron-down" style="font-size:0.62rem; margin-left:1px; opacity:0.7;"></i>
           </button>
           <div id="menu-more-tools" class="more-tools-dropdown">
@@ -2997,43 +2997,43 @@
                 <span class="menu-item-sub">Guardar o cargar biblioteca</span>
               </div>
             </button>
-            <button id="btn-view-stats" class="more-menu-item" title="Mis Estadísticas de Música">
+            <button id="btn-view-stats" class="more-menu-item" title="Mis EstadÃ­sticas de MÃºsica">
               <i class="fa-solid fa-chart-pie" style="color:#38bdf8;"></i>
               <div class="menu-item-info">
-                <span class="menu-item-title">Estadísticas</span>
-                <span class="menu-item-sub">Métricas de escucha & top</span>
+                <span class="menu-item-title">EstadÃ­sticas</span>
+                <span class="menu-item-sub">MÃ©tricas de escucha & top</span>
               </div>
             </button>
             <button id="btn-shortcuts-modal" class="more-menu-item" title="Atajos de Teclado">
               <i class="fa-regular fa-keyboard" style="color:#f59e0b;"></i>
               <div class="menu-item-info">
                 <span class="menu-item-title">Atajos de Teclado</span>
-                <span class="menu-item-sub">Guía rápida de teclas</span>
+                <span class="menu-item-sub">GuÃ­a rÃ¡pida de teclas</span>
               </div>
             </button>
             <a href="https://github.com/davidchaparro780-wq/AuraPlayer/releases/download/v3.4.0/app-debug.apk" id="btn-download-apk-top" class="more-menu-item" title="Descargar APK para Android">
               <i class="fa-brands fa-android" style="color:#22c55e;"></i>
               <div class="menu-item-info">
                 <span class="menu-item-title">Descargar APK Android</span>
-                <span class="menu-item-sub">Instalar en tu teléfono móvil (v3.4.0)</span>
+                <span class="menu-item-sub">Instalar en tu telÃ©fono mÃ³vil (v3.4.0)</span>
               </div>
             </a>
             <button id="btn-install-pwa" class="more-menu-item hidden" title="Instalar DaVE Player como App Nativa">
               <i class="fa-solid fa-download" style="color:var(--accent-cyan);"></i>
               <div class="menu-item-info">
                 <span class="menu-item-title">Instalar App PC</span>
-                <span class="menu-item-sub">Aplicación de escritorio web</span>
+                <span class="menu-item-sub">AplicaciÃ³n de escritorio web</span>
               </div>
             </button>
           </div>
         </div>
 
         <button id="btn-login-modal" class="btn-user-auth btn-action-pill">
-          <i class="fa-solid fa-user"></i> <span id="user-display-name">Iniciar Sesión</span>
+          <i class="fa-solid fa-user"></i> <span id="user-display-name">Iniciar SesiÃ³n</span>
         </button>
 
-        <button id="btn-topbar-logout" class="btn-action-pill hidden" title="Cerrar Sesión" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.12);">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar Sesión</span>
+        <button id="btn-topbar-logout" class="btn-action-pill hidden" title="Cerrar SesiÃ³n" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.12);">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar SesiÃ³n</span>
         </button>
       </div>
     </header>
@@ -3083,10 +3083,10 @@
           </button>
         </div>
 
-        <div class="sidebar-section-title sidebar-auth-title hidden" id="sidebar-auth-title" style="margin-top: auto; padding-top: 1rem;">SESIÓN</div>
+        <div class="sidebar-section-title sidebar-auth-title hidden" id="sidebar-auth-title" style="margin-top: auto; padding-top: 1rem;">SESIÃ“N</div>
         <div class="nav-list sidebar-auth-list hidden" id="sidebar-auth-list">
           <button class="nav-btn" id="btn-sidebar-logout" style="color: #ef4444; width: 100%;">
-            <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar Sesión</span>
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar SesiÃ³n</span>
           </button>
         </div>
       </nav>
@@ -3097,8 +3097,8 @@
         <!-- Welcome Action Banner -->
         <div class="welcome-banner" id="welcome-banner">
           <div class="banner-text">
-            <h2>✨ DaVE Player — Web & Desktop Studio</h2>
-            <p>Escucha música en alta fidelidad, aisla voces o instrumentos en vivo y sincroniza con tu celular.</p>
+            <h2>âœ¨ DaVE Player â€” Web & Desktop Studio</h2>
+            <p>Escucha mÃºsica en alta fidelidad, aisla voces o instrumentos en vivo y sincroniza con tu celular.</p>
           </div>
           <div class="banner-actions">
             <button id="btn-demo-track" class="btn-glow-primary">
@@ -3131,8 +3131,8 @@
 
             <div id="empty-state" class="empty-shelf">
               <i class="fa-solid fa-cloud-arrow-up"></i>
-              <h3>Tu biblioteca está lista</h3>
-              <p>Arrastra archivos de audio desde tu computadora o pulsa el botón para probar el reproductor ahora mismo.</p>
+              <h3>Tu biblioteca estÃ¡ lista</h3>
+              <p>Arrastra archivos de audio desde tu computadora o pulsa el botÃ³n para probar el reproductor ahora mismo.</p>
               <div style="display:flex; gap:0.6rem; justify-content:center;">
                 <button id="btn-empty-demo" class="btn-glow-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Probar Demo</button>
                 <button id="btn-empty-scan" class="btn-outline-secondary"><i class="fa-solid fa-file-audio"></i> Cargar Archivos</button>
@@ -3142,16 +3142,16 @@
             <div id="search-empty-state" class="empty-shelf hidden" style="padding: 2.5rem 1.5rem;">
               <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; color: var(--text-dim); margin-bottom: 0.8rem;"></i>
               <h3 style="font-size: 1.25rem;">No se encontraron canciones</h3>
-              <p id="search-empty-text" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">No hay canciones que coincidan con tu búsqueda.</p>
+              <p id="search-empty-text" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">No hay canciones que coincidan con tu bÃºsqueda.</p>
               <button id="btn-search-clear-action" class="btn-outline-secondary" style="margin: 0 auto;">
-                <i class="fa-solid fa-xmark"></i> Limpiar búsqueda
+                <i class="fa-solid fa-xmark"></i> Limpiar bÃºsqueda
               </button>
             </div>
 
             <div id="category-empty-state" class="empty-shelf hidden" style="padding: 2.5rem 1.5rem;">
               <i class="fa-solid fa-filter-circle-xmark" style="font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 0.8rem;"></i>
-              <h3 style="font-size: 1.25rem;">Sin canciones en esta categoría</h3>
-              <p id="category-empty-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">No hay canciones en esta categoría por ahora.</p>
+              <h3 style="font-size: 1.25rem;">Sin canciones en esta categorÃ­a</h3>
+              <p id="category-empty-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">No hay canciones en esta categorÃ­a por ahora.</p>
               <button id="btn-category-all-action" class="btn-glow-primary" style="margin: 0 auto;">
                 <i class="fa-solid fa-layer-group"></i> Ver Todas las Canciones
               </button>
@@ -3161,10 +3161,10 @@
               <thead>
                 <tr>
                   <th style="width: 48px; text-align: center;" class="th-sortable" data-sort="index" title="Restaurar orden original"># <span class="sort-icon"></span></th>
-                  <th style="width: 38%;" class="th-sortable" data-sort="title" title="Ordenar por título A-Z / Z-A">Título <span class="sort-icon"></span></th>
+                  <th style="width: 38%;" class="th-sortable" data-sort="title" title="Ordenar por tÃ­tulo A-Z / Z-A">TÃ­tulo <span class="sort-icon"></span></th>
                   <th style="width: 24%;" class="th-sortable" data-sort="artist" title="Ordenar por artista A-Z / Z-A">Artista <span class="sort-icon"></span></th>
-                  <th style="width: 22%;" class="th-sortable" data-sort="album" title="Ordenar por álbum A-Z / Z-A">Álbum <span class="sort-icon"></span></th>
-                  <th style="width: 65px; text-align: right;" class="th-sortable" data-sort="duration" title="Ordenar por duración"><i class="fa-regular fa-clock"></i> <span class="sort-icon"></span></th>
+                  <th style="width: 22%;" class="th-sortable" data-sort="album" title="Ordenar por Ã¡lbum A-Z / Z-A">Ãlbum <span class="sort-icon"></span></th>
+                  <th style="width: 65px; text-align: right;" class="th-sortable" data-sort="duration" title="Ordenar por duraciÃ³n"><i class="fa-regular fa-clock"></i> <span class="sort-icon"></span></th>
                   <th style="width: 85px; text-align: right;">Acciones</th>
                 </tr>
               </thead>
@@ -3178,8 +3178,8 @@
           <div class="table-container">
             <div style="padding: 1.2rem; background: rgba(6,182,212,0.06); border-bottom: 1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem;">
               <div>
-                <h3 style="color:var(--accent-cyan); display:flex; align-items:center; gap:0.5rem;"><i class="fa-solid fa-mobile-screen-button"></i> Música de mi Celular</h3>
-                <p id="phone-sync-status" style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">Conecta tu teléfono por WiFi o carga tus canciones para reproducirlas en la PC.</p>
+                <h3 style="color:var(--accent-cyan); display:flex; align-items:center; gap:0.5rem;"><i class="fa-solid fa-mobile-screen-button"></i> MÃºsica de mi Celular</h3>
+                <p id="phone-sync-status" style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">Conecta tu telÃ©fono por WiFi o carga tus canciones para reproducirlas en la PC.</p>
               </div>
               <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                 <button id="btn-phone-sync-trigger" class="btn-glow-primary" style="padding:0.45rem 0.9rem;">
@@ -3197,61 +3197,61 @@
               </div>
             </div>
 
-            <!-- Banner de Sincronización y Nuevas Descargas del Celular -->
+            <!-- Banner de SincronizaciÃ³n y Nuevas Descargas del Celular -->
             <div class="phone-sync-banner" style="background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(99,102,241,0.08)); border: 1px dashed rgba(6,182,212,0.4); border-radius: 12px; padding: 0.9rem 1.25rem; margin: 1rem 1.2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;">
               <div style="display: flex; align-items: center; gap: 0.85rem;">
                 <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(6,182,212,0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan); font-size: 1.2rem;">
                   <i class="fa-solid fa-cloud-arrow-down"></i>
                 </div>
                 <div>
-                  <strong style="color: #fff; font-size: 0.92rem; display: block;">¿Descargaste música nueva en tu celular?</strong>
+                  <strong style="color: #fff; font-size: 0.92rem; display: block;">Â¿Descargaste mÃºsica nueva en tu celular?</strong>
                   <span style="font-size: 0.78rem; color: var(--text-muted);">
-                    Arrastra aquí los archivos descargados desde la carpeta de tu celular, o pulsa el botón para agregarlos a tu PC.
+                    Arrastra aquÃ­ los archivos descargados desde la carpeta de tu celular, o pulsa el botÃ³n para agregarlos a tu PC.
                   </span>
                 </div>
               </div>
               <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <button id="btn-phone-quick-add" class="btn-glow-primary" style="padding: 0.42rem 0.85rem; font-size: 0.8rem;">
-                  <i class="fa-solid fa-plus"></i> Añadir Canciones Nuevas
+                  <i class="fa-solid fa-plus"></i> AÃ±adir Canciones Nuevas
                 </button>
                 <button id="btn-phone-help-guide" class="btn-outline-secondary" style="padding: 0.42rem 0.85rem; font-size: 0.8rem; border-color: rgba(255,255,255,0.2);">
-                  <i class="fa-solid fa-circle-question"></i> ¿Por qué no aparecen solas?
+                  <i class="fa-solid fa-circle-question"></i> Â¿Por quÃ© no aparecen solas?
                 </button>
               </div>
             </div>
 
             <div id="phone-empty-state" class="empty-shelf" style="max-width: 660px; padding: 2rem 1.5rem;">
               <i class="fa-solid fa-mobile-screen-button" style="font-size: 2.8rem; color: var(--accent-cyan); margin-bottom: 0.8rem;"></i>
-              <h3 style="font-size: 1.3rem;">¿Cómo escuchar las canciones de tu celular aquí?</h3>
+              <h3 style="font-size: 1.3rem;">Â¿CÃ³mo escuchar las canciones de tu celular aquÃ­?</h3>
               <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                Elige la forma más cómoda para ti:
+                Elige la forma mÃ¡s cÃ³moda para ti:
               </p>
 
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; text-align: left; margin-bottom: 1.5rem;">
-                <!-- Opción 1: WiFi en Vivo -->
+                <!-- OpciÃ³n 1: WiFi en Vivo -->
                 <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glow); border-radius: var(--radius-md); padding: 1.2rem;">
                   <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                     <i class="fa-solid fa-wifi" style="color: var(--accent-cyan); font-size: 1.1rem;"></i>
-                    <strong style="color: #fff; font-size: 0.95rem;">Opción 1: Por WiFi (En Vivo)</strong>
+                    <strong style="color: #fff; font-size: 0.95rem;">OpciÃ³n 1: Por WiFi (En Vivo)</strong>
                   </div>
                   <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; line-height: 1.4;">
-                    1. Abre <strong>DaVE Player</strong> en tu teléfono.<br>
-                    2. Toca <strong>🌐 Control Remoto PC</strong> arriba a la derecha.<br>
-                    3. Pulsa el botón de abajo e ingresa la dirección IP que te muestra tu pantalla.
+                    1. Abre <strong>DaVE Player</strong> en tu telÃ©fono.<br>
+                    2. Toca <strong>ðŸŒ Control Remoto PC</strong> arriba a la derecha.<br>
+                    3. Pulsa el botÃ³n de abajo e ingresa la direcciÃ³n IP que te muestra tu pantalla.
                   </p>
                   <button id="btn-empty-phone-connect" class="btn-glow-primary" style="width: 100%; justify-content: center; font-size: 0.82rem;">
                     <i class="fa-solid fa-tower-broadcast"></i> Conectar por IP WiFi
                   </button>
                 </div>
 
-                <!-- Opción 2: Cable USB o Carpeta -->
+                <!-- OpciÃ³n 2: Cable USB o Carpeta -->
                 <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.2rem;">
                   <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                     <i class="fa-brands fa-usb" style="color: #10b981; font-size: 1.1rem;"></i>
-                    <strong style="color: #fff; font-size: 0.95rem;">Opción 2: Cable USB o Carpeta</strong>
+                    <strong style="color: #fff; font-size: 0.95rem;">OpciÃ³n 2: Cable USB o Carpeta</strong>
                   </div>
                   <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; line-height: 1.4;">
-                    Conecta tu teléfono a la computadora por cable USB (modo Transferir archivos) y pulsa abajo para cargar tu carpeta de música directamente al reproductor.
+                    Conecta tu telÃ©fono a la computadora por cable USB (modo Transferir archivos) y pulsa abajo para cargar tu carpeta de mÃºsica directamente al reproductor.
                   </p>
                   <button id="btn-empty-phone-folder" class="btn-outline-secondary" style="width: 100%; justify-content: center; font-size: 0.82rem; border-color: rgba(16,185,129,0.4);">
                     <i class="fa-solid fa-folder-plus" style="color: #10b981;"></i> Cargar Carpeta Celular
@@ -3259,7 +3259,7 @@
                 </div>
               </div>
 
-              <!-- Otras Opciones Rápidas -->
+              <!-- Otras Opciones RÃ¡pidas -->
               <div style="display:flex; gap:0.6rem; justify-content:center; align-items:center; flex-wrap:wrap;">
                 <button id="btn-empty-phone-files" class="btn-outline-secondary" style="font-size:0.8rem;">
                   <i class="fa-solid fa-file-arrow-up"></i> Seleccionar Archivos Sueltos
@@ -3275,7 +3275,7 @@
               <h3 style="font-size: 1.25rem;">No se encontraron canciones</h3>
               <p id="phone-search-empty-text" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">No hay coincidencias en tu celular.</p>
               <button id="btn-phone-search-clear-action" class="btn-outline-secondary" style="margin: 0 auto;">
-                <i class="fa-solid fa-xmark"></i> Limpiar búsqueda
+                <i class="fa-solid fa-xmark"></i> Limpiar bÃºsqueda
               </button>
             </div>
 
@@ -3283,9 +3283,9 @@
               <thead>
                 <tr>
                   <th style="width: 48px; text-align: center;">#</th>
-                  <th style="width: 38%;">Título</th>
+                  <th style="width: 38%;">TÃ­tulo</th>
                   <th style="width: 24%;">Artista</th>
-                  <th style="width: 22%;">Álbum</th>
+                  <th style="width: 22%;">Ãlbum</th>
                   <th style="width: 65px; text-align: right;"><i class="fa-regular fa-clock"></i></th>
                   <th style="width: 85px; text-align: right;">Acciones</th>
                 </tr>
@@ -3313,7 +3313,7 @@
               <div class="playlists-header">
                 <div>
                   <h3 style="color:#fff; font-size:1.3rem; margin-bottom:0.25rem;"><i class="fa-solid fa-list-check" style="color:var(--accent-cyan);"></i> Tus Playlists</h3>
-                  <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Organiza y escucha tus colecciones de música favoritas.</p>
+                  <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Organiza y escucha tus colecciones de mÃºsica favoritas.</p>
                 </div>
                 <button id="btn-create-playlist-trigger" class="btn-glow-primary" style="padding:0.6rem 1.1rem; font-size:0.85rem;">
                   <i class="fa-solid fa-plus"></i> Nueva Playlist
@@ -3321,7 +3321,7 @@
               </div>
 
               <div class="playlist-cards-grid" id="playlist-cards-grid">
-                <!-- Se renderiza dinámicamente -->
+                <!-- Se renderiza dinÃ¡micamente -->
               </div>
             </div>
 
@@ -3336,7 +3336,7 @@
                     <i class="fa-solid fa-arrow-left"></i> Volver a Playlists
                   </button>
                   <h2 id="pl-detail-title" style="font-size:1.6rem; font-weight:800; color:#fff; margin:0 0 0.35rem 0;">Nombre de Playlist</h2>
-                  <p id="pl-detail-desc" style="font-size:0.85rem; color:var(--text-muted); margin:0 0 0.85rem 0;">Descripción de la lista</p>
+                  <p id="pl-detail-desc" style="font-size:0.85rem; color:var(--text-muted); margin:0 0 0.85rem 0;">DescripciÃ³n de la lista</p>
                   <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
                     <button id="btn-play-all-playlist" class="btn-glow-primary" style="padding:0.55rem 1.1rem; font-size:0.84rem;">
                       <i class="fa-solid fa-play"></i> Reproducir Todo (<span id="pl-detail-count">0</span>)
@@ -3352,11 +3352,11 @@
                 <thead>
                   <tr>
                     <th style="width: 48px; text-align: center;">#</th>
-                    <th style="width: 40%;">Título</th>
+                    <th style="width: 40%;">TÃ­tulo</th>
                     <th style="width: 25%;">Artista</th>
-                    <th style="width: 20%;">Álbum</th>
+                    <th style="width: 20%;">Ãlbum</th>
                     <th style="width: 65px; text-align: right;"><i class="fa-regular fa-clock"></i></th>
-                    <th style="width: 75px; text-align: right;">Acción</th>
+                    <th style="width: 75px; text-align: right;">AcciÃ³n</th>
                   </tr>
                 </thead>
                 <tbody id="pl-tracks-body"></tbody>
@@ -3370,15 +3370,15 @@
           <div class="stem-view">
             <div class="stem-header">
               <h3><i class="fa-solid fa-sliders"></i> Live AI Stem Mixer Studio</h3>
-              <p>Separa y modula Voces, Baterías, Bajos y Melodías en tiempo real con filtros psychoacústicos independientes.</p>
+              <p>Separa y modula Voces, BaterÃ­as, Bajos y MelodÃ­as en tiempo real con filtros psychoacÃºsticos independientes.</p>
             </div>
 
             <div class="chip-row">
-              <button class="chip-btn" data-preset="karaoke">🎤 Karaoke (Sin Voz)</button>
-              <button class="chip-btn" data-preset="acapella">🗣️ Acapella (Solo Voz)</button>
-              <button class="chip-btn" data-preset="bass">🔊 808 Bass Boost</button>
-              <button class="chip-btn" data-preset="instrumental">🎸 Instrumental</button>
-              <button class="chip-btn active" data-preset="reset">🔄 Mezcla Original</button>
+              <button class="chip-btn" data-preset="karaoke">ðŸŽ¤ Karaoke (Sin Voz)</button>
+              <button class="chip-btn" data-preset="acapella">ðŸ—£ï¸ Acapella (Solo Voz)</button>
+              <button class="chip-btn" data-preset="bass">ðŸ”Š 808 Bass Boost</button>
+              <button class="chip-btn" data-preset="instrumental">ðŸŽ¸ Instrumental</button>
+              <button class="chip-btn active" data-preset="reset">ðŸ”„ Mezcla Original</button>
             </div>
 
             <div class="faders-deck">
@@ -3438,7 +3438,7 @@
                 <p id="lyrics-song-artist" style="font-size:0.85rem; color:var(--text-muted); margin:0;">Modo Karaoke interactivo</p>
               </div>
               <button id="btn-fullscreen-lyrics" class="btn-glow-primary" style="padding:0.45rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;">
-                <i class="fa-solid fa-expand"></i> <span>Pantalla Completa Cinematográfica</span>
+                <i class="fa-solid fa-expand"></i> <span>Pantalla Completa CinematogrÃ¡fica</span>
               </button>
             </div>
             <div class="lyrics-scroll-box" id="lyrics-box"></div>
@@ -3449,7 +3449,7 @@
         <section id="tab-equalizer" class="tab-pane">
           <div class="eq-view">
             <div class="eq-header-row">
-              <h3 style="color:var(--accent-green); display:flex; align-items:center; gap:0.5rem;"><i class="fa-solid fa-chart-simple"></i> Ecualizador Gráfico de 10 Bandas</h3>
+              <h3 style="color:var(--accent-green); display:flex; align-items:center; gap:0.5rem;"><i class="fa-solid fa-chart-simple"></i> Ecualizador GrÃ¡fico de 10 Bandas</h3>
               <div>
                 <label style="font-size:0.82rem; color:var(--text-muted); margin-right:0.5rem;">Preajuste:</label>
                 <select id="eq-preset-dropdown">
@@ -3458,31 +3458,31 @@
                   <option value="rock">Rock</option>
                   <option value="pop">Pop</option>
                   <option value="vocal">Claridad Vocal</option>
-                  <option value="electronic">Electrónica / Club</option>
-                  <option value="acoustic">Acústico</option>
+                  <option value="electronic">ElectrÃ³nica / Club</option>
+                  <option value="acoustic">AcÃºstico</option>
                 </select>
               </div>
             </div>
             <div class="eq-board" id="eq-bands"></div>
 
-            <!-- Acústica Espacial / Reverberación -->
+            <!-- AcÃºstica Espacial / ReverberaciÃ³n -->
             <div class="spatial-reverb-box">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                 <h4 style="color:#fff; font-size:0.95rem; margin:0; display:flex; align-items:center; gap:0.5rem;">
-                  <i class="fa-solid fa-earth-americas" style="color:var(--accent-cyan);"></i> Modos de Acústica Espacial (Reverb DSP)
+                  <i class="fa-solid fa-earth-americas" style="color:var(--accent-cyan);"></i> Modos de AcÃºstica Espacial (Reverb DSP)
                 </h4>
-                <span style="font-size:0.75rem; color:var(--text-dim);">Simula acústica de salas en vivo con filtros de impulso</span>
+                <span style="font-size:0.75rem; color:var(--text-dim);">Simula acÃºstica de salas en vivo con filtros de impulso</span>
               </div>
               <div class="spatial-reverb-grid">
                 <div class="spatial-card active" data-reverb="off">
                   <i class="fa-solid fa-volume-xmark"></i>
                   <strong>Plano / Seco</strong>
-                  <span>Sin reverberación</span>
+                  <span>Sin reverberaciÃ³n</span>
                 </div>
                 <div class="spatial-card" data-reverb="studio">
                   <i class="fa-solid fa-microphone"></i>
-                  <strong>Estudio Íntimo</strong>
-                  <span>Cabina acústica</span>
+                  <strong>Estudio Ãntimo</strong>
+                  <span>Cabina acÃºstica</span>
                 </div>
                 <div class="spatial-card" data-reverb="club">
                   <i class="fa-solid fa-compact-disc"></i>
@@ -3536,11 +3536,11 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <h3 style="color:var(--accent-pink); display:flex; align-items:center; gap:0.5rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> Modo Club Party & Visualizador</h3>
-                <p style="font-size:0.82rem; color:var(--text-muted);">Visualizador reactivo a los graves con borde neón.</p>
+                <p style="font-size:0.82rem; color:var(--text-muted);">Visualizador reactivo a los graves con borde neÃ³n.</p>
               </div>
               <div style="display:flex; gap:1rem; align-items:center;">
                 <label style="font-size:0.82rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
-                  <input type="checkbox" id="chk-strobe-pulse" checked> Pulso Neón
+                  <input type="checkbox" id="chk-strobe-pulse" checked> Pulso NeÃ³n
                 </label>
                 <button id="btn-party-fullscreen" class="btn-glow-primary"><i class="fa-solid fa-expand"></i> Pantalla Completa</button>
               </div>
@@ -3587,7 +3587,7 @@
         </div>
         <div class="meta-col">
           <div class="song-title-text" id="player-title">Happy Nation</div>
-          <div class="song-artist-text" id="player-artist">Ace of Base • Infinix HOT 40i</div>
+          <div class="song-artist-text" id="player-artist">Ace of Base â€¢ Infinix HOT 40i</div>
         </div>
         <div class="mini-wave-bars" id="mini-wave-bars" title="Audio en vivo">
           <span></span><span></span><span></span><span></span>
@@ -3620,8 +3620,8 @@
 
       <!-- Volume & Mode Toggles -->
       <div class="player-right-dock">
-        <button id="btn-speed-selector" class="btn-dock-chip" title="Velocidad de Reproducción (Slowed / Nightcore)"><span id="speed-label">1.0x</span></button>
-        <button id="btn-pitch-shifter" class="btn-dock-chip" title="Transpositor de Tono Karaoke (±6 Semitonos)"><i class="fa-solid fa-music"></i> <span id="pitch-label">0</span></button>
+        <button id="btn-speed-selector" class="btn-dock-chip" title="Velocidad de ReproducciÃ³n (Slowed / Nightcore)"><span id="speed-label">1.0x</span></button>
+        <button id="btn-pitch-shifter" class="btn-dock-chip" title="Transpositor de Tono Karaoke (Â±6 Semitonos)"><i class="fa-solid fa-music"></i> <span id="pitch-label">0</span></button>
         <button id="btn-fullscreen-lyrics" class="btn-icon-round" title="Letras y Karaoke en Pantalla Completa"><i class="fa-solid fa-microphone-lines"></i></button>
         
         <button id="btn-toggle-fx-tray" class="btn-fx-pill" title="Estudio de Efectos DSP y Sonido (8D, Reverb, Tubos, 3D, DJ)">
@@ -3631,7 +3631,7 @@
         </button>
 
         <button id="btn-quick-pip" class="btn-icon-round" title="Mini-Player Flotante en Pantalla (PiP)"><i class="fa-solid fa-clone"></i></button>
-        <button id="btn-toggle-queue" class="btn-icon-round" title="Cola de Reproducción"><i class="fa-solid fa-list-ul"></i></button>
+        <button id="btn-toggle-queue" class="btn-icon-round" title="Cola de ReproducciÃ³n"><i class="fa-solid fa-list-ul"></i></button>
         
         <div class="volume-cluster">
           <button id="btn-mute" class="btn-icon-round" title="Silenciar / Activar volumen"><i class="fa-solid fa-volume-high"></i></button>
@@ -3650,7 +3650,7 @@
           <button id="btn-close-fx-tray" class="btn-close-x" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="fx-tray-grid">
-          <button id="btn-toggle-8d" class="fx-tile-btn" title="Audio 8D Órbita 360° (Usa Audífonos)">
+          <button id="btn-toggle-8d" class="fx-tile-btn" title="Audio 8D Ã“rbita 360Â° (Usa AudÃ­fonos)">
             <i class="fa-solid fa-headphones"></i>
             <span>Audio 8D</span>
           </button>
@@ -3662,9 +3662,9 @@
             <i class="fa-solid fa-fire-flame-curved"></i>
             <span>Calor a Tubos</span>
           </button>
-          <button id="btn-toggle-widener" class="fx-tile-btn" title="Expansor Estéreo 3D & Haas Soundstage">
+          <button id="btn-toggle-widener" class="fx-tile-btn" title="Expansor EstÃ©reo 3D & Haas Soundstage">
             <i class="fa-solid fa-arrows-left-right-to-line"></i>
-            <span>Estéreo 3D</span>
+            <span>EstÃ©reo 3D</span>
           </button>
           <button id="btn-ab-loop" class="fx-tile-btn" title="Bucle A-B (Repetir segmento)">
             <i class="fa-solid fa-repeat"></i>
@@ -3679,7 +3679,7 @@
             <span>Grabar Master</span>
             <span id="record-timer-badge" class="timer-badge hidden" style="background:#ef4444; position:absolute; top:4px; right:4px;">0:00</span>
           </button>
-          <button id="btn-visualizer-3d" class="fx-tile-btn" title="Visualizador 3D Espectro Neón Hi-Fi">
+          <button id="btn-visualizer-3d" class="fx-tile-btn" title="Visualizador 3D Espectro NeÃ³n Hi-Fi">
             <i class="fa-solid fa-cube"></i>
             <span>Visualizador 3D</span>
           </button>
@@ -3706,7 +3706,7 @@
 
   </div>
 
-  <!-- Modal: Iniciar Sesión -->
+  <!-- Modal: Iniciar SesiÃ³n -->
   <div id="modal-auth" class="modal-overlay hidden">
     <div class="modal-box">
       <div class="modal-top">
@@ -3719,28 +3719,28 @@
           <div style="display:flex; align-items:flex-start; gap:0.75rem;">
             <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444; font-size:1.25rem; margin-top:0.15rem;"></i>
             <div>
-              <strong style="color:#fff; font-size:0.92rem; display:block; margin-bottom:0.25rem;">Servidor del teléfono desconectado</strong>
-              <span style="font-size:0.82rem; color:#fca5a5; line-height:1.4; display:block;">Se ha desconectado el servidor de tu teléfono para esta PC. Inicia sesión para cargar y reproducir todas las canciones que tenías en la nube.</span>
+              <strong style="color:#fff; font-size:0.92rem; display:block; margin-bottom:0.25rem;">Servidor del telÃ©fono desconectado</strong>
+              <span style="font-size:0.82rem; color:#fca5a5; line-height:1.4; display:block;">Se ha desconectado el servidor de tu telÃ©fono para esta PC. Inicia sesiÃ³n para cargar y reproducir todas las canciones que tenÃ­as en la nube.</span>
             </div>
           </div>
         </div>
 
-        <p style="font-size:0.85rem; color:var(--text-muted);">Inicia sesión con tu correo para sincronizar automáticamente tu música y listas de tu celular.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Inicia sesiÃ³n con tu correo para sincronizar automÃ¡ticamente tu mÃºsica y listas de tu celular.</p>
         <form id="auth-form">
           <div class="form-field">
-            <label><i class="fa-regular fa-envelope"></i> Correo Electrónico</label>
+            <label><i class="fa-regular fa-envelope"></i> Correo ElectrÃ³nico</label>
             <input type="email" id="auth-email" placeholder="ejemplo@correo.com" required>
           </div>
           <div class="form-field" style="margin-top:0.6rem;">
-            <label><i class="fa-solid fa-lock"></i> Contraseña o PIN</label>
-            <input type="password" id="auth-password" placeholder="••••••••" required>
+            <label><i class="fa-solid fa-lock"></i> ContraseÃ±a o PIN</label>
+            <input type="password" id="auth-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
           </div>
           <div style="display:flex; justify-content:space-between; margin-top:0.6rem; font-size:0.75rem; color:var(--text-muted);">
             <label><input type="checkbox" id="auth-remember" checked> Recordar en esta PC</label>
             <a href="#" id="auth-link-demo" style="color:var(--accent-cyan); text-decoration:none;">Cuenta Demo</a>
           </div>
           <button type="submit" class="btn-glow-primary btn-block" style="margin-top:1rem;">
-            <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión y Sincronizar
+            <i class="fa-solid fa-right-to-bracket"></i> Iniciar SesiÃ³n y Sincronizar
           </button>
         </form>
         <button id="btn-google-login" class="btn-outline-secondary btn-block">
@@ -3755,7 +3755,7 @@
           <div>
             <h4 id="profile-name">Usuario DaVE</h4>
             <span id="profile-email" style="font-size:0.8rem; color:var(--text-muted);">correo@gmail.com</span>
-            <div style="font-size:0.75rem; color:var(--accent-green); font-weight:700; margin-top:0.2rem;"><i class="fa-solid fa-circle-check"></i> Sincronización Activa</div>
+            <div style="font-size:0.75rem; color:var(--accent-green); font-weight:700; margin-top:0.2rem;"><i class="fa-solid fa-circle-check"></i> SincronizaciÃ³n Activa</div>
           </div>
         </div>
         <div style="display:flex; justify-content:space-around; background:rgba(255,255,255,0.04); padding:0.8rem; border-radius:10px;">
@@ -3763,7 +3763,7 @@
           <div style="text-align:center;"><strong id="pstat-favs" style="color:#f43f5e; font-size:1.2rem;">0</strong><div style="font-size:0.7rem; color:var(--text-dim);">Favoritas</div></div>
         </div>
         <button id="btn-profile-sync" class="btn-glow-primary btn-block"><i class="fa-solid fa-arrows-rotate"></i> Sincronizar con mi Celular Ahora</button>
-        <button id="btn-profile-logout" class="btn-outline-secondary btn-block" style="color:#ef4444; border-color:rgba(239,68,68,0.3);"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
+        <button id="btn-profile-logout" class="btn-outline-secondary btn-block" style="color:#ef4444; border-color:rgba(239,68,68,0.3);"><i class="fa-solid fa-right-from-bracket"></i> Cerrar SesiÃ³n</button>
       </div>
     </div>
   </div>
@@ -3777,14 +3777,14 @@
       </div>
       <div class="modal-content">
         <div style="background: rgba(99,102,241,0.08); border: 1px solid var(--border-glow); border-radius: var(--radius-md); padding: 0.85rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
-          <strong style="color: #fff;">📌 ¿Cómo ver la IP de tu celular?</strong><br>
-          1. Abre la app <strong>DaVE Player</strong> en tu teléfono Android.<br>
-          2. Pulsa en el icono <strong>🌐 Control Remoto PC</strong>.<br>
-          3. Aparecerá una pantalla verde con tu IP (ej. <span style="color:var(--accent-cyan); font-family:monospace;">192.168.1.15:8080</span>).
+          <strong style="color: #fff;">ðŸ“Œ Â¿CÃ³mo ver la IP de tu celular?</strong><br>
+          1. Abre la app <strong>DaVE Player</strong> en tu telÃ©fono Android.<br>
+          2. Pulsa en el icono <strong>ðŸŒ Control Remoto PC</strong>.<br>
+          3. AparecerÃ¡ una pantalla verde con tu IP (ej. <span style="color:var(--accent-cyan); font-family:monospace;">192.168.1.15:8080</span>).
         </div>
 
         <div class="form-field" style="margin-top: 0.6rem;">
-          <label>Dirección IP de tu Teléfono</label>
+          <label>DirecciÃ³n IP de tu TelÃ©fono</label>
           <div style="display:flex; gap:0.5rem;">
             <input type="text" id="sync-ip-input" placeholder="192.168.1.15:8080" style="flex:1;">
             <button id="btn-test-connect" class="btn-glow-primary" style="padding:0.5rem 1rem;"><i class="fa-solid fa-bolt"></i> Conectar</button>
@@ -3793,13 +3793,13 @@
 
         <!-- Estado de conexion activa con boton de desconectar -->
         <div id="sync-active-box" class="hidden" style="background:rgba(16,185,129,0.1); border:1px solid #10b981; border-radius:var(--radius-md); padding:0.75rem 0.9rem; margin-bottom:0.7rem; display:flex; justify-content:space-between; align-items:center;">
-          <span style="color:#10b981; font-weight:600; font-size:0.84rem;"><i class="fa-solid fa-circle-check"></i> Teléfono Conectado: <span id="sync-connected-ip-text" style="font-family:monospace;"></span></span>
+          <span style="color:#10b981; font-weight:600; font-size:0.84rem;"><i class="fa-solid fa-circle-check"></i> TelÃ©fono Conectado: <span id="sync-connected-ip-text" style="font-family:monospace;"></span></span>
           <button id="btn-modal-disconnect-server" class="btn-outline-secondary" style="padding:0.3rem 0.75rem; font-size:0.75rem; color:#ef4444; border-color:rgba(239,68,68,0.4);"><i class="fa-solid fa-power-off"></i> Desconectar</button>
         </div>
 
         <div style="display:flex; gap:0.5rem;">
           <button id="btn-direct-browser-open" class="btn-outline-secondary btn-block" style="font-size:0.8rem;">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Consola en Nueva Pestaña
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Consola en Nueva PestaÃ±a
           </button>
         </div>
 
@@ -3813,12 +3813,12 @@
           </button>
         </div>
 
-        <!-- Escáner QR de Acceso Instantáneo para Celular -->
+        <!-- EscÃ¡ner QR de Acceso InstantÃ¡neo para Celular -->
         <div style="margin-top:1.2rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:1rem; text-align:center;">
           <div style="font-weight:700; color:#fff; font-size:0.86rem; margin-bottom:0.3rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-            <i class="fa-solid fa-qrcode" style="color:var(--accent-cyan);"></i> Escanea con tu Cámara
+            <i class="fa-solid fa-qrcode" style="color:var(--accent-cyan);"></i> Escanea con tu CÃ¡mara
           </div>
-          <p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 0.8rem 0;">Apunta la cámara de tu teléfono para abrir DaVE Player directamente en tu celular:</p>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 0.8rem 0;">Apunta la cÃ¡mara de tu telÃ©fono para abrir DaVE Player directamente en tu celular:</p>
           <div style="display:inline-block; padding:8px; background:#07090e; border:1px solid rgba(6,182,212,0.4); border-radius:12px; box-shadow:0 0 20px rgba(6,182,212,0.2);">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fdavidchaparro780-wq.github.io%2FAuraPlayer%2F&color=06b6d4&bgcolor=07090e" alt="QR Code DaVE Player" style="width:130px; height:130px; display:block; border-radius:8px;">
           </div>
@@ -3834,7 +3834,7 @@
     </div>
   </div>
 
-  <!-- Modal Guía: Por qué no aparecen las canciones del cel por cable USB -->
+  <!-- Modal GuÃ­a: Por quÃ© no aparecen las canciones del cel por cable USB -->
   <div id="modal-phone-sync-help" class="modal-overlay hidden">
     <div class="modal-box" style="max-width: 540px;">
       <div class="modal-top">
@@ -3843,32 +3843,32 @@
       </div>
       <div class="modal-content" style="font-size: 0.85rem; line-height: 1.5; color: var(--text-main);">
         <div style="background: rgba(234, 179, 8, 0.1); border-left: 3px solid #eab308; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem;">
-          <strong style="color: #fde047;">¿Por qué no aparecen solas al conectar el cable?</strong>
+          <strong style="color: #fde047;">Â¿Por quÃ© no aparecen solas al conectar el cable?</strong>
           <p style="margin-top: 0.25rem; font-size: 0.8rem; color: #cbd5e1;">
-            Por seguridad de Android y de Windows, al conectar tu celular por USB, el teléfono entra en modo <strong>"Sólo carga"</strong>. Además, los navegadores no tienen permiso de escanear tu teléfono sin que selecciones o arrastres los archivos.
+            Por seguridad de Android y de Windows, al conectar tu celular por USB, el telÃ©fono entra en modo <strong>"SÃ³lo carga"</strong>. AdemÃ¡s, los navegadores no tienen permiso de escanear tu telÃ©fono sin que selecciones o arrastres los archivos.
           </p>
         </div>
 
-        <h4 style="color: var(--accent-cyan); margin-bottom: 0.4rem;"><i class="fa-brands fa-usb"></i> Opción 1: Cable USB (Directo)</h4>
+        <h4 style="color: var(--accent-cyan); margin-bottom: 0.4rem;"><i class="fa-brands fa-usb"></i> OpciÃ³n 1: Cable USB (Directo)</h4>
         <ol style="padding-left: 1.2rem; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.82rem;">
           <li>Conecta tu celular a la compu con el cable USB.</li>
-          <li>En la pantalla de tu celular, baja la barra de notificaciones, toca <strong>"Cargando este dispositivo por USB"</strong> y cámbialo a <strong>"Transferencia de archivos" (MTP)</strong>.</li>
+          <li>En la pantalla de tu celular, baja la barra de notificaciones, toca <strong>"Cargando este dispositivo por USB"</strong> y cÃ¡mbialo a <strong>"Transferencia de archivos" (MTP)</strong>.</li>
           <li>En tu compu abre: <code style="color:#38bdf8;">Este equipo &gt; Infinix HOT 40i &gt; Almacenamiento interno &gt; Download</code>.</li>
-          <li><strong>Arrastra las canciones nuevas</strong> y suéltalas en DaVE Player, ¡o pulsa el botón <strong>"Añadir Canciones Nuevas"</strong>!</li>
+          <li><strong>Arrastra las canciones nuevas</strong> y suÃ©ltalas en DaVE Player, Â¡o pulsa el botÃ³n <strong>"AÃ±adir Canciones Nuevas"</strong>!</li>
         </ol>
 
-        <h4 style="color: #10b981; margin-bottom: 0.4rem;"><i class="fa-solid fa-bolt"></i> Sincronización Automática con 1 Clic (Script PC)</h4>
+        <h4 style="color: #10b981; margin-bottom: 0.4rem;"><i class="fa-solid fa-bolt"></i> SincronizaciÃ³n AutomÃ¡tica con 1 Clic (Script PC)</h4>
         <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
-          En la carpeta principal del reproductor en tu computadora tienes el archivo <strong>Sincronizar_Musica_Celular.bat</strong>. Con tu celular en modo transferencia, solo dale doble clic y copiará todas las canciones nuevas a la compu.
+          En la carpeta principal del reproductor en tu computadora tienes el archivo <strong>Sincronizar_Musica_Celular.bat</strong>. Con tu celular en modo transferencia, solo dale doble clic y copiarÃ¡ todas las canciones nuevas a la compu.
         </p>
 
-        <h4 style="color: var(--accent-pink); margin-bottom: 0.4rem;"><i class="fa-solid fa-wifi"></i> Opción 2: Inalámbrico por WiFi</h4>
+        <h4 style="color: var(--accent-pink); margin-bottom: 0.4rem;"><i class="fa-solid fa-wifi"></i> OpciÃ³n 2: InalÃ¡mbrico por WiFi</h4>
         <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
-          Abre <strong>DaVE Player</strong> en tu celular, toca <strong>🌐 Control Remoto PC</strong> arriba a la derecha, y en la compu pulsa <strong>"Conectar WiFi"</strong>.
+          Abre <strong>DaVE Player</strong> en tu celular, toca <strong>ðŸŒ Control Remoto PC</strong> arriba a la derecha, y en la compu pulsa <strong>"Conectar WiFi"</strong>.
         </p>
 
         <button id="btn-phone-help-got-it" class="btn-glow-primary" style="width: 100%; justify-content: center; padding: 0.6rem; margin-top: 0.5rem;">
-          ¡Entendido!
+          Â¡Entendido!
         </button>
       </div>
     </div>
@@ -3882,14 +3882,14 @@
         <button class="btn-close-x" id="btn-close-shortcuts"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-content">
-        <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom: 0.2rem;">Controla tu música al instante como un profesional:</p>
+        <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom: 0.2rem;">Controla tu mÃºsica al instante como un profesional:</p>
         <div class="shortcut-grid">
           <div class="shortcut-item"><span>Reproducir / Pausar</span><span class="kbd-badge">Espacio</span></div>
-          <div class="shortcut-item"><span>Siguiente Pista</span><span class="kbd-badge">Shift + →</span></div>
-          <div class="shortcut-item"><span>Pista Anterior</span><span class="kbd-badge">Shift + ←</span></div>
-          <div class="shortcut-item"><span>Avanzar 5 segundos</span><span class="kbd-badge">→</span></div>
-          <div class="shortcut-item"><span>Retroceder 5 segundos</span><span class="kbd-badge">←</span></div>
-          <div class="shortcut-item"><span>Subir / Bajar Volumen</span><span class="kbd-badge">↑ / ↓</span></div>
+          <div class="shortcut-item"><span>Siguiente Pista</span><span class="kbd-badge">Shift + â†’</span></div>
+          <div class="shortcut-item"><span>Pista Anterior</span><span class="kbd-badge">Shift + â†</span></div>
+          <div class="shortcut-item"><span>Avanzar 5 segundos</span><span class="kbd-badge">â†’</span></div>
+          <div class="shortcut-item"><span>Retroceder 5 segundos</span><span class="kbd-badge">â†</span></div>
+          <div class="shortcut-item"><span>Subir / Bajar Volumen</span><span class="kbd-badge">â†‘ / â†“</span></div>
           <div class="shortcut-item"><span>Silenciar (Mute)</span><span class="kbd-badge">M</span></div>
           <div class="shortcut-item"><span>Karaoke & Letras</span><span class="kbd-badge">L</span></div>
           <div class="shortcut-item"><span>Modo Aleatorio</span><span class="kbd-badge">S</span></div>
@@ -3907,10 +3907,10 @@
   <input type="file" id="phone-file-input" accept="audio/*" multiple style="display: none;">
   <input type="file" id="phone-folder-input" webkitdirectory directory multiple style="display: none;">
 
-  <!-- Queue Drawer ("A continuación") -->
+  <!-- Queue Drawer ("A continuaciÃ³n") -->
   <aside id="queue-drawer" class="queue-drawer">
     <div class="queue-header">
-      <h3><i class="fa-solid fa-list-ul" style="color: var(--accent-cyan);"></i> Cola de Reproducción</h3>
+      <h3><i class="fa-solid fa-list-ul" style="color: var(--accent-cyan);"></i> Cola de ReproducciÃ³n</h3>
       <button id="btn-close-queue" class="queue-close-btn" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="queue-body">
@@ -3918,12 +3918,12 @@
       <div class="queue-card-now" id="queue-now-card">
         <img id="queue-now-art" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 46 46'><rect width='46' height='46' fill='%23191c28'/></svg>" alt="Cover">
         <div class="queue-item-meta">
-          <strong id="queue-now-title">Sin música</strong>
-          <span id="queue-now-artist">Inicia sesión para reproducir</span>
+          <strong id="queue-now-title">Sin mÃºsica</strong>
+          <span id="queue-now-artist">Inicia sesiÃ³n para reproducir</span>
         </div>
       </div>
 
-      <div class="queue-section-title" style="margin-top:0.8rem;">A Continuación (<span id="queue-count">0</span>)</div>
+      <div class="queue-section-title" style="margin-top:0.8rem;">A ContinuaciÃ³n (<span id="queue-count">0</span>)</div>
       <div class="queue-list-items" id="queue-upcoming-list">
         <!-- Rendered dynamically -->
       </div>
@@ -3935,17 +3935,17 @@
     <div class="ctx-header">
       <img id="ctx-cover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'><rect width='36' height='36' fill='%23191c28'/></svg>" alt="Art">
       <div class="ctx-meta">
-        <span id="ctx-title">Título</span>
+        <span id="ctx-title">TÃ­tulo</span>
         <span id="ctx-artist">Artista</span>
       </div>
     </div>
     <div class="ctx-divider"></div>
     <button class="ctx-item" id="ctx-btn-play"><i class="fa-solid fa-play"></i> <span>Reproducir ahora</span></button>
-    <button class="ctx-item" id="ctx-btn-next"><i class="fa-solid fa-forward-step"></i> <span>Reproducir a continuación</span></button>
+    <button class="ctx-item" id="ctx-btn-next"><i class="fa-solid fa-forward-step"></i> <span>Reproducir a continuaciÃ³n</span></button>
     <button class="ctx-item" id="ctx-btn-lyrics"><i class="fa-solid fa-microphone-lines"></i> <span>Ver letra / Karaoke</span></button>
     <button class="ctx-item" id="ctx-btn-stems"><i class="fa-solid fa-sliders"></i> <span>Aislar en Stem Mixer</span></button>
-    <button class="ctx-item" id="ctx-btn-fav"><i class="fa-regular fa-heart"></i> <span id="ctx-fav-label">Añadir a Favoritas</span></button>
-    <button class="ctx-item" id="ctx-btn-playlist"><i class="fa-solid fa-folder-plus"></i> <span>Añadir a Playlist...</span></button>
+    <button class="ctx-item" id="ctx-btn-fav"><i class="fa-regular fa-heart"></i> <span id="ctx-fav-label">AÃ±adir a Favoritas</span></button>
+    <button class="ctx-item" id="ctx-btn-playlist"><i class="fa-solid fa-folder-plus"></i> <span>AÃ±adir a Playlist...</span></button>
     <div class="ctx-divider"></div>
     <a class="ctx-item" id="ctx-download-btn" href="#" download><i class="fa-solid fa-arrow-down-to-bracket"></i> <span>Descargar MP3</span></a>
   </div>
@@ -3959,7 +3959,7 @@
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom: 0.8rem;">
-          La música se detendrá suavemente con un desvanecimiento de volumen al finalizar el tiempo.
+          La mÃºsica se detendrÃ¡ suavemente con un desvanecimiento de volumen al finalizar el tiempo.
         </p>
 
         <div id="sleep-timer-status" style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.3); border-radius:10px; padding:0.65rem 0.9rem; text-align:center; font-size:0.88rem; color:#fff; margin-bottom:1rem;">
@@ -3972,7 +3972,7 @@
           <button class="timer-preset-btn" data-minutes="30"><i class="fa-solid fa-moon"></i> 30 Minutos</button>
           <button class="timer-preset-btn" data-minutes="45"><i class="fa-solid fa-cloud-moon"></i> 45 Minutos</button>
           <button class="timer-preset-btn" data-minutes="60"><i class="fa-solid fa-hourglass-half"></i> 1 Hora</button>
-          <button class="timer-preset-btn" data-minutes="end-track"><i class="fa-solid fa-forward-step"></i> Fin de Canción</button>
+          <button class="timer-preset-btn" data-minutes="end-track"><i class="fa-solid fa-forward-step"></i> Fin de CanciÃ³n</button>
           <button class="timer-preset-btn" id="btn-cancel-sleep-timer" style="color:#ef4444;"><i class="fa-solid fa-ban"></i> Apagar</button>
         </div>
 
@@ -3990,15 +3990,15 @@
     </div>
   </div>
 
-  <!-- Modal: Añadir a Playlist -->
+  <!-- Modal: AÃ±adir a Playlist -->
   <div id="modal-add-to-playlist" class="modal-overlay hidden">
     <div class="modal-box" style="max-width: 420px;">
       <div class="modal-top">
-        <h3><i class="fa-solid fa-folder-plus" style="color:var(--accent-cyan);"></i> Añadir a Playlist</h3>
+        <h3><i class="fa-solid fa-folder-plus" style="color:var(--accent-cyan);"></i> AÃ±adir a Playlist</h3>
         <button class="btn-close-x" id="btn-close-add-pl"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-content">
-        <p id="add-pl-track-name" style="font-size:0.88rem; font-weight:700; color:#fff; margin-bottom:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Canción Seleccionada</p>
+        <p id="add-pl-track-name" style="font-size:0.88rem; font-weight:700; color:#fff; margin-bottom:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CanciÃ³n Seleccionada</p>
         <div id="pl-picker-list" style="display:flex; flex-direction:column; gap:0.4rem; max-height:220px; overflow-y:auto; margin-bottom:1rem;">
           <!-- Listado de playlists -->
         </div>
@@ -4023,8 +4023,8 @@
             <input type="text" id="new-pl-name-input" required placeholder="Ej: Para Entrenar, Chill Vibes...">
           </div>
           <div class="form-field" style="margin-top:0.75rem;">
-            <label>Descripción (Opcional)</label>
-            <input type="text" id="new-pl-desc-input" placeholder="Ej: Mis temas favoritos de energía">
+            <label>DescripciÃ³n (Opcional)</label>
+            <input type="text" id="new-pl-desc-input" placeholder="Ej: Mis temas favoritos de energÃ­a">
           </div>
           <button type="submit" class="btn-glow-primary btn-block" style="margin-top:1.1rem; padding:0.75rem;">
             <i class="fa-solid fa-check"></i> Crear Playlist
@@ -4034,7 +4034,7 @@
     </div>
   </div>
 
-  <!-- Modal: Selector de Temas Neón -->
+  <!-- Modal: Selector de Temas NeÃ³n -->
   <div id="modal-theme" class="modal-overlay hidden">
     <div class="modal-box" style="max-width: 480px;">
       <div class="modal-top">
@@ -4049,7 +4049,7 @@
           <div class="theme-card active" data-theme="cyberpunk">
             <div class="theme-swatch" style="background: linear-gradient(90deg, #6366f1, #06b6d4);"></div>
             <strong>Cyber Glow</strong>
-            <span style="font-size:0.7rem; color:var(--text-dim);">Cyan & Índigo</span>
+            <span style="font-size:0.7rem; color:var(--text-dim);">Cyan & Ãndigo</span>
           </div>
           <div class="theme-card" data-theme="emerald">
             <div class="theme-swatch" style="background: linear-gradient(90deg, #10b981, #059669);"></div>
@@ -4080,7 +4080,7 @@
   <div id="modal-stats" class="modal-overlay hidden">
     <div class="modal-box" style="max-width: 500px;">
       <div class="modal-top">
-        <h3><i class="fa-solid fa-chart-pie" style="color:var(--accent-cyan);"></i> Tu Resumen de Música</h3>
+        <h3><i class="fa-solid fa-chart-pie" style="color:var(--accent-cyan);"></i> Tu Resumen de MÃºsica</h3>
         <button class="btn-close-x" id="btn-close-stats"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-content">
@@ -4095,7 +4095,7 @@
           </div>
           <div class="stat-kpi-card">
             <strong id="stat-top-artist" style="font-size:1.05rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">-</strong>
-            <span>Artista #1 Más Escuchado</span>
+            <span>Artista #1 MÃ¡s Escuchado</span>
           </div>
           <div class="stat-kpi-card">
             <strong id="stat-favs-count" style="color:#f43f5e;">0</strong>
@@ -4104,7 +4104,7 @@
         </div>
 
         <h4 style="font-size:0.86rem; color:#fff; margin:0 0 0.5rem 0; display:flex; align-items:center; gap:0.4rem;">
-          <i class="fa-solid fa-trophy" style="color:#eab308;"></i> Top 5 Más Escuchadas
+          <i class="fa-solid fa-trophy" style="color:#eab308;"></i> Top 5 MÃ¡s Escuchadas
         </h4>
         <div class="top-tracks-list" id="stat-top-tracks">
           <!-- Rendered dynamically -->
@@ -4113,7 +4113,7 @@
     </div>
   </div>
 
-  <!-- Modal / Overlay: Visualizador 3D Espectro Neón Hi-Fi -->
+  <!-- Modal / Overlay: Visualizador 3D Espectro NeÃ³n Hi-Fi -->
   <div id="modal-visualizer3d" class="visualizer-3d-overlay hidden">
     <div class="visualizer-3d-topbar">
       <div style="display:flex; align-items:center; gap:0.75rem;">
@@ -4123,8 +4123,8 @@
         <span class="badge-pill" id="viz3d-track-title" style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:rgba(255,255,255,0.08);">Reproduciendo</span>
       </div>
       <div style="display:flex; align-items:center; gap:0.8rem;">
-        <button id="btn-viz3d-mode" class="btn-action-pill" title="Cambiar Geometría 3D">
-          <i class="fa-solid fa-arrows-rotate"></i> <span id="viz3d-mode-label">Túnel Neón</span>
+        <button id="btn-viz3d-mode" class="btn-action-pill" title="Cambiar GeometrÃ­a 3D">
+          <i class="fa-solid fa-arrows-rotate"></i> <span id="viz3d-mode-label">TÃºnel NeÃ³n</span>
         </button>
         <button id="btn-viz3d-fullscreen" class="btn-action-pill" title="Pantalla Completa">
           <i class="fa-solid fa-expand"></i> <span>Pantalla Completa</span>
@@ -4147,7 +4147,7 @@
         <!-- Rendered dynamically -->
       </div>
       <div class="command-palette-footer">
-        <span><kbd>↑</kbd> <kbd>↓</kbd> Navegar &bull; <kbd>Enter</kbd> Ejecutar &bull; <kbd>Esc</kbd> Cerrar</span>
+        <span><kbd>â†‘</kbd> <kbd>â†“</kbd> Navegar &bull; <kbd>Enter</kbd> Ejecutar &bull; <kbd>Esc</kbd> Cerrar</span>
         <span style="color:var(--accent-cyan); font-weight:700;">DaVE Spotlight</span>
       </div>
     </div>
@@ -4157,12 +4157,12 @@
   <div id="modal-ambience" class="modal-overlay hidden">
     <div class="modal-box" style="max-width: 490px;">
       <div class="modal-top">
-        <h3><i class="fa-solid fa-cloud-rain" style="color:#38bdf8;"></i> Atmósfera & Sonidos Ambientales</h3>
+        <h3><i class="fa-solid fa-cloud-rain" style="color:#38bdf8;"></i> AtmÃ³sfera & Sonidos Ambientales</h3>
         <button class="btn-close-x" id="btn-close-ambience"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin:0 0 0.8rem 0;">
-          Genera capas de sonido relajantes de fondo que se mezclan armónicamente con tu música o radio:
+          Genera capas de sonido relajantes de fondo que se mezclan armÃ³nicamente con tu mÃºsica o radio:
         </p>
 
         <div class="ambience-grid">
@@ -4177,20 +4177,20 @@
             <div class="ambience-icon" style="background:rgba(6,182,212,0.15); color:#06b6d4;"><i class="fa-solid fa-water"></i></div>
             <div>
               <strong style="font-size:0.86rem; color:#fff; display:block;">Marea Marina</strong>
-              <span style="font-size:0.72rem; color:var(--text-dim);">Olas del océano nocturno</span>
+              <span style="font-size:0.72rem; color:var(--text-dim);">Olas del ocÃ©ano nocturno</span>
             </div>
           </div>
           <div class="ambience-card" data-sound="fire">
             <div class="ambience-icon" style="background:rgba(249,115,22,0.15); color:#f97316;"><i class="fa-solid fa-fire"></i></div>
             <div>
-              <strong style="font-size:0.86rem; color:#fff; display:block;">Hoguera Cálida</strong>
-              <span style="font-size:0.72rem; color:var(--text-dim);">Leña crepitante</span>
+              <strong style="font-size:0.86rem; color:#fff; display:block;">Hoguera CÃ¡lida</strong>
+              <span style="font-size:0.72rem; color:var(--text-dim);">LeÃ±a crepitante</span>
             </div>
           </div>
           <div class="ambience-card" data-sound="coffee">
             <div class="ambience-icon" style="background:rgba(234,179,8,0.15); color:#eab308;"><i class="fa-solid fa-mug-saucer"></i></div>
             <div>
-              <strong style="font-size:0.86rem; color:#fff; display:block;">Cafetería Lo-Fi</strong>
+              <strong style="font-size:0.86rem; color:#fff; display:block;">CafeterÃ­a Lo-Fi</strong>
               <span style="font-size:0.72rem; color:var(--text-dim);">Murmullo acogedor</span>
             </div>
           </div>
@@ -4198,7 +4198,7 @@
 
         <div style="margin-top:1.2rem; background:rgba(255,255,255,0.03); border-radius:12px; padding:0.9rem; border:1px solid rgba(255,255,255,0.06);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-            <span style="font-size:0.82rem; color:#fff; font-weight:700;"><i class="fa-solid fa-volume-low"></i> Volumen de la Atmósfera</span>
+            <span style="font-size:0.82rem; color:#fff; font-weight:700;"><i class="fa-solid fa-volume-low"></i> Volumen de la AtmÃ³sfera</span>
             <span id="ambience-volume-val" style="font-size:0.8rem; color:var(--accent-cyan); font-weight:700;">35%</span>
           </div>
           <input type="range" id="ambience-volume-slider" min="0" max="100" value="35" style="width:100%; accent-color:var(--accent-cyan); cursor:pointer;">
@@ -4206,7 +4206,7 @@
 
         <div style="display:flex; justify-content:flex-end; gap:0.6rem; margin-top:1.2rem;">
           <button id="btn-ambience-stop" class="btn-outline-secondary" style="font-size:0.84rem; padding:0.5rem 1rem;">
-            <i class="fa-solid fa-stop"></i> Detener Atmósfera
+            <i class="fa-solid fa-stop"></i> Detener AtmÃ³sfera
           </button>
         </div>
       </div>
@@ -4222,7 +4222,7 @@
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin:0 0 0.5rem 0;">
-          Ajusta la velocidad de reproducción y tono de cualquier canción o audio:
+          Ajusta la velocidad de reproducciÃ³n y tono de cualquier canciÃ³n o audio:
         </p>
 
         <div class="speed-chip-grid">
@@ -4262,20 +4262,20 @@
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin:0 0 1rem 0;">
-          Modela la saturación armónica cálida de amplificadores a válvulas clásicos y añade presencia sub-grave a 55Hz:
+          Modela la saturaciÃ³n armÃ³nica cÃ¡lida de amplificadores a vÃ¡lvulas clÃ¡sicos y aÃ±ade presencia sub-grave a 55Hz:
         </p>
         <div class="speed-chip-grid" style="grid-template-columns: repeat(2, 1fr);">
           <button class="speed-chip tube-chip active" data-tube="off">
             <i class="fa-solid fa-ban"></i> Apagado (Bypass)
           </button>
           <button class="speed-chip tube-chip" data-tube="warm">
-            <i class="fa-solid fa-mug-hot"></i> Cálido Vinilo (+2dB Sat)
+            <i class="fa-solid fa-mug-hot"></i> CÃ¡lido Vinilo (+2dB Sat)
           </button>
           <button class="speed-chip tube-chip" data-tube="punch">
-            <i class="fa-solid fa-bolt"></i> Punch Analógico (+5dB Sat)
+            <i class="fa-solid fa-bolt"></i> Punch AnalÃ³gico (+5dB Sat)
           </button>
           <button class="speed-chip tube-chip" data-tube="beast">
-            <i class="fa-solid fa-fire"></i> Bestia a Válvulas (+9dB Sat)
+            <i class="fa-solid fa-fire"></i> Bestia a VÃ¡lvulas (+9dB Sat)
           </button>
         </div>
         <div style="margin-top:1.2rem; background:rgba(255,255,255,0.03); border-radius:12px; padding:0.9rem; border:1px solid rgba(255,255,255,0.06);">
@@ -4283,7 +4283,7 @@
             <span style="font-size:0.82rem; color:#fff; font-weight:700;">Sub-Bass Exciter (55Hz Peaking)</span>
             <span id="tube-exciter-status" style="font-size:0.82rem; color:var(--accent-orange, #f97316); font-weight:700;">Inactivo</span>
           </div>
-          <p style="font-size:0.75rem; color:var(--text-dim); margin:0.3rem 0 0 0;">Genera presencia subacuática y resonancia de graves para parlantes y audífonos de alta gama.</p>
+          <p style="font-size:0.75rem; color:var(--text-dim); margin:0.3rem 0 0 0;">Genera presencia subacuÃ¡tica y resonancia de graves para parlantes y audÃ­fonos de alta gama.</p>
         </div>
       </div>
     </div>
@@ -4298,10 +4298,10 @@
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin:0 0 1rem 0;">
-          Selecciona un fragmento de la canción actual para crear tu tono de llamada o alarma para celular:
+          Selecciona un fragmento de la canciÃ³n actual para crear tu tono de llamada o alarma para celular:
         </p>
         <div style="background:rgba(255,255,255,0.04); border-radius:12px; padding:1rem; border:1px solid rgba(255,255,255,0.08); margin-bottom:1rem;">
-          <div style="font-weight:700; color:#fff; font-size:0.9rem; margin-bottom:0.2rem;" id="rt-song-title">Canción</div>
+          <div style="font-weight:700; color:#fff; font-size:0.9rem; margin-bottom:0.2rem;" id="rt-song-title">CanciÃ³n</div>
           <div style="font-size:0.8rem; color:var(--text-muted);" id="rt-song-artist">Artista</div>
         </div>
 
@@ -4311,10 +4311,10 @@
             <input type="number" id="rt-start-sec" min="0" step="1" value="30" class="input-base" style="width:100%; padding:0.5rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;">
           </div>
           <div>
-            <label style="font-size:0.78rem; color:var(--text-dim); display:block; margin-bottom:0.3rem;">Duración:</label>
+            <label style="font-size:0.78rem; color:var(--text-dim); display:block; margin-bottom:0.3rem;">DuraciÃ³n:</label>
             <select id="rt-duration-sel" class="input-base" style="width:100%; padding:0.5rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;">
-              <option value="15">15 Segundos (Notificación)</option>
-              <option value="25" selected>25 Segundos (Llamada Estándar)</option>
+              <option value="15">15 Segundos (NotificaciÃ³n)</option>
+              <option value="25" selected>25 Segundos (Llamada EstÃ¡ndar)</option>
               <option value="30">30 Segundos (Alarma Completa)</option>
             </select>
           </div>
@@ -4345,7 +4345,7 @@
         <div style="display:flex; align-items:center; gap:1rem;">
           <img id="fs-lyrics-art" src="" alt="Album Art" style="width:54px; height:54px; border-radius:10px; object-fit:cover; box-shadow:0 4px 16px rgba(0,0,0,0.5);">
           <div>
-            <h2 id="fs-lyrics-title" style="font-size:1.3rem; margin:0; color:#fff; font-weight:800;">Canción</h2>
+            <h2 id="fs-lyrics-title" style="font-size:1.3rem; margin:0; color:#fff; font-weight:800;">CanciÃ³n</h2>
             <p id="fs-lyrics-artist" style="font-size:0.88rem; color:rgba(255,255,255,0.7); margin:0.2rem 0 0 0;">Artista</p>
           </div>
         </div>
@@ -4361,12 +4361,12 @@
   <div id="modal-backup" class="modal-overlay hidden">
     <div class="modal-box" style="max-width: 480px;">
       <div class="modal-top">
-        <h3><i class="fa-solid fa-database" style="color:#a855f7;"></i> Respaldo & Restauración DaVE</h3>
+        <h3><i class="fa-solid fa-database" style="color:#a855f7;"></i> Respaldo & RestauraciÃ³n DaVE</h3>
         <button class="btn-close-x" id="btn-close-backup"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin:0 0 1.2rem 0;">
-          Exporta o importa todas tus playlists creadas, favoritos, estadísticas de reproducción, temas personalizados y configuraciones de sonido en un archivo JSON portátil:
+          Exporta o importa todas tus playlists creadas, favoritos, estadÃ­sticas de reproducciÃ³n, temas personalizados y configuraciones de sonido en un archivo JSON portÃ¡til:
         </p>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
           <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:1.2rem; text-align:center; display:flex; flex-direction:column; justify-content:space-between;">
@@ -4416,7 +4416,7 @@
       </div>
       <div class="modal-content">
         <p style="font-size:0.84rem; color:var(--text-muted); margin:0 0 1.2rem 0;">
-          Ajusta la tonalidad de la música en semitonos (±6) para cantar cómodamente en tu rango vocal:
+          Ajusta la tonalidad de la mÃºsica en semitonos (Â±6) para cantar cÃ³modamente en tu rango vocal:
         </p>
 
         <div style="display:flex; justify-content:center; align-items:center; gap:1.5rem; margin-bottom:1.5rem;">
@@ -4451,7 +4451,7 @@
   <div id="floating-mini-player" class="floating-mini-player hidden">
     <img id="fmini-art" class="floating-mini-art" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='46'><rect width='46' height='46' fill='%23191c28'/></svg>" alt="Art">
     <div class="floating-mini-meta">
-      <strong id="fmini-title">Sin música</strong>
+      <strong id="fmini-title">Sin mÃºsica</strong>
       <span id="fmini-artist">DaVE Player</span>
     </div>
     <div class="floating-mini-controls">
@@ -4470,6 +4470,6 @@
   <audio id="audio-player"></audio>
 
   <!-- Script -->
-  <script src="app.js?v=4.3.0"></script>
+  <script src="app.js?v=4.9.68"></script>
 </body>
 </html>
