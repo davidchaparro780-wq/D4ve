@@ -89,6 +89,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -171,21 +172,13 @@ fun DaveMagicHubSheet(
 
     val categories = listOf("🔥 Todo", "📥 Descargas", "🎛️ Audio Lab", "🎉 Fiesta & Juegos", "🧰 Utilidades")
 
-    val allTools = remember(
-        isFlashlightActive,
-        isVirtualDjActive,
-        isWifiServerRunning,
-        isBubbleActive,
-        isAirGesturesActive,
-        isShakeActive,
-        isSleepSensorActive
-    ) {
+    val allTools = listOf(
         listOf(
             // 1. Descargas & Redes
             HubToolItem(
                 id = "tiktok",
-                title = "TikTok Downloader",
-                subtitle = "Audio y video sin marcas de agua",
+                title = stringResource(R.string.hub_tiktok_title),
+                subtitle = stringResource(R.string.hub_tiktok_subtitle),
                 icon = Icons.Default.MusicNote,
                 category = "📥 Descargas",
                 color = Color(0xFF00F2FE),
@@ -193,8 +186,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "instagram",
-                title = "Instagram Reels",
-                subtitle = "Guarda reels y audios virales",
+                title = stringResource(R.string.hub_instagram_title),
+                subtitle = stringResource(R.string.hub_instagram_subtitle),
                 icon = Icons.Default.CameraAlt,
                 category = "📥 Descargas",
                 color = Color(0xFFE1306C),
@@ -202,8 +195,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "facebook",
-                title = "Facebook Video",
-                subtitle = "Descarga clips y música de Facebook",
+                title = stringResource(R.string.hub_facebook_title),
+                subtitle = stringResource(R.string.hub_facebook_subtitle),
                 icon = Icons.Default.VideoLibrary,
                 category = "📥 Descargas",
                 color = Color(0xFF1877F2),
@@ -211,8 +204,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "whatsapp",
-                title = "Estados WhatsApp",
-                subtitle = "Guarda fotos y videos al instante",
+                title = stringResource(R.string.hub_whatsapp_title),
+                subtitle = stringResource(R.string.hub_whatsapp_subtitle),
                 icon = Icons.Default.Chat,
                 category = "📥 Descargas",
                 color = Color(0xFF25D366),
@@ -220,8 +213,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "extractor",
-                title = "Extractor de Audio",
-                subtitle = "Convierte videos locales en MP3",
+                title = stringResource(R.string.hub_extractor_title),
+                subtitle = stringResource(R.string.hub_extractor_subtitle),
                 icon = Icons.Default.Movie,
                 category = "📥 Descargas",
                 color = Color(0xFF06B6D4),
@@ -231,8 +224,8 @@ fun DaveMagicHubSheet(
             // 2. Audio Lab
             HubToolItem(
                 id = "stem_mixer",
-                title = "AI Stem Mixer",
-                subtitle = "Separa voz, batería, bajo e instrumental",
+                title = stringResource(R.string.hub_stem_title),
+                subtitle = stringResource(R.string.hub_stem_subtitle),
                 icon = Icons.Default.Tune,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFFA78BFA),
@@ -240,8 +233,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "viral_studio",
-                title = "Estudio Viral FX",
-                subtitle = "Slowed + Reverb, 8D Espacial y Nightcore",
+                title = stringResource(R.string.hub_viral_title),
+                subtitle = stringResource(R.string.hub_viral_subtitle),
                 icon = Icons.Default.GraphicEq,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFFEC4899),
@@ -249,8 +242,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "zap_dj",
-                title = "Modo ZAP DJ",
-                subtitle = "Escucha los 15s más intensos de la pista",
+                title = stringResource(R.string.hub_zap_title),
+                subtitle = stringResource(R.string.hub_zap_subtitle),
                 icon = Icons.Default.Bolt,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFFF59E0B),
@@ -258,8 +251,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "binaural",
-                title = "Ondas Binaurales",
-                subtitle = "Frecuencias Alpha, Theta y ruido blanco",
+                title = stringResource(R.string.hub_binaural_title),
+                subtitle = stringResource(R.string.hub_binaural_subtitle),
                 icon = Icons.Default.Psychology,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFF38BDF8),
@@ -267,8 +260,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "ambience",
-                title = "Modo Ambiente",
-                subtitle = "Lluvia, chimenea, bosque relajante",
+                title = stringResource(R.string.hub_ambience_title),
+                subtitle = stringResource(R.string.hub_ambience_subtitle),
                 icon = Icons.Default.WaterDrop,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFF00E5FF),
@@ -276,8 +269,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "headphones",
-                title = "Mis Audífonos",
-                subtitle = "Perfiles acústicos para tus auriculares",
+                title = stringResource(R.string.hub_headphones_title),
+                subtitle = stringResource(R.string.hub_headphones_subtitle),
                 icon = Icons.Default.Headphones,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFF38BDF8),
@@ -285,8 +278,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "bpm_workout",
-                title = "Entrenamiento BPM",
-                subtitle = "Playlists dinámicas por ritmo y cadencia",
+                title = stringResource(R.string.hub_bpm_title),
+                subtitle = stringResource(R.string.hub_bpm_subtitle),
                 icon = Icons.Default.Timer,
                 category = "🎛️ Audio Lab",
                 color = Color(0xFF00F0FF),
@@ -296,8 +289,8 @@ fun DaveMagicHubSheet(
             // 3. Fiesta & Juegos
             HubToolItem(
                 id = "party_link",
-                title = "Silent Disco Link",
-                subtitle = "Transmite música sincronizada por Wi-Fi",
+                title = stringResource(R.string.hub_party_title),
+                subtitle = stringResource(R.string.hub_party_subtitle),
                 icon = Icons.Default.Radio,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFF8B5CF6),
@@ -305,8 +298,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "karaoke",
-                title = "Estudio Karaoke",
-                subtitle = "Atenúa voces y canta con letras vivas",
+                title = stringResource(R.string.hub_karaoke_title),
+                subtitle = stringResource(R.string.hub_karaoke_subtitle),
                 icon = Icons.Default.Mic,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFE040FB),
@@ -314,8 +307,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "quiz",
-                title = "DaVE Music Quiz",
-                subtitle = "Adivina la canción en 5 segundos",
+                title = stringResource(R.string.hub_quiz_title),
+                subtitle = stringResource(R.string.hub_quiz_subtitle),
                 icon = Icons.Default.SportsEsports,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFF43F5E),
@@ -323,8 +316,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "roulette",
-                title = "Ruleta Musical",
-                subtitle = "Elige canciones aleatorias al azar",
+                title = stringResource(R.string.hub_roulette_title),
+                subtitle = stringResource(R.string.hub_roulette_subtitle),
                 icon = Icons.Default.Casino,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFFFD700),
@@ -332,8 +325,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "tournament",
-                title = "Torneo de Canciones",
-                subtitle = "Duelo eliminatorio entre tus pistas",
+                title = stringResource(R.string.hub_tournament_title),
+                subtitle = stringResource(R.string.hub_tournament_subtitle),
                 icon = Icons.Default.Casino,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFFF9800),
@@ -341,8 +334,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "mood_wheel",
-                title = "Rueda de Emociones",
-                subtitle = "Música según tu energía y estado de ánimo",
+                title = stringResource(R.string.hub_mood_title),
+                subtitle = stringResource(R.string.hub_mood_subtitle),
                 icon = Icons.Default.AutoAwesome,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFA855F7),
@@ -350,8 +343,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "flashlight",
-                title = "Linterna Rítmica",
-                subtitle = "Flash parpadeante al compás del bajo",
+                title = stringResource(R.string.hub_flashlight_title),
+                subtitle = stringResource(R.string.hub_flashlight_subtitle),
                 icon = Icons.Default.FlashlightOn,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFEAB308),
@@ -360,8 +353,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "virtual_dj",
-                title = "Locutor Radio DJ",
-                subtitle = "Voz inteligente presentando canciones",
+                title = stringResource(R.string.hub_dj_title),
+                subtitle = stringResource(R.string.hub_dj_subtitle),
                 icon = Icons.Default.RecordVoiceOver,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFF10B981),
@@ -370,8 +363,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "jukebox",
-                title = "Jukebox & Oráculo",
-                subtitle = "Sinfonola retro y predicciones musicales",
+                title = stringResource(R.string.hub_jukebox_title),
+                subtitle = stringResource(R.string.hub_jukebox_subtitle),
                 icon = Icons.Default.AutoAwesome,
                 category = "🎉 Fiesta & Juegos",
                 color = Color(0xFFEC4899),
@@ -381,8 +374,8 @@ fun DaveMagicHubSheet(
             // 4. Utilidades
             HubToolItem(
                 id = "radar",
-                title = "DaVE Radar",
-                subtitle = "Identifica música estilo Shazam y tarareo",
+                title = stringResource(R.string.hub_radar_title),
+                subtitle = stringResource(R.string.hub_radar_subtitle),
                 icon = Icons.Default.Radar,
                 category = "🧰 Utilidades",
                 color = Color(0xFF00F0FF),
@@ -390,8 +383,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "insights",
-                title = "DaVE Insights",
-                subtitle = "Métricas y hábitos de escucha personales",
+                title = stringResource(R.string.hub_insights_title),
+                subtitle = stringResource(R.string.hub_insights_subtitle),
                 icon = Icons.Default.GraphicEq,
                 category = "🧰 Utilidades",
                 color = Color(0xFF6366F1),
@@ -399,8 +392,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "time_capsule",
-                title = "Cápsula del Tiempo",
-                subtitle = "Revive tus mejores temas del pasado",
+                title = stringResource(R.string.hub_capsule_title),
+                subtitle = stringResource(R.string.hub_capsule_subtitle),
                 icon = Icons.Default.AutoAwesome,
                 category = "🧰 Utilidades",
                 color = Color(0xFFFFD700),
@@ -408,8 +401,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "alarm",
-                title = "Alarma Musical",
-                subtitle = "Despierta suavemente al son de tu música",
+                title = stringResource(R.string.hub_alarm_title),
+                subtitle = stringResource(R.string.hub_alarm_subtitle),
                 icon = Icons.Default.NotificationsActive,
                 category = "🧰 Utilidades",
                 color = Color(0xFF10B981),
@@ -417,8 +410,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "covers",
-                title = "Descarga de Carátulas",
-                subtitle = "Búsqueda oficial HD 600x600 para toda la música",
+                title = stringResource(R.string.hub_covers_title),
+                subtitle = stringResource(R.string.hub_covers_subtitle),
                 icon = Icons.Default.Image,
                 category = "🧰 Utilidades",
                 color = Color(0xFF06B6D4),
@@ -426,8 +419,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "diagnostic",
-                title = "Diagnóstico & Limpieza",
-                subtitle = "Detecta duplicados, canciones corruptas y sin tags",
+                title = stringResource(R.string.hub_diagnostic_title),
+                subtitle = stringResource(R.string.hub_diagnostic_subtitle),
                 icon = Icons.Default.Handyman,
                 category = "🧰 Utilidades",
                 color = Color(0xFF3B82F6),
@@ -435,8 +428,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "wifi_server",
-                title = "Servidor Wi-Fi PC",
-                subtitle = "Reproduce tu música en la PC vía web (puerto 8080)",
+                title = stringResource(R.string.hub_wifi_title),
+                subtitle = stringResource(R.string.hub_wifi_subtitle),
                 icon = Icons.Default.Wifi,
                 category = "🧰 Utilidades",
                 color = Color(0xFF10B981),
@@ -445,8 +438,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "story_maker",
-                title = "Story & Reel Maker",
-                subtitle = "Crea videos con letras para WhatsApp y redes",
+                title = stringResource(R.string.hub_story_title),
+                subtitle = stringResource(R.string.hub_story_subtitle),
                 icon = Icons.Default.ContentCut,
                 category = "🧰 Utilidades",
                 color = Color(0xFFF472B6),
@@ -454,8 +447,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "folder_shield",
-                title = "Carpeta Segura Shield",
-                subtitle = "Oculta audios privados o notas de WhatsApp",
+                title = stringResource(R.string.hub_shield_title),
+                subtitle = stringResource(R.string.hub_shield_subtitle),
                 icon = Icons.Default.Security,
                 category = "🧰 Utilidades",
                 color = Color(0xFF10B981),
@@ -463,8 +456,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "bubble",
-                title = "Burbuja Flotante",
-                subtitle = "Mini reproductor en ventana flotante",
+                title = stringResource(R.string.hub_bubble_title),
+                subtitle = stringResource(R.string.hub_bubble_subtitle),
                 icon = Icons.Default.MusicNote,
                 category = "🧰 Utilidades",
                 color = Color(0xFF06B6D4),
@@ -473,8 +466,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "air_gestures",
-                title = "Gestos en el Aire",
-                subtitle = "Control sin tocar la pantalla con el sensor",
+                title = stringResource(R.string.hub_air_title),
+                subtitle = stringResource(R.string.hub_air_subtitle),
                 icon = Icons.Default.Tune,
                 category = "🧰 Utilidades",
                 color = Color(0xFFE040FB),
@@ -483,8 +476,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "shake",
-                title = "Agitar Canción",
-                subtitle = "Sacude el dispositivo para pasar de canción",
+                title = stringResource(R.string.hub_shake_title),
+                subtitle = stringResource(R.string.hub_shake_subtitle),
                 icon = Icons.Default.Shuffle,
                 category = "🧰 Utilidades",
                 color = Color(0xFFF59E0B),
@@ -493,8 +486,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "sleep_sensor",
-                title = "Detector de Sueño",
-                subtitle = "Auto-apaga la música si te quedas dormido",
+                title = stringResource(R.string.hub_sleep_title),
+                subtitle = stringResource(R.string.hub_sleep_subtitle),
                 icon = Icons.Default.Timer,
                 category = "🧰 Utilidades",
                 color = Color(0xFF38BDF8),
@@ -503,8 +496,8 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "themes",
-                title = "Temas & Atmósferas",
-                subtitle = "Paleta visual misteriosa y colores de acento",
+                title = stringResource(R.string.hub_themes_title),
+                subtitle = stringResource(R.string.hub_themes_subtitle),
                 icon = Icons.Default.Palette,
                 category = "🧰 Utilidades",
                 color = Color(0xFFB388FF),
@@ -512,16 +505,15 @@ fun DaveMagicHubSheet(
             ),
             HubToolItem(
                 id = "oled_saver",
-                title = "Modo Ahorro OLED",
-                subtitle = "Pantalla negra pura con 0% gasto de batería",
+                title = stringResource(R.string.hub_oled_title),
+                subtitle = stringResource(R.string.hub_oled_subtitle),
                 icon = Icons.Default.BatteryChargingFull,
                 category = "🧰 Utilidades",
                 color = Color(0xFF22C55E),
                 onClick = onOpenOledSaver
             )
         )
-    }
-
+    
     val filteredTools = remember(allTools, selectedCategoryIndex, searchQuery) {
         allTools.filter { tool ->
             val matchesCategory = when (selectedCategoryIndex) {
