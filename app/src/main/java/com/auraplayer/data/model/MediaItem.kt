@@ -2,6 +2,46 @@ package com.auraplayer.data.model
 
 import android.net.Uri
 
+/**
+ * Formatea milisegundos como "MM:SS" o "H:MM:SS" si supera la hora.
+ * Función pura de nivel superior para poder testearla sin Android.
+ */
+fun formatDurationMs(ms: Long): String {
+    val totalSeconds = (ms / 1000).coerceAtLeast(0)
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    val hours = minutes / 60
+    return if (hours > 0) {
+        String.format("%d:%02d:%02d", hours, minutes % 60, seconds)
+    } else {
+        String.format("%02d:%02d", minutes, seconds)
+    }
+}
+
+/**
+ * Insignia de calidad de audio según extensión y bitrate estimado (solo MP3).
+ * Función pura de nivel superior para poder testearla sin Android.
+ */
+fun computeAudioFormatBadge(path: String, size: Long, durationMs: Long): String {
+    val ext = path.substringAfterLast('.', "").lowercase()
+    return when (ext) {
+        "flac" -> "FLAC"
+        "wav" -> "WAV"
+        "alac" -> "ALAC"
+        "dsf", "dff" -> "DSD"
+        "m4a", "aac" -> "AAC"
+        "ogg", "opus" -> "OPUS"
+        "mp3" -> {
+            val sec = durationMs / 1000
+            if (sec > 0 && size > 0) {
+                val kbps = (size * 8 / sec) / 1000
+                if (kbps >= 300) "320k" else if (kbps >= 240) "256k" else "MP3"
+            } else "MP3"
+        }
+        else -> if (ext.isNotBlank()) ext.uppercase() else ""
+    }
+}
+
 data class MediaModel(
     val id: Long,
     val title: String,
@@ -26,38 +66,10 @@ data class MediaModel(
         }
 
     val formattedDuration: String
-        get() {
-            val totalSeconds = (duration / 1000).coerceAtLeast(0)
-            val minutes = totalSeconds / 60
-            val seconds = totalSeconds % 60
-            val hours = minutes / 60
-            return if (hours > 0) {
-                String.format("%d:%02d:%02d", hours, minutes % 60, seconds)
-            } else {
-                String.format("%02d:%02d", minutes, seconds)
-            }
-        }
+        get() = formatDurationMs(duration)
 
     val audioFormatBadge: String
-        get() {
-            val ext = path.substringAfterLast('.', "").lowercase()
-            return when (ext) {
-                "flac" -> "FLAC"
-                "wav" -> "WAV"
-                "alac" -> "ALAC"
-                "dsf", "dff" -> "DSD"
-                "m4a", "aac" -> "AAC"
-                "ogg", "opus" -> "OPUS"
-                "mp3" -> {
-                    val sec = duration / 1000
-                    if (sec > 0 && size > 0) {
-                        val kbps = (size * 8 / sec) / 1000
-                        if (kbps >= 300) "320k" else if (kbps >= 240) "256k" else "MP3"
-                    } else "MP3"
-                }
-                else -> if (ext.isNotBlank()) ext.uppercase() else ""
-            }
-        }
+        get() = computeAudioFormatBadge(path, size, duration)
 
     val isLossless: Boolean
         get() = audioFormatBadge in listOf("FLAC", "WAV", "ALAC", "DSD")
