@@ -1,7 +1,7 @@
 {
-  "versionCode": 175,
-  "versionName": "4.9.75",
-  "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.75/app-release.apk",
-  "changelog": "🛠️ DaVE Player v4.9.75 (Build 175) - Estados de WhatsApp: autodescubrimiento:\n• 🎯 Diagnostico clave: tu carpeta .Statuses esta congelada desde febrero - tu WhatsApp ya no escribe ahi.\n• 🔎 Autodescubrimiento: la app ahora busca carpetas .Statuses de CUALQUIER paquete/mod/volumen (GBWhatsApp, clones, business) en lugar de una lista fija.\n• 📲 Respaldo MediaStore: si ninguna carpeta tiene estados frescos, consulta al sistema los estados de las ultimas 24h en cualquier ruta.\n• ✅ Incluye todo lo de v4.9.63-74.",
-  "fileSizeMb": 5.9
+    "versionCode":  176,
+    "versionName":  "4.9.76",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.76/app-release.apk",
+    "changelog":  "🛠️ DaVE Player v4.9.76 (Build 176) - Estados: correccion del respaldo MediaStore:\r\n• 🐛 El respaldo MediaStore de la v4.9.75 nunca se activaba: la condicion estaba anulada por el marcado de carpeta activa. Ahora se activa cuando NINGUN archivo tiene fecha de modificacion fresca de verdad.\r\n• 🔎 Segunda pasada MediaStore: busca estados frescos en cualquier carpeta de WhatsApp, no solo .Statuses.\r\n• 📋 El diagnostico ahora distingue Vigentes (por carpeta) de Frescos de verdad (por mtime) y confirma si tu WhatsApp guarda en almacenamiento privado.\r\n• ✅ Incluye todo lo de v4.9.63-75.",
+    "fileSizeMb":  0
 }
