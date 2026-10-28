@@ -3,5 +3,5 @@
     "versionName":  "4.9.73",
     "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.73/app-release.apk",
     "changelog":  "🛠️ DaVE Player v4.9.73 (Build 173) - Correccion de Estados de WhatsApp:\r\n• 🔄 Los estados RECIENTES ya no se pierden: WhatsApp preserva la fecha del archivo original al publicar (fotos viejas republicadas nacen con fecha vieja), lo que mandaba los estados de hoy al fondo de la lista mezclados con residuos.\r\n• ✅ Ahora todo archivo dentro de la carpeta activa .Statuses se considera estado vigente (WhatsApp la limpia sola cada 24h).\r\n• 🧹 Los fosiles de la ruta legacy de WhatsApp se descartan si tienen mas de 48h.\r\n• ✅ Incluye todo lo de v4.9.63-72.",
-    "fileSizeMb":  0
+    "fileSizeMb":  5.9
 }
