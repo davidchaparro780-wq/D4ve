@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
 import android.media.ThumbnailUtils
+import android.content.ContentUris
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -145,6 +146,44 @@ object WhatsAppStatusManager {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             dirs.add(File(externalStorage, "WhatsApp/Media/.Statuses"))
             dirs.add(File(externalStorage, "WhatsApp Business/Media/.Statuses"))
+        }
+
+        // 4. AUTODESCUBRIMIENTO: recorrer Android/media en todos los volúmenes buscando carpetas
+        // .Statuses de CUALQUIER paquete/mod (com.whatsapp, w4b, gbwhatsapp, yowatsapp, clones...)
+        // Cubre rutas que no existían cuando se escribió la lista fija de arriba.
+        try {
+            val roots = mutableListOf(externalStorage)
+            context.getExternalFilesDirs(null)?.forEach { appDir ->
+                val idx = appDir?.absolutePath?.indexOf("/Android/") ?: -1
+                if (idx > 0) {
+                    val volumeRoot = File(appDir.absolutePath.substring(0, idx))
+                    if (!roots.any { it.absolutePath.equals(volumeRoot.absolutePath, ignoreCase = true) }) {
+                        roots.add(volumeRoot)
+                    }
+                }
+            }
+            for (volumeRoot in roots) {
+                val mediaRoot = File(volumeRoot, "Android/media")
+                val pkgDirs = mediaRoot.listFiles() ?: continue
+                for (pkgDir in pkgDirs) {
+                    val appDirs = pkgDir.listFiles() ?: continue
+                    for (appDir in appDirs) {
+                        if (!appDir.isDirectory) continue
+                        // Variante A: <appDir>/.Statuses
+                        val direct = File(appDir, ".Statuses")
+                        if (direct.isDirectory) dirs.add(direct)
+                        // Variante B: <appDir>/<carpeta>/Media/.Statuses (WhatsApp y mods)
+                        val subDirs = appDir.listFiles() ?: continue
+                        for (sub in subDirs) {
+                            if (!sub.isDirectory) continue
+                            val statusDir = File(sub, "Media/.Statuses")
+                            if (statusDir.isDirectory) dirs.add(statusDir)
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            AppLog.w(TAG, "Autodescubrimiento de carpetas .Statuses falló: ${e.message}")
         }
 
         return dirs.distinctBy { it.absolutePath }
@@ -630,6 +669,72 @@ object WhatsAppStatusManager {
                     } catch (e: Exception) {
                         AppLog.w(TAG, "Error leyendo estados vía SAF: ${e.message}")
                     }
+                }
+            }
+
+            // 2.5 MOTOR MEDIASTORE: estados frescos de las últimas 24h indexados por el sistema,
+            // sin importar en qué ruta los esté escribiendo la versión/mod de WhatsApp del usuario.
+            // Solo se activa si el escaneo de archivos no encontró nada vigente.
+            if (list.none { it.isRecent24h } && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    val cutoffSec = ((now - (24L * 60 * 60 * 1000L)) / 1000L).toString()
+                    val msProjection = arrayOf(
+                        MediaStore.MediaColumns._ID,
+                        MediaStore.MediaColumns.DISPLAY_NAME,
+                        MediaStore.MediaColumns.DATA,
+                        MediaStore.MediaColumns.DATE_MODIFIED,
+                        MediaStore.MediaColumns.SIZE,
+                        MediaStore.MediaColumns.MEDIA_TYPE
+                    )
+                    val msUri = MediaStore.Files.getContentUri("external")
+                    context.contentResolver.query(
+                        msUri,
+                        msProjection,
+                        "(${MediaStore.MediaColumns.MEDIA_TYPE}=? OR ${MediaStore.MediaColumns.MEDIA_TYPE}=?) AND ${MediaStore.MediaColumns.DATE_MODIFIED} >= ?",
+                        arrayOf("1", "3", cutoffSec),
+                        "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
+                    )?.use { cursor ->
+                        val idCol = cursor.getColumnIndex(MediaStore.MediaColumns._ID)
+                        val nameCol = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
+                        val dataCol = cursor.getColumnIndex(MediaStore.MediaColumns.DATA)
+                        val modCol = cursor.getColumnIndex(MediaStore.MediaColumns.DATE_MODIFIED)
+                        val sizeCol = cursor.getColumnIndex(MediaStore.MediaColumns.SIZE)
+                        while (cursor.moveToNext()) {
+                            val data = if (dataCol != -1) cursor.getString(dataCol) ?: "" else ""
+                            if (!data.replace('\\', '/').contains("/.statuses/", ignoreCase = true)) continue
+                            val id = if (idCol != -1) cursor.getLong(idCol) else continue
+                            val name = if (nameCol != -1) cursor.getString(nameCol) ?: "" else ""
+                            val size = if (sizeCol != -1) cursor.getLong(sizeCol) else 0L
+                            val modSec = if (modCol != -1) cursor.getLong(modCol) else 0L
+                            val isVideo = name.endsWith(".mp4", ignoreCase = true) || name.endsWith(".mkv", ignoreCase = true) || name.endsWith(".3gp", ignoreCase = true)
+                            if (!isVideo && !name.endsWith(".jpg", ignoreCase = true) && !name.endsWith(".jpeg", ignoreCase = true) && !name.endsWith(".png", ignoreCase = true) && !name.endsWith(".webp", ignoreCase = true)) continue
+                            val contentUri = if (isVideo) {
+                                ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                            } else {
+                                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                            }
+                            val signature = "${name}_$size"
+                            if (seenSignatures.add(signature)) {
+                                log("MediaStore · vigente hallado en: ${data.takeLast(60)}")
+                                list.add(
+                                    WhatsAppStatusItem(
+                                        file = null,
+                                        uri = contentUri,
+                                        isVideo = isVideo,
+                                        timestamp = modSec * 1000L,
+                                        size = size,
+                                        isRecent24h = true,
+                                        path = data
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    if (list.none { it.isRecent24h }) {
+                        log("⚠️ Ninguna ruta contiene estados de las últimas 24h. Abre WhatsApp > Estados (míralos) y vuelve a intentarlo: tu versión de WhatsApp puede estar guardándolos en almacenamiento privado.")
+                    }
+                } catch (e: Exception) {
+                    AppLog.w(TAG, "Error en el respaldo MediaStore de estados: ${e.message}")
                 }
             }
 
