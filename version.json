@@ -1,7 +1,7 @@
 {
-    "versionCode":  174,
-    "versionName":  "4.9.74",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.74/app-release.apk",
-    "changelog":  "🔍 DaVE Player v4.9.74 (Build 174) - Diagnostico de Estados de WhatsApp:\r\n• 🔍 Nuevo panel de diagnostico en Estados WhatsApp (boton lupa): muestra cada carpeta escaneada, cuantos archivos tiene y la fecha del mas nuevo, mas el total de estados vigentes y viejos. Con boton Copiar para reportar.\r\n• 🛠️ Filtro estricto tambien en el motor de respaldo SAF para carpetas legacy.\r\n• ✅ Incluye todo lo de v4.9.63-73.",
-    "fileSizeMb":  5.9
+    "versionCode":  175,
+    "versionName":  "4.9.75",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.75/app-release.apk",
+    "changelog":  "🛠️ DaVE Player v4.9.75 (Build 175) - Estados de WhatsApp: autodescubrimiento:\r\n• 🎯 Diagnostico clave: tu carpeta .Statuses esta congelada desde febrero - tu WhatsApp ya no escribe ahi.\r\n• 🔎 Autodescubrimiento: la app ahora busca carpetas .Statuses de CUALQUIER paquete/mod/volumen (GBWhatsApp, clones, business) en lugar de una lista fija.\r\n• 📲 Respaldo MediaStore: si ninguna carpeta tiene estados frescos, consulta al sistema los estados de las ultimas 24h en cualquier ruta.\r\n• ✅ Incluye todo lo de v4.9.63-74.",
+    "fileSizeMb":  0
 }
