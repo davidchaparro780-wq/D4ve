@@ -442,9 +442,10 @@ object WhatsAppStatusManager {
                             nameDate != null && nameDate < rawTime -> nameDate
                             else -> rawTime
                         }
-                        // Todo archivo hallado dentro de una carpeta .Statuses es un estado vigente:
-                        // WhatsApp purga los expirados, aunque preserve mtimes originales viejos
-                        val isRecent = true
+                        // Todo archivo hallado dentro de una carpeta .Statuses de la ruta ACTIVA es vigente.
+                        // En árboles legacy (WhatsApp/Media/.Statuses raíz) puede haber fósiles: filtro estricto.
+                        val docIdActive = folderDocId.contains("android/media", ignoreCase = true)
+                        val isRecent = docIdActive || ((now - effectiveTime) in -600_000L..(48L * 60 * 60 * 1000L))
                         list.add(
                             WhatsAppStatusItem(
                                 file = null,
@@ -506,12 +507,22 @@ object WhatsAppStatusManager {
      * Obtiene la lista de todos los estados vistos de WhatsApp en el dispositivo.
      * Combina Storage Access Framework (SAF) para Android 11+ y acceso directo a archivos,
      * descartando archivos fósiles obsoletos del almacenamiento legado.
+     * [reportSink] opcional: recibe líneas de diagnóstico del escaneo (para el panel del diálogo).
      */
-    suspend fun getStatuses(context: Context): List<WhatsAppStatusItem> = withContext(Dispatchers.IO) {
+    suspend fun getStatuses(context: Context, reportSink: ((String) -> Unit)? = null): List<WhatsAppStatusItem> = withContext(Dispatchers.IO) {
+        val report = mutableListOf<String>()
+        fun log(line: String) {
+            report.add(line)
+            reportSink?.invoke(line)
+        }
         val resultList = withTimeoutOrNull(10000L) {
             val list = mutableListOf<WhatsAppStatusItem>()
             val seenSignatures = mutableSetOf<String>()
             val now = System.currentTimeMillis()
+
+            log("═══ Diagnóstico de estados ═══")
+            log("Android SDK: ${Build.VERSION.SDK_INT} · AllFiles: ${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Environment.isExternalStorageManager() else "N/A"} · Árboles SAF: ${getSavedTreeUris(context).size}")
+            log("Ahora: ${java.text.SimpleDateFormat("dd/MM HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(now))}")
 
             // 1. Motor de Archivos Físicos (File System) — Prioridad Absoluta (Método Snaptube)
             // Cuando la app tiene acceso al almacenamiento, la lectura directa de carpetas es instantánea (< 2ms)
@@ -525,6 +536,9 @@ object WhatsAppStatusManager {
                     // (comportamiento conocido: contactos que re-publican fotos viejas nacen con mtime viejo).
                     val isActiveScoped = dir.absolutePath.replace('\\', '/').contains("/android/media/", ignoreCase = true)
                     val files = try { dir.listFiles() } catch (_: Exception) { null } ?: continue
+                    val newestMod = files.maxOfOrNull { it.lastModified() } ?: 0L
+                    val sdf = java.text.SimpleDateFormat("dd/MM HH:mm", java.util.Locale.getDefault())
+                    log("${if (isActiveScoped) "ACTIVA" else "LEGACY "} · ${files.size} archivos · más nuevo: ${if (newestMod > 0) sdf.format(java.util.Date(newestMod)) else "n/a"} · ${dir.absolutePath.takeLast(60)}")
                     for (file in files) {
                         if (file.isFile && !file.name.startsWith(".nomedia") && file.length() > 0) {
                             val name = file.name.lowercase()
@@ -618,6 +632,8 @@ object WhatsAppStatusManager {
                     }
                 }
             }
+
+            log("Total estados: ${list.size} · Vigentes: ${list.count { it.isRecent24h }} · Viejos: ${list.count { !it.isRecent24h }}")
 
             // Ordenar: primero los estados recientes, y dentro de cada grupo por el más reciente
             list.sortWith(

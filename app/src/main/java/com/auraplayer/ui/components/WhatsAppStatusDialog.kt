@@ -14,6 +14,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -76,6 +78,8 @@ fun WhatsAppStatusDialog(
     var selectedFilter by remember { mutableIntStateOf(0) }
     var savedSet by remember { mutableStateOf<Set<String>>(emptySet()) }
     var previewItem by remember { mutableStateOf<WhatsAppStatusItem?>(null) }
+    var debugReport by remember { mutableStateOf("") }
+    var showDebugReport by remember { mutableStateOf(false) }
 
     val isAndroid11Plus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
     var hasStoragePermission by remember {
@@ -97,7 +101,11 @@ fun WhatsAppStatusDialog(
         isLoading = true
         scope.launch {
             try {
-                val loaded = WhatsAppStatusManager.getStatuses(context)
+                val reportLines = StringBuilder()
+                val loaded = WhatsAppStatusManager.getStatuses(context) { line ->
+                    reportLines.appendLine(line)
+                }
+                debugReport = reportLines.toString().ifBlank { "Sin líneas de diagnóstico" }
                 statuses = loaded
             } catch (e: Throwable) {
                 AppLog.e("WhatsAppStatusDialog", "Error cargando estados", e)
@@ -170,6 +178,48 @@ fun WhatsAppStatusDialog(
         }
     }
 
+    // Panel de diagnóstico: muestra exactamente qué carpetas se escanearon y qué se encontró
+    if (showDebugReport) {
+        Dialog(onDismissRequest = { showDebugReport = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF0F172A))
+                    .border(1.dp, Color(0xFF25D366).copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "Diagnóstico de escaneo",
+                            color = Color(0xFF25D366),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(onClick = {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                            clipboard?.setPrimaryClip(android.content.ClipData.newPlainText("dave_status_debug", debugReport))
+                        }) {
+                            Text("Copiar", fontSize = 12.sp, color = Color(0xFF25D366))
+                        }
+                    }
+                    Text(
+                        text = debugReport,
+                        color = Color(0xFF94A3B8),
+                        fontSize = 10.sp,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    TextButton(onClick = { showDebugReport = false }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Cerrar", color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -226,6 +276,12 @@ fun WhatsAppStatusDialog(
                             ) {
                                 Icon(Icons.Default.FolderOpen, contentDescription = "Cambiar Carpeta", tint = Color(0xFF94A3B8))
                             }
+                        }
+                        IconButton(onClick = {
+                            load()
+                            showDebugReport = true
+                        }) {
+                            Text("🔍", fontSize = 15.sp)
                         }
                         IconButton(onClick = { load() }) {
                             Icon(Icons.Default.Refresh, contentDescription = "Recargar", tint = Color(0xFF94A3B8))
