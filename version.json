@@ -3,5 +3,5 @@
     "versionName":  "4.9.78",
     "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.78/app-release.apk",
     "changelog":  "🛠️ DaVE Player v4.9.78 (Build 178) - Estados: lista limpia de verdad:\r\n• 🧹 Recorte de fosiles: los estados de mas de 7 dias desaparecen de la lista (los 641 de febrero ya no ensucian).\r\n• 📅 Fechas honestas: ya no se maquilla la fecha de los archivos congelados (eso los ponía arriba como si fueran de hoy).\r\n• 📲 Los estados que tu WhatsApp guarda en Pictures/WhatsApp se detectan via MediaStore y aparecen en Vigentes.\r\n• ✅ Incluye todo lo de v4.9.63-77.",
-    "fileSizeMb":  0
+    "fileSizeMb":  5.9
 }
