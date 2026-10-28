@@ -690,9 +690,9 @@ object WhatsAppStatusManager {
                     context.contentResolver.query(
                         msUri,
                         msProjection,
-                        "(${"media_type"}=? OR ${"media_type"}=?) AND ${MediaStore.MediaColumns.DATE_MODIFIED} >= ?",
+                        "(media_type=? OR media_type=?) AND date_modified >= ?",
                         arrayOf("1", "3", cutoffSec),
-                        "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
+                        "date_modified DESC"
                     )?.use { cursor ->
                         val idCol = cursor.getColumnIndex(MediaStore.MediaColumns._ID)
                         val nameCol = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
