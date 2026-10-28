@@ -596,8 +596,8 @@ object WhatsAppStatusManager {
                                 if (isLegacyFossil) continue
                                 val isRecent = isActiveScoped || ((now - effectiveTime) in -600_000L..(48L * 60 * 60 * 1000L))
                                 val genuinelyFresh = (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
-                                // Nunca mostrar un estado vigente con fecha de hace días: se clamp a ahora
-                                val displayTime = if ((now - effectiveTime) <= (24L * 60 * 60 * 1000L)) effectiveTime else now
+                                // Timestamp HONESTO (mtime real): los fósiles se recortan al final del escaneo,
+                                // no se les maquilla la fecha (maquillarlos los ponía arriba como si fueran de hoy)
 
                                 val signature = "${file.name}_${file.length()}"
                                 if (seenSignatures.add(signature)) {
@@ -612,7 +612,7 @@ object WhatsAppStatusManager {
                                             file = file,
                                             uri = uri,
                                             isVideo = isVideo,
-                                            timestamp = displayTime,
+                                            timestamp = effectiveTime,
                                             size = file.length(),
                                             isRecent24h = isRecent,
                                             genuinelyFresh = genuinelyFresh,
@@ -755,6 +755,14 @@ object WhatsAppStatusManager {
                 } catch (e: Exception) {
                     AppLog.w(TAG, "Error en el respaldo MediaStore de estados: ${e.message}")
                 }
+            }
+
+            // Recorte final: los estados son efímeros por naturaleza. Fuera todo lo que tenga
+            // más de 7 días (los 641 fósiles de una carpeta congelada no aportan nada y ensucian)
+            val antesDelRecorte = list.size
+            list.removeAll { (now - it.timestamp) > (7L * 24 * 60 * 60 * 1000L) }
+            if (antesDelRecorte > list.size) {
+                log("🧹 Recortados por antigüedad (>7 días): ${antesDelRecorte - list.size}")
             }
 
             log("Total estados: ${list.size} · Vigentes: ${list.count { it.isRecent24h }} · Frescos de verdad: ${list.count { it.genuinelyFresh }}")
