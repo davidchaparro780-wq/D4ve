@@ -684,13 +684,13 @@ object WhatsAppStatusManager {
                         MediaStore.MediaColumns.DATA,
                         MediaStore.MediaColumns.DATE_MODIFIED,
                         MediaStore.MediaColumns.SIZE,
-                        MediaStore.MediaColumns.MEDIA_TYPE
+                        "media_type"
                     )
                     val msUri = MediaStore.Files.getContentUri("external")
                     context.contentResolver.query(
                         msUri,
                         msProjection,
-                        "(${MediaStore.MediaColumns.MEDIA_TYPE}=? OR ${MediaStore.MediaColumns.MEDIA_TYPE}=?) AND ${MediaStore.MediaColumns.DATE_MODIFIED} >= ?",
+                        "(${"media_type"}=? OR ${"media_type"}=?) AND ${MediaStore.MediaColumns.DATE_MODIFIED} >= ?",
                         arrayOf("1", "3", cutoffSec),
                         "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
                     )?.use { cursor ->
