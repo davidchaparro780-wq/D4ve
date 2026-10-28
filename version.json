@@ -3,5 +3,5 @@
     "versionName":  "4.9.77",
     "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.77/app-release.apk",
     "changelog":  "🛠️ DaVE Player v4.9.77 (Build 177) - Estados: pasada MediaStore afinada:\r\n• 🔇 La busqueda amplia por MediaStore ahora excluye carpetas de chats y medios que no son estados (WhatsApp Images, Video, Voice Notes, Stickers...) para dar resultados limpios.\r\n• 📋 El diagnostico sigue distinguiendo Vigentes vs Frescos de verdad y avisa si tu WhatsApp usa almacenamiento privado.\r\n• ✅ Incluye todo lo de v4.9.63-76.",
-    "fileSizeMb":  0
+    "fileSizeMb":  5.9
 }
