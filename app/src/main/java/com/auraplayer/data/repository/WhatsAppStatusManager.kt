@@ -33,6 +33,9 @@ data class WhatsAppStatusItem(
     val timestamp: Long,
     val size: Long,
     val isRecent24h: Boolean = (System.currentTimeMillis() - timestamp) in -600_000L..(24L * 60 * 60 * 1000L),
+    // Freshness HONESTA basada en el mtime real del archivo (sin overrides por carpeta activa).
+    // Un archivo en una carpeta congelada puede estar marcado "vigente" pero NO ser genuinamente fresco.
+    val genuinelyFresh: Boolean = false,
     val path: String = file?.absolutePath ?: uri.toString()
 ) {
     fun getRelativeTimeSpan(): String {
@@ -485,6 +488,7 @@ object WhatsAppStatusManager {
                         // En árboles legacy (WhatsApp/Media/.Statuses raíz) puede haber fósiles: filtro estricto.
                         val docIdActive = folderDocId.contains("android/media", ignoreCase = true)
                         val isRecent = docIdActive || ((now - effectiveTime) in -600_000L..(48L * 60 * 60 * 1000L))
+                        val genuinelyFresh = (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
                         list.add(
                             WhatsAppStatusItem(
                                 file = null,
@@ -493,6 +497,7 @@ object WhatsAppStatusManager {
                                 timestamp = effectiveTime,
                                 size = size,
                                 isRecent24h = isRecent,
+                                genuinelyFresh = genuinelyFresh,
                                 path = docUri.toString()
                             )
                         )
@@ -590,6 +595,7 @@ object WhatsAppStatusManager {
                                 val isLegacyFossil = !isActiveScoped && (now - effectiveTime) > (48L * 60 * 60 * 1000L)
                                 if (isLegacyFossil) continue
                                 val isRecent = isActiveScoped || ((now - effectiveTime) in -600_000L..(48L * 60 * 60 * 1000L))
+                                val genuinelyFresh = (now - effectiveTime) in -600_000L..(24L * 60 * 60 * 1000L)
                                 // Nunca mostrar un estado vigente con fecha de hace días: se clamp a ahora
                                 val displayTime = if ((now - effectiveTime) <= (24L * 60 * 60 * 1000L)) effectiveTime else now
 
@@ -609,6 +615,7 @@ object WhatsAppStatusManager {
                                             timestamp = displayTime,
                                             size = file.length(),
                                             isRecent24h = isRecent,
+                                            genuinelyFresh = genuinelyFresh,
                                             path = file.absolutePath
                                         )
                                     )
@@ -674,8 +681,9 @@ object WhatsAppStatusManager {
 
             // 2.5 MOTOR MEDIASTORE: estados frescos de las últimas 24h indexados por el sistema,
             // sin importar en qué ruta los esté escribiendo la versión/mod de WhatsApp del usuario.
-            // Solo se activa si el escaneo de archivos no encontró nada vigente.
-            if (list.none { it.isRecent24h } && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Se activa cuando NINGÚN archivo tiene mtime genuinamente fresco (carpeta congelada).
+            if (list.none { it.genuinelyFresh } && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                log("⚠️ Ninguna carpeta contiene archivos modificados en las últimas 24h (carpeta congelada). Activando respaldo MediaStore...")
                 try {
                     val cutoffSec = ((now - (24L * 60 * 60 * 1000L)) / 1000L).toString()
                     val msProjection = arrayOf(
@@ -701,7 +709,11 @@ object WhatsAppStatusManager {
                         val sizeCol = cursor.getColumnIndex(MediaStore.MediaColumns.SIZE)
                         while (cursor.moveToNext()) {
                             val data = if (dataCol != -1) cursor.getString(dataCol) ?: "" else ""
-                            if (!data.replace('\\', '/').contains("/.statuses/", ignoreCase = true)) continue
+                            val normalizedPath = data.replace('\\', '/')
+                            // Pasada 1: rutas .Statuses (cualquier paquete). Pasada 2: cualquier carpeta de WhatsApp.
+                            val isStatusesPath = normalizedPath.contains("/.statuses/", ignoreCase = true)
+                            val isWhatsappPath = normalizedPath.contains("/whatsapp", ignoreCase = true)
+                            if (!isStatusesPath && !isWhatsappPath) continue
                             val id = if (idCol != -1) cursor.getLong(idCol) else continue
                             val name = if (nameCol != -1) cursor.getString(nameCol) ?: "" else ""
                             val size = if (sizeCol != -1) cursor.getLong(sizeCol) else 0L
@@ -715,7 +727,7 @@ object WhatsAppStatusManager {
                             }
                             val signature = "${name}_$size"
                             if (seenSignatures.add(signature)) {
-                                log("MediaStore · vigente hallado en: ${data.takeLast(60)}")
+                                log("MediaStore · vigente (${if (isStatusesPath) ".statuses" else "whatsapp"}) hallado en: ${data.takeLast(60)}")
                                 list.add(
                                     WhatsAppStatusItem(
                                         file = null,
@@ -724,21 +736,22 @@ object WhatsAppStatusManager {
                                         timestamp = modSec * 1000L,
                                         size = size,
                                         isRecent24h = true,
+                                        genuinelyFresh = true,
                                         path = data
                                     )
                                 )
                             }
                         }
                     }
-                    if (list.none { it.isRecent24h }) {
-                        log("⚠️ Ninguna ruta contiene estados de las últimas 24h. Abre WhatsApp > Estados (míralos) y vuelve a intentarlo: tu versión de WhatsApp puede estar guardándolos en almacenamiento privado.")
+                    if (list.none { it.genuinelyFresh }) {
+                        log("⚠️ CONFIRMADO: ninguna ruta accesible contiene estados de las últimas 24h. Tu versión de WhatsApp está guardando los estados en almacenamiento privado (ningún visor de terceros puede leerlos). Opción: abre WhatsApp > Estados, mantén pulsado un estado > Compartir > DaVE Player.")
                     }
                 } catch (e: Exception) {
                     AppLog.w(TAG, "Error en el respaldo MediaStore de estados: ${e.message}")
                 }
             }
 
-            log("Total estados: ${list.size} · Vigentes: ${list.count { it.isRecent24h }} · Viejos: ${list.count { !it.isRecent24h }}")
+            log("Total estados: ${list.size} · Vigentes: ${list.count { it.isRecent24h }} · Frescos de verdad: ${list.count { it.genuinelyFresh }}")
 
             // Ordenar: primero los estados recientes, y dentro de cada grupo por el más reciente
             list.sortWith(
