@@ -713,7 +713,13 @@ object WhatsAppStatusManager {
                             // Pasada 1: rutas .Statuses (cualquier paquete). Pasada 2: cualquier carpeta de WhatsApp.
                             val isStatusesPath = normalizedPath.contains("/.statuses/", ignoreCase = true)
                             val isWhatsappPath = normalizedPath.contains("/whatsapp", ignoreCase = true)
-                            if (!isStatusesPath && !isWhatsappPath) continue
+                            // Excluir carpetas de chats/medios conocidas: no son estados y solo añaden ruido
+                            val isNoiseFolder = listOf(
+                                "/whatsapp images", "/whatsapp video", "/whatsapp audio",
+                                "/whatsapp voice notes", "/voice notes", "/backups", "/stickers",
+                                "/wallpaper", "/databases", "/whatsapp profile photos", "/media viewer"
+                            ).any { normalizedPath.lowercase().contains(it) }
+                            if (!isStatusesPath && (!isWhatsappPath || isNoiseFolder)) continue
                             val id = if (idCol != -1) cursor.getLong(idCol) else continue
                             val name = if (nameCol != -1) cursor.getString(nameCol) ?: "" else ""
                             val size = if (sizeCol != -1) cursor.getLong(sizeCol) else 0L
