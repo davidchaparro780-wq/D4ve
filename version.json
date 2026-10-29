@@ -1,7 +1,7 @@
 {
-    "versionCode":  179,
-    "versionName":  "4.9.79",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.79/app-release.apk",
-    "changelog":  "🚀 DaVE Player v4.9.79 (Build 179) - Suite de Video y Descarga Masiva:\n• 📥 Descarga en Lote de Estados: Nuevo boton \u0027Guardar todos\u0027 para descargar todos los estados recientes de un solo toque con indicador de progreso.\n• 🛡️ Nombres a prueba de colisiones: Extraccion limpia de nombres originales con sufijo seguro para guardados ultra-rapidos.\n• 🔍 Buscador y Carpetas en Videos: Busqueda en tiempo real por nombre y filtro por carpetas (Camera, WhatsApp, Downloads...) con contadores.\n• 📺 PiP Inteligente y Auto-PiP: Relacion de aspecto dinamica para videos verticales y horizontales, mas Auto-PiP nativo en Android 12+.\n• ✨ Nombres de video limpios: Titulos amigables automaticos para videos con nombres hash o descargados.\n• ⚡ CI acelerado: Cache de dependencias Gradle y tests automatizados en releases.",
-    "fileSizeMb":  6
+    "versionCode":  180,
+    "versionName":  "4.9.80",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.80/app-release.apk",
+    "changelog":  "v4.9.80: StandBy OLED Pixel Shifter, Presets de Auriculares y Video PiP\n\n- StandBy OLED (AOD): Proteccion anti-quemado Pixel Shifter, monitor de bateria en tiempo real, rotacion GPU de vinilo, barra ambiental y gestos tactiles.\n- Ecualizador Hi-Fi: Memoria persistente de preset y perfil + 5 perfiles para auriculares (AirPods Pro, Sony 1000XM, Galaxy Buds, JBL Bass Tune, IEM KZ) y boton de reinicio Flat.\n- Reproductor de Video: Busqueda rapida en tiempo real, chips de carpetas dinamicas y Picture-in-Picture (PiP) adaptativo para videos verticales y horizontales.\n- Suite de Tests: Nuevos tests unitarios para StandByLogic, VideoTitle y EqualizerPresets.",
+    "fileSizeMb":  0
 }
