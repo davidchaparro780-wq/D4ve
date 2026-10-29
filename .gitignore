@@ -33,3 +33,5 @@ Thumbs.db
 
 # Musica local del reproductor desktop - nunca al repo publico (peso y derechos)
 desktop/src/music/
+firma_*.txt
+.tmp_*

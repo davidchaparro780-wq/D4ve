@@ -77,6 +77,9 @@ fun WhatsAppStatusDialog(
     // 0: Recientes 24h, 1: Todos, 2: Videos, 3: Fotos
     var selectedFilter by remember { mutableIntStateOf(0) }
     var savedSet by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var isBatchSaving by remember { mutableStateOf(false) }
+    var batchProgress by remember { mutableIntStateOf(0) }
+    var batchTotal by remember { mutableIntStateOf(0) }
     var previewItem by remember { mutableStateOf<WhatsAppStatusItem?>(null) }
     var debugReport by remember { mutableStateOf("") }
     var showDebugReport by remember { mutableStateOf(false) }
@@ -466,6 +469,116 @@ fun WhatsAppStatusDialog(
                     )
                 }
 
+                // Barra de resumen y Guardar Todos
+                if (!isLoading && filteredList.isNotEmpty()) {
+                    val unsavedInFilter = remember(filteredList, savedSet) {
+                        filteredList.filter { !savedSet.contains(it.path) }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${filteredList.size} estados disponibles",
+                            color = Color(0xFF94A3B8),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        if (unsavedInFilter.isNotEmpty()) {
+                            Button(
+                                onClick = {
+                                    if (isBatchSaving) return@Button
+                                    isBatchSaving = true
+                                    batchTotal = unsavedInFilter.size
+                                    batchProgress = 0
+                                    scope.launch {
+                                        var successCount = 0
+                                        val newlySaved = mutableSetOf<String>()
+                                        unsavedInFilter.forEachIndexed { index, item ->
+                                            batchProgress = index + 1
+                                            val res = WhatsAppStatusManager.saveStatusToGallery(context, item)
+                                            if (res.isSuccess) {
+                                                successCount++
+                                                newlySaved.add(item.path)
+                                            }
+                                        }
+                                        savedSet = savedSet + newlySaved
+                                        isBatchSaving = false
+                                        if (successCount > 0) {
+                                            Toast.makeText(context, "✅ $successCount estados guardados en tu Galería", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "No se pudieron guardar los estados", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                },
+                                enabled = !isBatchSaving,
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF25D366),
+                                    contentColor = Color.Black,
+                                    disabledContainerColor = Color(0xFF1E293B),
+                                    disabledContentColor = Color(0xFF94A3B8)
+                                ),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                modifier = Modifier.height(30.dp)
+                            ) {
+                                if (isBatchSaving) {
+                                    CircularProgressIndicator(
+                                        color = Color(0xFF25D366),
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "$batchProgress/$batchTotal",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Download,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Guardar todos (${unsavedInFilter.size})",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF25D366).copy(alpha = 0.12f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF25D366),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Todos guardados",
+                                    color = Color(0xFF25D366),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (isLoading) {
@@ -832,6 +945,10 @@ fun WhatsAppStatusDialog(
 
                     Button(
                         onClick = {
+                            if (isItemSaved) {
+                                Toast.makeText(context, "Ya está guardado en tu Galería", Toast.LENGTH_SHORT).show()
+                                return@Button
+                            }
                             scope.launch {
                                 val res = WhatsAppStatusManager.saveStatusToGallery(context, pItem)
                                 if (res.isSuccess) {

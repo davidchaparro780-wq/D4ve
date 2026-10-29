@@ -789,7 +789,16 @@ object WhatsAppStatusManager {
         try {
             val extension = if (item.isVideo) ".mp4" else ".jpg"
             val mimeType = if (item.isVideo) "video/mp4" else "image/jpeg"
-            val fileName = "Status_${System.currentTimeMillis()}$extension"
+            val originalName = item.file?.name ?: try {
+                DocumentsContract.getDocumentId(item.uri)?.substringAfterLast('/')?.substringAfterLast(':')
+            } catch (_: Exception) { null }
+            val cleanOriginal = originalName?.substringBeforeLast('.')?.takeIf { it.isNotBlank() }
+            val uniqueSuffix = (System.nanoTime() % 1000).toString().padStart(3, '0')
+            val fileName = if (cleanOriginal != null) {
+                "Status_${cleanOriginal}_$uniqueSuffix$extension"
+            } else {
+                "Status_${System.currentTimeMillis()}_$uniqueSuffix$extension"
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val collectionUri = if (item.isVideo) {
