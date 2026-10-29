@@ -53,7 +53,23 @@ class EqualizerManager private constructor() {
         private set
 
     // 10 virtual band levels in dB (-12 dB to +12 dB)
-    val bandLevels = FloatArray(10) { 0f }
+val bandLevels = FloatArray(10) { 0f }
+
+    var currentPresetIndex: Int = 0
+        private set
+
+    var currentProfileIndex: Int = -1
+        private set
+
+    fun setProfileIndex(index: Int) {
+        currentProfileIndex = index
+        persistSettings()
+    }
+
+    fun setCustomPreset() {
+        currentPresetIndex = -1
+        persistSettings()
+    }
 
     fun initPrefs(context: Context) {
         if (prefs == null) {
@@ -71,8 +87,11 @@ class EqualizerManager private constructor() {
             virtualizerStrength = p.getInt("virtualizer_strength", 300).toShort()
             loudnessGain = p.getInt("loudness_gain", 0)
             for (i in 0 until 10) {
-                bandLevels[i] = p.getFloat("band_$i", 0f)
+    bandLevels[i] = p.getFloat("band_$i", 0f)
             }
+            currentPresetIndex = p.getInt("current_preset", 0)
+            currentProfileIndex = p.getInt("current_profile", -1)
+            
         }
     }
 
@@ -85,8 +104,11 @@ class EqualizerManager private constructor() {
             putInt("virtualizer_strength", virtualizerStrength.toInt())
             putInt("loudness_gain", loudnessGain)
             for (i in 0 until 10) {
-                putFloat("band_$i", bandLevels[i])
+    putFloat("band_$i", bandLevels[i])
             }
+            putInt("current_preset", currentPresetIndex)
+            putInt("current_profile", currentProfileIndex)
+            
             apply()
         }
     }
@@ -244,6 +266,7 @@ class EqualizerManager private constructor() {
     fun setBandLevel(bandIndex: Int, levelDb: Float) {
         if (bandIndex in 0 until 10) {
             bandLevels[bandIndex] = levelDb.coerceIn(-12f, 12f)
+            currentPresetIndex = -1
             applyBandsToHardware()
             persistSettings()
         }
@@ -416,6 +439,7 @@ class EqualizerManager private constructor() {
                 loudnessGain = 50
             }
         }
+        currentPresetIndex = presetIndex
         applyBandsToHardware()
         setBassBoostStrength(bassStrength)
         setVirtualizerStrength(virtualizerStrength)

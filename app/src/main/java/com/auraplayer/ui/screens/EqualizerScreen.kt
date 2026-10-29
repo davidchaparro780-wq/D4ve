@@ -78,11 +78,12 @@ fun EqualizerScreen(
     val view = androidx.compose.ui.platform.LocalView.current
     val eqManager = remember { EqualizerManager.instance }
     var isEqEnabled by remember { mutableStateOf(eqManager.isEnabled) }
-    var selectedPreset by remember { mutableIntStateOf(0) }
-    var selectedProfile by remember { mutableIntStateOf(0) }
+    var selectedPreset by remember { mutableIntStateOf(eqManager.currentPresetIndex) }
+    var selectedProfile by remember { mutableIntStateOf(eqManager.currentProfileIndex) }
     val presets = listOf(
         "Aura Flat", "Cyber Bass", "Vocal Glow", "Neon Pop",
-        "Rock Velvet", "Lo-Fi Lounge", "Electronic", "Audiófilo Hi-Fi"
+        "Rock Velvet", "Lo-Fi Lounge", "Electronic", "Audiófilo Hi-Fi",
+        "AirPods Pro", "Sony 1000XM", "Galaxy Buds", "JBL Bass Tune", "IEM Monitor KZ"
     )
 
     val deviceProfiles = listOf(
@@ -260,6 +261,8 @@ fun EqualizerScreen(
                         selected = selectedProfile == index,
                         onClick = {
                             selectedProfile = index
+                            eqManager.setProfileIndex(index)
+                            selectedPreset = -1
                             when (index) {
                                 0 -> { // In-Ear
                                     eqManager.applyPreset(3) // Neon Pop
@@ -306,20 +309,62 @@ fun EqualizerScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Presets Chips
-            Text(
-                text = "PRESETS",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                letterSpacing = 1.5.sp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "PRESETS",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.5.sp
+                )
+                if (selectedPreset == -1 || bandLevels.any { it != 0f }) {
+                    Text(
+                        text = "Restablecer Flat",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .clickable {
+                                com.auraplayer.audio.AuraHaptic.click(view)
+                                eqManager.applyPreset(0)
+                                selectedPreset = 0
+                                selectedProfile = -1
+                                eqManager.setProfileIndex(-1)
+                                for (i in 0 until 10) bandLevels[i] = 0f
+                                bassBoost = 0f
+                                virtualizer = 0f
+                                loudness = 0f
+                            }
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(10.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (selectedPreset == -1) {
+                    item {
+                        FilterChip(
+                            selected = true,
+                            onClick = {},
+                            label = { Text("🛠️ Personalizado") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.tertiary,
+                                selectedLabelColor = Color.White
+                            )
+                        )
+                    }
+                }
                 itemsIndexed(presets) { index, preset ->
                     FilterChip(
                         selected = selectedPreset == index,
                         onClick = {
                             selectedPreset = index
+                            selectedProfile = -1
+                            eqManager.setProfileIndex(-1)
                             eqManager.applyPreset(index)
                             for (i in 0 until 10) {
                                 bandLevels[i] = eqManager.bandLevels[i]
@@ -529,6 +574,8 @@ fun EqualizerScreen(
                                 onValueChange = { newVal ->
                                     bandLevels[index] = newVal
                                     eqManager.setBandLevel(index, newVal)
+                                    selectedPreset = -1
+                                    selectedProfile = -1
                                 },
                                 valueRange = -12f..12f,
                                 enabled = isEqEnabled,
