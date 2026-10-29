@@ -3085,6 +3085,12 @@ fun AuraApp(
         StandByScreen(
             currentMedia = currentMedia,
             isPlaying = isPlaying,
+            currentPositionMs = positionState.value,
+            durationMs = if (durationMs > 0L) durationMs else (currentMedia?.duration ?: 0L),
+            onSeekTo = { targetMs ->
+                controller?.seekTo(targetMs)
+                positionState.value = targetMs
+            },
             onPlayPause = {
                 controller?.let {
                     if (it.isPlaying) crossfadeManager.smoothPause(it)

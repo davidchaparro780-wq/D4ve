@@ -1,5 +1,8 @@
 package com.auraplayer.ui.screens
 
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -10,6 +13,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -42,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,18 +56,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.auraplayer.audio.AuraHaptic
 import com.auraplayer.data.model.MediaModel
+import com.auraplayer.data.model.formatDurationMs
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -69,12 +82,16 @@ import java.util.Locale
 /**
  * Modo StandBy OLED Always-On Display (Estilo Reloj de Noche & AOD Inteligente)
  * Transforma DaVE Player en un dock de mesa de noche con reloj cyberpunk,
- * animación de vinilo giratorio y controles de reproducción táctiles discretos.
+ * protección anti-quemado OLED (Pixel Shifter), rotación acelerada por GPU,
+ * indicador de batería, barra de progreso ambiental y gestos táctiles.
  */
 @Composable
 fun StandByScreen(
     currentMedia: MediaModel?,
     isPlaying: Boolean,
+    currentPositionMs: Long = 0L,
+    durationMs: Long = 0L,
+    onSeekTo: (Long) -> Unit = {},
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
@@ -84,9 +101,44 @@ fun StandByScreen(
         onClose()
     }
 
+    val context = LocalContext.current
+    val view = LocalView.current
+
     var currentTimeText by remember { mutableStateOf("") }
     var currentDateText by remember { mutableStateOf("") }
+    var batteryText by remember { mutableStateOf("") }
     var isSuperDimMode by remember { mutableStateOf(false) }
+
+    // Anti Burn-In OLED Pixel Shifter (desplaza periódicamente el contenido ±5px)
+    var burnInOffsetX by remember { mutableFloatStateOf(0f) }
+    var burnInOffsetY by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60000L)
+            burnInOffsetX = ((-5..5).random()).toFloat()
+            burnInOffsetY = ((-5..5).random()).toFloat()
+        }
+    }
+
+    // Monitor de batería y carga en tiempo real
+    LaunchedEffect(Unit) {
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        while (true) {
+            try {
+                val batteryIntent = context.registerReceiver(null, filter)
+                val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+                val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+                val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+                if (level >= 0 && scale > 0) {
+                    val pct = (level * 100) / scale
+                    batteryText = if (isCharging) "⚡ $pct%" else "🔋 $pct%"
+                }
+            } catch (_: Exception) {}
+            delay(15000L)
+        }
+    }
 
     // Actualizador de reloj en tiempo real
     LaunchedEffect(Unit) {
@@ -115,8 +167,20 @@ fun StandByScreen(
     val contentAlpha = if (isSuperDimMode) 0.35f else 1.0f
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.Black // Negro puro OLED para ahorrar 100% batería
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { _, dragAmount ->
+                    if (dragAmount > 60) {
+                        AuraHaptic.heavy(view)
+                        onPrevious()
+                    } else if (dragAmount < -60) {
+                        AuraHaptic.heavy(view)
+                        onNext()
+                    }
+                }
+            },
+        color = Color.Black // Negro puro OLED para 0% consumo en píxeles apagados
     ) {
         Column(
             modifier = Modifier
@@ -128,14 +192,17 @@ fun StandByScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header: Botón de Dim Nocturno y Salir
+            // Header: Botón de Dim Nocturno, Indicador de Batería y Salir
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { isSuperDimMode = !isSuperDimMode },
+                    onClick = {
+                        AuraHaptic.click(view)
+                        isSuperDimMode = !isSuperDimMode
+                    },
                     modifier = Modifier
                         .size(44.dp)
                         .background(Color(0xFF18181B), CircleShape)
@@ -148,13 +215,32 @@ fun StandByScreen(
                     )
                 }
 
-                Text(
-                    text = "STANDBY OLED",
-                    style = MaterialTheme.typography.labelSmall,
-                    letterSpacing = 2.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF64748B)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "STANDBY OLED",
+                        style = MaterialTheme.typography.labelSmall,
+                        letterSpacing = 2.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF64748B)
+                    )
+                    if (batteryText.isNotBlank()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF18181B))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = batteryText,
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = if (batteryText.startsWith("⚡")) Color(0xFF38BDF8) else Color(0xFF94A3B8)
+                            )
+                        }
+                    }
+                }
 
                 IconButton(
                     onClick = onClose,
@@ -171,23 +257,26 @@ fun StandByScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Reloj Cyberpunk Central Gigante
+            // Contenedor Central con Protección Anti Burn-In OLED
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset { IntOffset(burnInOffsetX.dp.roundToPx(), burnInOffsetY.dp.roundToPx()) }
             ) {
+                // Reloj Cyberpunk Central Gigante
                 Text(
                     text = currentTimeText.ifEmpty { "00:00:00" },
-                    fontSize = 62.sp,
+                    fontSize = 64.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 2.sp,
                     color = Color.White
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = currentDateText.ifEmpty { "Modo Noche DaVE" },
@@ -196,21 +285,26 @@ fun StandByScreen(
                     color = Color(0xFFA855F7),
                     textAlign = TextAlign.Center
                 )
-            }
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(22.dp))
 
-            // Información de Canción & Vinilo Neón
-            if (currentMedia != null) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Vinilo con rotación
+                // Información de Canción & Vinilo Neón
+                if (currentMedia != null) {
+                    // Vinilo con rotación optimizada por GPU (graphicsLayer)
                     Box(
                         modifier = Modifier
                             .size(160.dp)
-                            .rotate(if (isPlaying) rotationAngle else 0f)
+                            .graphicsLayer {
+                                rotationZ = if (isPlaying) rotationAngle else 0f
+                            }
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onDoubleTap = {
+                                        AuraHaptic.click(view)
+                                        onPlayPause()
+                                    }
+                                )
+                            }
                             .clip(CircleShape)
                             .background(
                                 Brush.radialGradient(
@@ -225,7 +319,7 @@ fun StandByScreen(
                                 model = currentMedia.artworkUri,
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(90.dp)
+                                    .size(92.dp)
                                     .clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
@@ -248,7 +342,7 @@ fun StandByScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                     Text(
                         text = currentMedia.title,
@@ -261,7 +355,7 @@ fun StandByScreen(
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
 
                     Text(
                         text = currentMedia.artist,
@@ -271,76 +365,145 @@ fun StandByScreen(
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
+
+                    // Barra de progreso ambiental y tiempos
+                    if (durationMs > 0L) {
+                        val progress = (currentPositionMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .padding(top = 14.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color.White.copy(alpha = 0.15f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(progress)
+                                        .height(3.dp)
+                                        .background(
+                                            Brush.horizontalGradient(
+                                                listOf(Color(0xFF8B5CF6), Color(0xFF38BDF8))
+                                            )
+                                        )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = formatDurationMs(currentPositionMs),
+                                    fontSize = 10.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = Color(0xFF64748B)
+                                )
+                                Text(
+                                    text = formatDurationMs(durationMs),
+                                    fontSize = 10.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "Toca para reproducir música o descansa",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF64748B)
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Controles Táctiles de Reproducción
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = onPrevious,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(Color(0xFF1E293B).copy(alpha = 0.8f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.SkipPrevious,
-                            contentDescription = "Anterior",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(28.dp))
-
-                    IconButton(
-                        onClick = onPlayPause,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(Color(0xFF8B5CF6), Color(0xFF6366F1))
-                                ),
-                                CircleShape
-                            )
-                    ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pausa" else "Reproducir",
-                            tint = Color.White,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(28.dp))
-
-                    IconButton(
-                        onClick = onNext,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(Color(0xFF1E293B).copy(alpha = 0.8f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.SkipNext,
-                            contentDescription = "Siguiente",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                }
-            } else {
-                Text(
-                    text = "Toca para reproducir música o descansa",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF64748B)
-                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Controles Táctiles de Reproducción & Pistas de Gestos
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (currentMedia != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = {
+                                AuraHaptic.click(view)
+                                onPrevious()
+                            },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color(0xFF1E293B).copy(alpha = 0.8f), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SkipPrevious,
+                                contentDescription = "Anterior",
+                                tint = Color.White,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(28.dp))
+
+                        IconButton(
+                            onClick = {
+                                AuraHaptic.click(view)
+                                onPlayPause()
+                            },
+                            modifier = Modifier
+                                .size(72.dp)
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(Color(0xFF8B5CF6), Color(0xFF6366F1))
+                                    ),
+                                    CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pausa" else "Reproducir",
+                                tint = Color.White,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(28.dp))
+
+                        IconButton(
+                            onClick = {
+                                AuraHaptic.click(view)
+                                onNext()
+                            },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color(0xFF1E293B).copy(alpha = 0.8f), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SkipNext,
+                                contentDescription = "Siguiente",
+                                tint = Color.White,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+
+                Text(
+                    text = "Desliza para cambiar • Doble toque para pausar • Toca X para salir",
+                    color = Color(0xFF475569),
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
