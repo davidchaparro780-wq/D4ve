@@ -48,6 +48,12 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -235,6 +241,29 @@ fun VideoScreen(
     var showInstagramDownloader by remember { mutableStateOf(false) }
     var showFacebookDownloader by remember { mutableStateOf(false) }
     var showTikTokDownloader by remember { mutableStateOf(false) }
+    var videoSearchQuery by remember { mutableStateOf("") }
+    var selectedFolder by remember { mutableStateOf<String?>(null) }
+
+    val availableFolders = remember(videos) {
+        val set = linkedSetOf<String>()
+        videos.forEach { v ->
+            val f = v.folderName.trim()
+            if (f.isNotBlank() && !f.equals("0", ignoreCase = true)) {
+                set.add(f)
+            }
+        }
+        set.toList().sorted()
+    }
+
+    val filteredVideos = remember(videos, videoSearchQuery, selectedFolder) {
+        videos.filter { video ->
+            val matchesFolder = selectedFolder == null || video.folderName.equals(selectedFolder, ignoreCase = true)
+            val matchesQuery = videoSearchQuery.isBlank() ||
+                video.title.contains(videoSearchQuery, ignoreCase = true) ||
+                video.folderName.contains(videoSearchQuery, ignoreCase = true)
+            matchesFolder && matchesQuery
+        }
+    }
 
     Column(
         modifier = modifier
@@ -409,6 +438,91 @@ fun VideoScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF60A5FA)
                     )
+                }
+            }
+        }
+
+        // Buscador y Filtros por Carpeta
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+        ) {
+            OutlinedTextField(
+                value = videoSearchQuery,
+                onValueChange = { videoSearchQuery = it },
+                placeholder = {
+                    Text("Buscar video o carpeta...", color = Color(0xFF64748B), fontSize = 13.sp)
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Buscar",
+                        tint = Color(0xFF94A3B8),
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                trailingIcon = {
+                    if (videoSearchQuery.isNotEmpty()) {
+                        IconButton(onClick = { videoSearchQuery = "" }, modifier = Modifier.size(28.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Limpiar",
+                                tint = Color(0xFF94A3B8),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF1E293B).copy(alpha = 0.5f),
+                    unfocusedContainerColor = Color(0xFF0F172A).copy(alpha = 0.4f),
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.12f),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            )
+
+            if (availableFolders.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterChip(
+                        selected = selectedFolder == null,
+                        onClick = { selectedFolder = null },
+                        label = { Text("📁 Todas (${videos.size})", fontSize = 11.sp) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                    availableFolders.forEach { folder ->
+                        val count = remember(videos, folder) {
+                            videos.count { it.folderName.equals(folder, ignoreCase = true) }
+                        }
+                        FilterChip(
+                            selected = selectedFolder.equals(folder, ignoreCase = true),
+                            onClick = {
+                                selectedFolder = if (selectedFolder.equals(folder, ignoreCase = true)) null else folder
+                            },
+                            label = { Text("📂 $folder ($count)", fontSize = 11.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                                selectedLabelColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
                 }
             }
         }

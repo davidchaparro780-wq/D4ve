@@ -190,6 +190,49 @@ fun VideoPlayerScreen(
         }
     }
 
+    // Auto PiP en Android 12+ (API 31+) al salir al inicio mientras se reproduce
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    ) {
+        DisposableEffect(exoPlayer, activity) {
+            val act = activity
+            val listener = object : androidx.media3.common.Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (act != null) {
+                        try {
+                            val params = getPipParams(exoPlayer, autoEnter = isPlaying)
+                            if (params != null) act.setPictureInPictureParams(params)
+                        } catch (_: Exception) {}
+                    }
+                }
+                override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
+                    if (act != null) {
+                        try {
+                            val params = getPipParams(exoPlayer, autoEnter = exoPlayer.isPlaying)
+                            if (params != null) act.setPictureInPictureParams(params)
+                        } catch (_: Exception) {}
+                    }
+                }
+            }
+            exoPlayer.addListener(listener)
+            if (act != null) {
+                try {
+                    val params = getPipParams(exoPlayer, autoEnter = exoPlayer.isPlaying)
+                    if (params != null) act.setPictureInPictureParams(params)
+                } catch (_: Exception) {}
+            }
+            onDispose {
+                exoPlayer.removeListener(listener)
+                if (act != null) {
+                    try {
+                        val disabledParams = PictureInPictureParams.Builder().setAutoEnterEnabled(false).build()
+                        act.setPictureInPictureParams(disabledParams)
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+    }
+
     // Auto-save playback position periodically
     LaunchedEffect(exoPlayer) {
         while (true) {
@@ -506,10 +549,13 @@ fun VideoPlayerScreen(
                         IconButton(
                             onClick = {
                                 val act = context.findActivity()
-                                val params = PictureInPictureParams.Builder()
-                                    .setAspectRatio(Rational(16, 9))
-                                    .build()
-                                act?.enterPictureInPictureMode(params)
+                                val params = getPipParams(exoPlayer, autoEnter = false)
+                                if (params != null) {
+                                    act?.enterPictureInPictureMode(params)
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    act?.enterPictureInPictureMode()
+                                }
                             },
                             modifier = Modifier.size(34.dp)
                         ) {
@@ -670,9 +716,31 @@ private fun formatMs(ms: Long): String {
 }
 
 /**
+ * Genera parámetros PiP optimizados con relación de aspecto dinámica según la resolución real del video.
+ */
+@OptIn(UnstableApi::class)
+fun getPipParams(player: ExoPlayer, autoEnter: Boolean = false): PictureInPictureParams? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+    val videoWidth = player.videoSize.width
+    val videoHeight = player.videoSize.height
+    val rational = if (videoWidth > 0 && videoHeight > 0) {
+        val r = videoWidth.toFloat() / videoHeight.toFloat()
+        if (r in 0.42f..2.38f) Rational(videoWidth, videoHeight) else Rational(16, 9)
+    } else {
+        Rational(16, 9)
+    }
+    val builder = PictureInPictureParams.Builder()
+        .setAspectRatio(rational)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        builder.setAutoEnterEnabled(autoEnter)
+    }
+    return builder.build()
+}
+
+/**
  * Replaces ugly raw hash filenames (like 0e46a9d0ce7ac6fe2189ea9a11b9a...) with clean, user-friendly titles.
  */
-private fun cleanVideoTitle(title: String, folderName: String): String {
+fun cleanVideoTitle(title: String, folderName: String): String {
     val clean = title.trim()
         .removeSuffix(".mp4").removeSuffix(".MP4")
         .removeSuffix(".mkv").removeSuffix(".MKV")
