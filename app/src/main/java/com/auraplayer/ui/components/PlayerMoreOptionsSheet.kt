@@ -17,6 +17,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Radar
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.WaterDrop
@@ -62,6 +65,10 @@ fun PlayerMoreOptionsSheet(
     onOpenPixelArcade: () -> Unit = {},
     onOpenSteampunk: () -> Unit = {},
     onOpenAquaZen: () -> Unit = {},
+    onOpenSupercar: () -> Unit = {},
+    onOpenMinidisc: () -> Unit = {},
+    onOpenHoloCockpit: () -> Unit = {},
+    onOpenSanctuary: () -> Unit = {},
     onToggleShake: () -> Unit,
     onPocketLock: () -> Unit,
     onDeleteSong: () -> Unit,
@@ -244,6 +251,66 @@ fun PlayerMoreOptionsSheet(
                         AuraHaptic.heavy(view)
                         onDismiss()
                         onOpenAquaZen()
+                    }
+                )
+
+                OptionDivider()
+
+                // 10. Supercar Cockpit GT
+                PlayerToolItem(
+                    icon = Icons.Default.Speed,
+                    iconTint = Color(0xFFEF4444),
+                    title = "Modo Supercar Cockpit",
+                    subtitle = "Tacómetro 9000 RPM, marcha digital y levas de cambio F1",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenSupercar()
+                    }
+                )
+
+                OptionDivider()
+
+                // 11. Minidisc Sony 2000s
+                PlayerToolItem(
+                    icon = Icons.Default.Album,
+                    iconTint = Color(0xFF60A5FA),
+                    title = "Modo Minidisc Hi-MD",
+                    subtitle = "Cartucho óptico zafiro, lectura láser UV y marquesina LCD",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenMinidisc()
+                    }
+                )
+
+                OptionDivider()
+
+                // 12. Aura Holo-Cockpit 2077
+                PlayerToolItem(
+                    icon = Icons.Default.Radar,
+                    iconTint = Color(0xFF00F0FF),
+                    title = "Aura Holo-Cockpit 2077",
+                    subtitle = "Cabina espacial con anillos giroscópicos y motor Warp",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenHoloCockpit()
+                    }
+                )
+
+                OptionDivider()
+
+                // 13. Santuario Nocturno
+                PlayerToolItem(
+                    icon = Icons.Default.Whatshot,
+                    iconTint = Color(0xFFF59E0B),
+                    title = "Santuario Nocturno",
+                    subtitle = "Vela viva procedural y penumbra para relajación profunda",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenSanctuary()
                     }
                 )
 

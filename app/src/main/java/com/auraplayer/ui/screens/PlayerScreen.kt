@@ -240,6 +240,10 @@ import com.auraplayer.data.model.MediaModel
 import com.auraplayer.data.model.RepeatMode
 import com.auraplayer.data.repository.SongLyrics
 import com.auraplayer.ui.components.AquaZenDialog
+import com.auraplayer.ui.components.AuraSanctuaryDialog
+import com.auraplayer.ui.components.HoloCockpitDialog
+import com.auraplayer.ui.components.MinidiscRetroDialog
+import com.auraplayer.ui.components.SupercarCockpitDialog
 import com.auraplayer.ui.components.AuraGalaxyDialog
 import com.auraplayer.ui.components.PixelArcadeDialog
 import com.auraplayer.ui.components.SteampunkPhonographDialog
@@ -347,6 +351,10 @@ fun PlayerScreen(
     var showPixelArcadeDialog by remember { mutableStateOf(false) }
     var showSteampunkDialog by remember { mutableStateOf(false) }
     var showAquaZenDialog by remember { mutableStateOf(false) }
+    var showSupercarDialog by remember { mutableStateOf(false) }
+    var showMinidiscDialog by remember { mutableStateOf(false) }
+    var showHoloCockpitDialog by remember { mutableStateOf(false) }
+    var showSanctuaryDialog by remember { mutableStateOf(false) }
     var showClubPartyDialog by remember { mutableStateOf(false) }
     var showCarDriveModeDialog by remember { mutableStateOf(false) }
     var showSongHunterDialog by remember { mutableStateOf(false) }
@@ -4108,6 +4116,10 @@ fun PlayerScreen(
             onOpenPixelArcade = { showPixelArcadeDialog = true },
             onOpenSteampunk = { showSteampunkDialog = true },
             onOpenAquaZen = { showAquaZenDialog = true },
+            onOpenSupercar = { showSupercarDialog = true },
+            onOpenMinidisc = { showMinidiscDialog = true },
+            onOpenHoloCockpit = { showHoloCockpitDialog = true },
+            onOpenSanctuary = { showSanctuaryDialog = true },
             onToggleShake = onToggleShake,
             onPocketLock = { isPocketLocked = true },
             onDeleteSong = { showDeleteConfirmDialog = true },
@@ -4335,6 +4347,58 @@ fun PlayerScreen(
             onNextClick = onNextClick,
             onPreviousClick = onPreviousClick,
             onDismiss = { showAquaZenDialog = false }
+        )
+    }
+
+    // Modo Supercar Cockpit GT Dialog
+    if (showSupercarDialog) {
+        SupercarCockpitDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            currentPositionMs = currentPositionMs,
+            durationMs = effectiveDurationMs,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showSupercarDialog = false }
+        )
+    }
+
+    // Modo Minidisc Hi-MD 2000s Dialog
+    if (showMinidiscDialog) {
+        MinidiscRetroDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            currentPositionMs = currentPositionMs,
+            durationMs = effectiveDurationMs,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showMinidiscDialog = false }
+        )
+    }
+
+    // Aura Holo-Cockpit 2077 Dialog
+    if (showHoloCockpitDialog) {
+        HoloCockpitDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showHoloCockpitDialog = false }
+        )
+    }
+
+    // Santuario Nocturno Vela Viva Dialog
+    if (showSanctuaryDialog) {
+        AuraSanctuaryDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showSanctuaryDialog = false }
         )
     }
 
