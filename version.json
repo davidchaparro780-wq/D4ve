@@ -1,7 +1,7 @@
 {
-    "versionCode":  182,
-    "versionName":  "4.9.82",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.82/app-release.apk",
-    "changelog":  "v4.9.82: Parallax 3D Tactil, Insignia Hi-Fi y Sleep Timer HUD\n\n- Inclinacion Parallax 3D Tactil: La caratula y el vinilo responden al arrastre del dedo inclinándose con perspectiva 3D (±14°) y física de resorte al soltar.\n- Insignia Hi-Fi Audiophile Interactiva: Píldora de cristal con diamante que muestra códec, bitrate y resolución con acceso directo al Inspector Acústico.\n- HUD Flotante del Sleep Timer: Cuenta regresiva Zen visible en la barra superior con opción de añadir +10 minutos al vuelo.\n- Suite de Tests: Nuevos tests unitarios para UiAudiophileTest.",
-    "fileSizeMb":  6
+    "versionCode":  183,
+    "versionName":  "4.9.83",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.83/app-release.apk",
+    "changelog":  "v4.9.83: Micro-Espectrograma FFT en Dock, Rebote Elastico de Pestanas y Acabado Mistico\n\n- Micro-Espectrograma FFT en Dock: Linea reactiva de 32 bandas de frecuencia sobre la barra de navegacion flotante con animacion en tiempo real.\n- Rebote Elastico en Pestanas: Iconos de navegacion con animacion spring-bounce interactiva al conmutar vistas.\n- Acabado Mistico en MiniPlayer y Canciones: Integracion de la paleta Obsidian Amethyst \u0026 Void Abisal en listas y dock mini.\n- Suite de Tests: Nuevas pruebas unitarias para DockSpectrumTest.",
+    "fileSizeMb":  0
 }
