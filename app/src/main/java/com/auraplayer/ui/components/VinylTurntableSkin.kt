@@ -209,22 +209,38 @@ fun VinylTurntableSkin(
                         style = Stroke(width = 1.2f)
                     )
                 }
-                // Reflejo de luz especular en cruz (típico de vinilos giratorios)
+                // Reflejo de luz especular anisotrópico (micro-surcos físicos del vinilo)
                 val cx = size.width / 2f
                 val cy = size.height / 2f
-                val r = size.minDimension * 0.45f
+                val r = size.minDimension * 0.46f
                 drawLine(
-                    color = Color.White.copy(alpha = 0.07f),
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.02f),
+                            Color.White.copy(alpha = 0.11f),
+                            Color.White.copy(alpha = 0.02f)
+                        ),
+                        start = Offset(cx - r, cy - r),
+                        end = Offset(cx + r, cy + r)
+                    ),
                     start = Offset(cx - r, cy - r),
                     end = Offset(cx + r, cy + r),
-                    strokeWidth = 14f,
+                    strokeWidth = 22f,
                     cap = StrokeCap.Round
                 )
                 drawLine(
-                    color = Color.White.copy(alpha = 0.07f),
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.02f),
+                            Color.White.copy(alpha = 0.11f),
+                            Color.White.copy(alpha = 0.02f)
+                        ),
+                        start = Offset(cx - r, cy + r),
+                        end = Offset(cx + r, cy - r)
+                    ),
                     start = Offset(cx - r, cy + r),
                     end = Offset(cx + r, cy - r),
-                    strokeWidth = 14f,
+                    strokeWidth = 22f,
                     cap = StrokeCap.Round
                 )
             }

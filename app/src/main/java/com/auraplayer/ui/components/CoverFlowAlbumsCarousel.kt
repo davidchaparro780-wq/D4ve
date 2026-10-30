@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -193,6 +194,39 @@ fun CoverFlowAlbumsCarousel(
                                 contentDescription = album.name,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        // Jewel case CD glass reflection sheen
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            Color.White.copy(alpha = 0.22f),
+                                            Color.White.copy(alpha = 0.04f),
+                                            Color.Transparent
+                                        ),
+                                        start = Offset(0f, 0f),
+                                        end = Offset(280f, 280f)
+                                    )
+                                )
+                        )
+                        // Floating Badge con contador de pistas
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.Black.copy(alpha = 0.65f))
+                                .border(0.5.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "${album.songs.size} pistas",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
                         }
                     }
