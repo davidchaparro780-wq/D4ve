@@ -239,7 +239,10 @@ import coil.compose.AsyncImage
 import com.auraplayer.data.model.MediaModel
 import com.auraplayer.data.model.RepeatMode
 import com.auraplayer.data.repository.SongLyrics
+import com.auraplayer.ui.components.AquaZenDialog
 import com.auraplayer.ui.components.AuraGalaxyDialog
+import com.auraplayer.ui.components.PixelArcadeDialog
+import com.auraplayer.ui.components.SteampunkPhonographDialog
 import com.auraplayer.ui.components.Boombox80sDialog
 import com.auraplayer.ui.components.LofiCafeDialog
 import com.auraplayer.ui.components.PlayerMoreOptionsSheet
@@ -341,6 +344,9 @@ fun PlayerScreen(
     var showLofiCafeDialog by remember { mutableStateOf(false) }
     var showGalaxyDialog by remember { mutableStateOf(false) }
     var showBoomboxDialog by remember { mutableStateOf(false) }
+    var showPixelArcadeDialog by remember { mutableStateOf(false) }
+    var showSteampunkDialog by remember { mutableStateOf(false) }
+    var showAquaZenDialog by remember { mutableStateOf(false) }
     var showClubPartyDialog by remember { mutableStateOf(false) }
     var showCarDriveModeDialog by remember { mutableStateOf(false) }
     var showSongHunterDialog by remember { mutableStateOf(false) }
@@ -4099,6 +4105,9 @@ fun PlayerScreen(
             onOpenLofiCafe = { showLofiCafeDialog = true },
             onOpenAuraGalaxy = { showGalaxyDialog = true },
             onOpenBoombox80s = { showBoomboxDialog = true },
+            onOpenPixelArcade = { showPixelArcadeDialog = true },
+            onOpenSteampunk = { showSteampunkDialog = true },
+            onOpenAquaZen = { showAquaZenDialog = true },
             onToggleShake = onToggleShake,
             onPocketLock = { isPocketLocked = true },
             onDeleteSong = { showDeleteConfirmDialog = true },
@@ -4290,6 +4299,42 @@ fun PlayerScreen(
             onNextClick = onNextClick,
             onPreviousClick = onPreviousClick,
             onDismiss = { showBoomboxDialog = false }
+        )
+    }
+
+    // Modo Retro Arcade 16-Bit Dialog
+    if (showPixelArcadeDialog) {
+        PixelArcadeDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showPixelArcadeDialog = false }
+        )
+    }
+
+    // Fonógrafo Steampunk 1890 Dialog
+    if (showSteampunkDialog) {
+        SteampunkPhonographDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showSteampunkDialog = false }
+        )
+    }
+
+    // Acuario Zen Bioluminiscente Dialog
+    if (showAquaZenDialog) {
+        AquaZenDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showAquaZenDialog = false }
         )
     }
 

@@ -16,7 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Headphones
@@ -56,6 +59,9 @@ fun PlayerMoreOptionsSheet(
     onOpenLofiCafe: () -> Unit = {},
     onOpenAuraGalaxy: () -> Unit = {},
     onOpenBoombox80s: () -> Unit = {},
+    onOpenPixelArcade: () -> Unit = {},
+    onOpenSteampunk: () -> Unit = {},
+    onOpenAquaZen: () -> Unit = {},
     onToggleShake: () -> Unit,
     onPocketLock: () -> Unit,
     onDeleteSong: () -> Unit,
@@ -193,6 +199,51 @@ fun PlayerMoreOptionsSheet(
                         AuraHaptic.heavy(view)
                         onDismiss()
                         onOpenBoombox80s()
+                    }
+                )
+
+                OptionDivider()
+
+                // 7. Modo Retro Arcade 16-Bit
+                PlayerToolItem(
+                    icon = Icons.Default.SportsEsports,
+                    iconTint = Color(0xFF818CF8),
+                    title = "Modo Retro Arcade 16-Bit",
+                    subtitle = "Consola portátil noventera, personaje pixel art y scanlines CRT",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenPixelArcade()
+                    }
+                )
+
+                OptionDivider()
+
+                // 8. Fonógrafo Steampunk Victoriano
+                PlayerToolItem(
+                    icon = Icons.Default.Album,
+                    iconTint = Color(0xFFE5C158),
+                    title = "Fonógrafo Steampunk 1890",
+                    subtitle = "Trompeta acústica vibratoria, engranajes y manivela táctil de cuerda",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenSteampunk()
+                    }
+                )
+
+                OptionDivider()
+
+                // 9. Acuario Zen Bioluminiscente
+                PlayerToolItem(
+                    icon = Icons.Default.WaterDrop,
+                    iconTint = Color(0xFF00F0FF),
+                    title = "Acuario Zen Bioluminiscente",
+                    subtitle = "Ondas de agua físicas al tacto y medusas fluorescentes",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenAquaZen()
                     }
                 )
 
