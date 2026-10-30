@@ -44,10 +44,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
@@ -2226,42 +2222,6 @@ fun AuraApp(
                         .fillMaxWidth()
                         .padding(start = 14.dp, end = 14.dp, bottom = 10.dp, top = 2.dp)
                 ) {
-                    // Micro-Spectrogram Live FFT Equalizer Line atop Dock
-                    if (isPlaying) {
-                        val dockPrimary = MaterialTheme.colorScheme.primary
-                        val dockSecondary = MaterialTheme.colorScheme.secondary
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(3.5.dp)
-                                .padding(horizontal = 30.dp)
-                                .align(Alignment.TopCenter)
-                        ) {
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                val totalBars = 32
-                                val spacing = size.width / totalBars
-                                val barW = spacing * 0.52f
-                                for (i in 0 until totalBars) {
-                                    val energy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBand(i, totalBars, true)
-                                    val barH = (size.height * energy * 1.6f).coerceIn(1.2.dp.toPx(), size.height)
-                                    val x = i * spacing + (spacing - barW) / 2f
-                                    val y = size.height - barH
-                                    drawRoundRect(
-                                        brush = Brush.verticalGradient(
-                                            listOf(
-                                                if (isMystNav) Color(0xFFB388FF) else dockPrimary,
-                                                if (isMystNav) Color(0xFF00E5FF) else dockSecondary
-                                            )
-                                        ),
-                                        topLeft = Offset(x, y),
-                                        size = Size(barW, barH),
-                                        cornerRadius = CornerRadius(barW / 2f, barW / 2f)
-                                    )
-                                }
-                            }
-                        }
-                    }
-
                     NavigationBar(
                         modifier = Modifier
                             .fillMaxWidth()

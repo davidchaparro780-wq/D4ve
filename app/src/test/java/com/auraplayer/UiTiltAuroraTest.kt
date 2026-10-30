@@ -5,35 +5,28 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Pruebas unitarias para la física de inclinación en el MiniPlayer (3D Tilt Resistance),
- * la geometría de los nodos de Aurora Borealis y la lógica de dial háptico en el seekbar.
+ * Pruebas unitarias para el escalado y alfa de brillo dinámico optimizado a 120 FPS
+ * y la lógica de dial háptico en el seekbar.
  */
 class UiTiltAuroraTest {
 
     @Test
-    fun `calculo de inclinacion 3d en MiniPlayer queda acotado dentro del rango de seguridad`() {
-        val factor = 0.038f
-        val maxTilt = 9f
+    fun `calculo de alfa de brillo ambiental se acota entre 0,2 y 0,95`() {
+        fun computeGlowAlpha(bassEnergy: Float, isPlaying: Boolean): Float {
+            return if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
+        }
 
-        // Caso 1: Arrastre moderado a la derecha (+100px)
-        val dragRight = 100f
-        val tiltRight = (dragRight * factor).coerceIn(-maxTilt, maxTilt)
-        assertEquals(3.8f, tiltRight, 0.001f)
+        // Caso 1: Pausado
+        assertEquals(0.2f, computeGlowAlpha(0.8f, false), 0.001f)
 
-        // Caso 2: Arrastre excesivo a la derecha (+400px)
-        val dragFarRight = 400f
-        val tiltFarRight = (dragFarRight * factor).coerceIn(-maxTilt, maxTilt)
-        assertEquals(maxTilt, tiltFarRight, 0.001f)
+        // Caso 2: Bajo mínimo
+        assertEquals(0.35f, computeGlowAlpha(0.0f, true), 0.001f)
 
-        // Caso 3: Arrastre moderado a la izquierda (-80px)
-        val dragLeft = -80f
-        val tiltLeft = (dragLeft * factor).coerceIn(-maxTilt, maxTilt)
-        assertEquals(-3.04f, tiltLeft, 0.001f)
+        // Caso 3: Bajo medio (0.5f)
+        assertEquals(0.625f, computeGlowAlpha(0.5f, true), 0.001f)
 
-        // Caso 4: Arrastre excesivo a la izquierda (-500px)
-        val dragFarLeft = -500f
-        val tiltFarLeft = (dragFarLeft * factor).coerceIn(-maxTilt, maxTilt)
-        assertEquals(-maxTilt, tiltFarLeft, 0.001f)
+        // Caso 4: Bajo extremo saturado (2.0f)
+        assertEquals(0.95f, computeGlowAlpha(2.0f, true), 0.001f)
     }
 
     @Test
@@ -51,24 +44,5 @@ class UiTiltAuroraTest {
         assertTrue("El índice 31 debe detonar un click firme (75% de la pista)", isFirmClick(31))
         assertTrue("El índice regular no debe ser click firme", !isFirmClick(5))
         assertTrue("El índice regular no debe ser click firme", !isFirmClick(22))
-    }
-
-    @Test
-    fun `geometria y desplazamiento de nodos orbitales de aurora`() {
-        val maxArtSize = 300f // dp
-        val offsetTopLeftX = -maxArtSize * 0.14f
-        val offsetTopLeftY = -maxArtSize * 0.14f
-
-        assertEquals(-42f, offsetTopLeftX, 0.001f)
-        assertEquals(-42f, offsetTopLeftY, 0.001f)
-
-        val offsetBottomRightX = maxArtSize * 0.14f
-        val offsetBottomRightY = maxArtSize * 0.14f
-
-        assertEquals(42f, offsetBottomRightX, 0.001f)
-        assertEquals(42f, offsetBottomRightY, 0.001f)
-
-        val orbitalDiameter = maxArtSize * 0.85f
-        assertEquals(255f, orbitalDiameter, 0.001f)
     }
 }

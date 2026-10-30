@@ -196,22 +196,6 @@ fun CoverFlowAlbumsCarousel(
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
-                        // Jewel case CD glass reflection sheen
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.linearGradient(
-                                        listOf(
-                                            Color.White.copy(alpha = 0.22f),
-                                            Color.White.copy(alpha = 0.04f),
-                                            Color.Transparent
-                                        ),
-                                        start = Offset(0f, 0f),
-                                        end = Offset(280f, 280f)
-                                    )
-                                )
-                        )
                         // Floating Badge con contador de pistas
                         Box(
                             modifier = Modifier
