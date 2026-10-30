@@ -1,7 +1,7 @@
 {
-    "versionCode":  183,
-    "versionName":  "4.9.83",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.83/app-release.apk",
-    "changelog":  "v4.9.83: Micro-Espectrograma FFT en Dock, Rebote Elastico de Pestanas y Acabado Mistico\n\n- Micro-Espectrograma FFT en Dock: Linea reactiva de 32 bandas de frecuencia sobre la barra de navegacion flotante con animacion en tiempo real.\n- Rebote Elastico en Pestanas: Iconos de navegacion con animacion spring-bounce interactiva al conmutar vistas.\n- Acabado Mistico en MiniPlayer y Canciones: Integracion de la paleta Obsidian Amethyst \u0026 Void Abisal en listas y dock mini.\n- Suite de Tests: Nuevas pruebas unitarias para DockSpectrumTest.",
-    "fileSizeMb":  6
+    "versionCode":  184,
+    "versionName":  "4.9.84",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.84/app-release.apk",
+    "changelog":  "v4.9.84: Inclinacion 3D en MiniPlayer, Aurora Mesh Glow y Dial Haptico Mecanico\n\n- Inclinacion 3D en MiniPlayer: Resistencia fisica y rotacion angular al deslizar horizontalmente.\n- Aurora Mesh Glow: Fondo ambiental multicromatico de 3 nodos que pulsa con los graves tras el vinilo.\n- Dial Haptico Mecanico: Micro-pulsos y clicks firmes en cuartos al desplazar el Waveform Seekbar.\n- Carpetas con Vidrio Biselado: Contornos esotericos y badges en listas de carpetas.\n- Suite de Tests: Nuevas pruebas unitarias en UiTiltAuroraTest.",
+    "fileSizeMb":  0
 }
