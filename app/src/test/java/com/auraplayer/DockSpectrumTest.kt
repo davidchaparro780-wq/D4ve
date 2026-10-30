@@ -75,8 +75,9 @@ class DockSpectrumTest {
     @Test
     fun `verificacion de acento misterioso para el dock y miniplayer`() {
         assertTrue(isMysteriousAccent("MYSTIC_OBSIDIAN"))
-        assertTrue(isMysteriousAccent("VOID_ABYSS"))
-        assertTrue(isMysteriousAccent("RUNIC_AMETHYST"))
+        assertTrue(isMysteriousAccent("MIDNIGHT_ECLIPSE"))
+        assertTrue(isMysteriousAccent("PHANTOM_SPECTER"))
+        assertTrue(isMysteriousAccent("NEBULA_ENIGMA"))
         assertTrue(!isMysteriousAccent("BLUE"))
         assertTrue(!isMysteriousAccent("RED"))
     }
