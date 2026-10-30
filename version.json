@@ -1,7 +1,7 @@
 {
-    "versionCode":  186,
-    "versionName":  "4.9.86",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.86/app-release.apk",
-    "changelog":  "v4.9.86: Optimizacion Ultra-Fluida a 120 FPS y Correccion de Lag\n\n- Eliminacion de sobrecarga de degradados radiales: Sustitucion de la malla pesada por brillo ambiental acelerado por GPU (graphicsLayer) sin recompilacion de shaders.\n- Renderizado directo en vinilo: Eliminadas las asignaciones continuas de linearGradient en el bucle de rotacion de 60 FPS.\n- Alivio del Dock principal: Eliminado el bucle de 32 barras del espectrograma que generaba repintados en la ventana raiz.\n- MiniPlayer de latencia cero: Revertida la capa 3D a offset nativo de hardware acelerado.\n- Suite de Tests: Pruebas unitarias actualizadas y verificadas en verde.",
-    "fileSizeMb":  6
+    "versionCode":  187,
+    "versionName":  "4.9.87",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.87/app-release.apk",
+    "changelog":  "Nuevas Experiencias UI Exclusivas: Modo Lofi Chill Cafe con lluvia interactiva, Aura DNA Galaxia Musical y Modo Boombox 80s con vumetros analogicos L/R",
+    "fileSizeMb":  0
 }
