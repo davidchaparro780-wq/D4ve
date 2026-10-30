@@ -4267,12 +4267,12 @@ fun PlayerScreen(
     // Aura DNA: Galaxia Musical Dialog
     if (showGalaxyDialog) {
         AuraGalaxyDialog(
-            songs = playlist,
+            songs = if (queueSongs.isNotEmpty()) queueSongs else (currentMedia?.let { listOf(it) } ?: emptyList()),
             currentMedia = currentMedia,
             onSongClick = { song ->
-                val idx = playlist.indexOfFirst { it.id == song.id }
+                val idx = queueSongs.indexOfFirst { it.id == song.id }
                 if (idx != -1) {
-                    onSongSelect(idx)
+                    onQueueSongClick(song, idx)
                 }
             },
             onDismiss = { showGalaxyDialog = false }
