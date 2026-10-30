@@ -58,7 +58,7 @@ class DockSpectrumTest {
     }
 
     @Test
-    fun `progreso de reproduccion en MiniPlayer se restringe estrictamente a 0..1`() {
+    fun `progreso de reproduccion en MiniPlayer se restringe estrictamente de cero a uno`() {
         // Progreso negativo (seek inicial anómalo)
         val negativeProgress = (-0.15f).coerceIn(0f, 1f)
         assertEquals(0f, negativeProgress, 0.001f)
