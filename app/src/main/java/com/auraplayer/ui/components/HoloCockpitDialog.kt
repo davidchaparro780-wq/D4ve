@@ -62,6 +62,7 @@ import com.auraplayer.audio.AuraHaptic
 import com.auraplayer.audio.RealtimeVisualizerManager
 import com.auraplayer.data.model.MediaModel
 import kotlinx.coroutines.delay
+import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
