@@ -97,6 +97,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
+import com.auraplayer.data.model.computeAudioFormatBadge
 import androidx.compose.ui.platform.LocalView
 import com.auraplayer.audio.AuraHaptic
 import com.auraplayer.audio.DynamicPaletteManager
@@ -614,6 +616,20 @@ fun PlayerScreen(
         }
     }
 
+    // 3D Parallax Tilt state on Center Artwork
+    var tiltX by remember { mutableFloatStateOf(0f) }
+    var tiltY by remember { mutableFloatStateOf(0f) }
+    val animatedTiltX by animateFloatAsState(
+        targetValue = tiltX,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "tiltX"
+    )
+    val animatedTiltY by animateFloatAsState(
+        targetValue = tiltY,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "tiltY"
+    )
+
     // On-Screen HUD for Gestures (Volume & Brightness)
     var hudText by remember { mutableStateOf("") }
     var hudIcon by remember { mutableStateOf(Icons.Default.VolumeUp) }
@@ -891,6 +907,32 @@ fun PlayerScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
+                            }
+
+                            // Floating Sleep Timer Countdown Pill
+                            val isSleepTimerRunning = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
+                            val sleepRemainingSec = sleepTimerManager?.remainingSeconds?.collectAsState()?.value ?: 0
+                            if (isSleepTimerRunning && sleepRemainingSec > 0) {
+                                Surface(
+                                    onClick = {
+                                        AuraHaptic.click(view)
+                                        sleepTimerManager?.extendTimer(10)
+                                        Toast.makeText(context, "⏳ +10 min al temporizador", Toast.LENGTH_SHORT).show()
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color(0xFF6366F1).copy(alpha = 0.22f),
+                                    border = BorderStroke(1.dp, Color(0xFF818CF8).copy(alpha = 0.6f))
+                                ) {
+                                    val min = sleepRemainingSec / 60
+                                    val sec = sleepRemainingSec % 60
+                                    Text(
+                                        text = String.format("⏳ %02d:%02d (+10m)", min, sec),
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFA5B4FC),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
 
                             // Pill Confort Ocular (Dinámico / Cálido / OLED)
@@ -1412,7 +1454,30 @@ fun PlayerScreen(
                                      Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
-                                            .then(levitationModifier)
+                                             .graphicsLayer {
+                                                 rotationX = animatedTiltX
+                                                 rotationY = animatedTiltY
+                                                 cameraDistance = 14f * density
+                                             }
+                                             .pointerInput(Unit) {
+                                                 detectDragGestures(
+                                                     onDragStart = {},
+                                                     onDrag = { change, dragAmount ->
+                                                         change.consume()
+                                                         tiltX = (tiltX - dragAmount.y * 0.08f).coerceIn(-14f, 14f)
+                                                         tiltY = (tiltY + dragAmount.x * 0.08f).coerceIn(-14f, 14f)
+                                                     },
+                                                     onDragEnd = {
+                                                         tiltX = 0f
+                                                         tiltY = 0f
+                                                     },
+                                                     onDragCancel = {
+                                                         tiltX = 0f
+                                                         tiltY = 0f
+                                                     }
+                                                 )
+                                             }
+                                             .then(levitationModifier)
                                             .padding(vertical = 4.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -2046,19 +2111,42 @@ fun PlayerScreen(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
-                    qualityInfo?.let { q ->
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Surface(
-                            color = Color(q.qualityColor).copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(q.qualityColor).copy(alpha = 0.35f))
+                    // Audiophile Hi-Fi Quality Pill
+                    val audioBadge = qualityInfo?.let { "${it.codec} • ${it.bitrateKbps} kbps • ${it.qualityLabel}" }
+                        ?: computeAudioFormatBadge(currentMedia.path, currentMedia.size, currentMedia.duration).let { b ->
+                            if (b.isNotBlank()) "$b • Hi-Fi Audio" else "Audio HD"
+                        }
+                    val badgeColor = qualityInfo?.let { Color(it.qualityColor) } ?: MaterialTheme.colorScheme.primary
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showAudioQualityDialog = true
+                            },
+                        color = badgeColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            Brush.horizontalGradient(
+                                listOf(badgeColor.copy(alpha = 0.65f), badgeColor.copy(alpha = 0.20f))
+                            )
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
+                            Text("💎", fontSize = 10.sp)
                             Text(
-                                text = "${q.codec} • ${q.bitrateKbps} kbps • ${q.qualityLabel}",
-                                color = Color(q.qualityColor),
-                                fontSize = 10.sp,
+                                text = audioBadge,
+                                color = badgeColor,
+                                fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                             )
                         }
                     }
