@@ -50,8 +50,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -2230,6 +2228,8 @@ fun AuraApp(
                 ) {
                     // Micro-Spectrogram Live FFT Equalizer Line atop Dock
                     if (isPlaying) {
+                        val dockPrimary = MaterialTheme.colorScheme.primary
+                        val dockSecondary = MaterialTheme.colorScheme.secondary
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -2249,8 +2249,8 @@ fun AuraApp(
                                     drawRoundRect(
                                         brush = Brush.verticalGradient(
                                             listOf(
-                                                if (isMystNav) Color(0xFFB388FF) else MaterialTheme.colorScheme.primary,
-                                                if (isMystNav) Color(0xFF00E5FF) else MaterialTheme.colorScheme.secondary
+                                                if (isMystNav) Color(0xFFB388FF) else dockPrimary,
+                                                if (isMystNav) Color(0xFF00E5FF) else dockSecondary
                                             )
                                         ),
                                         topLeft = Offset(x, y),
