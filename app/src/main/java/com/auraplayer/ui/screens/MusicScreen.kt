@@ -1045,14 +1045,32 @@ fun MusicScreen(
                 val filters = listOf("Todas", "📥 Descargas", "🕒 Recientes", "🔥 Más Escuchadas", "💎 Lossless", "⚡ Cortas", "☕ Largas")
                 itemsIndexed(filters) { index, label ->
                     val isSelected = selectedFilterIndex == index
+                    val chipScale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.05f else 1.0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "chipScale"
+                    )
                     Box(
                         modifier = Modifier
+                            .graphicsLayer {
+                                scaleX = chipScale
+                                scaleY = chipScale
+                            }
                             .shadow(
-                                elevation = if (isSelected) 5.dp else 2.dp,
+                                elevation = if (isSelected) 6.dp else 2.dp,
                                 shape = RoundedCornerShape(16.dp),
-                                spotColor = if (isSelected) themePrimary.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.4f)
+                                spotColor = if (isSelected) themePrimary.copy(alpha = 0.55f) else Color.Black.copy(alpha = 0.4f)
                             )
                             .clip(RoundedCornerShape(16.dp))
+                            .border(
+                                width = if (isSelected) 1.dp else 0.5.dp,
+                                brush = if (isSelected) Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.5f), Color.Transparent))
+                                        else Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.12f), Color.Transparent)),
+                                shape = RoundedCornerShape(16.dp)
+                            )
                             .background(
                                 if (isSelected) {
                                     Brush.verticalGradient(listOf(themePrimary, themeSecondary))

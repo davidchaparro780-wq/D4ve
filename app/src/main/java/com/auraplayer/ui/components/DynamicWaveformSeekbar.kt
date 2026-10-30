@@ -1,17 +1,28 @@
 package com.auraplayer.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,22 +31,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
-import com.auraplayer.audio.AuraHaptic
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.auraplayer.audio.AuraHaptic
+import com.auraplayer.data.model.formatDurationMs
 import kotlin.math.abs
 import kotlin.math.sin
 
 /**
- * Barra de búsqueda con Onda de Audio Interactiva (Waveform Seekbar).
+ * Barra de búsqueda con Onda de Audio Interactiva (Waveform Seekbar) y Tooltip de Tiempo.
  * Muestra 42 barras de onda armónica reactivas con gradiente neón en la zona reproducida,
- * efecto de magnificación táctil (lente de aumento) al deslizar el dedo y destellos fluidos.
+ * efecto de magnificación táctil al deslizar y burbuja flotante de tiempo preciso (Scrubbing Tooltip).
  */
 @Composable
 fun DynamicWaveformSeekbar(
@@ -44,7 +63,8 @@ fun DynamicWaveformSeekbar(
     onSeek: (Float) -> Unit,
     modifier: Modifier = Modifier,
     activeColor: Color = Color(0xFF38BDF8),
-    secondaryColor: Color = Color(0xFF8B5CF6)
+    secondaryColor: Color = Color(0xFF8B5CF6),
+    durationMs: Long = 0L
 ) {
     val barCount = 42
 
@@ -64,6 +84,7 @@ fun DynamicWaveformSeekbar(
     var isDragging by remember { mutableStateOf(false) }
     var touchX by remember { mutableFloatStateOf(0f) }
     var lastHapticBarIndex by remember { mutableIntStateOf(-1) }
+    var seekbarWidth by remember { mutableFloatStateOf(0f) }
 
     // Generar alturas armónicas pseudo-musicales fijas para consistencia visual
     val baseHeights = remember {
@@ -78,7 +99,10 @@ fun DynamicWaveformSeekbar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(38.dp)
+            .height(44.dp)
+            .onGloballyPositioned { coordinates ->
+                seekbarWidth = coordinates.size.width.toFloat()
+            }
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = { offset ->
@@ -159,12 +183,11 @@ fun DynamicWaveformSeekbar(
                     }
                 }
 
-                val barH = (h * 0.78f) * normalizedHeight
+                val barH = (h * 0.70f) * normalizedHeight
                 val barTop = (h - barH) / 2f
 
                 if (isPassed) {
                     // Barras ya reproducidas: Gradiente Neón brillante
-                    val progressFraction = (barCenterX / (currentPlayX.coerceAtLeast(1f)))
                     val barColor = Brush.verticalGradient(
                         colors = listOf(
                             activeColor,
@@ -219,6 +242,40 @@ fun DynamicWaveformSeekbar(
                 radius = if (isDragging) 6.dp.toPx() else 4.5.dp.toPx(),
                 center = Offset(headX, headCenterY)
             )
+        }
+
+        // Burbuja flotante de tiempo preciso (Scrubbing Tooltip) que sigue el dedo
+        if (isDragging && durationMs > 0L && seekbarWidth > 0f) {
+            val scrubFraction = (touchX / seekbarWidth).coerceIn(0f, 1f)
+            val scrubMs = (scrubFraction * durationMs).toLong()
+            val density = LocalDensity.current
+            val bubbleOffsetXDp = with(density) {
+                (touchX - 28.dp.toPx()).coerceIn(0f, (seekbarWidth - 56.dp.toPx()).coerceAtLeast(0f)).toDp()
+            }
+
+            AnimatedVisibility(
+                visible = isDragging,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut(),
+                modifier = Modifier.offset(x = bubbleOffsetXDp, y = (-26).dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .shadow(8.dp, RoundedCornerShape(12.dp), spotColor = activeColor)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF0F172A))
+                        .border(1.dp, activeColor.copy(alpha = 0.75f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.5.dp)
+                ) {
+                    Text(
+                        text = formatDurationMs(scrubMs),
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
         }
     }
 }

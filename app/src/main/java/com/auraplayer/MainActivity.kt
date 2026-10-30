@@ -2225,6 +2225,16 @@ fun AuraApp(
                                 ambientColor = Color.Black
                             )
                             .clip(RoundedCornerShape(28.dp))
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        Color.White.copy(alpha = 0.16f),
+                                        Color.White.copy(alpha = 0.04f)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(28.dp)
+                            )
                             .background(
                                 Brush.verticalGradient(
                                     listOf(

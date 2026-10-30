@@ -1416,6 +1416,21 @@ fun PlayerScreen(
                                             .padding(vertical = 4.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
+                                        // Ambient dynamic aura glow projected from album art
+                                        Box(
+                                            modifier = Modifier
+                                                .size(maxArtSize * 1.08f)
+                                                .background(
+                                                    Brush.radialGradient(
+                                                        listOf(
+                                                            (artworkPalette?.accent ?: activeAccent).copy(alpha = dynamicGlowAlpha * 0.70f),
+                                                            (artworkPalette?.seed ?: MaterialTheme.colorScheme.primary).copy(alpha = dynamicGlowAlpha * 0.30f),
+                                                            Color.Transparent
+                                                        )
+                                                    ),
+                                                    shape = CircleShape
+                                                )
+                                        )
                                         SupernovaShockwave(
                                             trigger = supernovaTrigger,
                                             accentColor = activeAccent,
@@ -2186,7 +2201,8 @@ fun PlayerScreen(
                             onSeek(targetMs)
                         },
                         activeColor = activeAccent,
-                        secondaryColor = MaterialTheme.colorScheme.secondary
+                        secondaryColor = MaterialTheme.colorScheme.secondary,
+                        durationMs = effectiveDurationMs
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),

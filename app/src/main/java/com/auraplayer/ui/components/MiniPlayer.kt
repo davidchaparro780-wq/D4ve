@@ -48,6 +48,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -89,6 +91,7 @@ fun MiniPlayer(
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val dragOffsetX = remember { Animatable(0f) }
+    var accumulatedDragY by remember { mutableFloatStateOf(0f) }
 
     AnimatedVisibility(
         visible = currentMedia != null,
@@ -188,17 +191,23 @@ fun MiniPlayer(
                         }
                         .pointerInput(Unit) {
                             detectDragGestures(
+                                onDragStart = {
+                                    accumulatedDragY = 0f
+                                },
                                 onDrag = { change, dragAmount ->
                                     change.consume()
+                                    accumulatedDragY += dragAmount.y
                                     coroutineScope.launch {
                                         dragOffsetX.snapTo(dragOffsetX.value + dragAmount.x * 0.72f)
                                     }
-                                    if (dragAmount.y < -35f) {
+                                    if (accumulatedDragY < -40f) {
+                                        accumulatedDragY = 0f
                                         AuraHaptic.click(view)
                                         onClick()
                                     }
                                 },
                                 onDragEnd = {
+                                    accumulatedDragY = 0f
                                     val currentDrag = dragOffsetX.value
                                     coroutineScope.launch {
                                         if (currentDrag < -75f) {
@@ -215,6 +224,7 @@ fun MiniPlayer(
                                     }
                                 },
                                 onDragCancel = {
+                                    accumulatedDragY = 0f
                                     coroutineScope.launch {
                                         dragOffsetX.animateTo(0f, spring(dampingRatio = 0.65f, stiffness = 550f))
                                     }
@@ -336,7 +346,14 @@ fun MiniPlayer(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.secondary
+                                            )
+                                        )
+                                    )
                                     .bounceClick(scaleDown = 0.88f) { onPlayPauseClick() },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -392,7 +409,14 @@ fun MiniPlayer(
                                     .fillMaxWidth(progress.coerceIn(0f, 1f))
                                     .fillMaxHeight()
                                     .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
-                                    .background(MaterialTheme.colorScheme.primary)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.secondary
+                                            )
+                                        )
+                                    )
                             )
                         }
                     }
