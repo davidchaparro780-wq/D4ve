@@ -1,7 +1,7 @@
 {
-    "versionCode":  180,
-    "versionName":  "4.9.80",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.80/app-release.apk",
-    "changelog":  "v4.9.80: StandBy OLED Pixel Shifter, Presets de Auriculares y Video PiP\n\n- StandBy OLED (AOD): Proteccion anti-quemado Pixel Shifter, monitor de bateria en tiempo real, rotacion GPU de vinilo, barra ambiental y gestos tactiles.\n- Ecualizador Hi-Fi: Memoria persistente de preset y perfil + 5 perfiles para auriculares (AirPods Pro, Sony 1000XM, Galaxy Buds, JBL Bass Tune, IEM KZ) y boton de reinicio Flat.\n- Reproductor de Video: Busqueda rapida en tiempo real, chips de carpetas dinamicas y Picture-in-Picture (PiP) adaptativo para videos verticales y horizontales.\n- Suite de Tests: Nuevos tests unitarios para StandByLogic, VideoTitle y EqualizerPresets.",
-    "fileSizeMb":  6
+    "versionCode":  181,
+    "versionName":  "4.9.81",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.81/app-release.apk",
+    "changelog":  "v4.9.81: Rediseño UI Fluido, Halo Dinámico, Scrubbing Tooltip y Gestos\n\n- Halo Ambiental Dinámico: Proyección de luz radial pulsante al ritmo del bajo detrás del plato/vinilo en el reproductor.\n- Scrubbing Tooltip Flotante: Cápsula de tiempo que sigue al pulgar al deslizar por la onda de audio.\n- Dock Flotante Glassmorphism: Barra de navegación inferior con marco de cristal esmerilado translúcido.\n- Chips de Biblioteca Elásticos: Micro-animaciones con física de resorte (spring) al seleccionar filtros.\n- MiniPlayer Swipe-Up: Deslizar hacia arriba sobre el MiniPlayer ahora abre el reproductor completo de forma fluida.\n- Suite de Tests: Nuevas pruebas unitarias para UiScrubbingTest.",
+    "fileSizeMb":  0
 }
