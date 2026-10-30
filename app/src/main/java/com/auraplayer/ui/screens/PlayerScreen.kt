@@ -239,6 +239,9 @@ import coil.compose.AsyncImage
 import com.auraplayer.data.model.MediaModel
 import com.auraplayer.data.model.RepeatMode
 import com.auraplayer.data.repository.SongLyrics
+import com.auraplayer.ui.components.AuraGalaxyDialog
+import com.auraplayer.ui.components.Boombox80sDialog
+import com.auraplayer.ui.components.LofiCafeDialog
 import com.auraplayer.ui.components.PlayerMoreOptionsSheet
 import com.auraplayer.util.AppLog
 import com.auraplayer.util.ArtworkPaletteExtractor
@@ -335,6 +338,9 @@ fun PlayerScreen(
     var showAudioQualityDialog by remember { mutableStateOf(false) }
     var showStemMixerDialog by remember { mutableStateOf(false) }
     var showStealthCalculator by remember { mutableStateOf(false) }
+    var showLofiCafeDialog by remember { mutableStateOf(false) }
+    var showGalaxyDialog by remember { mutableStateOf(false) }
+    var showBoomboxDialog by remember { mutableStateOf(false) }
     var showClubPartyDialog by remember { mutableStateOf(false) }
     var showCarDriveModeDialog by remember { mutableStateOf(false) }
     var showSongHunterDialog by remember { mutableStateOf(false) }
@@ -4090,6 +4096,9 @@ fun PlayerScreen(
             onOpenHeadphones = onOpenHeadphones,
             onOpenCarMode = onOpenCarMode,
             onOpenStandBy = onOpenStandBy,
+            onOpenLofiCafe = { showLofiCafeDialog = true },
+            onOpenAuraGalaxy = { showGalaxyDialog = true },
+            onOpenBoombox80s = { showBoomboxDialog = true },
             onToggleShake = onToggleShake,
             onPocketLock = { isPocketLocked = true },
             onDeleteSong = { showDeleteConfirmDialog = true },
@@ -4240,6 +4249,47 @@ fun PlayerScreen(
             isPlaying = isPlaying,
             stemManager = stemManager,
             onDismiss = { showStemMixerDialog = false }
+        )
+    }
+
+    // Modo Lofi Chill Cafe Dialog
+    if (showLofiCafeDialog) {
+        LofiCafeDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showLofiCafeDialog = false }
+        )
+    }
+
+    // Aura DNA: Galaxia Musical Dialog
+    if (showGalaxyDialog) {
+        AuraGalaxyDialog(
+            songs = playlist,
+            currentMedia = currentMedia,
+            onSongClick = { song ->
+                val idx = playlist.indexOfFirst { it.id == song.id }
+                if (idx != -1) {
+                    onSongSelect(idx)
+                }
+            },
+            onDismiss = { showGalaxyDialog = false }
+        )
+    }
+
+    // Modo Boombox 80s Retro Stereo Dialog
+    if (showBoomboxDialog) {
+        Boombox80sDialog(
+            currentMedia = currentMedia,
+            isPlaying = isPlaying,
+            currentPosition = currentPositionMs,
+            duration = durationMs,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextClick = onNextClick,
+            onPreviousClick = onPreviousClick,
+            onDismiss = { showBoomboxDialog = false }
         )
     }
 

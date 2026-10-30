@@ -17,9 +17,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Radio
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +53,9 @@ fun PlayerMoreOptionsSheet(
     onOpenHeadphones: () -> Unit,
     onOpenCarMode: () -> Unit,
     onOpenStandBy: () -> Unit,
+    onOpenLofiCafe: () -> Unit = {},
+    onOpenAuraGalaxy: () -> Unit = {},
+    onOpenBoombox80s: () -> Unit = {},
     onToggleShake: () -> Unit,
     onPocketLock: () -> Unit,
     onDeleteSong: () -> Unit,
@@ -142,6 +148,51 @@ fun PlayerMoreOptionsSheet(
                         AuraHaptic.click(view)
                         onDismiss()
                         onOpenStandBy()
+                    }
+                )
+
+                OptionDivider()
+
+                // 4. Lofi Chill Cafe Experience
+                PlayerToolItem(
+                    icon = Icons.Default.Coffee,
+                    iconTint = Color(0xFFF59E0B),
+                    title = "Modo Lofi Chill Cafe",
+                    subtitle = "Ventana con lluvia, reloj flip retro y sonidos acogedores",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenLofiCafe()
+                    }
+                )
+
+                OptionDivider()
+
+                // 5. Aura DNA: Galaxia Musical
+                PlayerToolItem(
+                    icon = Icons.Default.Star,
+                    iconTint = Color(0xFF00F0FF),
+                    title = "Aura DNA: Galaxia Musical",
+                    subtitle = "Navega tu música como un mapa de estrellas interactivo",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenAuraGalaxy()
+                    }
+                )
+
+                OptionDivider()
+
+                // 6. Boombox 80s Retro Stereo
+                PlayerToolItem(
+                    icon = Icons.Default.Radio,
+                    iconTint = Color(0xFFE2E8F0),
+                    title = "Modo Boombox 80s",
+                    subtitle = "Ghetto blaster con vúmetros analógicos L/R y carretes de cassette",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenBoombox80s()
                     }
                 )
 
