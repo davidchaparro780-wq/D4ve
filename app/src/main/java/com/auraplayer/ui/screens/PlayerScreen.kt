@@ -2356,7 +2356,7 @@ fun PlayerScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 Brush.verticalGradient(
-                                    listOf(Color(0xFF222B42), Color(0xFF131826))
+                                    if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826))
                                 )
                             )
                             .clickable { showFxDialog = true }
@@ -2391,7 +2391,7 @@ fun PlayerScreen(
                                 when {
                                     isAbLoopSet -> Brush.verticalGradient(listOf(Color(0xFF10B981), Color(0xFF047857)))
                                     isASetOnly -> Brush.verticalGradient(listOf(Color(0xFFF59E0B), Color(0xFFB45309)))
-                                    else -> Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                                    else -> Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
                                 }
                             )
                             .clickable {
@@ -2445,7 +2445,7 @@ fun PlayerScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (isTubeAmpActive) Brush.verticalGradient(listOf(Color(0xFFF59E0B), Color(0xFFB45309)))
-                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                                else Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
                             )
                             .clickable {
                                 isTubeAmpActive = !isTubeAmpActive
@@ -2472,7 +2472,7 @@ fun PlayerScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (isNightDrcActive) Brush.verticalGradient(listOf(Color(0xFF818CF8), Color(0xFF4338CA)))
-                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                                else Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
                             )
                             .clickable {
                                 isNightDrcActive = !isNightDrcActive
@@ -2500,7 +2500,7 @@ fun PlayerScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (isKaraokeActive) Brush.verticalGradient(listOf(Color(0xFFE040FB), Color(0xFF8E24AA)))
-                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                                else Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
                             )
                             .clickable {
                                 AuraHaptic.click(null)
@@ -2527,7 +2527,7 @@ fun PlayerScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (currentViralMode != ViralAudioMode.NORMAL) Brush.verticalGradient(listOf(Color(0xFF00F5FF), Color(0xFF008B8B)))
-                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                                else Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
                             )
                             .clickable {
                                 currentViralMode = viralEffectsManager.cycleMode(MainActivity.activeController)
@@ -2553,7 +2553,7 @@ fun PlayerScreen(
                         modifier = Modifier
                             .shadow(2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826))))
+                            .background(Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826))))
                             .clickable { showSyncedLyricsDialog = true }
                             .padding(horizontal = 9.dp, vertical = 6.dp)
                     ) {
@@ -2571,7 +2571,7 @@ fun PlayerScreen(
                         modifier = Modifier
                             .shadow(2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826))))
+                            .background(Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826))))
                             .clickable { showIpodClassicDialog = true }
                             .padding(horizontal = 9.dp, vertical = 6.dp)
                     ) {
@@ -2591,7 +2591,7 @@ fun PlayerScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (currentCanvasLoop != CanvasLoopTheme.OFF) Brush.verticalGradient(listOf(Color(0xFFE879F9), Color(0xFF9333EA)))
-                                else Brush.verticalGradient(listOf(Color(0xFF222B42), Color(0xFF131826)))
+                                else Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
                             )
                             .clickable {
                                 currentCanvasLoop = when (currentCanvasLoop) {

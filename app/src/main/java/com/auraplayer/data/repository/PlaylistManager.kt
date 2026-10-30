@@ -282,7 +282,7 @@ class PlaylistManager(context: Context) {
     // --- CYBER THEME ACCENT (BlackPlayer Style) ---
 
     fun getThemeAccent(): String {
-        return prefs.getString("theme_accent", "PURPLE") ?: "PURPLE"
+        return prefs.getString("theme_accent", "MYSTIC_OBSIDIAN") ?: "MYSTIC_OBSIDIAN"
     }
 
     fun setThemeAccent(accent: String) {

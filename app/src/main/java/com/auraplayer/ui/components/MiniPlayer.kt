@@ -236,7 +236,7 @@ fun MiniPlayer(
                         },
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp,
-                    color = Color(0xFF0F1524)
+                    color = if (isMysterious) Color(0xFF110822) else Color(0xFF0F1524)
                 ) {
                     Column {
                         Row(
@@ -252,11 +252,15 @@ fun MiniPlayer(
                                     .shadow(
                                         elevation = if (isPlaying) 8.dp else 2.dp,
                                         shape = RoundedCornerShape(12.dp),
-                                        spotColor = Color.Black.copy(alpha = 0.5f)
+                                        spotColor = if (isMysterious) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Black.copy(alpha = 0.5f)
                                     )
                                     .clip(RoundedCornerShape(12.dp))
-                                    .border(0.5.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
-                                    .background(Color(0xFF182032)),
+                                    .border(
+                                        0.5.dp,
+                                        if (isMysterious) Color(0xFFB388FF).copy(alpha = 0.3f) else Color.White.copy(alpha = 0.15f),
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .background(if (isMysterious) Color(0xFF1D0E38) else Color(0xFF182032)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (currentMedia.artworkUri != null) {
@@ -411,10 +415,17 @@ fun MiniPlayer(
                                     .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
                                     .background(
                                         Brush.horizontalGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.secondary
-                                            )
+                                            if (isMysterious) {
+                                                listOf(
+                                                    Color(0xFFB388FF),
+                                                    Color(0xFF00E5FF)
+                                                )
+                                            } else {
+                                                listOf(
+                                                    MaterialTheme.colorScheme.primary,
+                                                    MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
                                         )
                                     )
                             )

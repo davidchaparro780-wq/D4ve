@@ -44,6 +44,14 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -2209,39 +2217,99 @@ fun AuraApp(
                 )
 
                 // Floating Glass Navigation Dock
+                val isMystNav = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)
+                val tab0Scale by animateFloatAsState(targetValue = if (selectedNavTab == 0) 1.14f else 1.0f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow), label = "tab0")
+                val tab1Scale by animateFloatAsState(targetValue = if (selectedNavTab == 1) 1.14f else 1.0f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow), label = "tab1")
+                val tab2Scale by animateFloatAsState(targetValue = if (selectedNavTab == 2) 1.14f else 1.0f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow), label = "tab2")
+                val tab3Scale by animateFloatAsState(targetValue = if (selectedNavTab == 3) 1.14f else 1.0f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow), label = "tab3")
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 14.dp, end = 14.dp, bottom = 10.dp, top = 2.dp)
                 ) {
+                    // Micro-Spectrogram Live FFT Equalizer Line atop Dock
+                    if (isPlaying) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(3.5.dp)
+                                .padding(horizontal = 30.dp)
+                                .align(Alignment.TopCenter)
+                        ) {
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                val totalBars = 32
+                                val spacing = size.width / totalBars
+                                val barW = spacing * 0.52f
+                                for (i in 0 until totalBars) {
+                                    val energy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBand(i, totalBars, true)
+                                    val barH = (size.height * energy * 1.6f).coerceIn(1.2.dp.toPx(), size.height)
+                                    val x = i * spacing + (spacing - barW) / 2f
+                                    val y = size.height - barH
+                                    drawRoundRect(
+                                        brush = Brush.verticalGradient(
+                                            listOf(
+                                                if (isMystNav) Color(0xFFB388FF) else MaterialTheme.colorScheme.primary,
+                                                if (isMystNav) Color(0xFF00E5FF) else MaterialTheme.colorScheme.secondary
+                                            )
+                                        ),
+                                        topLeft = Offset(x, y),
+                                        size = Size(barW, barH),
+                                        cornerRadius = CornerRadius(barW / 2f, barW / 2f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     NavigationBar(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(66.dp)
                             .shadow(
-                                elevation = 20.dp,
+                                elevation = if (isMystNav) 24.dp else 20.dp,
                                 shape = RoundedCornerShape(28.dp),
-                                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                                spotColor = if (isMystNav) Color(0xFFB388FF).copy(alpha = 0.55f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                                 ambientColor = Color.Black
                             )
                             .clip(RoundedCornerShape(28.dp))
                             .border(
-                                width = 1.dp,
-                                brush = Brush.verticalGradient(
-                                    listOf(
-                                        Color.White.copy(alpha = 0.16f),
-                                        Color.White.copy(alpha = 0.04f)
+                                width = if (isMystNav) 1.2.dp else 1.dp,
+                                brush = if (isMystNav) {
+                                    Brush.horizontalGradient(
+                                        listOf(
+                                            Color(0xFFB388FF).copy(alpha = 0.65f),
+                                            Color(0xFF00E5FF).copy(alpha = 0.30f),
+                                            Color(0xFF7C4DFF).copy(alpha = 0.50f),
+                                            Color(0xFFB388FF).copy(alpha = 0.65f)
+                                        )
                                     )
-                                ),
+                                } else {
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color.White.copy(alpha = 0.16f),
+                                            Color.White.copy(alpha = 0.04f)
+                                        )
+                                    )
+                                },
                                 shape = RoundedCornerShape(28.dp)
                             )
                             .background(
-                                Brush.verticalGradient(
-                                    listOf(
-                                        Color(0xF01A2438),
-                                        Color(0xF00D1220)
+                                if (isMystNav) {
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color(0xF0150B28), // Deep Obsidian Amethyst Glass
+                                            Color(0xF007030F)  // Abyss Void Black
+                                        )
                                     )
-                                )
+                                } else {
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color(0xF01A2438),
+                                            Color(0xF00D1220)
+                                        )
+                                    )
+                                }
                             ),
                         containerColor = Color.Transparent,
                         tonalElevation = 0.dp
@@ -2254,7 +2322,7 @@ fun AuraApp(
                                     selectedNavTab = 0
                                 }
                             },
-                            icon = { Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            icon = { Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(22.dp).graphicsLayer { scaleX = tab0Scale; scaleY = tab0Scale }) },
                             label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_biblioteca), fontWeight = if (selectedNavTab == 0) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -2272,7 +2340,7 @@ fun AuraApp(
                                     selectedNavTab = 1
                                 }
                             },
-                            icon = { Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            icon = { Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(22.dp).graphicsLayer { scaleX = tab1Scale; scaleY = tab1Scale }) },
                             label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_explorar), fontWeight = if (selectedNavTab == 1) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -2290,7 +2358,7 @@ fun AuraApp(
                                     selectedNavTab = 2
                                 }
                             },
-                            icon = { Icon(Icons.Default.VideoLibrary, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            icon = { Icon(Icons.Default.VideoLibrary, contentDescription = null, modifier = Modifier.size(22.dp).graphicsLayer { scaleX = tab2Scale; scaleY = tab2Scale }) },
                             label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_videos), fontWeight = if (selectedNavTab == 2) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
@@ -2308,7 +2376,7 @@ fun AuraApp(
                                     selectedNavTab = 3
                                 }
                             },
-                            icon = { Icon(Icons.Default.Equalizer, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                            icon = { Icon(Icons.Default.Equalizer, contentDescription = null, modifier = Modifier.size(22.dp).graphicsLayer { scaleX = tab3Scale; scaleY = tab3Scale }) },
                             label = { Text(androidx.compose.ui.res.stringResource(com.auraplayer.R.string.nav_equalizer), fontWeight = if (selectedNavTab == 3) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,

@@ -1399,6 +1399,7 @@ fun MusicScreen(
                                                 isFavorite = favoritesManager.isFavorite(song.id),
                                                 isSelectionMode = isSelectionMode,
                                                 isChecked = isChecked,
+                                                isMysterious = isMysterious,
                                                 highlightQuery = searchQuery,
                                                 onClick = {
                                                     if (isSelectionMode) {
@@ -1696,6 +1697,7 @@ fun MusicScreen(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
                                             isFavorite = favoritesManager.isFavorite(song.id),
+                                            isMysterious = isMysterious,
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song },
@@ -1774,6 +1776,7 @@ fun MusicScreen(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
                                             isFavorite = favoritesManager.isFavorite(song.id),
+                                            isMysterious = isMysterious,
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song },
@@ -1992,6 +1995,7 @@ fun MusicScreen(
                                                     extraBadge = "🔥 $count plays",
                                                     isSelected = currentMedia?.id == song.id,
                                                     isFavorite = favoritesManager.isFavorite(song.id),
+                                                    isMysterious = isMysterious,
                                                     onClick = { onSongClick(song) },
                                                     onLongClick = { selectedSongForMenu = song },
                                                     onOptionsClick = { selectedSongForMenu = song }
@@ -2020,6 +2024,7 @@ fun MusicScreen(
                                                     extraBadge = "🕒 Reciente",
                                                     isSelected = currentMedia?.id == song.id,
                                                     isFavorite = favoritesManager.isFavorite(song.id),
+                                                    isMysterious = isMysterious,
                                                     onClick = { onSongClick(song) },
                                                     onLongClick = { selectedSongForMenu = song },
                                                     onOptionsClick = { selectedSongForMenu = song }
@@ -2045,6 +2050,7 @@ fun MusicScreen(
                                     song = song,
                                     isSelected = currentMedia?.id == song.id,
                                     isFavorite = true,
+                                    isMysterious = isMysterious,
                                     onClick = { onSongClick(song) },
                                     onLongClick = { selectedSongForMenu = song },
                                     onOptionsClick = { selectedSongForMenu = song },
@@ -2152,6 +2158,7 @@ fun MusicScreen(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
                                             isFavorite = favoritesManager.isFavorite(song.id),
+                                            isMysterious = isMysterious,
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song }
@@ -2346,6 +2353,7 @@ fun MusicScreen(
                                             song = song,
                                             isSelected = currentMedia?.id == song.id,
                                             isFavorite = favoritesManager.isFavorite(song.id),
+                                            isMysterious = isMysterious,
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
                                             onOptionsClick = { selectedSongForMenu = song }
@@ -2997,6 +3005,11 @@ private val SongItemBgSelected = Brush.verticalGradient(listOf(Color(0xFF1E2942)
 private val SongItemBgUnselected = Brush.verticalGradient(listOf(Color(0xFF181F30), Color(0xFF0F1420)))
 private val SongArtBgUnselected = Brush.verticalGradient(listOf(Color(0xFF263248), Color(0xFF151C2A)))
 
+// Brushes misteriosos (Suite Misteriosa: Obsidian Amethyst & Void Abisal)
+private val SongItemBgMystSelected = Brush.verticalGradient(listOf(Color(0xFF2A1550), Color(0xFF14082B)))
+private val SongItemBgMystUnselected = Brush.verticalGradient(listOf(Color(0xFF130926).copy(alpha = 0.88f), Color(0xFF080312).copy(alpha = 0.96f)))
+private val SongArtBgMystUnselected = Brush.verticalGradient(listOf(Color(0xFF200E3D), Color(0xFF0F051C)))
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongListItem(
@@ -3007,6 +3020,7 @@ fun SongListItem(
     extraBadge: String? = null,
     isSelectionMode: Boolean = false,
     isChecked: Boolean = false,
+    isMysterious: Boolean = false,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onOptionsClick: () -> Unit,
@@ -3137,12 +3151,20 @@ fun SongListItem(
                 .then(swipeModifier)
                 .clip(RoundedCornerShape(16.dp))
                 .border(
-                    width = if (isSelected) 1.dp else 0.5.dp,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.65f) else Color(0x18FFFFFF),
+                    width = if (isSelected) (if (isMysterious) 1.2.dp else 1.dp) else 0.5.dp,
+                    color = if (isSelected) {
+                        if (isMysterious) Color(0xFF00E5FF).copy(alpha = 0.75f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)
+                    } else {
+                        if (isMysterious) Color(0xFFB388FF).copy(alpha = 0.18f) else Color(0x18FFFFFF)
+                    },
                     shape = RoundedCornerShape(16.dp)
                 )
                 .background(
-                    if (isSelected) SongItemBgSelected else SongItemBgUnselected
+                    if (isSelected) {
+                        if (isMysterious) SongItemBgMystSelected else SongItemBgSelected
+                    } else {
+                        if (isMysterious) SongItemBgMystUnselected else SongItemBgUnselected
+                    }
                 )
                 .combinedClickable(
                     onClick = onClick,
