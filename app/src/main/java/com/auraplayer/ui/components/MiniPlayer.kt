@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
@@ -155,11 +156,15 @@ fun MiniPlayer(
                     }
                 }
 
-                // Precision Floating Dock Mini Player Card with Real-time Spring Drag Offset
+                // Precision Floating Dock Mini Player Card with Real-time Spring Drag Offset & 3D Tilt Resistance
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset { IntOffset(dragOffsetX.value.roundToInt(), 0) }
+                        .graphicsLayer {
+                            translationX = dragOffsetX.value
+                            rotationZ = (dragOffsetX.value * 0.038f).coerceIn(-9f, 9f)
+                            cameraDistance = 14f * density
+                        }
                         .shadow(
                             elevation = 14.dp,
                             shape = RoundedCornerShape(22.dp),

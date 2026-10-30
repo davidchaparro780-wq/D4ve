@@ -1482,21 +1482,57 @@ fun PlayerScreen(
                                             .padding(vertical = 4.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        // Ambient dynamic aura glow projected from album art
+                                        // Aurora Borealis multi-point dynamic ambient mesh glow
                                         Box(
-                                            modifier = Modifier
-                                                .size(maxArtSize * 1.08f)
-                                                .background(
-                                                    Brush.radialGradient(
-                                                        listOf(
-                                                            (artworkPalette?.accent ?: activeAccent).copy(alpha = dynamicGlowAlpha * 0.70f),
-                                                            (artworkPalette?.seed ?: MaterialTheme.colorScheme.primary).copy(alpha = dynamicGlowAlpha * 0.30f),
-                                                            Color.Transparent
-                                                        )
-                                                    ),
-                                                    shape = CircleShape
-                                                )
-                                        )
+                                            modifier = Modifier.size(maxArtSize * 1.16f),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            // Top-Left Aurora Node
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(maxArtSize * 0.85f)
+                                                    .offset(x = -maxArtSize * 0.14f, y = -maxArtSize * 0.14f)
+                                                    .background(
+                                                        Brush.radialGradient(
+                                                            listOf(
+                                                                (if (isMysteriousTheme) Color(0xFF00E5FF) else MaterialTheme.colorScheme.secondary).copy(alpha = dynamicGlowAlpha * 0.40f),
+                                                                Color.Transparent
+                                                            )
+                                                        ),
+                                                        shape = CircleShape
+                                                    )
+                                            )
+                                            // Bottom-Right Aurora Node
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(maxArtSize * 0.85f)
+                                                    .offset(x = maxArtSize * 0.14f, y = maxArtSize * 0.14f)
+                                                    .background(
+                                                        Brush.radialGradient(
+                                                            listOf(
+                                                                (if (isMysteriousTheme) Color(0xFFB388FF) else MaterialTheme.colorScheme.tertiary).copy(alpha = dynamicGlowAlpha * 0.35f),
+                                                                Color.Transparent
+                                                            )
+                                                        ),
+                                                        shape = CircleShape
+                                                    )
+                                            )
+                                            // Core Ambient Node (Bass Reactive)
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(maxArtSize * 1.08f)
+                                                    .background(
+                                                        Brush.radialGradient(
+                                                            listOf(
+                                                                (artworkPalette?.accent ?: activeAccent).copy(alpha = dynamicGlowAlpha * 0.65f),
+                                                                (artworkPalette?.seed ?: MaterialTheme.colorScheme.primary).copy(alpha = dynamicGlowAlpha * 0.25f),
+                                                                Color.Transparent
+                                                            )
+                                                        ),
+                                                        shape = CircleShape
+                                                    )
+                                            )
+                                        }
                                         SupernovaShockwave(
                                             trigger = supernovaTrigger,
                                             accentColor = activeAccent,

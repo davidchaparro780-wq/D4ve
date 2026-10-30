@@ -2179,14 +2179,20 @@ fun MusicScreen(
                                         .fillMaxWidth()
                                         .padding(horizontal = 4.dp, vertical = 5.dp)
                                         .shadow(
-                                            elevation = 4.dp,
-                                            shape = RoundedCornerShape(16.dp),
-                                            spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                                            elevation = if (isMysterious) 8.dp else 4.dp,
+                                            shape = RoundedCornerShape(18.dp),
+                                            spotColor = if (isMysterious) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
                                             ambientColor = Color.Black
                                         )
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .border(
+                                            width = 0.8.dp,
+                                            color = if (isMysterious) Color(0xFFB388FF).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.08f),
+                                            shape = RoundedCornerShape(18.dp)
+                                        )
                                         .background(
-                                            Brush.verticalGradient(
+                                            if (isMysterious) SongItemBgMystUnselected
+                                            else Brush.verticalGradient(
                                                 listOf(
                                                     Color(0xFF1C2538),
                                                     Color(0xFF0F1420)

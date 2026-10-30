@@ -111,7 +111,11 @@ fun DynamicWaveformSeekbar(
                         val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
                         if (barIdx != lastHapticBarIndex) {
                             lastHapticBarIndex = barIdx
-                            AuraHaptic.tick(view)
+                            if (barIdx == barCount / 4 || barIdx == barCount / 2 || barIdx == (barCount * 3) / 4) {
+                                AuraHaptic.click(view)
+                            } else {
+                                AuraHaptic.tick(view)
+                            }
                         }
                         onSeek(newProgress)
                     }
@@ -141,7 +145,11 @@ fun DynamicWaveformSeekbar(
                         val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
                         if (barIdx != lastHapticBarIndex) {
                             lastHapticBarIndex = barIdx
-                            AuraHaptic.tick(view)
+                            if (barIdx == barCount / 4 || barIdx == barCount / 2 || barIdx == (barCount * 3) / 4) {
+                                AuraHaptic.click(view)
+                            } else {
+                                AuraHaptic.tick(view)
+                            }
                         }
                         onSeek(newProgress)
                     }
