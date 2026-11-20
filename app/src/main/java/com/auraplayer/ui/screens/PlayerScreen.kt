@@ -213,6 +213,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
@@ -790,6 +792,70 @@ fun PlayerScreen(
                         .background(comfortBackground)
                 ) {
                 if (eyeComfortMode == 0) {
+                    // Apple Music-Style Dynamic Blurred Artwork Background with Living Ambient Drift
+                    if (currentMedia.artworkUri != null) {
+                        val infiniteBgTransition = rememberInfiniteTransition(label = "apple_music_bg_drift")
+                        val bgDriftScale by infiniteBgTransition.animateFloat(
+                            initialValue = 1.05f,
+                            targetValue = 1.15f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(14000, easing = LinearEasing),
+                                repeatMode = AnimRepeatMode.Reverse
+                            ),
+                            label = "bgDriftScale"
+                        )
+                        val bgDriftRotation by infiniteBgTransition.animateFloat(
+                            initialValue = -2.5f,
+                            targetValue = 2.5f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(22000, easing = LinearEasing),
+                                repeatMode = AnimRepeatMode.Reverse
+                            ),
+                            label = "bgDriftRotation"
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    scaleX = if (isPlaying) bgDriftScale else 1.05f
+                                    scaleY = if (isPlaying) bgDriftScale else 1.05f
+                                    rotationZ = if (isPlaying) bgDriftRotation else 0f
+                                }
+                        ) {
+                            AsyncImage(
+                                model = currentMedia.artworkUri,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .then(
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            Modifier.blur(48.dp)
+                                        } else {
+                                            Modifier
+                                        }
+                                    )
+                                    .alpha(0.60f)
+                            )
+                        }
+
+                        // Gradient scrim for optimal contrast, readability, and glassmorphism depth
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            Color.Black.copy(alpha = 0.45f),
+                                            Color.Black.copy(alpha = 0.60f),
+                                            Color(0xFF060913).copy(alpha = 0.88f)
+                                        )
+                                    )
+                                )
+                        )
+                    }
+
                     AuroraMeshBackground(
                         palette = artworkPalette,
                         isPlaying = isPlaying
@@ -1797,26 +1863,26 @@ fun PlayerScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .shadow(20.dp, RoundedCornerShape(24.dp), spotColor = activeAccent.copy(alpha = 0.35f))
-                                .clip(RoundedCornerShape(24.dp))
+                                .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = activeAccent.copy(alpha = 0.45f))
+                                .clip(RoundedCornerShape(28.dp))
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
-                                            Color(0xFF090E1A).copy(alpha = 0.94f),
-                                            Color(0xFF04060C).copy(alpha = 0.98f)
+                                            Color(0xFF090E1A).copy(alpha = 0.65f),
+                                            Color(0xFF04060C).copy(alpha = 0.78f)
                                         )
                                     )
                                 )
                                 .border(
-                                    width = 1.dp,
+                                    width = 1.2.dp,
                                     brush = Brush.verticalGradient(
                                         listOf(
-                                            activeAccent.copy(alpha = 0.35f),
-                                            Color.White.copy(alpha = 0.08f),
+                                            activeAccent.copy(alpha = 0.50f),
+                                            Color.White.copy(alpha = 0.12f),
                                             Color.Transparent
                                         )
                                     ),
-                                    shape = RoundedCornerShape(24.dp)
+                                    shape = RoundedCornerShape(28.dp)
                                 )
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
@@ -1925,48 +1991,53 @@ fun PlayerScreen(
                                             ) { index, line ->
                                                 val isActive = index == activeIndex
                                                 val lyricScale by androidx.compose.animation.core.animateFloatAsState(
-                                                    targetValue = if (isActive) 1.04f else 0.96f,
+                                                    targetValue = if (isActive) 1.05f else 0.95f,
                                                     animationSpec = androidx.compose.animation.core.spring(
-                                                        dampingRatio = 0.8f,
+                                                        dampingRatio = 0.75f,
                                                         stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
                                                     ),
                                                     label = "lyric_scale"
+                                                )
+                                                val lyricAlpha by androidx.compose.animation.core.animateFloatAsState(
+                                                    targetValue = if (isActive) 1f else 0.38f,
+                                                    animationSpec = androidx.compose.animation.core.tween(250),
+                                                    label = "lyric_alpha"
                                                 )
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .then(
                                                             if (isActive) Modifier.shadow(
-                                                                elevation = 8.dp,
-                                                                shape = RoundedCornerShape(16.dp),
-                                                                spotColor = activeAccent.copy(alpha = 0.45f),
+                                                                elevation = 12.dp,
+                                                                shape = RoundedCornerShape(20.dp),
+                                                                spotColor = activeAccent.copy(alpha = 0.55f),
                                                                 ambientColor = Color.Black
                                                             ) else Modifier
                                                         )
-                                                        .clip(RoundedCornerShape(16.dp))
+                                                        .clip(RoundedCornerShape(20.dp))
                                                         .background(
                                                             if (isActive) Brush.verticalGradient(
                                                                 listOf(
-                                                                    activeAccent.copy(alpha = 0.28f),
-                                                                    Color(0x228B5CF6)
+                                                                    activeAccent.copy(alpha = 0.32f),
+                                                                    Color(0x338B5CF6)
                                                                 )
                                                             ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                                                         )
                                                         .border(
-                                                            width = if (isActive) 1.dp else 0.dp,
+                                                            width = if (isActive) 1.2.dp else 0.dp,
                                                             brush = if (isActive) Brush.horizontalGradient(
                                                                 listOf(
-                                                                    activeAccent.copy(alpha = 0.5f),
-                                                                    Color(0xFF8B5CF6).copy(alpha = 0.3f)
+                                                                    activeAccent.copy(alpha = 0.65f),
+                                                                    Color(0xFF8B5CF6).copy(alpha = 0.4f)
                                                                 )
                                                             ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
-                                                            shape = RoundedCornerShape(16.dp)
+                                                            shape = RoundedCornerShape(20.dp)
                                                         )
                                                         .clickable {
                                                             AuraHaptic.click(null)
                                                             onSeek(line.timeMs)
                                                         }
-                                                        .padding(horizontal = 14.dp, vertical = if (isActive) 12.dp else 6.dp),
+                                                        .padding(horizontal = 16.dp, vertical = if (isActive) 14.dp else 7.dp),
                                                     contentAlignment = Alignment.Center
                                                 ) {
                                                     Column(
@@ -1975,20 +2046,21 @@ fun PlayerScreen(
                                                     ) {
                                                         Text(
                                                             text = line.text,
-                                                            fontSize = if (isActive) (23 * lyricsFontSizeMultiplier).sp else (15 * lyricsFontSizeMultiplier).sp,
+                                                            fontSize = if (isActive) (24 * lyricsFontSizeMultiplier).sp else (15 * lyricsFontSizeMultiplier).sp,
                                                             fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Medium,
-                                                            color = if (isActive) Color.White else Color.White.copy(alpha = 0.32f),
+                                                            color = if (isActive) Color.White else Color.White.copy(alpha = 0.38f),
                                                             textAlign = TextAlign.Center,
-                                                            lineHeight = if (isActive) (30 * lyricsFontSizeMultiplier).sp else (22 * lyricsFontSizeMultiplier).sp,
+                                                            lineHeight = if (isActive) (32 * lyricsFontSizeMultiplier).sp else (22 * lyricsFontSizeMultiplier).sp,
                                                             style = androidx.compose.ui.text.TextStyle(
                                                                 shadow = if (isActive) androidx.compose.ui.graphics.Shadow(
-                                                                    color = activeAccent.copy(alpha = 0.85f),
-                                                                    blurRadius = 18f
+                                                                    color = activeAccent.copy(alpha = 0.90f),
+                                                                    blurRadius = 22f
                                                                 ) else null
                                                             ),
                                                             modifier = Modifier.graphicsLayer {
                                                                 scaleX = lyricScale
                                                                 scaleY = lyricScale
+                                                                alpha = lyricAlpha
                                                             }
                                                         )
                                                         if (isPlayerTranslationEnabled) {
