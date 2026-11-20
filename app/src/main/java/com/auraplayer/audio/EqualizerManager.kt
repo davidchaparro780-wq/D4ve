@@ -438,6 +438,27 @@ val bandLevels = FloatArray(10) { 0f }
                 virtualizerStrength = 750
                 loudnessGain = 50
             }
+            13 -> { // Beats Studio & Solo
+                val preset = floatArrayOf(7f, 6f, 3f, 0f, -1f, 1f, 3f, 4f, 6f, 7f)
+                System.arraycopy(preset, 0, bandLevels, 0, 10)
+                bassStrength = 700
+                virtualizerStrength = 500
+                loudnessGain = 200
+            }
+            14 -> { // Sennheiser Momentum / HD
+                val preset = floatArrayOf(3f, 2f, 1f, 0f, 1f, 2f, 3f, 4f, 5f, 6f)
+                System.arraycopy(preset, 0, bandLevels, 0, 10)
+                bassStrength = 350
+                virtualizerStrength = 600
+                loudnessGain = 100
+            }
+            15 -> { // Altavoz Bluetooth Portátil (Party Boost)
+                val preset = floatArrayOf(6f, 5f, 4f, 2f, 1f, 2f, 4f, 5f, 7f, 8f)
+                System.arraycopy(preset, 0, bandLevels, 0, 10)
+                bassStrength = 750
+                virtualizerStrength = 400
+                loudnessGain = 350
+            }
         }
         currentPresetIndex = presetIndex
         applyBandsToHardware()

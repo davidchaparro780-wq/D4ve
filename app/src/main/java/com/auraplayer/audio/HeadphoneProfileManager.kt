@@ -60,6 +60,27 @@ class HeadphoneProfileManager(context: Context) {
             brand = "Bose",
             presetIndex = 7,
             description = "Curva balanceada audiófila anti-fatiga"
+        ),
+        HeadphoneProfile(
+            id = "beats_studio",
+            name = "Beats Studio & Solo Series",
+            brand = "Beats",
+            presetIndex = 13,
+            description = "Graves con pegada contundente y agudos brillantes"
+        ),
+        HeadphoneProfile(
+            id = "sennheiser_hd",
+            name = "Sennheiser Momentum / HD",
+            brand = "Sennheiser",
+            presetIndex = 14,
+            description = "Firma balanceada audiófila con gran escena sonora"
+        ),
+        HeadphoneProfile(
+            id = "bt_speaker",
+            name = "Altavoz Bluetooth Portátil (Party)",
+            brand = "JBL / Anker / Tronsmart",
+            presetIndex = 15,
+            description = "Refuerzo acústico para exteriores y reuniones"
         )
     )
 

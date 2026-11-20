@@ -196,8 +196,8 @@ private fun runDiagnostic(context: android.content.Context, songs: List<MediaMod
             if (!f.exists() || f.length() == 0L) corruptFiles.add(song)
         } catch (_: Exception) { corruptFiles.add(song) }
 
-        // No cover: neither persistent file in covers/ nor embedded/folder artwork
-        val hasCover = File(context.filesDir, "covers/${song.id}.jpg").exists() ||
+        // No cover: check CoverArtManager registry, local file, or embedded/folder artwork
+        val hasCover = com.auraplayer.data.repository.CoverArtManager(context).getLocalCoverUri(song.id, song.artist, song.title, song.path) != null ||
                 (song.artworkUri != null && song.artworkUri.scheme == "file")
         if (!hasCover) {
             val extracted = com.auraplayer.util.AudioArtworkResolver.resolveBitmap(
