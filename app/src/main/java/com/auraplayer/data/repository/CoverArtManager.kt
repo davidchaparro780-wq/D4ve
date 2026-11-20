@@ -37,30 +37,22 @@ class CoverArtManager(private val context: Context) {
             val cleanKey = sanitize("${artist}_${title}")
             val namedFile = File(coversDir, "$cleanKey.jpg")
             FileOutputStream(namedFile).use { it.write(coverBytes) }
+            val savedPath = namedFile.absolutePath
 
-            val titleFile = File(coversDir, "${sanitize(title)}.jpg")
-            FileOutputStream(titleFile).use { it.write(coverBytes) }
-
+            // Enlazar alias y claves en SharedPreferences apuntando al archivo único para ahorrar almacenamiento
             val rawClean = cleanSearchTerm(title).lowercase().trim().replace(Regex("[^a-z0-9]"), "")
             if (rawClean.isNotBlank()) {
-                val rawFile = File(coversDir, "raw_$rawClean.jpg")
-                FileOutputStream(rawFile).use { it.write(coverBytes) }
-                prefs.edit().putString("cover_raw_$rawClean", namedFile.absolutePath).apply()
+                prefs.edit().putString("cover_raw_$rawClean", savedPath).apply()
             }
 
             if (fileName.isNotBlank()) {
                 val nameNoExt = fileName.substringBeforeLast(".")
-                val directFile = File(coversDir, "$nameNoExt.jpg")
-                FileOutputStream(directFile).use { it.write(coverBytes) }
-                val safeFile = File(coversDir, "${sanitize(nameNoExt)}.jpg")
-                FileOutputStream(safeFile).use { it.write(coverBytes) }
-
-                prefs.edit().putString("cover_file_${nameNoExt.lowercase().trim()}", directFile.absolutePath).apply()
+                prefs.edit().putString("cover_file_${nameNoExt.lowercase().trim()}", savedPath).apply()
             }
 
             val searchKey = cleanSearchTerm("$artist $title").lowercase().trim()
             if (searchKey.isNotBlank()) {
-                prefs.edit().putString("cover_term_$searchKey", namedFile.absolutePath).apply()
+                prefs.edit().putString("cover_term_$searchKey", savedPath).apply()
             }
         } catch (e: Exception) {
             AppLog.e(TAG, "No se pudo guardar la carátula de forma persistente", e)
