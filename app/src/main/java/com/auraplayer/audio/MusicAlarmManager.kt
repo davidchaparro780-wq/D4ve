@@ -58,13 +58,33 @@ class MusicAlarmManager(private val context: Context) {
         )
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+            val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                true
+            }
+
+            if (canScheduleExact) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+                } else {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+                }
             } else {
                 alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
             }
-        } catch (_: Exception) {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+        } catch (e: SecurityException) {
+            AppLog.w(TAG, "Permiso de alarma exacta no disponible, usando fallback: ${e.message}")
+            try {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+            } catch (_: Exception) {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+            }
+        } catch (e: Exception) {
+            AppLog.e(TAG, "Error programando alarma", e)
+            try {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
+            } catch (_: Exception) {}
         }
 
         saveAlarm(alarm)
@@ -136,7 +156,7 @@ class MusicAlarmReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val launchIntent = Intent(context, Class.forName("com.auraplayer.MainActivity")).apply {
+        val launchIntent = Intent(context, com.auraplayer.MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("alarm_wake", true)
             putExtra("alarm_label", alarmLabel)

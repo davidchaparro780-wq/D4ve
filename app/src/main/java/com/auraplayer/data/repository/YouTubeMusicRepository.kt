@@ -491,8 +491,7 @@ class YouTubeMusicRepository {
             listOf(
                 "https://api.cobalt.tools",
                 "https://cobalt-api.kwiatekm.pl",
-                "https://cobalt.api.sciter.io",
-                "https://api.wuk.sh"
+                "https://cobalt.api.sciter.io"
             )
         }
         val videoUrl = "https://www.youtube.com/watch?v=$videoId"

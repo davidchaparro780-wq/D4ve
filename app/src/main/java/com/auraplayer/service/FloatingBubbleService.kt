@@ -14,6 +14,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -54,13 +55,25 @@ class FloatingBubbleService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            AppLog.w(TAG, "Permiso de superposición (overlay) no concedido. Deteniendo FloatingBubbleService.")
+            stopSelf()
+            return
+        }
+
         isRunning = true
         createNotificationChannel()
         val notif = createNotification()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(9982, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-        } else {
-            startForeground(9982, notif)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(9982, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+            } else {
+                startForeground(9982, notif)
+            }
+        } catch (e: Exception) {
+            AppLog.e(TAG, "Error iniciando Foreground Service en FloatingBubbleService", e)
+            stopSelf()
+            return
         }
         setupFloatingView()
     }

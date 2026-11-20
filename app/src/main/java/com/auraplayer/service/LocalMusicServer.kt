@@ -630,8 +630,12 @@ checkSong();
                 var skipped = 0L
                 while (skipped < startOffset) {
                     val n = ins.skip(startOffset - skipped)
-                    if (n <= 0) break
-                    skipped += n
+                    if (n <= 0L) {
+                        if (ins.read() == -1) break
+                        skipped += 1L
+                    } else {
+                        skipped += n
+                    }
                 }
 
                 val buffer = ByteArray(16 * 1024)
