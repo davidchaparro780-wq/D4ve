@@ -35,7 +35,7 @@ fun HyperdriveWarpTunnel(
     isPlaying: Boolean,
     modifier: Modifier = Modifier,
     accentColor: Color = Color(0xFF38BDF8),
-    starCount: Int = 45
+    starCount: Int = 22
 ) {
     val stars = remember {
         val colors = listOf(accentColor, Color(0xFF8B5CF6), Color(0xFFEC4899), Color.White)
@@ -64,7 +64,7 @@ fun HyperdriveWarpTunnel(
     Canvas(modifier = modifier.fillMaxSize()) {
         val centerX = size.width / 2f
         val centerY = size.height / 2f
-        val maxDist = size.minDimension * 0.85f
+        val maxDist = size.minDimension * 0.62f
 
         stars.forEach { s ->
             val curProgress = (s.initialDistance + phase * s.speed) % 1f
@@ -77,15 +77,16 @@ fun HyperdriveWarpTunnel(
             val px = centerX + kotlin.math.cos(s.initialAngle) * prevDist
             val py = centerY + kotlin.math.sin(s.initialAngle) * prevDist
 
-            val alpha = (curProgress * 1.2f).coerceIn(0.1f, 0.95f)
+            val alpha = (curProgress * 0.8f).coerceIn(0.08f, 0.48f)
 
-            if (isPlaying && curProgress > 0.15f) {
-                // Estela hiperespacial
+            if (isPlaying && curProgress > 0.35f) {
+                // Estela hiperespacial corta y tenue: evita que el fondo parezca
+                // una pantalla rota con rayos largos cruzando toda la interfaz.
                 drawLine(
                     color = s.color.copy(alpha = alpha),
                     start = Offset(px, py),
                     end = Offset(x, y),
-                    strokeWidth = s.size * (0.8f + curProgress * 1.2f),
+                    strokeWidth = s.size * (0.6f + curProgress * 0.5f),
                     cap = StrokeCap.Round
                 )
             } else {

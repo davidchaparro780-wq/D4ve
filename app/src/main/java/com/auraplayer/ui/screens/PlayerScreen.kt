@@ -1537,11 +1537,11 @@ fun PlayerScreen(
                             transitionSpec = {
                                 (slideInHorizontally(
                                     animationSpec = spring(dampingRatio = 0.76f, stiffness = 350f)
-                                ) { width -> width / 2 } + fadeIn(tween(220)) + scaleIn(initialScale = 0.88f))
+                                ) { width -> width / 10 } + fadeIn(tween(220)) + scaleIn(initialScale = 0.94f))
                                 .togetherWith(
                                     slideOutHorizontally(
                                         animationSpec = spring(dampingRatio = 0.76f, stiffness = 350f)
-                                    ) { width -> -width / 2 } + fadeOut(tween(180)) + scaleOut(targetScale = 0.88f)
+                                    ) { width -> -width / 10 } + fadeOut(tween(180)) + scaleOut(targetScale = 0.94f)
                                 )
                             },
                             label = "visualizer_song_transition"
@@ -2468,7 +2468,7 @@ fun PlayerScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedContent(
@@ -2481,8 +2481,8 @@ fun PlayerScreen(
                     ) { t ->
                         Text(
                             text = t,
-                            fontSize = 18.sp,
-                            lineHeight = 23.sp,
+                            fontSize = 17.sp,
+                            lineHeight = 21.sp,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = (-0.2).sp,
                             color = MaterialTheme.colorScheme.onBackground,

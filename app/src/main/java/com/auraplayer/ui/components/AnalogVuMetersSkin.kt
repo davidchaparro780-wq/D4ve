@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,8 +39,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.auraplayer.audio.AuraHaptic
 import com.auraplayer.data.model.MediaModel
 import kotlin.math.cos
@@ -121,14 +124,35 @@ fun AnalogVuMetersSkin(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "DaVE HI-FI LABORATORY",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFF59E0B),
-                    fontFamily = FontFamily.Monospace,
-                    letterSpacing = 1.2.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Miniatura de la carátula real: el skin Vúmetro también muestra la portada
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF1C1917))
+                            .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (song?.artworkUri != null) {
+                            AsyncImage(
+                                model = song.artworkUri,
+                                contentDescription = "Carátula de ${song.title}",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Text(
+                        text = "DaVE HI-FI LABORATORY",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFF59E0B),
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 1.2.sp
+                    )
+                }
 
                 // Indicador LED PEAK de saturación
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -156,21 +180,24 @@ fun AnalogVuMetersSkin(
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Tamaño cuadrado explícito: fillMaxSize() junto a weight(1f) podía dejar
+                // los cuadrantes sin altura medible y hacerlos invisibles en pantallas compactas.
                 SingleVuMeterDial(
                     label = "LEFT CHANNEL",
                     level = needleLevelL,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxSize()
+                        .aspectRatio(0.82f)
                 )
                 SingleVuMeterDial(
                     label = "RIGHT CHANNEL",
                     level = needleLevelR,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxSize()
+                        .aspectRatio(0.82f)
                 )
             }
 
@@ -179,16 +206,10 @@ fun AnalogVuMetersSkin(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // El título y el artista ya los muestra el reproductor debajo del skin:
+                // aquí solo la especificación técnica para no duplicar textos superpuestos.
                 Text(
-                    text = song?.title ?: "Sin reproducir",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "${song?.artist ?: "DaVE Player"} • DUAL MONO VU DECIBEL MONITOR",
+                    text = "DUAL MONO VU DECIBEL MONITOR",
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF94A3B8),
@@ -227,7 +248,7 @@ private fun SingleVuMeterDial(
             .border(2.dp, Color(0xFF292524), RoundedCornerShape(14.dp))
             .padding(6.dp)
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(14.dp))) {
             val w = size.width
             val h = size.height
             if (w <= 0f || h <= 0f) return@Canvas
