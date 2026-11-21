@@ -977,7 +977,7 @@ fun PlayerScreen(
                 )
 
                 // Header bar (swipe down to dismiss)
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .pointerInput(Unit) {
@@ -987,11 +987,34 @@ fun PlayerScreen(
                                     onDismiss()
                                 }
                             }
-                        },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        }
                 ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // El título va en su propia fila a ancho completo: dentro de la columna
+                    // central con weight(1f) se quedaba sin espacio y se partía en vertical.
+                    Text(
+                        text = "DaVE PLAYER",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showAudioSpecSheet = true },
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = when (eyeComfortMode) {
+                            1 -> Color(0xFFF59E0B)
+                            2 -> Color(0xFFE2E8F0)
+                            else -> MaterialTheme.colorScheme.primary
+                        },
+                        letterSpacing = 2.sp,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
@@ -1013,26 +1036,10 @@ fun PlayerScreen(
                     }
                 }
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { showAudioSpecSheet = true }
-                    ) {
-                        Text(
-                            text = "DaVE PLAYER",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = when (eyeComfortMode) {
-                                1 -> Color(0xFFF59E0B)
-                                2 -> Color(0xFFE2E8F0)
-                                else -> MaterialTheme.colorScheme.primary
-                            },
-                            letterSpacing = 2.sp
-                        )
-                        Spacer(modifier = Modifier.height(3.dp))
                         Row(
-                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            modifier = Modifier
+                                .weight(1f)
+                                .horizontalScroll(rememberScrollState()),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
@@ -1186,7 +1193,6 @@ fun PlayerScreen(
                                 )
                             }
                         }
-                    }
 
                     if (isComfortView) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1282,6 +1288,7 @@ fun PlayerScreen(
                                 )
                             }
                         }
+                    }
                     }
                 }
 
