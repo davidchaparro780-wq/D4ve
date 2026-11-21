@@ -1015,7 +1015,9 @@ fun PlayerScreen(
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable { showAudioSpecSheet = true }
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { showAudioSpecSheet = true }
                     ) {
                         Text(
                             text = "DaVE PLAYER",
@@ -1030,6 +1032,7 @@ fun PlayerScreen(
                         )
                         Spacer(modifier = Modifier.height(3.dp))
                         Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
@@ -1177,6 +1180,8 @@ fun PlayerScreen(
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFFF59E0B),
+                                    maxLines = 1,
+                                    softWrap = false,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
@@ -2534,6 +2539,9 @@ fun PlayerScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -2564,6 +2572,8 @@ fun PlayerScreen(
                                     color = badgeColor,
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false,
                                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                                 )
                             }
@@ -2596,7 +2606,9 @@ fun PlayerScreen(
                                     text = activeHeadphoneProfile,
                                     color = activeAccent,
                                     fontSize = 10.5.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                                 Text("▾", color = activeAccent, fontSize = 9.sp)
                             }
@@ -2633,6 +2645,8 @@ fun PlayerScreen(
                                     color = Color(0xFFC4B5FD),
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false,
                                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                                 )
                             }
