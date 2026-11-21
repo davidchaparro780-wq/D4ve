@@ -1,7 +1,7 @@
 {
-    "versionCode": 205,
-    "versionName": "5.0.5",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.5/app-release.apk",
-    "changelog": "v5.0.5 Correcciones visuales del reproductor.\n- Vumetros analogicos visibles y recortados dentro de su tarjeta (diales L/R con tamano cuadrado explicito).\n- Caratula real en el skin Vumetro y titulo/artista duplicado eliminado.\n- Transicion de skins sin desplazamientos laterales excesivos que dejaban elementos en el borde.\n- Fondo de estelas hiperespaciales mas corto, tenue y escaso.\n- Titulo y artista con espaciado y tamano ajustados para no solaparse.",
+    "versionCode": 206,
+    "versionName": "5.0.6",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.6/app-release.apk",
+    "changelog": "v5.0.6 Correccion de pills verticales en el reproductor.\n- Arreglado el boton Auto del encabezado: se envolvia letra por letra y quedaba como una barra vertical en el borde derecho.\n- Arreglada la pill morada de tonalidad DJ (Camelot): tambien se comprimia y subia en vertical a la derecha.\n- La fila de ajustes del reproductor y la fila de calidad/auriculares/tonalidad tienen scroll horizontal y las etiquetas usan una sola linea sin salto automatico.",
     "fileSizeMb": 6.1
 }
