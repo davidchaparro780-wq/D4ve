@@ -1,7 +1,7 @@
 {
-    "versionCode": 208,
-    "versionName": "5.0.8",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.8/app-release.apk",
-    "changelog": "v5.0.8 Ultimos detalles visuales.\n- Etiquetas LEFT CHANNEL / RIGHT CHANNEL de los vumetros sobre chip oscuro: ya no quedan tapadas por el tornillo del pivote ni cruzadas por la aguja.\n- Pivote y arco de los diales reubicados para dejar espacio a la etiqueta.\n- Las filas de calidad de audio, controles FX y chips VIP Pro envuelven a la siguiente linea en vez de cortarse a la derecha: todas las opciones quedan visibles sin desplazar.",
+    "versionCode": 209,
+    "versionName": "5.0.9",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.9/app-release.apk",
+    "changelog": "v5.0.9 Restauración total del reproductor y solución definitiva de layout.\n- Eliminación total de FlowRow expansivo que deformaba el reproductor y ocultaba los controles.\n- Carruseles horizontales con scroll fluido para Calidad de Audio, FX Studio y Suite VIP Pro.\n- Cabecera compacta de una sola fila con título, selector de skins, confort ocular y herramientas.\n- Proporciones 1:1 acotadas en carátula cuadrada (cuadrática) para evitar desbordes o cortes.\n- Vúmetros analógicos y visualizadores optimizados con contraste perfecto.",
     "fileSizeMb": 6.1
 }

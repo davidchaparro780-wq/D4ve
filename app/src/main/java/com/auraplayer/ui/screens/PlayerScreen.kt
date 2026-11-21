@@ -70,7 +70,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
@@ -92,7 +91,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Bedtime
@@ -272,7 +270,7 @@ import kotlin.math.sin
 
 private const val TAG = "PlayerScreen"
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PlayerScreen(
     currentMedia: MediaModel?,
@@ -979,7 +977,7 @@ fun PlayerScreen(
                 )
 
                 // Header bar (swipe down to dismiss)
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .pointerInput(Unit) {
@@ -989,61 +987,60 @@ fun PlayerScreen(
                                     onDismiss()
                                 }
                             }
-                        }
-                ) {
-                    // El título va en su propia fila a ancho completo: dentro de la columna
-                    // central con weight(1f) se quedaba sin espacio y se partía en vertical.
-                    Text(
-                        text = "DaVE PLAYER",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showAudioSpecSheet = true },
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = when (eyeComfortMode) {
-                            1 -> Color(0xFFF59E0B)
-                            2 -> Color(0xFFE2E8F0)
-                            else -> MaterialTheme.colorScheme.primary
                         },
-                        letterSpacing = 2.sp,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                    Spacer(modifier = Modifier.height(3.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Minimizar",
-                            modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Minimizar",
+                                modifier = Modifier.size(28.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(onClick = {
+                            AuraHaptic.click(view)
+                            triggerPiP()
+                        }, modifier = Modifier.size(36.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.PictureInPictureAlt,
+                                contentDescription = "Modo PiP Cápsula Flotante",
+                                modifier = Modifier.size(19.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
-                    IconButton(onClick = {
-                        AuraHaptic.click(view)
-                        triggerPiP()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.PictureInPictureAlt,
-                            contentDescription = "Modo PiP Cápsula Flotante",
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
 
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            text = "DaVE PLAYER",
+                            modifier = Modifier.clickable { showAudioSpecSheet = true },
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = when (eyeComfortMode) {
+                                1 -> Color(0xFFF59E0B)
+                                2 -> Color(0xFFE2E8F0)
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                            letterSpacing = 1.8.sp,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Row(
                             modifier = Modifier
-                                .weight(1f)
+                                .fillMaxWidth()
                                 .horizontalScroll(rememberScrollState()),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
                         ) {
                             // Pill Vista Cómoda vs Pro
                             Surface(
@@ -1195,6 +1192,7 @@ fun PlayerScreen(
                                 )
                             }
                         }
+                    }
 
                     if (isComfortView) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1291,9 +1289,7 @@ fun PlayerScreen(
                             }
                         }
                     }
-                    }
                 }
-
                 // YouTube Music Style Switcher: [ 🎵 Canción | 🎬 Video ] (solo si la pista contiene video o está en modo video)
                 val hasVideoContent = remember(currentMedia.id, currentMedia.path, isVideoMode) {
                     isVideoMode || currentMedia.isVideo ||
@@ -1447,8 +1443,8 @@ fun PlayerScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    val artDimension = minOf(maxWidth * 0.82f, maxHeight * 0.94f)
-                    val maxArtSize = if (artDimension > 120.dp) artDimension else 210.dp
+                    val artDimension = minOf(maxWidth * 0.85f, maxHeight * 0.95f)
+                    val maxArtSize = artDimension.coerceAtLeast(100.dp)
                     // Ancho real de la carátula en píxeles: las zonas de doble toque (retroceso/favorito/avance)
                     // deben calcularse sobre el tamaño medido, no sobre valores fijos ni sobre Dp crudos.
                     val artWidthPx = with(LocalDensity.current) { maxArtSize.toPx() }
@@ -2482,7 +2478,7 @@ fun PlayerScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedContent(
@@ -2495,8 +2491,8 @@ fun PlayerScreen(
                     ) { t ->
                         Text(
                             text = t,
-                            fontSize = 17.sp,
-                            lineHeight = 21.sp,
+                            fontSize = 18.sp,
+                            lineHeight = 22.sp,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = (-0.2).sp,
                             color = MaterialTheme.colorScheme.onBackground,
@@ -2547,10 +2543,12 @@ fun PlayerScreen(
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
                             modifier = Modifier
@@ -2723,12 +2721,13 @@ fun PlayerScreen(
 
                 if (!isComfortView) {
                     // FX Studio, A-B Looper & Audio Processing Controls Row
-                    FlowRow(
+                    Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Audio FX Studio pill
                     val fxLabel = when {
@@ -3070,12 +3069,13 @@ fun PlayerScreen(
                 }
 
                 // VIP Pro Suite Quick Action Chips Row
-                FlowRow(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Live Sleep Timer & Smart Sensor Chip
                     val isTimerOn = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
