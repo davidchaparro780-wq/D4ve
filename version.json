@@ -1,7 +1,7 @@
 {
-    "versionCode": 207,
-    "versionName": "5.0.7",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.7/app-release.apk",
-    "changelog": "v5.0.7 Titulo del reproductor corregido.\n- El titulo DaVE PLAYER ya no se parte letra por letra en vertical cuando el encabezado tiene muchos iconos (Vista Comoda / Pro).\n- El titulo ahora ocupa su propia fila centrada a ancho completo, con una sola linea sin salto automatico.\n- Los iconos laterales y la fila desplazable de ajustes siguen en la fila inferior del encabezado, sin solaparse.",
+    "versionCode": 208,
+    "versionName": "5.0.8",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.8/app-release.apk",
+    "changelog": "v5.0.8 Ultimos detalles visuales.\n- Etiquetas LEFT CHANNEL / RIGHT CHANNEL de los vumetros sobre chip oscuro: ya no quedan tapadas por el tornillo del pivote ni cruzadas por la aguja.\n- Pivote y arco de los diales reubicados para dejar espacio a la etiqueta.\n- Las filas de calidad de audio, controles FX y chips VIP Pro envuelven a la siguiente linea en vez de cortarse a la derecha: todas las opciones quedan visibles sin desplazar.",
     "fileSizeMb": 6.1
 }
