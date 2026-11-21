@@ -238,6 +238,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -1434,6 +1435,9 @@ fun PlayerScreen(
                 ) {
                     val artDimension = minOf(maxWidth * 0.82f, maxHeight * 0.94f)
                     val maxArtSize = if (artDimension > 120.dp) artDimension else 210.dp
+                    // Ancho real de la carátula en píxeles: las zonas de doble toque (retroceso/favorito/avance)
+                    // deben calcularse sobre el tamaño medido, no sobre valores fijos ni sobre Dp crudos.
+                    val artWidthPx = with(LocalDensity.current) { maxArtSize.toPx() }
                     if (isVideoMode) {
                         // Video Player Screen
                         val activeExo = PlaybackService.activePlayer
@@ -1692,7 +1696,7 @@ fun PlayerScreen(
                                                 Toast.makeText(context, "🖼️ Carátula Cuadrada Completa HD", Toast.LENGTH_SHORT).show()
                                             },
                                             onDoubleTap = { offset ->
-                                                val w = 300f
+                                                val w = artWidthPx
                                                 if (offset.x < w * 0.35f) {
                                                     onSeekRelative(-10000L)
                                                     seekBadgeText = "-10s"
@@ -1818,7 +1822,7 @@ fun PlayerScreen(
                                             showMysteriousThemeDialog = true
                                         },
                                         onDoubleTap = { offset ->
-                                            val w = 300f
+                                            val w = artWidthPx
                                             if (offset.x < w * 0.35f) {
                                                 onSeekRelative(-10000L)
                                                 seekBadgeText = "-10s"
@@ -1901,7 +1905,7 @@ fun PlayerScreen(
                                         cycleVisualizerSkin()
                                     },
                                     onDoubleTap = { offset ->
-                                        val w = maxArtSize.value
+                                        val w = artWidthPx
                                         if (offset.x < w * 0.35f) {
                                             onSeekRelative(-10000L)
                                             seekBadgeText = "-10s"
@@ -2032,7 +2036,7 @@ fun PlayerScreen(
                                         cycleVisualizerSkin()
                                     },
                                     onDoubleTap = { offset ->
-                                        val w = maxArtSize.value
+                                        val w = artWidthPx
                                         if (offset.x < w * 0.35f) {
                                             onSeekRelative(-10000L)
                                             seekBadgeText = "-10s"
@@ -2071,7 +2075,7 @@ fun PlayerScreen(
                                         showArcaneFrequencyDialog = true
                                     },
                                     onDoubleTap = { offset ->
-                                        val w = maxArtSize.value
+                                        val w = artWidthPx
                                         if (offset.x < w * 0.35f) {
                                             onSeekRelative(-10000L)
                                             seekBadgeText = "-10s"
