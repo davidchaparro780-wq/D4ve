@@ -1,7 +1,7 @@
 {
-    "versionCode": 209,
-    "versionName": "5.0.9",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.9/app-release.apk",
-    "changelog": "v5.0.9 Restauración total del reproductor y solución definitiva de layout.\n- Eliminación total de FlowRow expansivo que deformaba el reproductor y ocultaba los controles.\n- Carruseles horizontales con scroll fluido para Calidad de Audio, FX Studio y Suite VIP Pro.\n- Cabecera compacta de una sola fila con título, selector de skins, confort ocular y herramientas.\n- Proporciones 1:1 acotadas en carátula cuadrada (cuadrática) para evitar desbordes o cortes.\n- Vúmetros analógicos y visualizadores optimizados con contraste perfecto.",
+    "versionCode": 210,
+    "versionName": "5.0.10",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.10/app-release.apk",
+    "changelog": "v5.0.10 Limpieza definitiva de elementos redundantes y correcciones en Vista Cómoda:\n- Eliminados accesos duplicados de alarma/temporizador, audífonos, tema aura, modo cálido y modo auto en la cabecera.\n- Cabecera limpia y unificada con minimizador, PiP, DaVE PLAYER, selector de skins, botón cómoda/pro y acciones esenciales (favorito, letras, cola, menú de herramientas).\n- Solucionado bug en Vista Cómoda: mensajes de activación corregidos, alternancia de letras bidireccional y controles consistentes.\n- Corrección en cola de reproducción: selección infalible por ID de canción garantizando la pista correcta.",
     "fileSizeMb": 6.1
 }

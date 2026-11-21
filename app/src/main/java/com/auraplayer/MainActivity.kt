@@ -2962,15 +2962,17 @@ fun AuraApp(
                     currentMedia = song
                     playlistManager.recordPlay(song.id)
                     controller?.let { ctrl ->
-                        if (index in 0 until ctrl.mediaItemCount) {
-                            ctrl.seekToDefaultPosition(index)
-                        } else {
-                            for (i in 0 until ctrl.mediaItemCount) {
-                                if (ctrl.getMediaItemAt(i).mediaId == song.id.toString()) {
-                                    ctrl.seekToDefaultPosition(i)
-                                    break
-                                }
+                        var targetIdx = -1
+                        for (i in 0 until ctrl.mediaItemCount) {
+                            if (ctrl.getMediaItemAt(i).mediaId == song.id.toString()) {
+                                targetIdx = i
+                                break
                             }
+                        }
+                        if (targetIdx != -1) {
+                            ctrl.seekToDefaultPosition(targetIdx)
+                        } else if (index in 0 until ctrl.mediaItemCount) {
+                            ctrl.seekToDefaultPosition(index)
                         }
                         ctrl.play()
                     }

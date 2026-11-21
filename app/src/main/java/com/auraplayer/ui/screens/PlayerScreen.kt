@@ -411,6 +411,10 @@ fun PlayerScreen(
     fun setComfortView(enabled: Boolean) {
         isComfortView = enabled
         comfortPrefs.edit().putBoolean("is_comfort_view", enabled).apply()
+        val msg = if (enabled) "🌿 Vista Cómoda activada" else "🎛️ Vista Pro Completa (Herramientas FX y VIP)"
+        try {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        } catch (_: Exception) {}
     }
 
     fun cycleEyeComfortMode() {
@@ -991,6 +995,7 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Left: Minimize & PiP
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
                             Icon(
@@ -1013,6 +1018,7 @@ fun PlayerScreen(
                         }
                     }
 
+                    // Center: DaVE PLAYER & Clean Core Pills
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
@@ -1042,27 +1048,26 @@ fun PlayerScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
                         ) {
-                            // Pill Vista Cómoda vs Pro
+                            // Pill 1: Vista Cómoda vs Pro Switcher
                             Surface(
                                 onClick = {
                                     AuraHaptic.click(view)
                                     setComfortView(!isComfortView)
-                                    Toast.makeText(context, if (!isComfortView) "🌿 Vista Cómoda activada" else "🎛️ Vista Pro Completa", Toast.LENGTH_SHORT).show()
                                 },
                                 shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+                                color = if (isComfortView) Color(0xFF10B981).copy(alpha = 0.20f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                border = BorderStroke(1.dp, if (isComfortView) Color(0xFF10B981).copy(alpha = 0.60f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
                             ) {
                                 Text(
                                     text = if (isComfortView) "🌿 Cómoda" else "🎛️ Pro",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = if (isComfortView) Color(0xFF10B981) else MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
 
-                            // Pill Selector de Skin (Carátula Cuadrada / Vinilo / Cassette / CD...)
+                            // Pill 2: Selector de Skin (Carátula / Vinilo / Cassette / CD...)
                             val currentSkinLabel = when (centerVisualizerMode) {
                                 0 -> "🖼️ Carátula"
                                 1 -> "💿 Vinilo"
@@ -1090,203 +1095,59 @@ fun PlayerScreen(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
-
-                            // Floating Sleep Timer Countdown Pill
-                            val isSleepTimerRunning = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
-                            val sleepRemainingSec = sleepTimerManager?.remainingSeconds?.collectAsState()?.value ?: 0
-                            if (isSleepTimerRunning && sleepRemainingSec > 0) {
-                                Surface(
-                                    onClick = {
-                                        AuraHaptic.click(view)
-                                        sleepTimerManager?.extendTimer(10)
-                                        Toast.makeText(context, "⏳ +10 min al temporizador", Toast.LENGTH_SHORT).show()
-                                    },
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFF6366F1).copy(alpha = 0.22f),
-                                    border = BorderStroke(1.dp, Color(0xFF818CF8).copy(alpha = 0.6f))
-                                ) {
-                                    val min = sleepRemainingSec / 60
-                                    val sec = sleepRemainingSec % 60
-                                    Text(
-                                        text = String.format("⏳ %02d:%02d (+10m)", min, sec),
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFA5B4FC),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-
-                            // Pill Confort Ocular (Dinámico / Cálido / OLED)
-                            Surface(
-                                onClick = {
-                                    AuraHaptic.click(view)
-                                    cycleEyeComfortMode()
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                color = when (eyeComfortMode) {
-                                    1 -> Color(0xFFF59E0B).copy(alpha = 0.22f)
-                                    2 -> Color(0xFFE2E8F0).copy(alpha = 0.15f)
-                                    else -> Color.White.copy(alpha = 0.08f)
-                                },
-                                border = BorderStroke(1.dp, when (eyeComfortMode) {
-                                    1 -> Color(0xFFF59E0B)
-                                    2 -> Color(0xFF94A3B8)
-                                    else -> Color.White.copy(alpha = 0.15f)
-                                })
-                            ) {
-                                Text(
-                                    text = when (eyeComfortMode) {
-                                        1 -> "🌙 Cálido"
-                                        2 -> "⬛ OLED"
-                                        else -> "🎨 Color"
-                                    },
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = when (eyeComfortMode) {
-                                        1 -> Color(0xFFF59E0B)
-                                        2 -> Color(0xFFE2E8F0)
-                                        else -> Color.White
-                                    },
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                )
-                            }
-
-                            // Pill Aura Misteriosa (Selector In-Player)
-                            Surface(
-                                onClick = {
-                                    AuraHaptic.click(view)
-                                    showMysteriousThemeDialog = true
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.22f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f))
-                            ) {
-                                Text(
-                                    text = "🔮 Aura",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                )
-                            }
-
-                            // Pill Modo Conducción / Coche 🚗
-                            Surface(
-                                onClick = {
-                                    AuraHaptic.click(view)
-                                    showCarDriveModeDialog = true
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFFF59E0B).copy(alpha = 0.22f),
-                                border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.55f))
-                            ) {
-                                Text(
-                                    text = "🚗 Auto",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFF59E0B),
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                )
-                            }
                         }
                     }
 
-                    if (isComfortView) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Headphones Hub Button
-                            IconButton(onClick = onOpenHeadphones) {
-                                Icon(
-                                    imageVector = Icons.Default.Headphones,
-                                    contentDescription = "Mis Audífonos & Audio",
-                                    tint = if (isHeadphonesConnected) Color(0xFF10B981) else MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Queue Button
-                            IconButton(onClick = { showQueueSheet = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.QueueMusic,
-                                    contentDescription = "Cola de Reproducción",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-
-                            // Sleep Timer
-                            IconButton(onClick = onOpenSleepTimer) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = "Temporizador",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
+                    // Right: Unified Action Buttons (Favorito, Letras, Cola, Más herramientas)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        // 1. Favorito
+                        IconButton(onClick = {
+                            AuraHaptic.heavy(view)
+                            onToggleFavorite()
+                            showHeartBurst = true
+                        }, modifier = Modifier.size(34.dp)) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorito",
+                                tint = if (isFavorite) Color(0xFFEC4899) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
-                    } else {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            // 1. Favorite Toggle
-                            IconButton(onClick = {
-                                AuraHaptic.heavy(view)
-                                onToggleFavorite()
-                                showHeartBurst = true
-                            }) {
-                                Icon(
-                                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                    contentDescription = "Favorito",
-                                    tint = if (isFavorite) Color(0xFFEC4899) else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
 
-                            // 2. Lyrics / Vinyl Toggle
-                            IconButton(onClick = { showLyricsView = !showLyricsView }) {
-                                Icon(
-                                    imageVector = if (showLyricsView) Icons.Default.Album else Icons.Default.Mic,
-                                    contentDescription = "Letras",
-                                    tint = if (showLyricsView) Color(0xFFEC4899) else MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
+                        // 2. Letras / Visualizador Toggle
+                        IconButton(onClick = { showLyricsView = !showLyricsView }, modifier = Modifier.size(34.dp)) {
+                            Icon(
+                                imageVector = if (showLyricsView) Icons.Default.Album else Icons.Default.Mic,
+                                contentDescription = "Letras",
+                                tint = if (showLyricsView) Color(0xFFEC4899) else MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
 
-                            // 3. Queue Button (Musicolet Style)
-                            IconButton(onClick = { showQueueSheet = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.QueueMusic,
-                                    contentDescription = "Cola de Reproducción",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
+                        // 3. Cola de Reproducción
+                        IconButton(onClick = { showQueueSheet = true }, modifier = Modifier.size(34.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.QueueMusic,
+                                contentDescription = "Cola de Reproducción",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
 
-                            // 4. Sleep Timer
-                            IconButton(onClick = onOpenSleepTimer) {
-                                Icon(
-                                    imageVector = Icons.Default.Timer,
-                                    contentDescription = "Temporizador",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // 5. More Player Tools (Headphones, Car Mode, StandBy, Shake, Pocket Lock, Delete)
-                            IconButton(onClick = {
-                                AuraHaptic.click(view)
-                                showMoreToolsSheet = true
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Más herramientas de reproducción",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
+                        // 4. Más Herramientas (Audífonos, Temporizador, Confort Ocular, Aura, etc.)
+                        IconButton(onClick = {
+                            AuraHaptic.click(view)
+                            showMoreToolsSheet = true
+                        }, modifier = Modifier.size(34.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Más herramientas de reproducción",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
@@ -3815,147 +3676,72 @@ fun PlayerScreen(
                     }
                 }
 
-                // Ergonomic Comfort Bar & Quick Pro Switcher
-                if (isComfortView) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Quick Favorite with heart burst
-                        IconButton(
-                            onClick = {
-                                AuraHaptic.click(view)
-                                onToggleFavorite()
-                                if (!isFavorite) showHeartBurst = true
-                            },
-                            modifier = Modifier.size(40.dp).bounceClick()
-                        ) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
-                                tint = if (isFavorite) Color(0xFFFF2D55) else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        // Lyrics
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
-                            modifier = Modifier.clickable {
-                                AuraHaptic.click(view)
-                                showLyricsView = true
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Mic,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = "Letras",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-
-                        // Booster 200%
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = if (boostPercent > 100) Color(0xFFFF5722).copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                            border = BorderStroke(1.dp, if (boostPercent > 100) Color(0xFFFF5722).copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
-                            modifier = Modifier.clickable {
-                                AuraHaptic.click(view)
-                                showVolumeBoosterDialog = true
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.VolumeUp,
-                                    contentDescription = null,
-                                    tint = if (boostPercent > 100) Color(0xFFFF5722) else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = if (boostPercent > 100) "Booster $boostPercent%" else "Booster",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (boostPercent > 100) Color(0xFFFF7043) else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-
-                        // Pro Suite Access Pill
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
-                            modifier = Modifier.clickable {
-                                AuraHaptic.click(view)
-                                setComfortView(false)
-                                Toast.makeText(context, "🎛️ Suite Pro Desplegada (30+ herramientas)", Toast.LENGTH_SHORT).show()
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tune,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = "Suite Pro",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    // Pill to easily return to Zen/Comfort view
+                // Ergonomic Quick Controls & View Switcher
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Quick Volume Booster
                     Surface(
                         shape = RoundedCornerShape(20.dp),
-                        color = Color(0xFF10B981).copy(alpha = 0.15f),
-                        border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.4f)),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                AuraHaptic.click(view)
-                                setComfortView(true)
-                                Toast.makeText(context, "🌿 Modo Cómodo (Zen) Activado", Toast.LENGTH_SHORT).show()
-                            }
+                        color = if (boostPercent > 100) Color(0xFFFF5722).copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                        border = BorderStroke(1.dp, if (boostPercent > 100) Color(0xFFFF5722).copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
+                        modifier = Modifier.clickable {
+                            AuraHaptic.click(view)
+                            showVolumeBoosterDialog = true
+                        }
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.VolumeUp,
+                                contentDescription = null,
+                                tint = if (boostPercent > 100) Color(0xFFFF5722) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(15.dp)
+                            )
                             Text(
-                                text = "🌿 Volver a Vista Cómoda",
+                                text = if (boostPercent > 100) "Booster $boostPercent%" else "Booster",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (boostPercent > 100) Color(0xFFFF7043) else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    // Switch between Comfort and Pro View
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isComfortView) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color(0xFF10B981).copy(alpha = 0.15f),
+                        border = BorderStroke(1.dp, if (isComfortView) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color(0xFF10B981).copy(alpha = 0.4f)),
+                        modifier = Modifier.clickable {
+                            AuraHaptic.click(view)
+                            setComfortView(!isComfortView)
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = null,
+                                tint = if (isComfortView) MaterialTheme.colorScheme.primary else Color(0xFF10B981),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = if (isComfortView) "🎛️ Vista Pro" else "🌿 Vista Cómoda",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF10B981)
+                                color = if (isComfortView) MaterialTheme.colorScheme.primary else Color(0xFF10B981)
                             )
                         }
                     }
@@ -4286,7 +4072,7 @@ fun PlayerScreen(
     if (showQueueSheet) {
         var queueDisplay by remember(queueSongs) { mutableStateOf(queueSongs) }
         val queueListState = rememberLazyListState()
-        LaunchedEffect(Unit) {
+        LaunchedEffect(currentMedia.id, queueDisplay.size) {
             val currentIdx = queueDisplay.indexOfFirst { it.id == currentMedia.id }
             if (currentIdx > 0) {
                 queueListState.scrollToItem((currentIdx - 1).coerceAtLeast(0))
