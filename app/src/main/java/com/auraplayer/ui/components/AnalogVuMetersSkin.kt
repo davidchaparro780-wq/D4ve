@@ -254,8 +254,9 @@ private fun SingleVuMeterDial(
             if (w <= 0f || h <= 0f) return@Canvas
 
             val pivotX = w / 2f
-            val pivotY = h * 0.95f
-            val radius = h * 0.80f
+            // El pivote antes estaba en 0.95h y su tornillo tapaba la etiqueta del canal.
+            val pivotY = h * 0.84f
+            val radius = h * 0.70f
 
             // Arco normal (-20 a 0 dB en negro)
             val startAngle = 210f
@@ -366,19 +367,25 @@ private fun SingleVuMeterDial(
             )
         }
 
-        // Etiqueta del canal en la parte inferior
+        // Etiqueta del canal sobre chip oscuro: contrasta con el ámbar y nunca
+        // queda cruzada por la aguja ni por el tornillo del pivote.
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 2.dp)
+                .padding(bottom = 1.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0xFF292524).copy(alpha = 0.88f))
+                .padding(horizontal = 4.dp, vertical = 1.dp)
         ) {
             Text(
                 text = label,
-                fontSize = 8.sp,
+                fontSize = 7.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF44403C),
+                color = Color(0xFFFDE68A),
                 fontFamily = FontFamily.Monospace,
-                letterSpacing = 0.8.sp
+                letterSpacing = 0.5.sp,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

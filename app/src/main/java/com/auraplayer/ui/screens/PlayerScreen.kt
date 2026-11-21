@@ -70,6 +70,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
@@ -91,6 +92,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Bedtime
@@ -270,7 +272,7 @@ import kotlin.math.sin
 
 private const val TAG = "PlayerScreen"
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun PlayerScreen(
     currentMedia: MediaModel?,
@@ -2545,12 +2547,10 @@ fun PlayerScreen(
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Surface(
                             modifier = Modifier
@@ -2723,13 +2723,12 @@ fun PlayerScreen(
 
                 if (!isComfortView) {
                     // FX Studio, A-B Looper & Audio Processing Controls Row
-                    Row(
+                    FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     // Audio FX Studio pill
                     val fxLabel = when {
@@ -3071,13 +3070,12 @@ fun PlayerScreen(
                 }
 
                 // VIP Pro Suite Quick Action Chips Row
-                Row(
+                FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
                         .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     // Live Sleep Timer & Smart Sensor Chip
                     val isTimerOn = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
