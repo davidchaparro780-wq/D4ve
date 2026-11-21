@@ -1,7 +1,7 @@
 {
-    "versionCode": 211,
-    "versionName": "5.0.11",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.11/app-release.apk",
-    "changelog": "v5.0.11 Super Polish de UI y Animaciones Fluidas:\n- Animación estilo Apple Music de respiración y spring en la portada/visualizador central (expansión dinámica al reproducir y reposo al pausar).\n- Transición de acordeón con física de resorte y desvanecimiento suave al alternar entre Vista Cómoda y Vista Pro.\n- Micro-ecualizador en vivo de tres barras neón danzantes junto a 'DaVE PLAYER' en la cabecera durante la reproducción.\n- Retroceso háptico y recoil físico elástico en los botones Anterior y Siguiente al saltar de pista.\n- Micro-interacción táctil 'bounceClick' aplicada en todos los botones de cabecera, pills y conmutadores.\n- Destello shimmer metálico animado sobre la insignia Hi-Fi Audio / Lossless mientras suena la música.",
+    "versionCode": 212,
+    "versionName": "5.0.12",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.12/app-release.apk",
+    "changelog": "v5.0.12 Dimensión Arcana & UI Misteriosa:\n- Nuevo chip de acceso directo '🔮 Enigma' en la cabecera para activar temas cósmicos y paletas arcanas (Misterio Arcano, Eclipse Enigmático, Espectro Abisal, Nebulosa).\n- Banner rúnico esotérico 'NecronomicScrollText' interactivo con rotación de runas cósmicas (ᛟ ᚢ ᛏ ᚱ ᛈ ᚨ ᛉ) sobre la barra de progreso.\n- Activación automática de la atmósfera mística completa (Bruma Espectral PhantomMist, Constelaciones Estelares reactivas al bajo y Anillos Orbitales Celestiales) en modo Arcano y en el Monolito de Obsidiana.\n- Chip y acceso en Pro Suite a Frecuencias Sagradas Solfeggio en vivo (432Hz, 528Hz ADN, 639Hz Cuántica).\n- Nuevo chip interactivo del Oráculo de DaVE con orbe místico 3D, predicción de escucha y lectura del destino sonoro.\n- Nuevas opciones de Dimensión Arcana, Frecuencias Sagradas y Oráculo en el menú 'Más herramientas'.",
     "fileSizeMb": 6.1
 }

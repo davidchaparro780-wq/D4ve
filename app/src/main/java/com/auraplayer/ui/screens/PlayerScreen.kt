@@ -156,6 +156,8 @@ import com.auraplayer.ui.components.PhantomMistOverlay
 import com.auraplayer.audio.LunarPhaseManager
 import com.auraplayer.ui.components.StellarConstellationBanner
 import com.auraplayer.ui.components.NecronomicScrollText
+import com.auraplayer.ui.components.OracleCard
+import com.auraplayer.ui.components.predictDailySong
 import com.auraplayer.data.repository.PlaylistManager
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastRewind
@@ -449,6 +451,7 @@ fun PlayerScreen(
     val lunarPhase = remember { LunarPhaseManager.getCurrentPhase() }
     var currentArcaneHz by remember { mutableIntStateOf(432) }
     var showArcaneFrequencyDialog by remember { mutableStateOf(false) }
+    var showOracleCard by remember { mutableStateOf(false) }
 
     var showFxDialog by remember { mutableStateOf(false) }
     var showCutterDialog by remember { mutableStateOf(false) }
@@ -923,7 +926,7 @@ fun PlayerScreen(
                         isPlaying = isPlaying
                     )
 
-                    if (isMysteriousTheme) {
+                    if (isMysteriousTheme || centerVisualizerMode == 7) {
                         PhantomMistOverlay(
                             accentColor = activeAccent,
                             secondaryColor = MaterialTheme.colorScheme.secondary,
@@ -1174,6 +1177,34 @@ fun PlayerScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
+                            }
+
+                            // Pill 3: Modo Arcano & Misterioso Enigma
+                            Surface(
+                                onClick = {
+                                    AuraHaptic.click(view)
+                                    showMysteriousThemeDialog = true
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isMysteriousTheme) Color(0xFF7C3AED).copy(alpha = 0.28f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isMysteriousTheme) Brush.horizontalGradient(listOf(Color(0xFFA855F7), Color(0xFF00E5FF)))
+                                    else Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.40f), Color(0xFFA855F7).copy(alpha = 0.30f)))
+                                ),
+                                modifier = Modifier.bounceClick()
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = if (isMysteriousTheme) "🔮 Arcano: ON" else "🔮 Enigma",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isMysteriousTheme) Color(0xFFE9D5FF) else MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         }
                     }
@@ -1563,7 +1594,7 @@ fun PlayerScreen(
                                     )
                                 }
 
-                                if (isMysteriousTheme) {
+                                if (isMysteriousTheme || centerVisualizerMode == 7) {
                                     ArcaneRunicOrbit(
                                         accentColor = activeAccent,
                                         secondaryColor = MaterialTheme.colorScheme.secondary,
@@ -2620,6 +2651,19 @@ fun PlayerScreen(
 
                 }
 
+                if (isMysteriousTheme || centerVisualizerMode == 7) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    NecronomicScrollText(
+                        accentColor = activeAccent,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showArcaneFrequencyDialog = true
+                            }
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(6.dp))
 
                 // Seek Bar & Timeline
@@ -3042,6 +3086,46 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Frecuencias Arcanas Solfeggio Chip (432Hz / 528Hz)
+                    FilterChip(
+                        selected = currentArcaneHz != 440,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            showArcaneFrequencyDialog = true
+                        },
+                        label = {
+                            Text(
+                                text = if (currentArcaneHz != 440) "🔮 $currentArcaneHz Hz Solfeggio" else "🔮 Frecuencias 432Hz",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFA855F7).copy(alpha = 0.28f),
+                            selectedLabelColor = Color(0xFFE9D5FF),
+                            labelColor = Color(0xFFC084FC)
+                        )
+                    )
+
+                    // Oráculo Arcano DaVE Chip
+                    FilterChip(
+                        selected = false,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            showOracleCard = true
+                        },
+                        label = {
+                            Text(
+                                text = "👁️ Oráculo Arcano",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            labelColor = Color(0xFF00E5FF)
+                        )
+                    )
+
                     // Live Sleep Timer & Smart Sensor Chip
                     val isTimerOn = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
                     val sleepSec = sleepTimerManager?.remainingSeconds?.collectAsState()?.value ?: 0
@@ -4465,6 +4549,9 @@ fun PlayerScreen(
             onOpenMinidisc = { showMinidiscDialog = true },
             onOpenHoloCockpit = { showHoloCockpitDialog = true },
             onOpenSanctuary = { showSanctuaryDialog = true },
+            onOpenMysteriousThemes = { showMysteriousThemeDialog = true },
+            onOpenArcaneFrequency = { showArcaneFrequencyDialog = true },
+            onOpenOracle = { showOracleCard = true },
             onToggleShake = onToggleShake,
             onPocketLock = { isPocketLocked = true },
             onDeleteSong = { showDeleteConfirmDialog = true },
@@ -4965,6 +5052,31 @@ fun PlayerScreen(
                 showArcaneFrequencyDialog = false
             },
             onDismiss = { showArcaneFrequencyDialog = false }
+        )
+    }
+
+    // El Oráculo de DaVE: Predicción Esotérica de la Canción del Día
+    if (showOracleCard) {
+        val candidateSongs = remember(queueSongs, currentMedia) {
+            if (queueSongs.isNotEmpty()) queueSongs else listOf(currentMedia)
+        }
+        val predicted = remember(candidateSongs) {
+            predictDailySong(candidateSongs, context.getSharedPreferences("dave_oracle", Context.MODE_PRIVATE))
+                ?: Pair(currentMedia, 92)
+        }
+        OracleCard(
+            predictedSong = predicted.first,
+            confidencePercent = predicted.second,
+            onPlay = {
+                val idx = queueSongs.indexOfFirst { it.id == predicted.first.id }
+                if (idx >= 0) {
+                    onQueueSongClick(predicted.first, idx)
+                } else {
+                    onPlayPauseClick()
+                }
+                showOracleCard = false
+            },
+            onDismiss = { showOracleCard = false }
         )
     }
 

@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -69,6 +71,9 @@ fun PlayerMoreOptionsSheet(
     onOpenMinidisc: () -> Unit = {},
     onOpenHoloCockpit: () -> Unit = {},
     onOpenSanctuary: () -> Unit = {},
+    onOpenMysteriousThemes: () -> Unit = {},
+    onOpenArcaneFrequency: () -> Unit = {},
+    onOpenOracle: () -> Unit = {},
     onToggleShake: () -> Unit,
     onPocketLock: () -> Unit,
     onDeleteSong: () -> Unit,
@@ -311,6 +316,51 @@ fun PlayerMoreOptionsSheet(
                         AuraHaptic.heavy(view)
                         onDismiss()
                         onOpenSanctuary()
+                    }
+                )
+
+                OptionDivider()
+
+                // 14. Portal Arcano & Temas Misteriosos
+                PlayerToolItem(
+                    icon = Icons.Default.AutoAwesome,
+                    iconTint = Color(0xFFA855F7),
+                    title = "🔮 Dimensión Arcana & Temas Misteriosos",
+                    subtitle = "Vacío cósmico, amatista de obsidiana, runas y espectro abisal",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenMysteriousThemes()
+                    }
+                )
+
+                OptionDivider()
+
+                // 15. Frecuencias Sagradas Solfeggio
+                PlayerToolItem(
+                    icon = Icons.Default.Tune,
+                    iconTint = Color(0xFF00E5FF),
+                    title = "🎚️ Frecuencias Sagradas Solfeggio",
+                    subtitle = "Sintonizador de resonancia 432Hz, 528Hz ADN y armónicos",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenArcaneFrequency()
+                    }
+                )
+
+                OptionDivider()
+
+                // 16. Oráculo de DaVE
+                PlayerToolItem(
+                    icon = Icons.Default.Star,
+                    iconTint = Color(0xFFFFD700),
+                    title = "👁️ El Oráculo de DaVE",
+                    subtitle = "Predicción esotérica y lectura del destino sonoro del día",
+                    onClick = {
+                        AuraHaptic.heavy(view)
+                        onDismiss()
+                        onOpenOracle()
                     }
                 )
 
