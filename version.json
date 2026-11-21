@@ -1,7 +1,7 @@
 {
-    "versionCode": 206,
-    "versionName": "5.0.6",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.6/app-release.apk",
-    "changelog": "v5.0.6 Correccion de pills verticales en el reproductor.\n- Arreglado el boton Auto del encabezado: se envolvia letra por letra y quedaba como una barra vertical en el borde derecho.\n- Arreglada la pill morada de tonalidad DJ (Camelot): tambien se comprimia y subia en vertical a la derecha.\n- La fila de ajustes del reproductor y la fila de calidad/auriculares/tonalidad tienen scroll horizontal y las etiquetas usan una sola linea sin salto automatico.",
+    "versionCode": 207,
+    "versionName": "5.0.7",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.7/app-release.apk",
+    "changelog": "v5.0.7 Titulo del reproductor corregido.\n- El titulo DaVE PLAYER ya no se parte letra por letra en vertical cuando el encabezado tiene muchos iconos (Vista Comoda / Pro).\n- El titulo ahora ocupa su propia fila centrada a ancho completo, con una sola linea sin salto automatico.\n- Los iconos laterales y la fila desplazable de ajustes siguen en la fila inferior del encabezado, sin solaparse.",
     "fileSizeMb": 6.1
 }
