@@ -929,7 +929,7 @@ fun MusicScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                items(searchHistoryManager.historyList) { historyItem ->
+                items(searchHistoryManager.historyList, key = { it }) { historyItem ->
                     val isCurrent = searchQuery.equals(historyItem, ignoreCase = true)
                     Box(
                         modifier = Modifier
@@ -2177,7 +2177,7 @@ fun MusicScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = 140.dp)
                         ) {
-                            items(folderGroups.keys.toList()) { folderName ->
+                            items(folderGroups.keys.toList(), key = { it }) { folderName ->
                                 val folderSongs = folderGroups[folderName] ?: emptyList()
                                 Box(
                                     modifier = Modifier
@@ -2378,7 +2378,7 @@ fun MusicScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = 140.dp)
                         ) {
-                            items(artistGroups.keys.toList()) { artistName ->
+                            items(artistGroups.keys.toList(), key = { it }) { artistName ->
                                 val artistSongs = artistGroups[artistName] ?: emptyList()
                                 Box(
                                     modifier = Modifier

@@ -37,6 +37,23 @@ class RealtimeVisualizerManager private constructor() {
     private var trebleEnergy: Float = 0.06f
     private var lastDataTime: Long = 0L
 
+    // Búferes y tablas precalculadas para evitar asignaciones continuas en el hilo de audio (~50 Hz)
+    private val reusableMagnitudes = FloatArray(512)
+    private var cachedBinCount: Int = -1
+    private val bandStartBins = IntArray(NUM_BANDS)
+    private val bandEndBins = IntArray(NUM_BANDS)
+
+    private fun updateBandBinsIfNeeded(binCount: Int) {
+        if (cachedBinCount == binCount) return
+        cachedBinCount = binCount
+        for (b in 0 until NUM_BANDS) {
+            val fracStart = (b.toFloat() / NUM_BANDS)
+            val fracEnd = ((b + 1).toFloat() / NUM_BANDS)
+            bandStartBins[b] = (Math.pow(fracStart.toDouble(), 1.6) * (binCount - 1)).toInt().coerceIn(0, binCount - 1)
+            bandEndBins[b] = (Math.pow(fracEnd.toDouble(), 1.6) * (binCount - 1)).toInt().coerceIn(bandStartBins[b], binCount - 1)
+        }
+    }
+
     // Energía de bajo publicada como estado observable: los Canvas que la recolectan
     // redibujan al ritmo real del FFT (~20 Hz) en vez de esperar la recomposición del positionMs (400 ms)
     private val _bassEnergyState = MutableStateFlow(0.08f)
@@ -115,35 +132,33 @@ class RealtimeVisualizerManager private constructor() {
     private fun processFft(bytes: ByteArray) {
         lastDataTime = SystemClock.uptimeMillis()
         val n = bytes.size
-        val binCount = n / 2
+        val binCount = (n / 2).coerceIn(1, reusableMagnitudes.size)
         if (binCount <= 0) return
 
-        // Compute magnitude for each bin
-        val magnitudes = FloatArray(binCount)
+        updateBandBinsIfNeeded(binCount)
+
+        // Compute magnitude for each bin directly into reusable array (0 allocations)
         for (k in 0 until binCount) {
             val r = bytes[2 * k].toFloat()
             val im = if (2 * k + 1 < n) bytes[2 * k + 1].toFloat() else 0f
-            magnitudes[k] = hypot(r, im)
+            reusableMagnitudes[k] = hypot(r, im)
         }
 
-        // Map bins into 32 bands with logarithmic frequency spacing
+        // Map bins into 32 bands with precomputed logarithmic frequency spacing
         var totalBass = 0f
         var totalTreble = 0f
 
         for (b in 0 until NUM_BANDS) {
-            // Logarithmic index spread: low frequencies get fine bins, highs get grouped
-            val fracStart = (b.toFloat() / NUM_BANDS)
-            val fracEnd = ((b + 1).toFloat() / NUM_BANDS)
-            val startBin = (Math.pow(fracStart.toDouble(), 1.6) * (binCount - 1)).toInt().coerceIn(0, binCount - 1)
-            val endBin = (Math.pow(fracEnd.toDouble(), 1.6) * (binCount - 1)).toInt().coerceIn(startBin, binCount - 1)
+            val startBin = bandStartBins[b]
+            val endBin = bandEndBins[b]
 
             var bandSum = 0f
             var count = 0
             for (k in startBin..endBin) {
-                bandSum += magnitudes[k]
+                bandSum += reusableMagnitudes[k]
                 count++
             }
-            val avg = if (count > 0) bandSum / count else magnitudes[startBin]
+            val avg = if (count > 0) bandSum / count else reusableMagnitudes[startBin]
 
             // Normalize and enhance dynamics (bass slightly boosted, treble balanced)
             val boost = if (b < 8) 1.25f else if (b < 18) 1.0f else 0.85f

@@ -119,7 +119,8 @@ fun DynamicWaveformSeekbar(
                 detectTapGestures(
                     onPress = { offset ->
                         touchX = offset.x
-                        val newProgress = (offset.x / size.width.toFloat()).coerceIn(0f, 1f)
+                        val w = if (size.width > 0) size.width.toFloat() else seekbarWidth.coerceAtLeast(1f)
+                        val newProgress = (offset.x / w).coerceIn(0f, 1f)
                         val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
                         if (barIdx != lastHapticBarIndex) {
                             lastHapticBarIndex = barIdx
@@ -138,7 +139,8 @@ fun DynamicWaveformSeekbar(
                     onDragStart = { offset ->
                         isDragging = true
                         touchX = offset.x
-                        val newProgress = (offset.x / size.width.toFloat()).coerceIn(0f, 1f)
+                        val w = if (size.width > 0) size.width.toFloat() else seekbarWidth.coerceAtLeast(1f)
+                        val newProgress = (offset.x / w).coerceIn(0f, 1f)
                         val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
                         lastHapticBarIndex = barIdx
                         AuraHaptic.tick(view)
@@ -153,7 +155,8 @@ fun DynamicWaveformSeekbar(
                     onHorizontalDrag = { change, _ ->
                         change.consume()
                         touchX = change.position.x
-                        val newProgress = (change.position.x / size.width.toFloat()).coerceIn(0f, 1f)
+                        val w = if (size.width > 0) size.width.toFloat() else seekbarWidth.coerceAtLeast(1f)
+                        val newProgress = (change.position.x / w).coerceIn(0f, 1f)
                         val barIdx = (newProgress * barCount).toInt().coerceIn(0, barCount - 1)
                         if (barIdx != lastHapticBarIndex) {
                             lastHapticBarIndex = barIdx

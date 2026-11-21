@@ -34,6 +34,8 @@ object AudioWaveformExtractor {
 
     private val memoryCache = LruCache<Long, FloatArray>(120)
 
+    fun getCachedWaveform(songId: Long): FloatArray? = memoryCache.get(songId)
+
     suspend fun getWaveform(context: Context, song: MediaModel): FloatArray {
         // 1. Verificar caché en memoria
         memoryCache.get(song.id)?.let { return it }
@@ -178,14 +180,18 @@ object AudioWaveformExtractor {
 
 /**
  * Hook Composable que proporciona la onda de audio real de la canción activa.
+ * Carga de forma síncrona inmediata si ya está en RAM (0 ms) o asíncrona en hilo IO.
  */
 @Composable
 fun rememberAudioWaveform(song: MediaModel?): State<FloatArray?> {
     val context = LocalContext.current
-    return produceState<FloatArray?>(initialValue = null, key1 = song?.id) {
+    val initial = androidx.compose.runtime.remember(song?.id) {
+        song?.let { AudioWaveformExtractor.getCachedWaveform(it.id) }
+    }
+    return produceState<FloatArray?>(initialValue = initial, key1 = song?.id) {
         if (song == null) {
             value = null
-        } else {
+        } else if (value == null) {
             value = AudioWaveformExtractor.getWaveform(context, song)
         }
     }

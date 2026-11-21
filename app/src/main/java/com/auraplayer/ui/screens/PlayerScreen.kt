@@ -337,7 +337,7 @@ fun PlayerScreen(
     var isSpatial8D by remember { mutableStateOf(EqualizerManager.instance.isSpatial8DEnabled) }
     var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Retro Discman CD 2000s, 3: Live Spectrum Waves
     var isGyro3dEnabled by rememberSaveable { mutableStateOf(true) }
-    val gyroTilt by com.auraplayer.audio.rememberGyroscopeTilt(isEnabled = isGyro3dEnabled)
+    val gyroTiltState = com.auraplayer.audio.rememberGyroscopeTilt(isEnabled = isGyro3dEnabled)
     val realWaveform by com.auraplayer.audio.rememberAudioWaveform(currentMedia)
     var isVideoMode by rememberSaveable {
         mutableStateOf(currentMedia?.isVideo == true ||
@@ -1523,32 +1523,42 @@ fun PlayerScreen(
                                     val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse
                                     val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
 
-                                    // Outer atmospheric diffusion halo
+                                    // Outer atmospheric diffusion halo (120 FPS GPU RenderNode)
                                     Box(
                                         modifier = Modifier
-                                            .size(maxArtSize * (bloomScale * 1.15f))
+                                            .size(maxArtSize)
+                                            .graphicsLayer {
+                                                scaleX = bloomScale * 1.15f
+                                                scaleY = bloomScale * 1.15f
+                                                alpha = (bloomAlpha * 0.45f).coerceIn(0f, 1f)
+                                            }
                                             .clip(androidx.compose.foundation.shape.CircleShape)
                                             .background(
                                                 androidx.compose.ui.graphics.Brush.radialGradient(
                                                     colors = listOf(
-                                                        activeAccent.copy(alpha = bloomAlpha * 0.45f),
-                                                        MaterialTheme.colorScheme.secondary.copy(alpha = bloomAlpha * 0.22f),
-                                                        Color(0xFF8B5CF6).copy(alpha = bloomAlpha * 0.12f),
+                                                        activeAccent,
+                                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                                        Color(0xFF8B5CF6).copy(alpha = 0.25f),
                                                         Color.Transparent
                                                     )
                                                 )
                                             )
                                     )
-                                    // Core glowing aura
+                                    // Core glowing aura (120 FPS GPU RenderNode)
                                     Box(
                                         modifier = Modifier
-                                            .size(maxArtSize * bloomScale)
+                                            .size(maxArtSize)
+                                            .graphicsLayer {
+                                                scaleX = bloomScale
+                                                scaleY = bloomScale
+                                                alpha = (bloomAlpha * 0.65f).coerceIn(0f, 1f)
+                                            }
                                             .clip(androidx.compose.foundation.shape.CircleShape)
                                             .background(
                                                 androidx.compose.ui.graphics.Brush.radialGradient(
                                                     colors = listOf(
-                                                        activeAccent.copy(alpha = bloomAlpha * 0.65f),
-                                                        Color(0xFF38BDF8).copy(alpha = bloomAlpha * 0.32f),
+                                                        activeAccent,
+                                                        Color(0xFF38BDF8).copy(alpha = 0.5f),
                                                         Color.Transparent
                                                     )
                                                 )
@@ -1571,15 +1581,14 @@ fun PlayerScreen(
                                     val bassEnergy = liveBassEnergy
                                     val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
                                     val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
-                                    val combinedTiltX = (animatedTiltX + (if (isGyro3dEnabled) gyroTilt.first else 0f)).coerceIn(-18f, 18f)
-                                    val combinedTiltY = (animatedTiltY + (if (isGyro3dEnabled) gyroTilt.second else 0f)).coerceIn(-18f, 18f)
 
                                      Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
                                              .graphicsLayer {
-                                                 rotationX = combinedTiltX
-                                                 rotationY = combinedTiltY
+                                                 val (gPitch, gRoll) = if (isGyro3dEnabled) gyroTiltState.value else Pair(0f, 0f)
+                                                 rotationX = (animatedTiltX + gPitch).coerceIn(-18f, 18f)
+                                                 rotationY = (animatedTiltY + gRoll).coerceIn(-18f, 18f)
                                                  cameraDistance = 14f * density
                                              }
                                              .pointerInput(Unit) {
@@ -1673,8 +1682,9 @@ fun PlayerScreen(
                                                 .clip(CircleShape)
                                                 .graphicsLayer { alpha = 0.40f }
                                         ) {
-                                            val cx = size.width * (0.5f + (combinedTiltY / 32f))
-                                            val cy = size.height * (0.5f - (combinedTiltX / 32f))
+                                            val (gPitch, gRoll) = gyroTiltState.value
+                                            val cx = size.width * (0.5f + ((animatedTiltY + gRoll) / 32f))
+                                            val cy = size.height * (0.5f - ((animatedTiltX + gPitch) / 32f))
                                             drawCircle(
                                                 brush = Brush.radialGradient(
                                                     colors = listOf(
@@ -4574,7 +4584,7 @@ fun PlayerScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    items(presets) { (presetIdx, title, subtitle) ->
+                    items(presets, key = { it.first }) { (presetIdx, title, subtitle) ->
                         val isSelected = currentIdx == presetIdx
                         Surface(
                             modifier = Modifier
