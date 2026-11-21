@@ -1,7 +1,7 @@
 {
-    "versionCode":  201,
-    "versionName":  "5.0.1",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.1/app-release.apk",
-    "changelog":  "v5.0.1 Hotfix Carátula Cuadrada Completa: Incorporación del skin de Carátula Cuadrada Completa HD (1:1) sin recortes; ajuste del cálculo maxArtSize (80% maxHeight) con holgura de seguridad para eliminar por completo el corte superior e inferior durante la inclinación 3D del giroscopio; chip selector directo de skins en cabecera y persistencia de skin preferido en memoria.",
+    "versionCode":  202,
+    "versionName":  "5.0.2",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.2/app-release.apk",
+    "changelog":  "v5.0.2 Rediseño y Restauración de Carátula HD: Solución definitiva al colapso de la carátula central (fijando un tamaño hero garantizado de 240-280dp independiente de la densidad y resolución); eliminación de banners redundantes y lienzos secundarios que sobrecargaban la pantalla; optimización del espaciado vertical eliminando los espacios negros vacíos; y soporte de desplazamiento suave de seguridad para dispositivos con zoom de pantalla grande.",
     "fileSizeMb":  0
 }

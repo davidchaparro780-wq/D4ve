@@ -56,6 +56,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -235,6 +236,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -935,12 +937,17 @@ fun PlayerScreen(
                 if (isEdgeLightingEnabled) {
                     EdgeLighting(isPlaying = isPlaying)
                 }
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp.dp
+            val screenHeight = configuration.screenHeightDp.dp
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                    .padding(horizontal = 16.dp, vertical = 2.dp)
+                    .verticalScroll(rememberScrollState(), enabled = (screenHeight < 620.dp)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -1259,7 +1266,7 @@ fun PlayerScreen(
                     }
                 }
 
-                // Celestial Lunar Phase Pill
+                // YouTube Music Style Switcher: [ 🎵 Canción | 🎬 Video ]
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1268,61 +1275,21 @@ fun PlayerScreen(
                 ) {
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF130924).copy(alpha = 0.75f))
-                            .border(
-                                0.8.dp,
-                                Brush.horizontalGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF))),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable {
-                                AuraHaptic.click(view)
-                                showArcaneFrequencyDialog = true
-                            }
-                            .padding(horizontal = 10.dp, vertical = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Text(text = lunarPhase.phaseEmoji, fontSize = 12.sp)
-                        Text(
-                            text = "${lunarPhase.phaseName} (${lunarPhase.illuminationPercent}%)",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFE2D4FF)
-                        )
-                        Text(
-                            text = "• ${lunarPhase.recommendedFrequencyHz} Hz ${lunarPhase.runeSymbol}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF00E5FF)
-                        )
-                    }
-                }
-
-                // YouTube Music Style Switcher: [ 🎵 Canción | 🎬 Video ]
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 2.dp, bottom = 4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .shadow(6.dp, RoundedCornerShape(22.dp), spotColor = Color.Black.copy(alpha = 0.6f))
-                            .clip(RoundedCornerShape(22.dp))
+                            .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
+                            .clip(RoundedCornerShape(20.dp))
                             .background(
                                 Brush.verticalGradient(
                                     listOf(Color(0xFF1E2840), Color(0xFF0F1424))
                                 )
                             )
-                            .padding(4.dp),
+                            .padding(3.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // 🎵 Canción Tab
                         Box(
                             modifier = Modifier
-                                .shadow(if (!isVideoMode) 4.dp else 0.dp, RoundedCornerShape(18.dp))
-                                .clip(RoundedCornerShape(18.dp))
+                                .shadow(if (!isVideoMode) 3.dp else 0.dp, RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .then(
                                     if (!isVideoMode) {
                                         Modifier.background(Brush.verticalGradient(listOf(activeAccent, activeAccent.copy(alpha = 0.7f))))
@@ -1334,7 +1301,7 @@ fun PlayerScreen(
                                     AuraHaptic.click(view)
                                     isVideoMode = false
                                 }
-                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                                .padding(horizontal = 14.dp, vertical = 4.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1342,9 +1309,9 @@ fun PlayerScreen(
                                     imageVector = Icons.Default.MusicNote,
                                     contentDescription = null,
                                     tint = if (!isVideoMode) Color.White else Color.Gray,
-                                    modifier = Modifier.size(13.dp)
+                                    modifier = Modifier.size(12.dp)
                                 )
-                                Spacer(modifier = Modifier.width(5.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "Canción",
                                     fontSize = 11.sp,
@@ -1357,8 +1324,8 @@ fun PlayerScreen(
                         // 🎬 Video Tab
                         Box(
                             modifier = Modifier
-                                .shadow(if (isVideoMode) 4.dp else 0.dp, RoundedCornerShape(18.dp))
-                                .clip(RoundedCornerShape(18.dp))
+                                .shadow(if (isVideoMode) 3.dp else 0.dp, RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .then(
                                     if (isVideoMode) {
                                         Modifier.background(Brush.verticalGradient(listOf(Color(0xFF8B5CF6), Color(0xFF6D28D9))))
@@ -1370,7 +1337,7 @@ fun PlayerScreen(
                                     AuraHaptic.click(view)
                                     isVideoMode = true
                                 }
-                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                                .padding(horizontal = 14.dp, vertical = 4.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1378,9 +1345,9 @@ fun PlayerScreen(
                                     imageVector = Icons.Default.Videocam,
                                     contentDescription = null,
                                     tint = if (isVideoMode) Color.White else Color.Gray,
-                                    modifier = Modifier.size(13.dp)
+                                    modifier = Modifier.size(12.dp)
                                 )
-                                Spacer(modifier = Modifier.width(5.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "Video",
                                     fontSize = 11.sp,
@@ -1392,12 +1359,18 @@ fun PlayerScreen(
                     }
                 }
 
-                // Center Display: Either Glowing Vinyl OR Synced Karaoke Lyrics (Interactive Physics Deck Swipe)
-                BoxWithConstraints(
+                // Center Display: Guaranteed Hero Album Art / Vinyl / CD / Retro Skin (Physics Deck Swipe)
+                val heroArtSize = remember(screenWidth, screenHeight) {
+                    val base = minOf(screenWidth * 0.76f, 275.dp)
+                    if (screenHeight < 680.dp) base.coerceIn(195.dp, 240.dp)
+                    else base.coerceIn(230.dp, 280.dp)
+                }
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .padding(vertical = 4.dp)
+                        .height(heroArtSize + 16.dp)
+                        .padding(vertical = 2.dp)
                         .graphicsLayer {
                             translationX = swipeOffsetX.value
                             rotationZ = (swipeOffsetX.value / 35f).coerceIn(-12f, 12f)
@@ -1444,7 +1417,7 @@ fun PlayerScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    val maxArtSize = minOf(maxWidth * 0.85f, maxHeight * 0.80f)
+                    val maxArtSize = heroArtSize
                     if (isVideoMode) {
                         // Video Player Screen
                         val activeExo = PlaybackService.activePlayer
@@ -2646,127 +2619,9 @@ fun PlayerScreen(
                         }
                     }
 
-                    if (isMysteriousTheme) {
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Surface(
-                            modifier = Modifier.clickable {
-                                AuraHaptic.click(view)
-                                showArcaneFrequencyDialog = true
-                            },
-                            color = Color(0xFF1E1135).copy(alpha = 0.7f),
-                            shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(0.8.dp, androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF))))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(text = "ᛟ", color = Color(0xFF00E5FF), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                                Text(
-                                    text = "RESONANCIA ARCANA • $currentArcaneHz Hz",
-                                    color = Color(0xFFE2D4FF),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.6.sp
-                                )
-                                Text(text = "✧", color = Color(0xFFB388FF), fontSize = 10.sp)
-                            }
-                        }
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                if (isMysteriousTheme) {
-                    NecronomicScrollText(accentColor = activeAccent)
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // 4-Mode Interactive Visualizer
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { visualizerMode = (visualizerMode + 1) % 4 },
-                    contentAlignment = Alignment.Center
-                ) {
-                    val primaryColor = MaterialTheme.colorScheme.primary
-                    val secondaryColor = MaterialTheme.colorScheme.secondary
-                    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val width = size.width
-                        val height = size.height
-                        val midY = height / 2f
-
-                        when (visualizerMode) {
-                            0 -> { // Spectrum Bars (Real FFT Frequency Spectrum)
-                                val barCount = 28
-                                val barWidth = width / (barCount * 1.6f)
-                                for (i in 0 until barCount) {
-                                    val factor = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBand(i, barCount, isPlaying)
-                                    val barHeight = (height * factor).coerceIn(4f, height)
-                                    val x = i * (barWidth * 1.6f) + (barWidth * 0.3f)
-                                    val y = midY - (barHeight / 2f)
-
-                                    drawRoundRect(
-                                        brush = Brush.verticalGradient(listOf(secondaryColor, primaryColor)),
-                                        topLeft = Offset(x, y),
-                                        size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
-                                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx(), 4.dp.toPx())
-                                    )
-                                }
-                            }
-                            1 -> { // Neon Wave (Real Audio Waveform Oscilloscope)
-                                val path = Path()
-                                path.moveTo(0f, midY)
-                                val points = 80
-                                for (i in 0..points) {
-                                    val x = (i.toFloat() / points) * width
-                                    val wave = com.auraplayer.audio.RealtimeVisualizerManager.instance.getWaveform(i, points, isPlaying)
-                                    val y = midY + (wave * (height * 0.45f))
-                                    path.lineTo(x, y)
-                                }
-                                drawPath(
-                                    path = path,
-                                    brush = Brush.horizontalGradient(listOf(primaryColor, secondaryColor, tertiaryColor, primaryColor)),
-                                    style = Stroke(width = 3.dp.toPx())
-                                )
-                            }
-                            2 -> { // Dual Laser Pulse (Real Bass and Treble Modulated)
-                                val path1 = Path()
-                                val path2 = Path()
-                                path1.moveTo(0f, midY)
-                                path2.moveTo(0f, midY)
-                                val points = 60
-                                val bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying)
-                                val trebleEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getTrebleEnergy(isPlaying)
-                                for (i in 0..points) {
-                                    val x = (i.toFloat() / points) * width
-                                    val wave1 = com.auraplayer.audio.RealtimeVisualizerManager.instance.getWaveform(i, points, isPlaying) * (height * 0.42f) * (0.5f + bassEnergy)
-                                    val wave2 = -com.auraplayer.audio.RealtimeVisualizerManager.instance.getWaveform(points - i, points, isPlaying) * (height * 0.42f) * (0.5f + trebleEnergy)
-                                    path1.lineTo(x, midY + wave1)
-                                    path2.lineTo(x, midY + wave2)
-                                }
-                                drawPath(path1, Brush.horizontalGradient(listOf(primaryColor, tertiaryColor)), style = Stroke(width = 2.dp.toPx()))
-                                drawPath(path2, Brush.horizontalGradient(listOf(secondaryColor, primaryColor)), style = Stroke(width = 2.dp.toPx()))
-                            }
-                            3 -> { // Starfield Beat Dots (Real Frequency Pulsing)
-                                val dotCount = 20
-                                for (i in 0 until dotCount) {
-                                    val x = (i.toFloat() / dotCount) * width + (width / (dotCount * 2))
-                                    val factor = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBand(i, dotCount, isPlaying)
-                                    val radius = 3.dp.toPx() + (factor * 7.dp.toPx())
-                                    val color = if (i % 2 == 0) primaryColor else secondaryColor
-                                    drawCircle(color = color, radius = radius, center = Offset(x, midY))
-                                }
-                            }
-                        }
-                    }
-                }
+                Spacer(modifier = Modifier.height(6.dp))
 
                 // Seek Bar & Timeline
                 Column(modifier = Modifier.fillMaxWidth()) {
