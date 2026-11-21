@@ -40,8 +40,11 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
     private val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     private val accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    private val _isMonitoring = MutableStateFlow(false)
-    val isMonitoring: StateFlow<Boolean> = _isMonitoring.asStateFlow()
+    var isMonitoring: Boolean = false
+        private set
+
+    private val _isMonitoringFlow = MutableStateFlow(false)
+    val isMonitoringFlow: StateFlow<Boolean> = _isMonitoringFlow.asStateFlow()
 
     private val _isFadeOutActive = MutableStateFlow(false)
     val isFadeOutActive: StateFlow<Boolean> = _isFadeOutActive.asStateFlow()
@@ -85,17 +88,19 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
             SensorManager.SENSOR_DELAY_NORMAL
         ) ?: false
 
-        _isMonitoring.value = registered
+        isMonitoring = registered
+        _isMonitoringFlow.value = registered
         AppLog.d(TAG, "Monitoreo de sueño por acelerómetro iniciado ($minutesInactivity min)")
         return registered
     }
 
     fun stopMonitoring() {
-        if (!_isMonitoring.value) return
+        if (!isMonitoring) return
         try {
             sensorManager?.unregisterListener(this)
         } catch (_: Exception) {}
-        _isMonitoring.value = false
+        isMonitoring = false
+        _isMonitoringFlow.value = false
         fadeOutJob?.cancel()
         _isFadeOutActive.value = false
         AppLog.d(TAG, "Monitoreo de sueño detenido")
@@ -133,7 +138,7 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null || !_isMonitoring.value) return
+        if (event == null || !isMonitoring) return
 
         val x = event.values[0]
         val y = event.values[1]

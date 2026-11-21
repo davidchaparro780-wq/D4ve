@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -43,8 +44,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.auraplayer.R
 import com.auraplayer.audio.RealtimeVisualizerManager
 import com.auraplayer.data.model.MediaModel
 
@@ -61,8 +60,6 @@ fun PictureInPictureMiniPlayer(
     onPrev: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-
     val infiniteTransition = rememberInfiniteTransition(label = "pip_spectrum")
     val pulse by infiniteTransition.animateFloat(
         initialValue = 0.3f,
@@ -98,16 +95,21 @@ fun PictureInPictureMiniPlayer(
                     .background(Color(0xFF1E293B)),
                 contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(song?.artworkUri ?: song?.uri)
-                        .error(R.drawable.ic_default_artwork)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (song?.artworkUri != null) {
+                    AsyncImage(
+                        model = song.artworkUri,
+                        contentDescription = "Artwork",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.MusicNote,
+                        contentDescription = null,
+                        tint = Color(0xFF00F0FF),
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
 
             // Metadatos y controles compactos
