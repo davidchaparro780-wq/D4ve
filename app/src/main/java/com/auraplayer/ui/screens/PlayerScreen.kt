@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -345,6 +346,7 @@ fun PlayerScreen(
     var showSyncedLyricsDialog by remember { mutableStateOf(false) }
     var showIpodClassicDialog by remember { mutableStateOf(false) }
     var showAudioQualityDialog by remember { mutableStateOf(false) }
+    var showQuickDspDialog by remember { mutableStateOf(false) }
     var showStemMixerDialog by remember { mutableStateOf(false) }
     var showStealthCalculator by remember { mutableStateOf(false) }
     var showLofiCafeDialog by remember { mutableStateOf(false) }
@@ -663,6 +665,7 @@ fun PlayerScreen(
     val coroutineScope = rememberCoroutineScope()
     val shuffleRotation = remember { Animatable(0f) }
     val repeatBounce = remember { Animatable(1f) }
+    val swipeOffsetX = remember { Animatable(0f) }
 
     var supernovaTrigger by remember { mutableStateOf(0L) }
 
@@ -1327,31 +1330,53 @@ fun PlayerScreen(
                     }
                 }
 
-                // Center Display: Either Glowing Vinyl OR Synced Karaoke Lyrics (Swipe to change track)
+                // Center Display: Either Glowing Vinyl OR Synced Karaoke Lyrics (Interactive Physics Deck Swipe)
                 BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(vertical = 4.dp)
+                        .graphicsLayer {
+                            translationX = swipeOffsetX.value
+                            rotationZ = (swipeOffsetX.value / 35f).coerceIn(-12f, 12f)
+                            val factor = (kotlin.math.abs(swipeOffsetX.value) / 1000f).coerceAtMost(0.10f)
+                            scaleX = 1f - factor
+                            scaleY = 1f - factor
+                        }
                         .pointerInput(isPocketLocked) {
                             if (isPocketLocked) return@pointerInput
-                            var totalDragX = 0f
                             detectHorizontalDragGestures(
                                 onDragEnd = {
                                     if (isPocketLocked) return@detectHorizontalDragGestures
-                                    if (totalDragX < -60f) {
-                                        AuraHaptic.tick(view)
-                                        onNextClick()
-                                    } else if (totalDragX > 60f) {
-                                        AuraHaptic.tick(view)
-                                        onPreviousClick()
+                                    val currentX = swipeOffsetX.value
+                                    if (currentX < -80f) {
+                                        AuraHaptic.heavy(view)
+                                        coroutineScope.launch {
+                                            swipeOffsetX.animateTo(-600f, tween(160, easing = LinearEasing))
+                                            onNextClick()
+                                            swipeOffsetX.snapTo(600f)
+                                            swipeOffsetX.animateTo(0f, spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow))
+                                        }
+                                    } else if (currentX > 80f) {
+                                        AuraHaptic.heavy(view)
+                                        coroutineScope.launch {
+                                            swipeOffsetX.animateTo(600f, tween(160, easing = LinearEasing))
+                                            onPreviousClick()
+                                            swipeOffsetX.snapTo(-600f)
+                                            swipeOffsetX.animateTo(0f, spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow))
+                                        }
+                                    } else {
+                                        coroutineScope.launch {
+                                            swipeOffsetX.animateTo(0f, spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow))
+                                        }
                                     }
-                                    totalDragX = 0f
                                 },
                                 onHorizontalDrag = { change, dragAmount ->
                                     if (isPocketLocked) return@detectHorizontalDragGestures
                                     change.consume()
-                                    totalDragX += dragAmount
+                                    coroutineScope.launch {
+                                        swipeOffsetX.snapTo(swipeOffsetX.value + dragAmount)
+                                    }
                                 }
                             )
                         },
@@ -2207,43 +2232,97 @@ fun PlayerScreen(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
-                    // Audiophile Hi-Fi Quality Pill
+                    // Audiophile Hi-Fi Quality & Quick DSP Calibrated Acoustic Pills
                     val audioBadge = qualityInfo?.let { "${it.codec} • ${it.bitrateKbps} kbps • ${it.qualityLabel}" }
                         ?: computeAudioFormatBadge(currentMedia.path, currentMedia.size, currentMedia.duration).let { b ->
                             if (b.isNotBlank()) "$b • Hi-Fi Audio" else "Audio HD"
                         }
                     val badgeColor = qualityInfo?.let { Color(it.qualityColor) } ?: MaterialTheme.colorScheme.primary
 
+                    val activePresetIdx = com.auraplayer.audio.EqualizerManager.instance.currentPresetIndex
+                    val activeHeadphoneProfile = remember(activePresetIdx) {
+                        when (activePresetIdx) {
+                            13 -> "Beats Studio"
+                            14 -> "Sennheiser HD"
+                            15 -> "Party Speaker"
+                            8 -> "AirPods Pro"
+                            9 -> "Sony WH-1000"
+                            10 -> "Galaxy Buds"
+                            11 -> "JBL Pure Bass"
+                            1 -> "Bass Boost"
+                            7 -> "Vocal & Hi-Fi"
+                            else -> "AutoEQ DSP"
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(6.dp))
-                    Surface(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable {
-                                AuraHaptic.click(view)
-                                showAudioQualityDialog = true
-                            },
-                        color = badgeColor.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            Brush.horizontalGradient(
-                                listOf(badgeColor.copy(alpha = 0.65f), badgeColor.copy(alpha = 0.20f))
-                            )
-                        )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Text("💎", fontSize = 10.sp)
-                            Text(
-                                text = audioBadge,
-                                color = badgeColor,
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    AuraHaptic.click(view)
+                                    showAudioQualityDialog = true
+                                },
+                            color = badgeColor.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                Brush.horizontalGradient(
+                                    listOf(badgeColor.copy(alpha = 0.65f), badgeColor.copy(alpha = 0.20f))
+                                )
                             )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("💎", fontSize = 10.sp)
+                                Text(
+                                    text = audioBadge,
+                                    color = badgeColor,
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                )
+                            }
+                        }
+
+                        // Calibrated DSP Acoustic Profile Pill
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    AuraHaptic.click(view)
+                                    showQuickDspDialog = true
+                                },
+                            color = activeAccent.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                Brush.horizontalGradient(
+                                    listOf(activeAccent.copy(alpha = 0.70f), activeAccent.copy(alpha = 0.25f))
+                                )
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("🎧", fontSize = 10.sp)
+                                Text(
+                                    text = activeHeadphoneProfile,
+                                    color = activeAccent,
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text("▾", color = activeAccent, fontSize = 9.sp)
+                            }
                         }
                     }
 
@@ -3637,37 +3716,44 @@ fun PlayerScreen(
             // Floating Cyberpunk HUD (Volume / Brightness)
             AnimatedVisibility(
                 visible = isHudVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
+                enter = fadeIn() + scaleIn(initialScale = 0.82f),
+                exit = fadeOut() + scaleOut(targetScale = 0.82f),
                 modifier = Modifier.align(Alignment.Center)
             ) {
                 Box(
                     modifier = Modifier
-                        .shadow(16.dp, RoundedCornerShape(20.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                        .clip(RoundedCornerShape(20.dp))
+                        .shadow(28.dp, RoundedCornerShape(24.dp), spotColor = activeAccent.copy(alpha = 0.65f))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color(0xFF1E2840), Color(0xFF0F1424))
+                                listOf(Color(0xE610172A), Color(0xF2060913))
                             )
                         )
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .border(
+                            1.2.dp,
+                            Brush.horizontalGradient(
+                                listOf(activeAccent.copy(alpha = 0.80f), Color(0xFF8B5CF6).copy(alpha = 0.40f))
+                            ),
+                            RoundedCornerShape(24.dp)
+                        )
+                        .padding(horizontal = 26.dp, vertical = 18.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(imageVector = hudIcon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                            Icon(imageVector = hudIcon, contentDescription = null, tint = activeAccent, modifier = Modifier.size(28.dp))
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(text = hudText, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
                         }
-                        // Cyberpunk Neon Bar
+                        // Cyberpunk Neon Glow Bar
                         Box(
                             modifier = Modifier
-                                .width(130.dp)
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp))
+                                .width(140.dp)
+                                .height(7.dp)
+                                .clip(RoundedCornerShape(4.dp))
                                 .background(Color.White.copy(alpha = 0.15f))
                         ) {
                             Box(
@@ -3676,7 +3762,7 @@ fun PlayerScreen(
                                     .fillMaxWidth(hudPercent.coerceIn(0f, 1f))
                                     .background(
                                         Brush.horizontalGradient(
-                                            listOf(MaterialTheme.colorScheme.primary, Color(0xFF06B6D4))
+                                            listOf(activeAccent, Color(0xFF00F0FF))
                                         )
                                     )
                             )
@@ -4250,6 +4336,102 @@ fun PlayerScreen(
     if (showSoundboardDialog) {
         SoundboardDialog(
             onDismiss = { showSoundboardDialog = false }
+        )
+    }
+
+    // Calibrated Acoustic DSP Profile Selector Dialog
+    if (showQuickDspDialog) {
+        AlertDialog(
+            onDismissRequest = { showQuickDspDialog = false },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showQuickDspDialog = false }) {
+                    Text("Cerrar", color = activeAccent, fontWeight = FontWeight.Bold)
+                }
+            },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("🎧", fontSize = 20.sp)
+                    Text(
+                        text = "Calibración Acústica DSP",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            },
+            text = {
+                val dspManager = com.auraplayer.audio.EqualizerManager.instance
+                val currentIdx = dspManager.currentPresetIndex
+                val presets = listOf(
+                    Triple(13, "Beats Studio & Solo", "Graves profundos y pegada contundente"),
+                    Triple(14, "Sennheiser Momentum / HD", "Escena amplia audiófila y agudos cristalinos"),
+                    Triple(15, "Altavoz Bluetooth Party", "Volumen y dinámica para exteriores"),
+                    Triple(8, "AirPods / AirPods Pro", "Bajos cálidos y firma balanceada"),
+                    Triple(9, "Sony WH-1000XM / WF", "Sub-bajos y cancelación acústica"),
+                    Triple(10, "Samsung Galaxy Buds", "Firma Harman Neutra y voces claras"),
+                    Triple(11, "JBL Pure Bass Series", "Graves de club y alta pegada"),
+                    Triple(1, "Super Bass Booster", "Realce masivo de frecuencias graves"),
+                    Triple(7, "Vocal Pop & Acústico", "Claridad vocal y medios detallados"),
+                    Triple(0, "Referencia Plana (Flat)", "Curva neutra de estudio sin coloración")
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    items(presets) { (presetIdx, title, subtitle) ->
+                        val isSelected = currentIdx == presetIdx
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .clickable {
+                                    AuraHaptic.click(view)
+                                    dspManager.applyPreset(presetIdx)
+                                    showQuickDspDialog = false
+                                    Toast.makeText(context, "Perfil: $title", Toast.LENGTH_SHORT).show()
+                                },
+                            color = if (isSelected) activeAccent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.05f),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(
+                                1.dp,
+                                if (isSelected) activeAccent.copy(alpha = 0.65f) else Color.White.copy(alpha = 0.08f)
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = title,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold,
+                                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = subtitle,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) activeAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
+                                if (isSelected) {
+                                    Text("✓", color = activeAccent, fontWeight = FontWeight.Black, fontSize = 16.sp)
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            containerColor = Color(0xFF0F1523),
+            shape = RoundedCornerShape(24.dp)
         )
     }
 
