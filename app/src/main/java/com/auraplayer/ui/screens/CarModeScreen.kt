@@ -1,8 +1,12 @@
 package com.auraplayer.ui.screens
 
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -18,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,18 +50,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.auraplayer.audio.AuraHaptic
+import com.auraplayer.audio.RealtimeVisualizerManager
 import com.auraplayer.data.model.MediaModel
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun CarModeScreen(
@@ -69,8 +84,35 @@ fun CarModeScreen(
     isFavorite: Boolean = false,
     onToggleFavorite: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     val view = LocalView.current
     var gestureFeedbackText by remember { mutableStateOf<String?>(null) }
+    var currentTimeText by remember { mutableStateOf("") }
+    var batteryText by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+        while (true) {
+            currentTimeText = timeFormat.format(Date())
+            delay(1000L)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        while (true) {
+            try {
+                val batteryIntent = context.registerReceiver(null, filter)
+                val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+                if (level >= 0 && scale > 0) {
+                    val pct = (level * 100 / scale.toFloat()).toInt()
+                    batteryText = "🔋 $pct%"
+                }
+            } catch (_: Exception) {}
+            delay(30000L)
+        }
+    }
 
     LaunchedEffect(gestureFeedbackText) {
         if (gestureFeedbackText != null) {
@@ -143,6 +185,32 @@ fun CarModeScreen(
                         )
                     }
 
+                    // Digital Clock & Battery HUD Pill
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color(0xFF1E2433))
+                            .border(1.dp, Color(0xFF334155), RoundedCornerShape(20.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = if (currentTimeText.isNotEmpty()) currentTimeText else "--:--",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        if (batteryText.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "• $batteryText",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF38BDF8)
+                            )
+                        }
+                    }
+
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         if (onToggleFavorite != null) {
                             IconButton(
@@ -188,14 +256,14 @@ fun CarModeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(16.dp, RoundedCornerShape(28.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.3f))
+                        .shadow(20.dp, RoundedCornerShape(28.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.35f))
                         .clip(RoundedCornerShape(28.dp))
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color(0xFF131B2E), Color(0xFF0B101D))
+                                listOf(Color(0xFF131B2E), Color(0xFF090D18))
                             )
                         )
-                        .border(1.dp, Color(0xFF38BDF8).copy(alpha = 0.35f), RoundedCornerShape(28.dp))
+                        .border(1.2.dp, Color(0xFF38BDF8).copy(alpha = 0.40f), RoundedCornerShape(28.dp))
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onTap = {
@@ -205,26 +273,54 @@ fun CarModeScreen(
                                 }
                             )
                         }
-                        .padding(vertical = 40.dp, horizontal = 20.dp),
+                        .padding(vertical = 24.dp, horizontal = 20.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // High Contrast Album Artwork
+                        Box(
+                            modifier = Modifier
+                                .size(130.dp)
+                                .shadow(14.dp, RoundedCornerShape(20.dp), spotColor = Color(0xFF38BDF8).copy(alpha = 0.4f))
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Color(0xFF1E2433)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (currentMedia?.artworkUri != null) {
+                                AsyncImage(
+                                    model = currentMedia.artworkUri,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.DirectionsCar,
+                                    contentDescription = null,
+                                    tint = Color(0xFF38BDF8),
+                                    modifier = Modifier.size(54.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(18.dp))
+
                         Text(
                             text = currentMedia?.title ?: "Sin reproducción activa",
-                            fontSize = 32.sp,
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
-                            lineHeight = 38.sp
+                            lineHeight = 34.sp
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = currentMedia?.artist ?: "DaVE Player HUD",
-                            fontSize = 22.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF38BDF8),
                             textAlign = TextAlign.Center,
@@ -232,7 +328,43 @@ fun CarModeScreen(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Live Reactive Audio Equalizer Spectrum Bars in Car HUD
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.70f)
+                                .height(22.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                val barCount = 18
+                                val spacing = size.width / barCount
+                                val barWidth = spacing * 0.65f
+                                val maxHeight = size.height
+                                val midY = size.height / 2f
+
+                                for (i in 0 until barCount) {
+                                    val factor = if (isPlaying) {
+                                        RealtimeVisualizerManager.instance.getBand(i, barCount, true)
+                                    } else 0.08f
+                                    val barHeight = (maxHeight * factor).coerceIn(4f, maxHeight)
+                                    val x = i * spacing + (spacing - barWidth) / 2f
+                                    val y = midY - (barHeight / 2f)
+
+                                    drawRoundRect(
+                                        brush = Brush.verticalGradient(
+                                            listOf(Color(0xFF00F0FF), Color(0xFF3B82F6))
+                                        ),
+                                        topLeft = Offset(x, y),
+                                        size = Size(barWidth, barHeight),
+                                        cornerRadius = CornerRadius(3.dp.toPx(), 3.dp.toPx())
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
                             text = "👆 Toca la tarjeta para pausar / reanudar",
