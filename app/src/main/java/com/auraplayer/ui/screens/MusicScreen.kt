@@ -673,8 +673,13 @@ fun MusicScreen(
                                     Toast.makeText(context, "Detector de sueño desactivado", Toast.LENGTH_SHORT).show()
                                 } else {
                                     val started = sleepSensorManager.startMonitoring(minutesInactivity = 15) {
-                                        currentMedia?.let { onSongClick(it) }
-                                        Toast.makeText(context, "💤 Inactividad detectada: música pausada", Toast.LENGTH_LONG).show()
+                                        val controller = com.auraplayer.MainActivity.activeController
+                                        if (controller != null) {
+                                            com.auraplayer.audio.CrossfadeManager.getInstance(context).smoothPause(controller)
+                                        } else {
+                                            com.auraplayer.service.PlaybackService.activePlayer?.pause()
+                                        }
+                                        Toast.makeText(context, "💤 Inactividad detectada: música pausada suavemente", Toast.LENGTH_LONG).show()
                                     }
                                     if (started) {
                                         Toast.makeText(context, "💤 Detector de sueño activado (15 min inmóvil)", Toast.LENGTH_SHORT).show()

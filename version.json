@@ -1,7 +1,7 @@
 {
-    "versionCode":  195,
-    "versionName":  "4.9.95",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.95/app-release.apk",
-    "changelog":  "v4.9.95 Car Mode HUD & Infotainment Upgrade: Rediseño completo del Modo Conducción con carátula HD de alto contraste, reloj digital y batería en tiempo real, e indicador espectral reactivo.",
+    "versionCode":  196,
+    "versionName":  "4.9.96",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.96/app-release.apk",
+    "changelog":  "v4.9.96 Smart Sleep & Live HUD Update: Corrección del detector de sueño inteligente para pausar suavemente con desvanecimiento progresivo y nuevo chip con cuenta regresiva en vivo del temporizador en PlayerScreen.",
     "fileSizeMb":  0
 }

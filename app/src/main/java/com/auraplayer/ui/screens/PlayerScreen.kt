@@ -2862,6 +2862,29 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Live Sleep Timer & Smart Sensor Chip
+                    val isTimerOn = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
+                    val sleepSec = sleepTimerManager?.remainingSeconds?.collectAsState()?.value ?: 0
+                    FilterChip(
+                        selected = isTimerOn,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            onOpenSleepTimer()
+                        },
+                        label = {
+                            Text(
+                                text = if (isTimerOn && sleepSec > 0) "💤 ${sleepSec / 60}m ${sleepSec % 60}s" else "💤 Temporizador",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFA855F7).copy(alpha = 0.25f),
+                            selectedLabelColor = Color(0xFFA855F7),
+                            labelColor = Color(0xFFC084FC)
+                        )
+                    )
+
                     // Super Booster 200% Chip
                     FilterChip(
                         selected = boostPercent > 100,
