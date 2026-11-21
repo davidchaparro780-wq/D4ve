@@ -1,7 +1,7 @@
 {
-    "versionCode":  196,
-    "versionName":  "4.9.96",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.96/app-release.apk",
-    "changelog":  "v4.9.96 Smart Sleep & Live HUD Update: Corrección del detector de sueño inteligente para pausar suavemente con desvanecimiento progresivo y nuevo chip con cuenta regresiva en vivo del temporizador en PlayerScreen.",
+    "versionCode":  197,
+    "versionName":  "4.9.97",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.97/app-release.apk",
+    "changelog":  "v4.9.97 Flashlight Beat & Story Card Studio Update: Linterna estroboscópica rítmica reactiva al bajo directamente en el reproductor, generador de historias 9:16 para compartir versos y letras en WhatsApp/Instagram, y cola de reproducción interactiva con scroll inteligente y botón de mezcla.",
     "fileSizeMb":  0
 }

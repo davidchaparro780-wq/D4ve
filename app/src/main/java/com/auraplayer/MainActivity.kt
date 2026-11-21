@@ -3006,6 +3006,11 @@ fun AuraApp(
                         com.auraplayer.util.AppLog.e("MainActivity", "Error toggling haptic bass", t)
                     }
                 },
+                isFlashlightActive = isFlashlightActive,
+                onToggleFlashlight = {
+                    isFlashlightActive = flashlightManager.toggle()
+                    Toast.makeText(context, if (isFlashlightActive) "🔦 Linterna Rítmica ACTIVADA" else "🔦 Linterna Rítmica DESACTIVADA", Toast.LENGTH_SHORT).show()
+                },
                 onAudioFxChange = { speed, pitch ->
                     playbackSpeed = speed
                     playbackPitch = pitch

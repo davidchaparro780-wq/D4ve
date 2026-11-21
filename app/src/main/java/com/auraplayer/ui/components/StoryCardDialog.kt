@@ -50,10 +50,11 @@ enum class StoryVisualTheme(val title: String, val bgStart: String, val bgEnd: S
 @Composable
 fun StoryCardDialog(
     song: MediaModel,
+    initialQuote: String = "“La música expresa lo que no se puede decir y aquello que no puede callarse.”",
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    var lyricQuote by remember { mutableStateOf("“La música expresa lo que no se puede decir y aquello que no puede callarse.”") }
+    var lyricQuote by remember(initialQuote) { mutableStateOf(initialQuote) }
     var selectedTheme by remember { mutableStateOf(StoryVisualTheme.NEON_CYBER) }
     var includeSpectrumWave by remember { mutableStateOf(true) }
 
@@ -267,7 +268,19 @@ private fun shareStoryCard(
             textSize = 44f
             isAntiAlias = true
         }
-        val lines = quote.chunked(30)
+        val words = quote.split(" ")
+        val lines = mutableListOf<String>()
+        var currentLine = ""
+        for (word in words) {
+            if ((if (currentLine.isEmpty()) word else "$currentLine $word").length <= 32) {
+                currentLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+            } else {
+                if (currentLine.isNotEmpty()) lines.add(currentLine)
+                currentLine = word
+            }
+        }
+        if (currentLine.isNotEmpty()) lines.add(currentLine)
+
         var y = if (drawWave) 1000f else 900f
         for (line in lines.take(5)) {
             canvas.drawText(line, 160f, y, quotePaint)

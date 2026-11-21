@@ -87,6 +87,9 @@ import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Bedtime
@@ -263,7 +266,7 @@ import kotlin.math.sin
 
 private const val TAG = "PlayerScreen"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PlayerScreen(
     currentMedia: MediaModel?,
@@ -303,6 +306,8 @@ fun PlayerScreen(
     onCycleVibe: () -> com.auraplayer.audio.AudioVibe = { com.auraplayer.audio.AudioVibe.NORMAL },
     isHapticBass: Boolean = false,
     onToggleHapticBass: () -> Unit = {},
+    isFlashlightActive: Boolean = false,
+    onToggleFlashlight: () -> Unit = {},
     onOpenHeadphones: () -> Unit = {},
     isHeadphonesConnected: Boolean = false,
     onSearchOnline: (String) -> Unit = {},
@@ -503,6 +508,7 @@ fun PlayerScreen(
     var showStickerDialog by remember { mutableStateOf(false) }
     var showPitchSpeedDialog by remember { mutableStateOf(false) }
     var showStoryCardDialog by remember { mutableStateOf(false) }
+    var storyCardInitialQuote by remember { mutableStateOf("") }
     var showFullscreenVisualizer by remember { mutableStateOf(false) }
     val view = LocalView.current
     var showQuickEqDialog by remember { mutableStateOf(false) }
@@ -1987,6 +1993,27 @@ fun PlayerScreen(
                                             ) {
                                                 Icon(Icons.Default.ContentCopy, contentDescription = "Copiar", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                                             }
+                                            IconButton(
+                                                onClick = {
+                                                    AuraHaptic.click(view)
+                                                    val activeLineText = if (lyrics.lines.isNotEmpty()) {
+                                                        val idx = lyrics.lines.indexOfLast { currentPositionMs >= it.timeMs }.coerceAtLeast(0)
+                                                        lyrics.lines.getOrNull(idx)?.text ?: ""
+                                                    } else {
+                                                        lyrics.plainLyrics?.lines()?.firstOrNull { it.isNotBlank() } ?: ""
+                                                    }
+                                                    storyCardInitialQuote = if (activeLineText.isNotBlank()) "“$activeLineText”" else ""
+                                                    showStoryCardDialog = true
+                                                },
+                                                modifier = Modifier.size(28.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.FormatQuote,
+                                                    contentDescription = "Compartir verso en Story / Estado",
+                                                    tint = Color(0xFFEC4899),
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
                                         }
                                     }
 
@@ -2058,10 +2085,17 @@ fun PlayerScreen(
                                                             ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
                                                             shape = RoundedCornerShape(20.dp)
                                                         )
-                                                        .clickable {
-                                                            AuraHaptic.click(null)
-                                                            onSeek(line.timeMs)
-                                                        }
+                                                        .combinedClickable(
+                                                            onClick = {
+                                                                AuraHaptic.click(null)
+                                                                onSeek(line.timeMs)
+                                                            },
+                                                            onLongClick = {
+                                                                AuraHaptic.heavyClick(view)
+                                                                storyCardInitialQuote = "“${line.text}”"
+                                                                showStoryCardDialog = true
+                                                            }
+                                                        )
                                                         .padding(horizontal = 16.dp, vertical = if (isActive) 14.dp else 7.dp),
                                                     contentAlignment = Alignment.Center
                                                 ) {
@@ -2123,7 +2157,18 @@ fun PlayerScreen(
                                                     fontSize = (15 * lyricsFontSizeMultiplier).sp,
                                                     color = MaterialTheme.colorScheme.onBackground,
                                                     textAlign = TextAlign.Center,
-                                                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .combinedClickable(
+                                                            onClick = {},
+                                                            onLongClick = {
+                                                                AuraHaptic.heavyClick(view)
+                                                                val firstLine = lyrics.plainLyrics?.lines()?.firstOrNull { it.isNotBlank() } ?: ""
+                                                                storyCardInitialQuote = if (firstLine.isNotBlank()) "“$firstLine”" else ""
+                                                                showStoryCardDialog = true
+                                                            }
+                                                        )
+                                                        .padding(8.dp)
                                                 )
                                             }
                                         }
@@ -3186,11 +3231,35 @@ fun PlayerScreen(
                         )
                     )
 
+                    // Linterna Rítmica / Flashlight Beat Chip
+                    FilterChip(
+                        selected = isFlashlightActive,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            onToggleFlashlight()
+                        },
+                        label = {
+                            Text(
+                                text = if (isFlashlightActive) "⚡ Linterna Beat: ON" else "⚡ Linterna Beat",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFFBBF24).copy(alpha = 0.25f),
+                            selectedLabelColor = Color(0xFFF59E0B),
+                            labelColor = Color(0xFFFBBF24)
+                        )
+                    )
+
                     // Club Party Strobe Chip
                     FilterChip(
                         selected = false,
-                        onClick = { showClubPartyDialog = true },
-                        label = { Text("🔦 Modo Club Strobe", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        onClick = {
+                            AuraHaptic.click(view)
+                            showClubPartyDialog = true
+                        },
+                        label = { Text("🔦 Modo Club RGB", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = FilterChipDefaults.filterChipColors(
                             labelColor = Color(0xFFFBBF24)
                         )
@@ -4052,6 +4121,13 @@ fun PlayerScreen(
     // Interactive Queue Sheet Modal
     if (showQueueSheet) {
         var queueDisplay by remember(queueSongs) { mutableStateOf(queueSongs) }
+        val queueListState = rememberLazyListState()
+        LaunchedEffect(Unit) {
+            val currentIdx = queueDisplay.indexOfFirst { it.id == currentMedia.id }
+            if (currentIdx > 0) {
+                queueListState.scrollToItem((currentIdx - 1).coerceAtLeast(0))
+            }
+        }
         ModalBottomSheet(
             onDismissRequest = { showQueueSheet = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -4091,12 +4167,27 @@ fun PlayerScreen(
                             color = Color(0xFF94A3B8)
                         )
                     }
-                    IconButton(onClick = { showQueueSheet = false }) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Cerrar",
-                            tint = Color(0xFF38BDF8)
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = {
+                                AuraHaptic.click(view)
+                                onShuffleToggle()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Shuffle,
+                                contentDescription = "Mezclar cola",
+                                tint = if (isShuffle) Color(0xFF00F0FF) else Color(0xFF94A3B8),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        IconButton(onClick = { showQueueSheet = false }) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Cerrar",
+                                tint = Color(0xFF38BDF8)
+                            )
+                        }
                     }
                 }
 
@@ -4108,6 +4199,7 @@ fun PlayerScreen(
                     }
                 } else {
                     LazyColumn(
+                        state = queueListState,
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 420.dp),
@@ -4480,7 +4572,11 @@ fun PlayerScreen(
     if (showStoryCardDialog) {
         com.auraplayer.ui.components.StoryCardDialog(
             song = currentMedia,
-            onDismiss = { showStoryCardDialog = false }
+            initialQuote = if (storyCardInitialQuote.isNotBlank()) storyCardInitialQuote else "“La música expresa lo que no se puede decir y aquello que no puede callarse.”",
+            onDismiss = {
+                showStoryCardDialog = false
+                storyCardInitialQuote = ""
+            }
         )
     }
 
