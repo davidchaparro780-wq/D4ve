@@ -32,6 +32,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import com.auraplayer.ui.components.AuraRippleRings
@@ -707,6 +709,16 @@ fun PlayerScreen(
     val shuffleRotation = remember { Animatable(0f) }
     val repeatBounce = remember { Animatable(1f) }
     val swipeOffsetX = remember { Animatable(0f) }
+    val prevNudge = remember { Animatable(0f) }
+    val nextNudge = remember { Animatable(0f) }
+    val artPlayingScale by animateFloatAsState(
+        targetValue = if (isPlaying) 1.0f else 0.93f,
+        animationSpec = spring(
+            dampingRatio = 0.72f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "artPlayingScale"
+    )
 
     var supernovaTrigger by remember { mutableStateOf(0L) }
 
@@ -997,7 +1009,7 @@ fun PlayerScreen(
                 ) {
                     // Left: Minimize & PiP
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
+                        IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp).bounceClick()) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = "Minimizar",
@@ -1008,7 +1020,7 @@ fun PlayerScreen(
                         IconButton(onClick = {
                             AuraHaptic.click(view)
                             triggerPiP()
-                        }, modifier = Modifier.size(36.dp)) {
+                        }, modifier = Modifier.size(36.dp).bounceClick()) {
                             Icon(
                                 imageVector = Icons.Default.PictureInPictureAlt,
                                 contentDescription = "Modo PiP Cápsula Flotante",
@@ -1025,21 +1037,87 @@ fun PlayerScreen(
                             .weight(1f)
                             .padding(horizontal = 4.dp)
                     ) {
-                        Text(
-                            text = "DaVE PLAYER",
-                            modifier = Modifier.clickable { showAudioSpecSheet = true },
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = when (eyeComfortMode) {
-                                1 -> Color(0xFFF59E0B)
-                                2 -> Color(0xFFE2E8F0)
-                                else -> MaterialTheme.colorScheme.primary
-                            },
-                            letterSpacing = 1.8.sp,
-                            maxLines = 1,
-                            softWrap = false
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .clickable { showAudioSpecSheet = true }
+                                .bounceClick()
+                        ) {
+                            Text(
+                                text = "DaVE PLAYER",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = when (eyeComfortMode) {
+                                    1 -> Color(0xFFF59E0B)
+                                    2 -> Color(0xFFE2E8F0)
+                                    else -> MaterialTheme.colorScheme.primary
+                                },
+                                letterSpacing = 1.8.sp,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                            if (isPlaying) {
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    modifier = Modifier.height(11.dp)
+                                ) {
+                                    val bar1 by infiniteTransition.animateFloat(
+                                        initialValue = 0.25f,
+                                        targetValue = 0.95f,
+                                        animationSpec = infiniteRepeatable(
+                                            animation = tween(420, easing = FastOutSlowInEasing),
+                                            repeatMode = AnimRepeatMode.Reverse
+                                        ),
+                                        label = "eqBar1"
+                                    )
+                                    val bar2 by infiniteTransition.animateFloat(
+                                        initialValue = 0.85f,
+                                        targetValue = 0.30f,
+                                        animationSpec = infiniteRepeatable(
+                                            animation = tween(310, easing = FastOutSlowInEasing),
+                                            repeatMode = AnimRepeatMode.Reverse
+                                        ),
+                                        label = "eqBar2"
+                                    )
+                                    val bar3 by infiniteTransition.animateFloat(
+                                        initialValue = 0.40f,
+                                        targetValue = 1.0f,
+                                        animationSpec = infiniteRepeatable(
+                                            animation = tween(520, easing = FastOutSlowInEasing),
+                                            repeatMode = AnimRepeatMode.Reverse
+                                        ),
+                                        label = "eqBar3"
+                                    )
+                                    val eqColor = when (eyeComfortMode) {
+                                        1 -> Color(0xFFF59E0B)
+                                        2 -> Color(0xFFE2E8F0)
+                                        else -> MaterialTheme.colorScheme.primary
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .width(2.5.dp)
+                                            .height(11.dp * bar1)
+                                            .background(eqColor, RoundedCornerShape(1.dp))
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .width(2.5.dp)
+                                            .height(11.dp * bar2)
+                                            .background(eqColor, RoundedCornerShape(1.dp))
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .width(2.5.dp)
+                                            .height(11.dp * bar3)
+                                            .background(eqColor, RoundedCornerShape(1.dp))
+                                    )
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.height(2.dp))
                         Row(
                             modifier = Modifier
@@ -1056,7 +1134,8 @@ fun PlayerScreen(
                                 },
                                 shape = RoundedCornerShape(12.dp),
                                 color = if (isComfortView) Color(0xFF10B981).copy(alpha = 0.20f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                                border = BorderStroke(1.dp, if (isComfortView) Color(0xFF10B981).copy(alpha = 0.60f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+                                border = BorderStroke(1.dp, if (isComfortView) Color(0xFF10B981).copy(alpha = 0.60f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
+                                modifier = Modifier.bounceClick()
                             ) {
                                 Text(
                                     text = if (isComfortView) "🌿 Cómoda" else "🎛️ Pro",
@@ -1085,7 +1164,8 @@ fun PlayerScreen(
                                 },
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f))
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)),
+                                modifier = Modifier.bounceClick()
                             ) {
                                 Text(
                                     text = currentSkinLabel,
@@ -1108,7 +1188,7 @@ fun PlayerScreen(
                             AuraHaptic.heavy(view)
                             onToggleFavorite()
                             showHeartBurst = true
-                        }, modifier = Modifier.size(34.dp)) {
+                        }, modifier = Modifier.size(34.dp).bounceClick()) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Favorito",
@@ -1118,7 +1198,7 @@ fun PlayerScreen(
                         }
 
                         // 2. Letras / Visualizador Toggle
-                        IconButton(onClick = { showLyricsView = !showLyricsView }, modifier = Modifier.size(34.dp)) {
+                        IconButton(onClick = { showLyricsView = !showLyricsView }, modifier = Modifier.size(34.dp).bounceClick()) {
                             Icon(
                                 imageVector = if (showLyricsView) Icons.Default.Album else Icons.Default.Mic,
                                 contentDescription = "Letras",
@@ -1128,7 +1208,7 @@ fun PlayerScreen(
                         }
 
                         // 3. Cola de Reproducción
-                        IconButton(onClick = { showQueueSheet = true }, modifier = Modifier.size(34.dp)) {
+                        IconButton(onClick = { showQueueSheet = true }, modifier = Modifier.size(34.dp).bounceClick()) {
                             Icon(
                                 imageVector = Icons.Default.QueueMusic,
                                 contentDescription = "Cola de Reproducción",
@@ -1141,7 +1221,7 @@ fun PlayerScreen(
                         IconButton(onClick = {
                             AuraHaptic.click(view)
                             showMoreToolsSheet = true
-                        }, modifier = Modifier.size(34.dp)) {
+                        }, modifier = Modifier.size(34.dp).bounceClick()) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "Más herramientas de reproducción",
@@ -1262,8 +1342,8 @@ fun PlayerScreen(
                             translationX = swipeOffsetX.value
                             rotationZ = (swipeOffsetX.value / 35f).coerceIn(-12f, 12f)
                             val factor = (kotlin.math.abs(swipeOffsetX.value) / 1000f).coerceAtMost(0.10f)
-                            scaleX = 1f - factor
-                            scaleY = 1f - factor
+                            scaleX = (1f - factor) * artPlayingScale
+                            scaleY = (1f - factor) * artPlayingScale
                         }
                         .pointerInput(isPocketLocked) {
                             if (isPocketLocked) return@pointerInput
@@ -2404,6 +2484,15 @@ fun PlayerScreen(
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
+                    val badgeShimmer by infiniteTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2400, easing = LinearEasing),
+                            repeatMode = AnimRepeatMode.Restart
+                        ),
+                        label = "badgeShimmer"
+                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -2417,14 +2506,23 @@ fun PlayerScreen(
                                 .clickable {
                                     AuraHaptic.click(view)
                                     showAudioQualityDialog = true
-                                },
+                                }
+                                .bounceClick(),
                             color = badgeColor.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(12.dp),
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                Brush.horizontalGradient(
-                                    listOf(badgeColor.copy(alpha = 0.65f), badgeColor.copy(alpha = 0.20f))
-                                )
+                                if (isPlaying) {
+                                    Brush.horizontalGradient(
+                                        0.0f to badgeColor.copy(alpha = 0.30f),
+                                        badgeShimmer to badgeColor.copy(alpha = 0.95f),
+                                        1.0f to badgeColor.copy(alpha = 0.30f)
+                                    )
+                                } else {
+                                    Brush.horizontalGradient(
+                                        listOf(badgeColor.copy(alpha = 0.65f), badgeColor.copy(alpha = 0.20f))
+                                    )
+                                }
                             )
                         ) {
                             Row(
@@ -2452,7 +2550,8 @@ fun PlayerScreen(
                                 .clickable {
                                     AuraHaptic.click(view)
                                     showQuickDspDialog = true
-                                },
+                                }
+                                .bounceClick(),
                             color = activeAccent.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(12.dp),
                             border = androidx.compose.foundation.BorderStroke(
@@ -2580,7 +2679,12 @@ fun PlayerScreen(
                     }
                 }
 
-                if (!isComfortView) {
+                AnimatedVisibility(
+                    visible = !isComfortView,
+                    enter = expandVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(tween(250)),
+                    exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeOut(tween(200))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                     // FX Studio, A-B Looper & Audio Processing Controls Row
                     Row(
                     modifier = Modifier
@@ -3563,7 +3667,8 @@ fun PlayerScreen(
                         )
                     )
                 }
-            }
+                    }
+                }
 
                 // Primary Playback Controls
                 Row(
@@ -3601,10 +3706,16 @@ fun PlayerScreen(
                     IconButton(
                         onClick = {
                             AuraHaptic.tick(view)
+                            coroutineScope.launch {
+                                prevNudge.snapTo(0f)
+                                prevNudge.animateTo(-10f, tween(70))
+                                prevNudge.animateTo(0f, spring(dampingRatio = 0.52f, stiffness = Spring.StiffnessMediumLow))
+                            }
                             onPreviousClick()
                         },
                         modifier = Modifier
                             .size(48.dp)
+                            .graphicsLayer { translationX = prevNudge.value }
                             .bounceClick()
                     ) {
                         Icon(
@@ -3632,10 +3743,16 @@ fun PlayerScreen(
                     IconButton(
                         onClick = {
                             AuraHaptic.tick(view)
+                            coroutineScope.launch {
+                                nextNudge.snapTo(0f)
+                                nextNudge.animateTo(10f, tween(70))
+                                nextNudge.animateTo(0f, spring(dampingRatio = 0.52f, stiffness = Spring.StiffnessMediumLow))
+                            }
                             onNextClick()
                         },
                         modifier = Modifier
                             .size(48.dp)
+                            .graphicsLayer { translationX = nextNudge.value }
                             .bounceClick()
                     ) {
                         Icon(
@@ -3689,10 +3806,12 @@ fun PlayerScreen(
                         shape = RoundedCornerShape(20.dp),
                         color = if (boostPercent > 100) Color(0xFFFF5722).copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                         border = BorderStroke(1.dp, if (boostPercent > 100) Color(0xFFFF5722).copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
-                        modifier = Modifier.clickable {
-                            AuraHaptic.click(view)
-                            showVolumeBoosterDialog = true
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                AuraHaptic.click(view)
+                                showVolumeBoosterDialog = true
+                            }
+                            .bounceClick()
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -3721,10 +3840,12 @@ fun PlayerScreen(
                         shape = RoundedCornerShape(20.dp),
                         color = if (isComfortView) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color(0xFF10B981).copy(alpha = 0.15f),
                         border = BorderStroke(1.dp, if (isComfortView) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color(0xFF10B981).copy(alpha = 0.4f)),
-                        modifier = Modifier.clickable {
-                            AuraHaptic.click(view)
-                            setComfortView(!isComfortView)
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                AuraHaptic.click(view)
+                                setComfortView(!isComfortView)
+                            }
+                            .bounceClick()
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -3759,6 +3880,7 @@ fun PlayerScreen(
                             AuraHaptic.click(view)
                             showQueueSheet = true
                         }
+                        .bounceClick()
                         .padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
