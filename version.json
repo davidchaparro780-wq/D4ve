@@ -1,7 +1,7 @@
 {
-    "versionCode":  202,
-    "versionName":  "5.0.2",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.2/app-release.apk",
-    "changelog":  "v5.0.2 Rediseño y Restauración de Carátula HD: Solución definitiva al colapso de la carátula central (fijando un tamaño hero garantizado de 240-280dp independiente de la densidad y resolución); eliminación de banners redundantes y lienzos secundarios que sobrecargaban la pantalla; optimización del espaciado vertical eliminando los espacios negros vacíos; y soporte de desplazamiento suave de seguridad para dispositivos con zoom de pantalla grande.",
+    "versionCode":  203,
+    "versionName":  "5.0.3",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.3/app-release.apk",
+    "changelog":  "v5.0.3 Hotfix Definitivo Carátula Cuadrada Completa (1:1) y Controles Anti-Desborde: Redimensionamiento proporcional dinámico del contenedor central con BoxWithConstraints (evitando cualquier desborde vertical o recorte de botones de reproducción en pantallas de cualquier altura); eliminación de restricciones erróneas de scroll; rediseño de SquareAlbumArtSkin con fondo vinilo HD anti-vacío y respaldo automático para pistas locales sin carátula; optimización inteligente del switch de video; y retroalimentación háptica con toast al alternar skins.",
     "fileSizeMb":  0
 }

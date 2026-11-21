@@ -346,6 +346,21 @@ fun PlayerScreen(
         centerVisualizerMode = mode
         skinPrefs.edit().putInt("center_visualizer_mode", mode).apply()
     }
+    fun cycleVisualizerSkin() {
+        val nextMode = (centerVisualizerMode + 1) % 8
+        setVisualizerSkin(nextMode)
+        val label = when (nextMode) {
+            0 -> "🖼️ Carátula Cuadrada Completa HD"
+            1 -> "💿 Vinilo Giratorio Hi-Fi"
+            2 -> "📼 Cassette Tape Retro"
+            3 -> "💿 CD Discman 2000s"
+            4 -> "⚡ Espectro FFT en Vivo"
+            5 -> "📱 iPod Classic"
+            6 -> "🎛️ Vúmetros Analógicos Hi-Fi"
+            else -> "🗿 Monolito Arcano"
+        }
+        Toast.makeText(context, label, Toast.LENGTH_SHORT).show()
+    }
     var isGyro3dEnabled by rememberSaveable { mutableStateOf(true) }
     val gyroTiltState = com.auraplayer.audio.rememberGyroscopeTilt(isEnabled = isGyro3dEnabled)
     val realWaveform by com.auraplayer.audio.rememberAudioWaveform(currentMedia)
@@ -946,8 +961,7 @@ fun PlayerScreen(
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 2.dp)
-                    .verticalScroll(rememberScrollState(), enabled = (screenHeight < 620.dp)),
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -1052,8 +1066,7 @@ fun PlayerScreen(
                             Surface(
                                 onClick = {
                                     AuraHaptic.click(view)
-                                    val nextMode = (centerVisualizerMode + 1) % 8
-                                    setVisualizerSkin(nextMode)
+                                    cycleVisualizerSkin()
                                 },
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
@@ -1266,13 +1279,20 @@ fun PlayerScreen(
                     }
                 }
 
-                // YouTube Music Style Switcher: [ 🎵 Canción | 🎬 Video ]
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 1.dp, bottom = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                // YouTube Music Style Switcher: [ 🎵 Canción | 🎬 Video ] (solo si la pista contiene video o está en modo video)
+                val hasVideoContent = remember(currentMedia.id, currentMedia.path, isVideoMode) {
+                    isVideoMode || currentMedia.isVideo ||
+                        currentMedia.path.endsWith(".mp4", ignoreCase = true) ||
+                        currentMedia.path.endsWith(".mkv", ignoreCase = true) ||
+                        currentMedia.path.endsWith(".webm", ignoreCase = true)
+                }
+                if (hasVideoContent) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 1.dp, bottom = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                     Row(
                         modifier = Modifier
                             .shadow(4.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.5f))
@@ -1358,18 +1378,13 @@ fun PlayerScreen(
                         }
                     }
                 }
-
-                // Center Display: Guaranteed Hero Album Art / Vinyl / CD / Retro Skin (Physics Deck Swipe)
-                val heroArtSize = remember(screenWidth, screenHeight) {
-                    val base = minOf(screenWidth * 0.76f, 275.dp)
-                    if (screenHeight < 680.dp) base.coerceIn(195.dp, 240.dp)
-                    else base.coerceIn(230.dp, 280.dp)
                 }
 
-                Box(
+                // Center Display: Hero Album Art / Vinyl / CD / Retro Skin (Physics Deck Swipe)
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(heroArtSize + 16.dp)
+                        .weight(1f)
                         .padding(vertical = 2.dp)
                         .graphicsLayer {
                             translationX = swipeOffsetX.value
@@ -1417,7 +1432,8 @@ fun PlayerScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    val maxArtSize = heroArtSize
+                    val artDimension = minOf(maxWidth * 0.82f, maxHeight * 0.94f)
+                    val maxArtSize = if (artDimension > 120.dp) artDimension else 210.dp
                     if (isVideoMode) {
                         // Video Player Screen
                         val activeExo = PlaybackService.activePlayer
@@ -1670,7 +1686,7 @@ fun PlayerScreen(
                                             accentColor = activeAccent,
                                             onTap = {
                                                 AuraHaptic.click(view)
-                                                setVisualizerSkin(1)
+                                                cycleVisualizerSkin()
                                             },
                                             onLongPress = {
                                                 Toast.makeText(context, "🖼️ Carátula Cuadrada Completa HD", Toast.LENGTH_SHORT).show()
@@ -1795,7 +1811,7 @@ fun PlayerScreen(
                                         onSeekRelative = onSeekRelative,
                                         onTap = {
                                             AuraHaptic.click(view)
-                                            setVisualizerSkin(2)
+                                            cycleVisualizerSkin()
                                         },
                                         onLongPress = {
                                             Toast.makeText(context, "🔮 Resonancia Arcana: Ecos del Vacío Estelar", Toast.LENGTH_SHORT).show()
@@ -1868,7 +1884,7 @@ fun PlayerScreen(
                                             detectTapGestures(
                                                 onTap = {
                                                     AuraHaptic.click(view)
-                                                    setVisualizerSkin(3)
+                                                    cycleVisualizerSkin()
                                                 }
                                             )
                                         }
@@ -1882,7 +1898,7 @@ fun PlayerScreen(
                                     durationMs = durationMs,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        setVisualizerSkin(4)
+                                        cycleVisualizerSkin()
                                     },
                                     onDoubleTap = { offset ->
                                         val w = maxArtSize.value
@@ -1925,7 +1941,7 @@ fun PlayerScreen(
                                             detectTapGestures(
                                                 onTap = {
                                                     AuraHaptic.click(view)
-                                                    setVisualizerSkin(5)
+                                                    cycleVisualizerSkin()
                                                 },
                                                 onDoubleTap = { offset ->
                                                     val w = size.width
@@ -1995,7 +2011,7 @@ fun PlayerScreen(
                                     durationMs = durationMs,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        setVisualizerSkin(6)
+                                        cycleVisualizerSkin()
                                     },
                                     onTogglePlay = onPlayPauseClick,
                                     onNext = onNextClick,
@@ -2013,7 +2029,7 @@ fun PlayerScreen(
                                     bassEnergy = liveBassEnergy,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        setVisualizerSkin(7)
+                                        cycleVisualizerSkin()
                                     },
                                     onDoubleTap = { offset ->
                                         val w = maxArtSize.value
@@ -2049,7 +2065,7 @@ fun PlayerScreen(
                                     secondaryColor = MaterialTheme.colorScheme.secondary,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        setVisualizerSkin(0)
+                                        cycleVisualizerSkin()
                                     },
                                     onLongPress = {
                                         showArcaneFrequencyDialog = true
