@@ -205,7 +205,27 @@ class DaVEAppWidgetProvider : AppWidgetProvider() {
         }
 
         private fun loadThumbnailBitmap(context: Context, uri: Uri): Bitmap? {
-            return com.auraplayer.util.AudioArtworkResolver.resolveBitmap(context, uri, targetSize = 256)
+            val src = com.auraplayer.util.AudioArtworkResolver.resolveBitmap(context, uri, targetSize = 256) ?: return null
+            return getRoundedCornerBitmap(src, 14f, context)
+        }
+
+        private fun getRoundedCornerBitmap(bitmap: Bitmap, cornerRadiusDp: Float, context: Context): Bitmap {
+            return try {
+                val density = context.resources.displayMetrics.density
+                val radiusPx = cornerRadiusDp * density
+                val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+                val canvas = android.graphics.Canvas(output)
+                val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+                val rect = android.graphics.Rect(0, 0, bitmap.width, bitmap.height)
+                val rectF = android.graphics.RectF(rect)
+
+                canvas.drawRoundRect(rectF, radiusPx, radiusPx, paint)
+                paint.xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_IN)
+                canvas.drawBitmap(bitmap, rect, rect, paint)
+                output
+            } catch (_: Exception) {
+                bitmap
+            }
         }
     }
 }

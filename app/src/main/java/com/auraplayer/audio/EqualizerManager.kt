@@ -210,9 +210,13 @@ val bandLevels = FloatArray(10) { 0f }
             if (enabled) {
                 presetReverb?.preset = 6 // PresetReverb.PRESET_CONCERTHALL (Concert Hall)
                 virtualizer?.let {
+                    try {
+                        it.forceVirtualizationMode(Virtualizer.VIRTUALIZATION_MODE_BINAURAL)
+                    } catch (_: Exception) {}
                     if (it.strengthSupported) {
                         it.setStrength(1000.toShort())
                     }
+                    it.enabled = true
                 }
             } else {
                 presetReverb?.preset = PresetReverb.PRESET_NONE
@@ -226,6 +230,20 @@ val bandLevels = FloatArray(10) { 0f }
             AppLog.e(TAG, "No se pudo cambiar el modo Spatial 8D del ecualizador", e)
         }
         persistSettings()
+    }
+
+    /**
+     * Modulación dinámica de profundidad y reverberación para Audio Espacial 8D rotativo
+     */
+    fun updateSpatial8DDynamics(strength: Short) {
+        if (!isSpatial8DEnabled) return
+        try {
+            virtualizer?.let {
+                if (it.strengthSupported && it.enabled) {
+                    it.setStrength(strength)
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     fun setKaraokeMode(enabled: Boolean) {

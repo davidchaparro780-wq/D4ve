@@ -161,7 +161,11 @@ class PlaybackService : MediaSessionService() {
                 val crossfadeSec = playlistManager.getCrossfadeSeconds()
                 val is8D = EqualizerManager.instance.isSpatial8DEnabled
                 val spatialFactor = if (is8D && player.isPlaying) {
-                    0.92f + 0.08f * kotlin.math.sin(System.currentTimeMillis() / 950.0).toFloat()
+                    val angle = (System.currentTimeMillis() % 8500L) / 8500.0 * 2.0 * Math.PI
+                    val distance = kotlin.math.cos(angle).toFloat()
+                    val dynamicStrength = (800 + (200 * ((distance + 1f) / 2f))).toInt().toShort()
+                    EqualizerManager.instance.updateSpatial8DDynamics(dynamicStrength)
+                    0.93f + 0.07f * kotlin.math.sin(angle).toFloat()
                 } else 1.0f
                 val sleepFade = SleepTimerManager.globalFadeFactor
                 val effectiveFactor = (spatialFactor * sleepFade).coerceIn(0.0f, 1.0f)
