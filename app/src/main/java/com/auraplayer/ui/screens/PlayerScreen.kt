@@ -133,6 +133,7 @@ import com.auraplayer.ui.components.SongHunterDialog
 import com.auraplayer.ui.components.MoodWheelDialog
 import com.auraplayer.ui.components.CassetteTapeSkin
 import com.auraplayer.ui.components.IpodClassicSkin
+import com.auraplayer.ui.components.SquareAlbumArtSkin
 import com.auraplayer.ui.components.AuroraMeshBackground
 import com.auraplayer.ui.components.VinylTurntableSkin
 import com.auraplayer.ui.components.RetroDiscmanSkin
@@ -335,7 +336,14 @@ fun PlayerScreen(
 
     var isEdgeLightingEnabled by remember { mutableStateOf(false) }
     var isSpatial8D by remember { mutableStateOf(EqualizerManager.instance.isSpatial8DEnabled) }
-    var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Retro Discman CD 2000s, 3: Live Spectrum Waves
+    val skinPrefs = remember { context.getSharedPreferences("aura_skin_prefs", Context.MODE_PRIVATE) }
+    var centerVisualizerMode by rememberSaveable {
+        mutableIntStateOf(skinPrefs.getInt("center_visualizer_mode", 0))
+    }
+    fun setVisualizerSkin(mode: Int) {
+        centerVisualizerMode = mode
+        skinPrefs.edit().putInt("center_visualizer_mode", mode).apply()
+    }
     var isGyro3dEnabled by rememberSaveable { mutableStateOf(true) }
     val gyroTiltState = com.auraplayer.audio.rememberGyroscopeTilt(isEnabled = isGyro3dEnabled)
     val realWaveform by com.auraplayer.audio.rememberAudioWaveform(currentMedia)
@@ -1023,6 +1031,36 @@ fun PlayerScreen(
                                 )
                             }
 
+                            // Pill Selector de Skin (Carátula Cuadrada / Vinilo / Cassette / CD...)
+                            val currentSkinLabel = when (centerVisualizerMode) {
+                                0 -> "🖼️ Carátula"
+                                1 -> "💿 Vinilo"
+                                2 -> "📼 Cassette"
+                                3 -> "💿 CD"
+                                4 -> "⚡ Espectro"
+                                5 -> "📱 iPod"
+                                6 -> "🎛️ Vúmetros"
+                                else -> "🗿 Monolito"
+                            }
+                            Surface(
+                                onClick = {
+                                    AuraHaptic.click(view)
+                                    val nextMode = (centerVisualizerMode + 1) % 8
+                                    setVisualizerSkin(nextMode)
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f))
+                            ) {
+                                Text(
+                                    text = currentSkinLabel,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+
                             // Floating Sleep Timer Countdown Pill
                             val isSleepTimerRunning = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
                             val sleepRemainingSec = sleepTimerManager?.remainingSeconds?.collectAsState()?.value ?: 0
@@ -1406,7 +1444,7 @@ fun PlayerScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    val maxArtSize = minOf(maxWidth * 0.90f, maxHeight * 0.92f)
+                    val maxArtSize = minOf(maxWidth * 0.85f, maxHeight * 0.80f)
                     if (isVideoMode) {
                         // Video Player Screen
                         val activeExo = PlaybackService.activePlayer
@@ -1592,6 +1630,130 @@ fun PlayerScreen(
                                 }
 
                                 if (centerVisualizerMode == 0) {
+                                    // Skin Carátula Cuadrada Completa (Full Square Album Art Hi-Fi)
+                                    val bassEnergy = liveBassEnergy
+                                    val dynamicElevation = if (isPlaying) (16.dp + (18.dp * bassEnergy)) else 10.dp
+                                    val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(maxArtSize)
+                                            .graphicsLayer {
+                                                val (gPitch, gRoll) = if (isGyro3dEnabled) gyroTiltState.value else Pair(0f, 0f)
+                                                rotationX = (animatedTiltX + gPitch).coerceIn(-18f, 18f)
+                                                rotationY = (animatedTiltY + gRoll).coerceIn(-18f, 18f)
+                                                cameraDistance = 14f * density
+                                            }
+                                            .pointerInput(Unit) {
+                                                detectDragGestures(
+                                                    onDragStart = {},
+                                                    onDrag = { change, dragAmount ->
+                                                        change.consume()
+                                                        tiltX = (tiltX - dragAmount.y * 0.08f).coerceIn(-14f, 14f)
+                                                        tiltY = (tiltY + dragAmount.x * 0.08f).coerceIn(-14f, 14f)
+                                                    },
+                                                    onDragEnd = {
+                                                        tiltX = 0f
+                                                        tiltY = 0f
+                                                    },
+                                                    onDragCancel = {
+                                                        tiltX = 0f
+                                                        tiltY = 0f
+                                                    }
+                                                )
+                                            }
+                                            .then(levitationModifier)
+                                            .padding(vertical = 4.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        // Halo ambiental cuadrado
+                                        Box(
+                                            modifier = Modifier
+                                                .size(maxArtSize * 1.06f)
+                                                .graphicsLayer {
+                                                    alpha = dynamicGlowAlpha * 0.70f
+                                                }
+                                                .background(
+                                                    Brush.radialGradient(
+                                                        listOf(
+                                                            artworkPalette?.accent ?: activeAccent,
+                                                            (artworkPalette?.seed ?: MaterialTheme.colorScheme.primary).copy(alpha = 0.40f),
+                                                            Color.Transparent
+                                                        )
+                                                    ),
+                                                    shape = RoundedCornerShape(28.dp)
+                                                )
+                                        )
+
+                                        SupernovaShockwave(
+                                            trigger = supernovaTrigger,
+                                            accentColor = activeAccent,
+                                            secondaryColor = MaterialTheme.colorScheme.secondary
+                                        )
+
+                                        SquareAlbumArtSkin(
+                                            song = currentMedia,
+                                            isPlaying = isPlaying,
+                                            accentColor = activeAccent,
+                                            onTap = {
+                                                AuraHaptic.click(view)
+                                                setVisualizerSkin(1)
+                                            },
+                                            onLongPress = {
+                                                Toast.makeText(context, "🖼️ Carátula Cuadrada Completa HD", Toast.LENGTH_SHORT).show()
+                                            },
+                                            onDoubleTap = { offset ->
+                                                val w = 300f
+                                                if (offset.x < w * 0.35f) {
+                                                    onSeekRelative(-10000L)
+                                                    seekBadgeText = "-10s"
+                                                    seekBadgeIsForward = false
+                                                    showSeekBadge = true
+                                                    AuraHaptic.click(view)
+                                                } else if (offset.x > w * 0.65f) {
+                                                    onSeekRelative(10000L)
+                                                    seekBadgeText = "+10s"
+                                                    seekBadgeIsForward = true
+                                                    showSeekBadge = true
+                                                    AuraHaptic.click(view)
+                                                } else {
+                                                    onToggleFavorite()
+                                                    showHeartBurst = true
+                                                    AuraHaptic.heavy(view)
+                                                }
+                                            },
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+
+                                        // Capa Holográfica Iridiscente reactiva al giro 3D del teléfono
+                                        if (isGyro3dEnabled) {
+                                            Canvas(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(RoundedCornerShape(26.dp))
+                                                    .graphicsLayer { alpha = 0.35f }
+                                            ) {
+                                                val (gPitch, gRoll) = gyroTiltState.value
+                                                val cx = size.width * (0.5f + ((animatedTiltY + gRoll) / 32f))
+                                                val cy = size.height * (0.5f - ((animatedTiltX + gPitch) / 32f))
+                                                drawCircle(
+                                                    brush = Brush.radialGradient(
+                                                        colors = listOf(
+                                                            Color.White.copy(alpha = 0.38f),
+                                                            Color(0xFF00F0FF).copy(alpha = 0.28f),
+                                                            Color(0xFFEC4899).copy(alpha = 0.22f),
+                                                            Color(0xFFFFD700).copy(alpha = 0.18f),
+                                                            Color.Transparent
+                                                        ),
+                                                        center = Offset(cx, cy),
+                                                        radius = size.width * 0.65f
+                                                    ),
+                                                    radius = size.width * 0.5f
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else if (centerVisualizerMode == 1) {
                                     // Glowing Ambient Aura Disc with Vinyl Record Grooves (Dynamic Palette Glow)
                                     val bassEnergy = liveBassEnergy
                                     val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
@@ -1660,7 +1822,7 @@ fun PlayerScreen(
                                         onSeekRelative = onSeekRelative,
                                         onTap = {
                                             AuraHaptic.click(view)
-                                            centerVisualizerMode = 1
+                                            setVisualizerSkin(2)
                                         },
                                         onLongPress = {
                                             Toast.makeText(context, "🔮 Resonancia Arcana: Ecos del Vacío Estelar", Toast.LENGTH_SHORT).show()
@@ -1717,7 +1879,7 @@ fun PlayerScreen(
                                         }
                                     }
                                 }
-                            } else if (centerVisualizerMode == 1) {
+                            } else if (centerVisualizerMode == 2) {
                                 // Skin Retro Vintage: Cassette Tape Interactivo
                                 CassetteTapeSkin(
                                     song = currentMedia,
@@ -1733,12 +1895,12 @@ fun PlayerScreen(
                                             detectTapGestures(
                                                 onTap = {
                                                     AuraHaptic.click(view)
-                                                    centerVisualizerMode = 2
+                                                    setVisualizerSkin(3)
                                                 }
                                             )
                                         }
                                 )
-                            } else if (centerVisualizerMode == 2) {
+                            } else if (centerVisualizerMode == 3) {
                                 // Skin Retro 2000s: Discman CD Player con Holograma y LCD
                                 RetroDiscmanSkin(
                                     song = currentMedia,
@@ -1747,7 +1909,7 @@ fun PlayerScreen(
                                     durationMs = durationMs,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        centerVisualizerMode = 3
+                                        setVisualizerSkin(4)
                                     },
                                     onDoubleTap = { offset ->
                                         val w = maxArtSize.value
@@ -1773,7 +1935,7 @@ fun PlayerScreen(
                                         .size(maxArtSize)
                                         .then(levitationModifier)
                                 )
-                            } else if (centerVisualizerMode == 3) {
+                            } else if (centerVisualizerMode == 4) {
                                 // Live Cyber Spectrum Waveform Visualizer (Real-time FFT audio engine)
                                 Box(
                                     modifier = Modifier
@@ -1790,7 +1952,7 @@ fun PlayerScreen(
                                             detectTapGestures(
                                                 onTap = {
                                                     AuraHaptic.click(view)
-                                                    centerVisualizerMode = 4
+                                                    setVisualizerSkin(5)
                                                 },
                                                 onDoubleTap = { offset ->
                                                     val w = size.width
@@ -1851,7 +2013,7 @@ fun PlayerScreen(
                                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp)
                                     )
                                 }
-                            } else if (centerVisualizerMode == 4) {
+                            } else if (centerVisualizerMode == 5) {
                                 // Skin Retro iPod Classic con Click Wheel Háptica
                                 RetroIpodSkin(
                                     song = currentMedia,
@@ -1860,7 +2022,7 @@ fun PlayerScreen(
                                     durationMs = durationMs,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        centerVisualizerMode = 5
+                                        setVisualizerSkin(6)
                                     },
                                     onTogglePlay = onPlayPauseClick,
                                     onNext = onNextClick,
@@ -1870,7 +2032,7 @@ fun PlayerScreen(
                                         .size(maxArtSize)
                                         .then(levitationModifier)
                                 )
-                            } else if (centerVisualizerMode == 5) {
+                            } else if (centerVisualizerMode == 6) {
                                 // Skin Vintage Hi-Fi: Vúmetros Analógicos de Aguja Mecánica (Canal L & R)
                                 AnalogVuMetersSkin(
                                     song = currentMedia,
@@ -1878,7 +2040,7 @@ fun PlayerScreen(
                                     bassEnergy = liveBassEnergy,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        centerVisualizerMode = 6
+                                        setVisualizerSkin(7)
                                     },
                                     onDoubleTap = { offset ->
                                         val w = maxArtSize.value
@@ -1914,7 +2076,7 @@ fun PlayerScreen(
                                     secondaryColor = MaterialTheme.colorScheme.secondary,
                                     onTap = {
                                         AuraHaptic.click(view)
-                                        centerVisualizerMode = 0
+                                        setVisualizerSkin(0)
                                     },
                                     onLongPress = {
                                         showArcaneFrequencyDialog = true

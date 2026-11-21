@@ -1,7 +1,7 @@
 {
-    "versionCode":  200,
-    "versionName":  "5.0.0",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.0/app-release.apk",
-    "changelog":  "v5.0.0 Generation Five Masterpiece: Aura Liquid Fluid Canvas estilo Apple Music con 6 nodos cromáticos orgánicos y reactividad sub-bajo/agudos a 120 FPS; Audio Espacial 3D inmersivo con seguimiento de cabeza por giroscopio; HUD Audiófilo Bit-Perfect DAC Stream con perfiles AutoEQ (AirPods, Sony XM5, Moondrop, Sennheiser) y Crossfeed Chu-Moy anti-fatiga; Motor DJ con Rueda de Camelot (1A-12B) y transiciones armónicas; Mini-reproductor Picture-in-Picture (PiP) con micro-espectro reactivo; y Sensor de Cama Inteligente con acelerómetro y fade-out suave de 3 minutos.",
+    "versionCode":  201,
+    "versionName":  "5.0.1",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.1/app-release.apk",
+    "changelog":  "v5.0.1 Hotfix Carátula Cuadrada Completa: Incorporación del skin de Carátula Cuadrada Completa HD (1:1) sin recortes; ajuste del cálculo maxArtSize (80% maxHeight) con holgura de seguridad para eliminar por completo el corte superior e inferior durante la inclinación 3D del giroscopio; chip selector directo de skins en cabecera y persistencia de skin preferido en memoria.",
     "fileSizeMb":  0
 }
