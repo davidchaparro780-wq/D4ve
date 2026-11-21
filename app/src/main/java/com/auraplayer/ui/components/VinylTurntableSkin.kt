@@ -180,11 +180,13 @@ fun VinylTurntableSkin(
                                 dragAccX += dragAmount
                                 if (dragAccX > 22f) {
                                     onSeekRelative(2000L)
-                                    AuraHaptic.tick(view)
+                                    AuraHaptic.heavy(view)
+                                    try { DjSynthSoundPlayer.playScratch() } catch (_: Throwable) {}
                                     dragAccX = 0f
                                 } else if (dragAccX < -22f) {
                                     onSeekRelative(-2000L)
-                                    AuraHaptic.tick(view)
+                                    AuraHaptic.heavy(view)
+                                    try { DjSynthSoundPlayer.playScratch() } catch (_: Throwable) {}
                                     dragAccX = 0f
                                 }
                             },

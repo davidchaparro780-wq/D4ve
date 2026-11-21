@@ -64,7 +64,8 @@ fun DynamicWaveformSeekbar(
     modifier: Modifier = Modifier,
     activeColor: Color = Color(0xFF38BDF8),
     secondaryColor: Color = Color(0xFF8B5CF6),
-    durationMs: Long = 0L
+    durationMs: Long = 0L,
+    waveform: FloatArray? = null
 ) {
     val barCount = 42
 
@@ -86,13 +87,24 @@ fun DynamicWaveformSeekbar(
     var lastHapticBarIndex by remember { mutableIntStateOf(-1) }
     var seekbarWidth by remember { mutableFloatStateOf(0f) }
 
-    // Generar alturas armónicas pseudo-musicales fijas para consistencia visual
+    // Generar alturas armónicas pseudo-musicales fijas para consistencia visual si no hay waveform real
     val baseHeights = remember {
         FloatArray(barCount) { i ->
             val angle = (i.toFloat() / barCount) * Math.PI * 3.5f
             val wave1 = (sin(angle).toFloat() * 0.5f + 0.5f)
             val wave2 = (sin(angle * 2.1f + 1.2f).toFloat() * 0.35f + 0.35f)
             (0.25f + 0.45f * wave1 + 0.30f * wave2).coerceIn(0.2f, 1.0f)
+        }
+    }
+
+    val effectiveHeights = remember(waveform) {
+        if (waveform != null && waveform.isNotEmpty()) {
+            FloatArray(barCount) { i ->
+                val sampleIdx = ((i.toFloat() / barCount) * waveform.size).toInt().coerceIn(0, waveform.size - 1)
+                waveform[sampleIdx].coerceIn(0.15f, 1.0f)
+            }
+        } else {
+            baseHeights
         }
     }
 
@@ -171,7 +183,7 @@ fun DynamicWaveformSeekbar(
                 val barCenterX = i * totalBarSpace + (totalBarSpace / 2f)
                 val isPassed = barCenterX <= currentPlayX
 
-                var normalizedHeight = baseHeights[i]
+                var normalizedHeight = effectiveHeights[i]
 
                 // Animación sutil de respiración armónica y reacción al bajo si está reproduciendo
                 if (isPlaying) {

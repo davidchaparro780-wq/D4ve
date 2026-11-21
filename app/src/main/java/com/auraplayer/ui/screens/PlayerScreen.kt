@@ -336,6 +336,9 @@ fun PlayerScreen(
     var isEdgeLightingEnabled by remember { mutableStateOf(false) }
     var isSpatial8D by remember { mutableStateOf(EqualizerManager.instance.isSpatial8DEnabled) }
     var centerVisualizerMode by remember { mutableIntStateOf(0) } // 0: Vinyl disc, 1: Cassette Tape, 2: Retro Discman CD 2000s, 3: Live Spectrum Waves
+    var isGyro3dEnabled by rememberSaveable { mutableStateOf(true) }
+    val gyroTilt by com.auraplayer.audio.rememberGyroscopeTilt(isEnabled = isGyro3dEnabled)
+    val realWaveform by com.auraplayer.audio.rememberAudioWaveform(currentMedia)
     var isVideoMode by rememberSaveable {
         mutableStateOf(currentMedia?.isVideo == true ||
             currentMedia?.path?.endsWith(".mp4", ignoreCase = true) == true ||
@@ -1568,13 +1571,15 @@ fun PlayerScreen(
                                     val bassEnergy = liveBassEnergy
                                     val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
                                     val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
+                                    val combinedTiltX = (animatedTiltX + (if (isGyro3dEnabled) gyroTilt.first else 0f)).coerceIn(-18f, 18f)
+                                    val combinedTiltY = (animatedTiltY + (if (isGyro3dEnabled) gyroTilt.second else 0f)).coerceIn(-18f, 18f)
 
                                      Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
                                              .graphicsLayer {
-                                                 rotationX = animatedTiltX
-                                                 rotationY = animatedTiltY
+                                                 rotationX = combinedTiltX
+                                                 rotationY = combinedTiltY
                                                  cameraDistance = 14f * density
                                              }
                                              .pointerInput(Unit) {
@@ -1659,6 +1664,33 @@ fun PlayerScreen(
                                         },
                                         modifier = Modifier.fillMaxSize()
                                     )
+
+                                    // Capa Holográfica Iridiscente reactiva al giro 3D del teléfono
+                                    if (isGyro3dEnabled) {
+                                        Canvas(
+                                            modifier = Modifier
+                                                .size(maxArtSize * 0.86f)
+                                                .clip(CircleShape)
+                                                .graphicsLayer { alpha = 0.40f }
+                                        ) {
+                                            val cx = size.width * (0.5f + (combinedTiltY / 32f))
+                                            val cy = size.height * (0.5f - (combinedTiltX / 32f))
+                                            drawCircle(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(
+                                                        Color.White.copy(alpha = 0.38f),
+                                                        Color(0xFF00F0FF).copy(alpha = 0.28f),
+                                                        Color(0xFFEC4899).copy(alpha = 0.22f),
+                                                        Color(0xFFFFD700).copy(alpha = 0.18f),
+                                                        Color.Transparent
+                                                    ),
+                                                    center = Offset(cx, cy),
+                                                    radius = size.width * 0.65f
+                                                ),
+                                                radius = size.width * 0.5f
+                                            )
+                                        }
+                                    }
                                 }
                             } else if (centerVisualizerMode == 1) {
                                 // Skin Retro Vintage: Cassette Tape Interactivo
@@ -2103,17 +2135,37 @@ fun PlayerScreen(
                                                         horizontalAlignment = Alignment.CenterHorizontally,
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
+                                                        val nextLineTime = lyrics.lines.getOrNull(index + 1)?.timeMs ?: (line.timeMs + 4500L)
+                                                        val lineDuration = (nextLineTime - line.timeMs).coerceIn(1200L, 12000L)
+                                                        val lineElapsed = (currentPositionMs - line.timeMs).coerceIn(0L, lineDuration)
+                                                        val lineProgress = (lineElapsed.toFloat() / lineDuration.toFloat()).coerceIn(0f, 1f)
+                                                        val bassPulse = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0f
+
                                                         Text(
                                                             text = line.text,
                                                             fontSize = if (isActive) (24 * lyricsFontSizeMultiplier).sp else (15 * lyricsFontSizeMultiplier).sp,
                                                             fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Medium,
-                                                            color = if (isActive) Color.White else Color.White.copy(alpha = 0.38f),
                                                             textAlign = TextAlign.Center,
                                                             lineHeight = if (isActive) (32 * lyricsFontSizeMultiplier).sp else (22 * lyricsFontSizeMultiplier).sp,
                                                             style = androidx.compose.ui.text.TextStyle(
+                                                                brush = if (isActive) {
+                                                                    Brush.horizontalGradient(
+                                                                        colorStops = arrayOf(
+                                                                            0.0f to Color.White,
+                                                                            (lineProgress - 0.08f).coerceAtLeast(0f) to Color.White,
+                                                                            lineProgress to Color(0xFFFFD700),
+                                                                            (lineProgress + 0.08f).coerceAtMost(1f) to Color.White.copy(alpha = 0.40f),
+                                                                            1.0f to Color.White.copy(alpha = 0.40f)
+                                                                        )
+                                                                    )
+                                                                } else {
+                                                                    Brush.horizontalGradient(
+                                                                        listOf(Color.White.copy(alpha = 0.38f), Color.White.copy(alpha = 0.38f))
+                                                                    )
+                                                                },
                                                                 shadow = if (isActive) androidx.compose.ui.graphics.Shadow(
                                                                     color = activeAccent.copy(alpha = 0.90f),
-                                                                    blurRadius = 22f
+                                                                    blurRadius = 22f + (bassPulse * 16f)
                                                                 ) else null
                                                             ),
                                                             modifier = Modifier.graphicsLayer {
@@ -2510,7 +2562,8 @@ fun PlayerScreen(
                         },
                         activeColor = activeAccent,
                         secondaryColor = MaterialTheme.colorScheme.secondary,
-                        durationMs = effectiveDurationMs
+                        durationMs = effectiveDurationMs,
+                        waveform = realWaveform
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -3249,6 +3302,29 @@ fun PlayerScreen(
                             selectedContainerColor = Color(0xFFFBBF24).copy(alpha = 0.25f),
                             selectedLabelColor = Color(0xFFF59E0B),
                             labelColor = Color(0xFFFBBF24)
+                        )
+                    )
+
+                    // Giroscopio 3D Holográfico Chip
+                    FilterChip(
+                        selected = isGyro3dEnabled,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            isGyro3dEnabled = !isGyro3dEnabled
+                            val msg = if (isGyro3dEnabled) "🛸 Giroscopio 3D: ACTIVADO (inclina el teléfono)" else "Giroscopio 3D: Desactivado"
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        },
+                        label = {
+                            Text(
+                                text = if (isGyro3dEnabled) "🛸 Giroscopio 3D: ON" else "🛸 Giroscopio 3D",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF00F0FF).copy(alpha = 0.25f),
+                            selectedLabelColor = Color(0xFF00F0FF),
+                            labelColor = Color(0xFF38BDF8)
                         )
                     )
 
