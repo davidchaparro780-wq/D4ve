@@ -14,6 +14,7 @@ out/
 *.class
 # Generated files
 .gradle/
+.kotlin/
 .idea/
 *.iml
 local.properties

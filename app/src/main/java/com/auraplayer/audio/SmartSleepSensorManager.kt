@@ -65,8 +65,17 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
         set(value) {
             prefs.edit().putBoolean(KEY_BED_SENSOR, value).apply()
             if (value) {
+                // executeSleepFadeOut() ya realiza el fade-out, la pausa y la notificación.
+                // El callback de "sueño detectado" solo debe informar al usuario; llamar de nuevo
+                // a executeSleepFadeOut() aquí provocaría un bucle infinito de desvanecimientos.
                 startMonitoring(15) {
-                    executeSleepFadeOut()
+                    try {
+                        Toast.makeText(
+                            appContext,
+                            "💤 Inactividad detectada: música pausada suavemente",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } catch (_: Exception) {}
                 }
             } else {
                 stopMonitoring()
@@ -130,9 +139,11 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
 
             player?.pause()
             player?.volume = 1.0f // Restaurar volumen base para la próxima sesión
-            _isFadeOutActive.value = false
             stopMonitoring()
+            // El flag se libera al final para que un callback accidental no pueda
+            // reiniciar otro fade-out mientras este todavía está finalizando.
             onSleepDetected?.invoke()
+            _isFadeOutActive.value = false
             AppLog.i(TAG, "Música en pausa: Modo descanso completado exitosamente.")
         }
     }
