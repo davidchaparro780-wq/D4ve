@@ -113,8 +113,14 @@ fun rememberGyroscopeTilt(isEnabled: Boolean = true): State<Pair<Float, Float>> 
         }
 
         val manager = GyroscopeTiltManager(context)
+        val spatialEngine = HeadTrackingSpatialAudioEngine.getInstance(context)
         manager.onTiltChanged = { pitch, roll ->
             tiltState.value = Pair(pitch, roll)
+            if (spatialEngine.isHeadTrackingEnabled.value) {
+                val movementMagnitude = (kotlin.math.abs(roll) + kotlin.math.abs(pitch)).coerceIn(0f, 25f)
+                val dynamicVirtualizerStrength = (500 + (movementMagnitude * 20f)).toInt().coerceIn(300, 1000).toShort()
+                EqualizerManager.instance.updateSpatial8DDynamics(dynamicVirtualizerStrength)
+            }
         }
         manager.startListening()
 

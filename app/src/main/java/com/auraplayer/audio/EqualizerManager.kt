@@ -477,6 +477,20 @@ val bandLevels = FloatArray(10) { 0f }
                 virtualizerStrength = 400
                 loudnessGain = 350
             }
+            16 -> { // Moondrop / Audiophile Harman Target
+                val preset = floatArrayOf(2f, 1f, 0f, 0f, 1f, 2f, 3f, 4f, 4f, 5f)
+                System.arraycopy(preset, 0, bandLevels, 0, 10)
+                bassStrength = 300
+                virtualizerStrength = 650
+                loudnessGain = 80
+            }
+            17 -> { // Audio-Technica ATH-M50x Studio Reference
+                val preset = floatArrayOf(3f, 2f, 0f, -1f, 0f, 1f, 2f, 3f, 3f, 4f)
+                System.arraycopy(preset, 0, bandLevels, 0, 10)
+                bassStrength = 400
+                virtualizerStrength = 500
+                loudnessGain = 100
+            }
         }
         currentPresetIndex = presetIndex
         applyBandsToHardware()

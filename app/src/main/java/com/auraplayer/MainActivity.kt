@@ -288,6 +288,33 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         onResumeCallback?.invoke()
     }
+
+    var isPipMode by mutableStateOf(false)
+
+    fun enterPip() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val params = android.app.PictureInPictureParams.Builder()
+                    .setAspectRatio(android.util.Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(params)
+            } catch (e: Exception) {
+                AppLog.e(TAG, "Error entrando a Picture-in-Picture", e)
+            }
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        isPipMode = isInPictureInPictureMode
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (activeController?.isPlaying == true) {
+            enterPip()
+        }
+    }
 }
 
 @OptIn(UnstableApi::class)
@@ -1886,6 +1913,22 @@ fun AuraApp(
             },
             onDismiss = { showTournamentDialog = false }
         )
+    }
+
+    val mainActivity = context as? MainActivity
+    if (mainActivity?.isPipMode == true) {
+        com.auraplayer.ui.components.PictureInPictureMiniPlayer(
+            song = currentMedia,
+            isPlaying = isPlaying,
+            onTogglePlay = {
+                controller?.let { c ->
+                    if (c.isPlaying) c.pause() else c.play()
+                }
+            },
+            onNext = { controller?.seekToNextMediaItem() },
+            onPrev = { controller?.seekToPreviousMediaItem() }
+        )
+        return
     }
 
     // Main Container with Animated Fullscreen Player & Update Dialog

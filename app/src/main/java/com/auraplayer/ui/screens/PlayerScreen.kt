@@ -485,7 +485,9 @@ fun PlayerScreen(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 val act = context.findActivity()
-                val params = android.app.PictureInPictureParams.Builder().build()
+                val params = android.app.PictureInPictureParams.Builder()
+                    .setAspectRatio(android.util.Rational(16, 9))
+                    .build()
                 act?.enterPictureInPictureMode(params)
             } catch (e: Exception) {
                 Toast.makeText(context, "Ventana flotante: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
@@ -959,6 +961,7 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
@@ -967,6 +970,18 @@ fun PlayerScreen(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
+                    IconButton(onClick = {
+                        AuraHaptic.click(view)
+                        triggerPiP()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.PictureInPictureAlt,
+                            contentDescription = "Modo PiP Cápsula Flotante",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -2429,6 +2444,42 @@ fun PlayerScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text("▾", color = activeAccent, fontSize = 9.sp)
+                            }
+                        }
+
+                        // Camelot Wheel DJ Harmonic Key Pill
+                        val camelotKey = remember(currentMedia.id) {
+                            com.auraplayer.audio.CamelotHarmonicDjEngine.detectCamelotKey(currentMedia)
+                        }
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    AuraHaptic.click(view)
+                                    Toast.makeText(context, "🎛️ Tonalidad Armónica DJ: ${camelotKey.code} (${camelotKey.musicalKey})", Toast.LENGTH_SHORT).show()
+                                },
+                            color = Color(0xFF8B5CF6).copy(alpha = 0.18f),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFF8B5CF6).copy(alpha = 0.70f), Color(0xFF00F0FF).copy(alpha = 0.30f))
+                                )
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("🎛️", fontSize = 10.sp)
+                                Text(
+                                    text = "${camelotKey.code} • ${camelotKey.musicalKey.take(6)}",
+                                    color = Color(0xFFC4B5FD),
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                )
                             }
                         }
                     }
@@ -4026,41 +4077,12 @@ fun PlayerScreen(
         }
     }
 
-    // Audiophile Technical Spec Sheet Dialog
+    // Audiophile Technical Spec Sheet & Bit-Perfect DAC Studio Dialog
     if (showAudioSpecSheet) {
-        val file = File(currentMedia.path)
-        val sizeMb = if (currentMedia.size > 0) String.format("%.2f MB", currentMedia.size / (1024.0 * 1024.0)) else "Desconocido"
-        val kbpsEstimate = if (durationMs > 0 && currentMedia.size > 0) {
-            val kb = currentMedia.size * 8 / 1024
-            val sec = durationMs / 1000
-            if (sec > 0) "${kb / sec} kbps" else "320 kbps"
-        } else "320 kbps"
-
-        AlertDialog(
-            onDismissRequest = { showAudioSpecSheet = false },
-            containerColor = Color(0xFF101422),
-            shape = RoundedCornerShape(24.dp),
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Inspector Audiófilo", fontWeight = FontWeight.Bold, color = Color.White)
-                }
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DetailRow("Insignia de Formato", audioBadgeText)
-                    DetailRow("Bitrate Estimado", kbpsEstimate)
-                    DetailRow("Motor de Procesamiento", "32-bit Float DSP • 48.0 kHz Estéreo")
-                    DetailRow("Tamaño del Archivo", sizeMb)
-                    DetailRow("Ruta", currentMedia.path)
-                }
-            },
-            confirmButton = {
-                Button(onClick = { showAudioSpecSheet = false }) {
-                    Text("Cerrar")
-                }
-            }
+        com.auraplayer.ui.components.AudiophileDacHudDialog(
+            song = currentMedia,
+            durationMs = durationMs,
+            onDismiss = { showAudioSpecSheet = false }
         )
     }
 

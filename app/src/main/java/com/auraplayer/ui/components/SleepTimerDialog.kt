@@ -379,6 +379,63 @@ fun SleepTimerDialog(
                     ) {
                         Text("Iniciar $customMinutes min", fontWeight = FontWeight.Bold, color = Color.White)
                     }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Sensor de Cama Inteligente por Acelerómetro
+                    val bedSensorManager = remember { com.auraplayer.audio.SmartSleepSensorManager.getInstance(context) }
+                    var isBedSensorActive by remember { mutableStateOf(bedSensorManager.isBedSensorEnabled) }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF131A29))
+                            .padding(10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.NightsStay,
+                                    contentDescription = null,
+                                    tint = Color(0xFFA78BFA),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "Sensor de Cama (Acelerómetro)",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "Apaga con fade-out al notar inmovilidad en la cama",
+                                        fontSize = 10.sp,
+                                        color = Color.White.copy(alpha = 0.65f)
+                                    )
+                                }
+                            }
+                            androidx.compose.material3.Switch(
+                                checked = isBedSensorActive,
+                                onCheckedChange = {
+                                    isBedSensorActive = it
+                                    bedSensorManager.isBedSensorEnabled = it
+                                },
+                                colors = androidx.compose.material3.SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = Color(0xFF8B5CF6)
+                                )
+                            )
+                        }
+                    }
                 }
             }
         },

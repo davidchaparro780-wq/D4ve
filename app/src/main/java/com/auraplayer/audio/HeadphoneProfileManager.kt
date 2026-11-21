@@ -76,6 +76,20 @@ class HeadphoneProfileManager(context: Context) {
             description = "Firma balanceada audiófila con gran escena sonora"
         ),
         HeadphoneProfile(
+            id = "moondrop_harman",
+            name = "Moondrop Chu / Blessing (AutoEQ)",
+            brand = "Moondrop",
+            presetIndex = 16,
+            description = "Calibración AutoEQ Harman Target Neutra de Estudio"
+        ),
+        HeadphoneProfile(
+            id = "ath_m50x",
+            name = "Audio-Technica ATH-M50x",
+            brand = "Audio-Technica",
+            presetIndex = 17,
+            description = "Referencia analítica de producción musical"
+        ),
+        HeadphoneProfile(
             id = "bt_speaker",
             name = "Altavoz Bluetooth Portátil (Party)",
             brand = "JBL / Anker / Tronsmart",

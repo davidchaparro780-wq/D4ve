@@ -1,12 +1,14 @@
 package com.auraplayer.audio
 
 import android.content.Context
+import com.auraplayer.data.model.MediaModel
 import com.auraplayer.util.AppLog
 
 /**
  * Gestor de Transiciones DJ Inteligentes (Smart DJ Auto-Mix Engine):
  * Crea mezclas continuas sin silencios entre canciones estilo festival de música electrónica / club:
  * - Filtro Sweep en la salida: Atenúa los graves de la canción saliente para no saturar la mezcla.
+ * - Integración con la Rueda de Camelot (CamelotHarmonicDjEngine) para mezcla armónica.
  * - Caída progresiva con curva exponencial de volumen.
  * - Entrada con golpe de bombo completo al comenzar la siguiente pista.
  */
@@ -20,6 +22,12 @@ class SmartDjTransitionManager private constructor(context: Context) {
         set(value) {
             prefs.edit().putBoolean("smart_dj_enabled", value).apply()
         }
+
+    fun getHarmonicAdvice(currentSong: MediaModel, nextSong: MediaModel): HarmonicTransitionAdvice {
+        val keyFrom = CamelotHarmonicDjEngine.detectCamelotKey(currentSong)
+        val keyTo = CamelotHarmonicDjEngine.detectCamelotKey(nextSong)
+        return CamelotHarmonicDjEngine.evaluateTransition(keyFrom, keyTo)
+    }
 
     fun computeTransitionVolume(positionMs: Long, durationMs: Long, transitionSec: Int): Float {
         if (!isSmartDjEnabled || transitionSec <= 0 || durationMs <= 0) return 1.0f

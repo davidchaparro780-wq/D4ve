@@ -1,7 +1,7 @@
 {
-    "versionCode":  199,
-    "versionName":  "4.9.99",
-    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v4.9.99/app-release.apk",
-    "changelog":  "v4.9.99 Performance & Bug Fixes Master Suite: Motor FFT con cero asignaciones de memoria en ciclo de audio (50Hz) y tablas logarítmicas precalculadas; aceleración por hardware GPU con RenderNode graphicsLayer en halo ambiental para eliminar 60 recomposiciones/segundo; giroscopio optimizado a 60Hz con zona muerta y matrices estáticas sin churn de GC; blindaje contra NaN y división por cero en gestos de onda seekbar; y reciclaje ultra-fluido en listas Lazy de historial, carpetas y artistas con keys estables.",
+    "versionCode":  200,
+    "versionName":  "5.0.0",
+    "downloadUrl":  "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.0/app-release.apk",
+    "changelog":  "v5.0.0 Generation Five Masterpiece: Aura Liquid Fluid Canvas estilo Apple Music con 6 nodos cromáticos orgánicos y reactividad sub-bajo/agudos a 120 FPS; Audio Espacial 3D inmersivo con seguimiento de cabeza por giroscopio; HUD Audiófilo Bit-Perfect DAC Stream con perfiles AutoEQ (AirPods, Sony XM5, Moondrop, Sennheiser) y Crossfeed Chu-Moy anti-fatiga; Motor DJ con Rueda de Camelot (1A-12B) y transiciones armónicas; Mini-reproductor Picture-in-Picture (PiP) con micro-espectro reactivo; y Sensor de Cama Inteligente con acelerómetro y fade-out suave de 3 minutos.",
     "fileSizeMb":  0
 }

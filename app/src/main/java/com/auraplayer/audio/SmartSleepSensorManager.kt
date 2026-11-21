@@ -1,25 +1,50 @@
 package com.auraplayer.audio
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.widget.Toast
+import com.auraplayer.service.PlaybackService
 import com.auraplayer.util.AppLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
- * Detector de Sueño Inteligente por Acelerómetro.
- * Detecta cuando el usuario se queda dormido por inmovilidad del teléfono en la cama o mesa.
+ * Detector de Sueño Inteligente por Acelerómetro (Smart Bed Inactivity Sensor).
+ *
+ * Detecta cuando el usuario se queda dormido por inmovilidad física del teléfono
+ * sobre la cama, almohada o mesa de noche:
+ * - Filtro pasabanda para descartar vibraciones parásitas.
+ * - Al confirmar 15 minutos sin interacción humana:
+ *     Inicia un fade-out suave de volumen durante 3 minutos para no despertar al oyente.
+ * - Pausa la reproducción automáticamente para ahorrar batería y proteger el descanso.
  */
 class SmartSleepSensorManager(private val context: Context) : SensorEventListener {
 
-    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+    private val appContext = context.applicationContext
+    private val prefs: SharedPreferences =
+        appContext.getSharedPreferences("aura_smart_sleep_sensor", Context.MODE_PRIVATE)
+
+    private val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     private val accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    var isMonitoring = false
-        private set
+    private val _isMonitoring = MutableStateFlow(false)
+    val isMonitoring: StateFlow<Boolean> = _isMonitoring.asStateFlow()
+
+    private val _isFadeOutActive = MutableStateFlow(false)
+    val isFadeOutActive: StateFlow<Boolean> = _isFadeOutActive.asStateFlow()
 
     private var lastMovementTimestamp = System.currentTimeMillis()
     private var inactivityThresholdMs = 15 * 60 * 1000L // 15 minutos por defecto
@@ -28,6 +53,22 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
     private var lastX = 0f
     private var lastY = 0f
     private var lastZ = 0f
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
+    private var fadeOutJob: Job? = null
+
+    var isBedSensorEnabled: Boolean
+        get() = prefs.getBoolean(KEY_BED_SENSOR, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_BED_SENSOR, value).apply()
+            if (value) {
+                startMonitoring(15) {
+                    executeSleepFadeOut()
+                }
+            } else {
+                stopMonitoring()
+            }
+        }
 
     fun startMonitoring(
         minutesInactivity: Int = 15,
@@ -44,22 +85,55 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
             SensorManager.SENSOR_DELAY_NORMAL
         ) ?: false
 
-        isMonitoring = registered
-        AppLog.d("SmartSleepSensor", "Monitoreo de sueño por acelerómetro iniciado ($minutesInactivity min)")
+        _isMonitoring.value = registered
+        AppLog.d(TAG, "Monitoreo de sueño por acelerómetro iniciado ($minutesInactivity min)")
         return registered
     }
 
     fun stopMonitoring() {
-        if (!isMonitoring) return
+        if (!_isMonitoring.value) return
         try {
             sensorManager?.unregisterListener(this)
         } catch (_: Exception) {}
-        isMonitoring = false
-        AppLog.d("SmartSleepSensor", "Monitoreo de sueño detenido")
+        _isMonitoring.value = false
+        fadeOutJob?.cancel()
+        _isFadeOutActive.value = false
+        AppLog.d(TAG, "Monitoreo de sueño detenido")
+    }
+
+    private fun executeSleepFadeOut() {
+        if (_isFadeOutActive.value) return
+        _isFadeOutActive.value = true
+
+        fadeOutJob = coroutineScope.launch {
+            AppLog.i(TAG, "Iniciando desvanecimiento suave de volumen por sueño (3 minutos)...")
+            try {
+                Toast.makeText(appContext, "😴 DaVE detectó inactividad: Desvaneciendo música suavemente...", Toast.LENGTH_LONG).show()
+            } catch (_: Exception) {}
+
+            val player = PlaybackService.activePlayer
+            val startVol = player?.volume ?: 1.0f
+            val totalSteps = 60
+            val stepDelayMs = 3000L // 3 segundos x 60 = 180 segundos (3 min)
+
+            for (step in 1..totalSteps) {
+                if (!isActive) break
+                val factor = (totalSteps - step).toFloat() / totalSteps.toFloat()
+                player?.volume = (startVol * factor).coerceIn(0f, 1f)
+                delay(stepDelayMs)
+            }
+
+            player?.pause()
+            player?.volume = 1.0f // Restaurar volumen base para la próxima sesión
+            _isFadeOutActive.value = false
+            stopMonitoring()
+            onSleepDetected?.invoke()
+            AppLog.i(TAG, "Música en pausa: Modo descanso completado exitosamente.")
+        }
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null || !isMonitoring) return
+        if (event == null || !_isMonitoring.value) return
 
         val x = event.values[0]
         val y = event.values[1]
@@ -77,17 +151,36 @@ class SmartSleepSensorManager(private val context: Context) : SensorEventListene
 
         val now = System.currentTimeMillis()
         if (totalMovement > 0.45f) {
-            // El usuario movió el teléfono, se reinicia el contador de inactividad
+            // El usuario movió el teléfono en la cama, se reinicia el temporizador de inactividad
             lastMovementTimestamp = now
+            if (_isFadeOutActive.value) {
+                // Cancelar fadeout si el usuario se despertó y movió el móvil
+                fadeOutJob?.cancel()
+                _isFadeOutActive.value = false
+                PlaybackService.activePlayer?.volume = 1.0f
+            }
         } else {
-            // Comprobar si ya pasó el tiempo de inactividad
+            // Comprobar si ya pasó el tiempo de inactividad continua
             if (now - lastMovementTimestamp >= inactivityThresholdMs) {
-                AppLog.i("SmartSleepSensor", "Inactividad confirmada: Sueño detectado. Apagando música.")
-                stopMonitoring()
-                onSleepDetected?.invoke()
+                AppLog.i(TAG, "Inactividad confirmada por acelerómetro: Usuario dormido.")
+                executeSleepFadeOut()
             }
         }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    companion object {
+        private const val TAG = "SmartSleepSensor"
+        private const val KEY_BED_SENSOR = "smart_bed_sleep_sensor_enabled"
+
+        @Volatile
+        private var INSTANCE: SmartSleepSensorManager? = null
+
+        fun getInstance(context: Context): SmartSleepSensorManager {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SmartSleepSensorManager(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
 }
