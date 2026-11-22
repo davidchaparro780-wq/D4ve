@@ -862,6 +862,17 @@ fun PlayerScreen(
             if (eyeComfortMode == 0) {
                 // High-Performance Blurred Artwork Background (Cached Static RenderNode a 120 FPS)
                 if (currentMedia.artworkUri != null) {
+                    val blurredBgRequest = remember(currentMedia.artworkUri) {
+                        coil.request.ImageRequest.Builder(context)
+                            .data(currentMedia.artworkUri)
+                            .size(96, 96)
+                            .precision(coil.size.Precision.EXACT)
+                            .allowHardware(true)
+                            .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                            .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                            .crossfade(false)
+                            .build()
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -871,14 +882,14 @@ fun PlayerScreen(
                             }
                     ) {
                         AsyncImage(
-                            model = currentMedia.artworkUri,
+                            model = blurredBgRequest,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .then(
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        Modifier.blur(48.dp)
+                                        Modifier.blur(20.dp)
                                     } else {
                                         Modifier
                                     }

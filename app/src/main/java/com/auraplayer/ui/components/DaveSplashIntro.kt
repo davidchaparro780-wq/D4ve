@@ -45,6 +45,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -107,6 +109,19 @@ fun DaveSplashIntro(
             Color(0xFF00E5FF)
         )
     }
+    val plasmaSweepBrush = remember(sweepBrushColors) {
+        Brush.sweepGradient(sweepBrushColors)
+    }
+    val auraBreathingBrush = remember {
+        Brush.radialGradient(
+            colors = listOf(
+                Color(0xFF00E5FF).copy(alpha = 0.40f),
+                Color(0xFF8B5CF6).copy(alpha = 0.30f),
+                Color(0xFFE040FB).copy(alpha = 0.15f),
+                Color.Transparent
+            )
+        )
+    }
 
     // Continuous infinite transitions
     val infiniteTransition = rememberInfiniteTransition(label = "IntroInfinite")
@@ -161,45 +176,45 @@ fun DaveSplashIntro(
         label = "AuraBreathingAlpha"
     )
 
-    // Master cinematic timeline
+    // Master cinematic timeline (Optimizado: fluido, dinámico y sin bloqueos de inicio)
     LaunchedEffect(Unit) {
-        // Phase 1: Inflow Quantum Vortex (0 - 400ms)
-        vortexProgress.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
+        // Phase 1: Inflow Quantum Vortex (260ms)
+        vortexProgress.animateTo(1f, tween(260, easing = FastOutSlowInEasing))
 
-        // Phase 2: Supernova Detonation & Haptic Blast (400ms)
+        // Phase 2: Supernova Detonation & Haptic Blast
         AuraHaptic.heavy(view)
 
         launch {
-            shockwaveProgress.animateTo(1f, tween(650, easing = LinearOutSlowInEasing))
+            shockwaveProgress.animateTo(1f, tween(420, easing = LinearOutSlowInEasing))
         }
         launch {
             logoScaleAnim.animateTo(
                 targetValue = 1f,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
+                    stiffness = Spring.StiffnessMediumLow
                 )
             )
         }
         launch {
-            logoAlphaAnim.animateTo(1f, tween(300))
+            logoAlphaAnim.animateTo(1f, tween(220))
         }
         launch {
-            logoRotationYAnim.animateTo(0f, tween(550, easing = FastOutSlowInEasing))
+            logoRotationYAnim.animateTo(0f, tween(380, easing = FastOutSlowInEasing))
         }
         launch {
-            delay(150)
-            textAlphaAnim.animateTo(1f, tween(450, easing = FastOutSlowInEasing))
+            delay(100)
+            textAlphaAnim.animateTo(1f, tween(320, easing = FastOutSlowInEasing))
         }
         launch {
-            delay(350)
-            shimmerAnim.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
+            delay(220)
+            shimmerAnim.animateTo(1f, tween(450, easing = FastOutSlowInEasing))
         }
 
-        // Phase 3: Hold the sacred resonance & prepare exit
-        delay(1250)
+        // Phase 3: Hold and smooth portal transition
+        delay(650)
         isVisible = false
-        delay(360) // allow portal dissolve exit animation to conclude
+        delay(200)
         onFinish()
     }
 
@@ -314,23 +329,17 @@ fun DaveSplashIntro(
                 }
             }
 
-            // Ambient Radiant Breathing Nebula Glow behind Logo
+            // Ambient Radiant Breathing Nebula Glow behind Logo (GPU zero-recomposition)
             Box(
                 modifier = Modifier
                     .size(260.dp)
-                    .scale(auraBreathingScale)
-                    .alpha(auraBreathingAlpha)
+                    .graphicsLayer {
+                        scaleX = auraBreathingScale
+                        scaleY = auraBreathingScale
+                        alpha = auraBreathingAlpha
+                    }
                     .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                Color(0xFF00E5FF).copy(alpha = 0.40f),
-                                Color(0xFF8B5CF6).copy(alpha = 0.30f),
-                                Color(0xFFE040FB).copy(alpha = 0.15f),
-                                Color.Transparent
-                            )
-                        )
-                    )
+                    .background(auraBreathingBrush)
             )
 
             // Outer Sacred Astrolabe & Runic Ring (250dp)
@@ -406,8 +415,11 @@ fun DaveSplashIntro(
             Canvas(
                 modifier = Modifier
                     .size(175.dp)
-                    .scale(auraBreathingScale)
-                    .graphicsLayer { rotationZ = plasmaRotation }
+                    .graphicsLayer {
+                        scaleX = auraBreathingScale
+                        scaleY = auraBreathingScale
+                        rotationZ = plasmaRotation
+                    }
             ) {
                 val center = Offset(size.width / 2f, size.height / 2f)
                 val baseR = size.minDimension * 0.44f
@@ -425,21 +437,20 @@ fun DaveSplashIntro(
 
                 drawPath(
                     path = cachedPlasmaPath,
-                    brush = Brush.sweepGradient(
-                        colors = sweepBrushColors,
-                        center = center
-                    ),
+                    brush = plasmaSweepBrush,
                     style = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
 
-            // Central Branding Column with 3D Flip & Zoom Spring
+            // Central Branding Column with 3D Flip & Zoom Spring (GPU zero-recomposition)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .scale(logoScaleAnim.value)
-                    .alpha(logoAlphaAnim.value)
+                modifier = Modifier.graphicsLayer {
+                    scaleX = logoScaleAnim.value
+                    scaleY = logoScaleAnim.value
+                    alpha = logoAlphaAnim.value
+                }
             ) {
                 // Holographic 3D Logo Badge
                 Box(
@@ -505,7 +516,7 @@ fun DaveSplashIntro(
 
                 // Brand Name with High-End Chromatic Gradient
                 Box(
-                    modifier = Modifier.alpha(textAlphaAnim.value),
+                    modifier = Modifier.graphicsLayer { alpha = textAlphaAnim.value },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -535,7 +546,7 @@ fun DaveSplashIntro(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 3.5.sp,
                     color = Color(0xFF94A3B8),
-                    modifier = Modifier.alpha(textAlphaAnim.value)
+                    modifier = Modifier.graphicsLayer { alpha = textAlphaAnim.value }
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -547,50 +558,52 @@ fun DaveSplashIntro(
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 2.sp,
                     color = Color(0xFF818CF8),
-                    modifier = Modifier.alpha(textAlphaAnim.value)
+                    modifier = Modifier.graphicsLayer { alpha = textAlphaAnim.value }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 9-Band Harmonic Dancing Spectrum Equalizer
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.alpha(textAlphaAnim.value)
+                // 9-Band Harmonic Dancing Spectrum Equalizer (GPU zero-layout Canvas a 120 FPS)
+                val m0 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(320, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq0")
+                val m1 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq1")
+                val m2 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(480, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq2")
+                val m3 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(560, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq3")
+                val m4 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(640, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq4")
+                val m5 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(560, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq5")
+                val m6 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(480, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq6")
+                val m7 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq7")
+                val m8 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(320, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq8")
+
+                Canvas(
+                    modifier = Modifier
+                        .size(width = 64.dp, height = 44.dp)
+                        .graphicsLayer { alpha = textAlphaAnim.value }
                 ) {
-                    val barBaseHeights = listOf(10.dp, 18.dp, 26.dp, 36.dp, 44.dp, 36.dp, 26.dp, 18.dp, 10.dp)
-                    val barColors = listOf(
-                        Color(0xFF00E5FF),
-                        Color(0xFF38BDF8),
-                        Color(0xFF818CF8),
-                        Color(0xFFA855F7),
-                        Color(0xFFE040FB),
-                        Color(0xFFA855F7),
-                        Color(0xFF818CF8),
-                        Color(0xFF38BDF8),
-                        Color(0xFF00E5FF)
+                    val count = 9
+                    val barW = 3.2.dp.toPx()
+                    val totalW = size.width
+                    val gap = (totalW - (count * barW)) / (count - 1).coerceAtLeast(1)
+                    val baseHeights = floatArrayOf(
+                        10.dp.toPx(), 18.dp.toPx(), 26.dp.toPx(), 36.dp.toPx(), 44.dp.toPx(),
+                        36.dp.toPx(), 26.dp.toPx(), 18.dp.toPx(), 10.dp.toPx()
                     )
+                    val multipliers = floatArrayOf(m0, m1, m2, m3, m4, m5, m6, m7, m8)
+                    val barColors = arrayOf(
+                        Color(0xFF00E5FF), Color(0xFF38BDF8), Color(0xFF818CF8),
+                        Color(0xFFA855F7), Color(0xFFE040FB), Color(0xFFA855F7),
+                        Color(0xFF818CF8), Color(0xFF38BDF8), Color(0xFF00E5FF)
+                    )
+                    val cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
 
-                    barBaseHeights.forEachIndexed { index, baseHeight ->
-                        val animMultiplier by infiniteTransition.animateFloat(
-                            initialValue = 0.25f,
-                            targetValue = 1.0f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(
-                                    durationMillis = 320 + (index * 80),
-                                    easing = FastOutSlowInEasing
-                                ),
-                                repeatMode = RepeatMode.Reverse
-                            ),
-                            label = "EqualizerBar$index"
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .width(3.2.dp)
-                                .height(baseHeight * animMultiplier)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(barColors[index])
+                    for (i in 0 until count) {
+                        val barH = (baseHeights[i] * multipliers[i]).coerceIn(4.dp.toPx(), size.height)
+                        val left = i * (barW + gap)
+                        val top = (size.height - barH) / 2f
+                        drawRoundRect(
+                            color = barColors[i],
+                            topLeft = Offset(left, top),
+                            size = Size(barW, barH),
+                            cornerRadius = cornerRadius
                         )
                     }
                 }

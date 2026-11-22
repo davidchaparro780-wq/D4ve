@@ -1407,15 +1407,7 @@ fun MusicScreen(
                                                     }
                                                 },
                                                 onLongClick = { selectedSongForMenu = song },
-                                                onOptionsClick = { selectedSongForMenu = song },
-                                                onSwipePlayNext = {
-                                                    onPlayNext(song)
-                                                    Toast.makeText(context, "Se reproducirá a continuación: ${song.title}", Toast.LENGTH_SHORT).show()
-                                                },
-                                                onSwipeToggleFavorite = {
-                                                    val isFav = favoritesManager.toggleFavorite(song.id)
-                                                    Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
-                                                }
+                                                onOptionsClick = { selectedSongForMenu = song }
                                             )
                                         }
                                     }
@@ -1693,15 +1685,7 @@ fun MusicScreen(
                                             isMysterious = isMysterious,
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
-                                            onOptionsClick = { selectedSongForMenu = song },
-                                            onSwipePlayNext = {
-                                                onPlayNext(song)
-                                                Toast.makeText(context, "Se reproducirá a continuación: ${song.title}", Toast.LENGTH_SHORT).show()
-                                            },
-                                            onSwipeToggleFavorite = {
-                                                val isFav = favoritesManager.toggleFavorite(song.id)
-                                                Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
-                                            }
+                                            onOptionsClick = { selectedSongForMenu = song }
                                         )
                                     }
                                 }
@@ -1772,15 +1756,7 @@ fun MusicScreen(
                                             isMysterious = isMysterious,
                                             onClick = { onSongClick(song) },
                                             onLongClick = { selectedSongForMenu = song },
-                                            onOptionsClick = { selectedSongForMenu = song },
-                                            onSwipePlayNext = {
-                                                onPlayNext(song)
-                                                Toast.makeText(context, "Se reproducirá a continuación: ${song.title}", Toast.LENGTH_SHORT).show()
-                                            },
-                                            onSwipeToggleFavorite = {
-                                                val isFav = favoritesManager.toggleFavorite(song.id)
-                                                Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
-                                            }
+                                            onOptionsClick = { selectedSongForMenu = song }
                                         )
                                     }
                                 }
@@ -1894,7 +1870,7 @@ fun MusicScreen(
                                                                     val imageRequest = remember(firstSong.artworkUri) {
                                                                         coil.request.ImageRequest.Builder(context)
                                                                             .data(firstSong.artworkUri)
-                                                                            .crossfade(150)
+                                                                            .crossfade(false)
                                                                             .build()
                                                                     }
                                                                     coil.compose.AsyncImage(
@@ -2046,15 +2022,7 @@ fun MusicScreen(
                                     isMysterious = isMysterious,
                                     onClick = { onSongClick(song) },
                                     onLongClick = { selectedSongForMenu = song },
-                                    onOptionsClick = { selectedSongForMenu = song },
-                                    onSwipePlayNext = {
-                                        onPlayNext(song)
-                                        Toast.makeText(context, "Se reproducirá a continuación: ${song.title}", Toast.LENGTH_SHORT).show()
-                                    },
-                                    onSwipeToggleFavorite = {
-                                        val isFav = favoritesManager.toggleFavorite(song.id)
-                                        Toast.makeText(context, if (isFav) "Añadida a Favoritos ❤️" else "Eliminada de Favoritos", Toast.LENGTH_SHORT).show()
-                                    }
+                                    onOptionsClick = { selectedSongForMenu = song }
                                 )
                             }
                         }
@@ -3023,129 +2991,11 @@ fun SongListItem(
     onSwipePlayNext: (() -> Unit)? = null,
     onSwipeToggleFavorite: (() -> Unit)? = null
 ) {
-    val view = LocalView.current
-    val coroutineScope = rememberCoroutineScope()
-    val offsetX = remember { Animatable(0f) }
-
-    val swipeModifier = if (onSwipePlayNext != null || onSwipeToggleFavorite != null) {
-        Modifier.pointerInput(Unit) {
-            detectHorizontalDragGestures(
-                onDragEnd = {
-                    coroutineScope.launch {
-                        val finalOffset = offsetX.value
-                        if (finalOffset > 80f && onSwipePlayNext != null) {
-                            AuraHaptic.heavy(view)
-                            onSwipePlayNext()
-                        } else if (finalOffset < -80f && onSwipeToggleFavorite != null) {
-                            AuraHaptic.heavy(view)
-                            onSwipeToggleFavorite()
-                        }
-                        offsetX.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow))
-                    }
-                },
-                onDragCancel = {
-                    coroutineScope.launch {
-                        offsetX.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow))
-                    }
-                },
-                onHorizontalDrag = { change, dragAmount ->
-                    change.consume()
-                    coroutineScope.launch {
-                        val newOffset = (offsetX.value + dragAmount).coerceIn(-140f, 140f)
-                        offsetX.snapTo(newOffset)
-                    }
-                }
-            )
-        }
-    } else Modifier
-
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-    ) {
-        // Swipe Background Hints
-        val currentOffset = offsetX.value
-        if (currentOffset > 0) {
-            // Right Swipe: Play Next (Emerald Green)
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF059669).copy(alpha = (currentOffset / 90f).coerceIn(0.25f, 0.95f)),
-                                Color(0xFF10B981).copy(alpha = (currentOffset / 90f).coerceIn(0.15f, 0.85f))
-                            )
-                        )
-                    )
-                    .padding(start = 22.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.QueueMusic,
-                        contentDescription = "Siguiente",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    if (currentOffset > 45f) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Siguiente en la Cola",
-                            color = Color.White,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-            }
-        } else if (currentOffset < 0) {
-            // Left Swipe: Toggle Favorite (Neon Violet / Pink)
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF8B5CF6).copy(alpha = ((-currentOffset) / 90f).coerceIn(0.15f, 0.85f)),
-                                Color(0xFFEC4899).copy(alpha = ((-currentOffset) / 90f).coerceIn(0.25f, 0.95f))
-                            )
-                        )
-                    )
-                    .padding(end = 22.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (-currentOffset > 45f) {
-                        Text(
-                            text = if (isFavorite) "Quitar Favorito" else "Favorito",
-                            color = Color.White,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
-                        contentDescription = "Favorito",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-        }
-
-        // Foreground Song Item Row - Optimizado a 120 FPS con bordes nítidos y brushes pre-cacheados
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 3.5.dp)
-                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .then(swipeModifier)
-                .clip(RoundedCornerShape(16.dp))
+            .padding(horizontal = 10.dp, vertical = 3.5.dp)
+            .clip(RoundedCornerShape(16.dp))
                 .border(
                     width = if (isSelected) (if (isMysterious) 1.2.dp else 1.dp) else 0.5.dp,
                     color = if (isSelected) {
@@ -3217,7 +3067,7 @@ fun SongListItem(
                             .allowHardware(true)
                             .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                             .diskCachePolicy(coil.request.CachePolicy.ENABLED)
-                            .crossfade(150)
+                            .crossfade(false)
                             .build()
                     }
                     AsyncImage(
@@ -3258,22 +3108,12 @@ fun SongListItem(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     if (isFavorite) {
-                        val heartScale by animateFloatAsState(
-                            targetValue = if (isFavorite) 1.2f else 1.0f,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessLow
-                            ),
-                            label = "heartScale"
-                        )
                         Spacer(modifier = Modifier.width(6.dp))
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Favorito",
                             tint = Color(0xFFEC4899),
-                            modifier = Modifier
-                                .size(14.dp)
-                                .graphicsLayer(scaleX = heartScale, scaleY = heartScale)
+                            modifier = Modifier.size(14.dp)
                         )
                     }
                 }
@@ -3331,7 +3171,6 @@ fun SongListItem(
                 )
             }
         }
-    }
 }
 
 @Composable

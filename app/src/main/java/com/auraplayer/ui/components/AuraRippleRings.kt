@@ -60,22 +60,36 @@ fun AuraRippleRings(
         label = "phase3"
     )
 
-    val phases = listOf(phase1 % 1f, phase2 % 1f, phase3 % 1f)
-
     Canvas(modifier = modifier.fillMaxSize()) {
         val baseRadius = size.minDimension * 0.42f
         val maxExtraRadius = size.minDimension * 0.07f
 
-        phases.forEach { p ->
-            val radius = baseRadius + (maxExtraRadius * p)
-            val alpha = (1f - p) * 0.40f
-            val strokeWidth = (3.5f * (1f - p * 0.5f))
+        val p1 = phase1 % 1f
+        val p2 = phase2 % 1f
+        val p3 = phase3 % 1f
 
-            drawCircle(
-                color = accentColor.copy(alpha = alpha.coerceIn(0f, 1f)),
-                radius = radius,
-                style = Stroke(width = strokeWidth)
-            )
-        }
+        val r1 = baseRadius + (maxExtraRadius * p1)
+        val a1 = ((1f - p1) * 0.40f).coerceIn(0f, 1f)
+        drawCircle(
+            color = accentColor.copy(alpha = a1),
+            radius = r1,
+            style = Stroke(width = 3.5f * (1f - p1 * 0.5f))
+        )
+
+        val r2 = baseRadius + (maxExtraRadius * p2)
+        val a2 = ((1f - p2) * 0.40f).coerceIn(0f, 1f)
+        drawCircle(
+            color = accentColor.copy(alpha = a2),
+            radius = r2,
+            style = Stroke(width = 3.5f * (1f - p2 * 0.5f))
+        )
+
+        val r3 = baseRadius + (maxExtraRadius * p3)
+        val a3 = ((1f - p3) * 0.40f).coerceIn(0f, 1f)
+        drawCircle(
+            color = accentColor.copy(alpha = a3),
+            radius = r3,
+            style = Stroke(width = 3.5f * (1f - p3 * 0.5f))
+        )
     }
 }
