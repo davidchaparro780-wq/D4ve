@@ -3587,6 +3587,7 @@ fun AuraApp(
         )
     }
 }
+}
 
 @Composable
 private fun MiniPlayerScaffoldHost(
@@ -3613,5 +3614,4 @@ private fun MiniPlayerScaffoldHost(
         onPreviousClick = onPreviousClick,
         onClick = onClick
     )
-}
 }
