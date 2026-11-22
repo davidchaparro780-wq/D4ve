@@ -33,6 +33,10 @@ class FolderShieldManager(context: Context) {
         get() = prefs.getBoolean("filter_ringtones", true)
         set(value) = prefs.edit().putBoolean("filter_ringtones", value).apply()
 
+    var isVideoAudioFilterEnabled: Boolean
+        get() = prefs.getBoolean("filter_video_audios", true)
+        set(value) = prefs.edit().putBoolean("filter_video_audios", value).apply()
+
     // Lista negra de carpetas personalizadas
     fun getBlacklistedFolders(): Set<String> {
         val json = prefs.getString("blacklisted_folders", "[]") ?: "[]"
@@ -103,6 +107,27 @@ class FolderShieldManager(context: Context) {
             // Filtro 5: Carpetas en lista negra personalizada
             if (blacklisted.contains(folderLower)) {
                 return@filter false
+            }
+
+            // Filtro 6: Videos descargados y archivos de video en la biblioteca musical
+            if (isVideoAudioFilterEnabled) {
+                val ext = song.path.substringAfterLast('.', "").lowercase()
+                val isVideoExt = ext in setOf("mp4", "mkv", "webm", "avi", "3gp", "mov", "flv", "wmv", "ts", "m4v", "mpg", "mpeg")
+                if (song.isVideo ||
+                    isVideoExt ||
+                    pathLower.contains("whatsapp video") ||
+                    pathLower.contains("telegram video") ||
+                    pathLower.contains("/movies") ||
+                    pathLower.contains("/dcim/") ||
+                    pathLower.contains("snaptube video") ||
+                    pathLower.contains("/snaptube/download/video") ||
+                    pathLower.contains("/snaptube/download/snaptube video") ||
+                    folderLower.contains("video") ||
+                    folderLower == "movies" ||
+                    folderLower == "camera"
+                ) {
+                    return@filter false
+                }
             }
 
             true

@@ -63,6 +63,7 @@ fun FolderShieldDialog(
     var filterWhatsApp by remember { mutableStateOf(folderShieldManager.isWhatsAppFilterEnabled) }
     var filterTelegram by remember { mutableStateOf(folderShieldManager.isTelegramFilterEnabled) }
     var filterRingtones by remember { mutableStateOf(folderShieldManager.isRingtonesFilterEnabled) }
+    var filterVideoAudios by remember { mutableStateOf(folderShieldManager.isVideoAudioFilterEnabled) }
 
     val hiddenCount = (totalSongsCount - filteredSongsCount).coerceAtLeast(0)
 
@@ -269,6 +270,37 @@ fun FolderShieldDialog(
                         )
                     )
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Switch 5: Videos descargados (.mp4, Snaptube, TikTok, WhatsApp Video)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Ocultar videos descargados",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Excluye .mp4, videos de Snaptube, TikTok y WhatsApp",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
+                    Switch(
+                        checked = filterVideoAudios,
+                        onCheckedChange = { filterVideoAudios = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF10B981)
+                        )
+                    )
+                }
             }
         },
         confirmButton = {
@@ -279,6 +311,7 @@ fun FolderShieldDialog(
                     folderShieldManager.isWhatsAppFilterEnabled = filterWhatsApp
                     folderShieldManager.isTelegramFilterEnabled = filterTelegram
                     folderShieldManager.isRingtonesFilterEnabled = filterRingtones
+                    folderShieldManager.isVideoAudioFilterEnabled = filterVideoAudios
                     onApply()
                     onDismiss()
                 },

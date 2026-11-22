@@ -1,7 +1,7 @@
 {
-    "versionCode": 220,
-    "versionName": "5.0.20",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.20/app-release.apk",
-    "changelog": "v5.0.20 Eliminación radical de lag al abrir la app (Instant Startup & 120 FPS Intro):\n- Cero recomposiciones en DaveSplashIntro: todas las animaciones (estrellas, vórtice cuántico, onda de choque, ecualizador de 9 bandas y destellos) corren exclusivamente en RenderNode y DrawScope por hardware.\n- Caché en memoria para CoverArtManager: eliminadas lecturas de disco repetitivas y escaneo de carpetas en el hilo principal.\n- Carga de biblioteca 100% asíncrona en Dispatchers.IO: la interfaz de usuario nunca se congela durante el arranque.\n- Sincronización proactiva de carátulas diferida para proteger la fluidez de inicio.",
+    "versionCode": 221,
+    "versionName": "5.0.21",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.21/app-release.apk",
+    "changelog": "v5.0.21 Exclusión Inteligente de Videos Descargados de la Biblioteca de Música:\n- Eliminación total de inyección de videos (.mp4, .mkv, .webm, etc.) en la biblioteca de canciones.\n- Filtro Folder Shield activado por defecto para excluir videos de WhatsApp Video, Telegram Video, Snaptube Video, TikTok y Movies de la lista de canciones.\n- Los videos permanecen organizados y accesibles exclusivamente en la pestaña dedicada de Videos.",
     "fileSizeMb": 6.38
 }

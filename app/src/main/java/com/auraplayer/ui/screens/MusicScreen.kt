@@ -368,10 +368,11 @@ fun MusicScreen(
         folderShield.minTrackDurationSeconds,
         folderShield.isWhatsAppFilterEnabled,
         folderShield.isTelegramFilterEnabled,
-        folderShield.isRingtonesFilterEnabled
+        folderShield.isRingtonesFilterEnabled,
+        folderShield.isVideoAudioFilterEnabled
     ) {
         val shieldFiltered = folderShield.filterSongs(songs)
-        val baseSongs = if (shieldFiltered.isEmpty() && songs.isNotEmpty()) songs else shieldFiltered
+        val baseSongs = shieldFiltered
 
         var list = if (searchQuery.isBlank()) baseSongs
         else {
