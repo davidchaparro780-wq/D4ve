@@ -94,6 +94,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LongState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -2229,13 +2231,12 @@ fun AuraApp(
                     }
                 }
 
-                // Mini Player
-                val effectiveDuration = if (durationMs > 0L) durationMs else (currentMedia?.duration ?: 0L)
-                val progress = if (effectiveDuration > 0L) positionState.value.toFloat() / effectiveDuration.toFloat() else 0f
-                MiniPlayer(
+                // Mini Player (Composición Aislada para 0 recomposiciones en la barra de navegación)
+                MiniPlayerScaffoldHost(
                     currentMedia = currentMedia,
                     isPlaying = isPlaying,
-                    progress = progress,
+                    positionState = positionState,
+                    durationMs = durationMs,
                     isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent),
                     onPlayPauseClick = {
                         controller?.let {
@@ -3585,5 +3586,32 @@ fun AuraApp(
             }
         )
     }
+}
+
+@Composable
+private fun MiniPlayerScaffoldHost(
+    currentMedia: com.auraplayer.data.model.MediaModel?,
+    isPlaying: Boolean,
+    positionState: State<Long>,
+    durationMs: Long,
+    isMysterious: Boolean,
+    onPlayPauseClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onPreviousClick: () -> Unit,
+    onClick: () -> Unit
+) {
+    val pos = positionState.value
+    val effectiveDuration = if (durationMs > 0L) durationMs else (currentMedia?.duration ?: 0L)
+    val progress = if (effectiveDuration > 0L) pos.toFloat() / effectiveDuration.toFloat() else 0f
+    com.auraplayer.ui.components.MiniPlayer(
+        currentMedia = currentMedia,
+        isPlaying = isPlaying,
+        progress = progress,
+        isMysterious = isMysterious,
+        onPlayPauseClick = onPlayPauseClick,
+        onNextClick = onNextClick,
+        onPreviousClick = onPreviousClick,
+        onClick = onClick
+    )
 }
 }

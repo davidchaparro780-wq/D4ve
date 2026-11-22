@@ -2880,19 +2880,16 @@ fun LiveEqualizerIndicator(
         val barWidth = 2.5.dp.toPx()
         val spacing = 1.5.dp.toPx()
         val cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
-        val heights = floatArrayOf(h1, h2, h3, h4)
 
-        for (i in 0 until 4) {
-            val barH = (heights[i] * size.height).coerceAtLeast(2.5.dp.toPx())
-            val left = i * (barWidth + spacing)
-            val top = size.height - barH
-            drawRoundRect(
-                color = barColor,
-                topLeft = Offset(left, top),
-                size = Size(barWidth, barH),
-                cornerRadius = cornerRadius
-            )
-        }
+        val b1 = (h1 * size.height).coerceAtLeast(2.5.dp.toPx())
+        val b2 = (h2 * size.height).coerceAtLeast(2.5.dp.toPx())
+        val b3 = (h3 * size.height).coerceAtLeast(2.5.dp.toPx())
+        val b4 = (h4 * size.height).coerceAtLeast(2.5.dp.toPx())
+
+        drawRoundRect(barColor, Offset(0f, size.height - b1), Size(barWidth, b1), cornerRadius)
+        drawRoundRect(barColor, Offset(barWidth + spacing, size.height - b2), Size(barWidth, b2), cornerRadius)
+        drawRoundRect(barColor, Offset((barWidth + spacing) * 2f, size.height - b3), Size(barWidth, b3), cornerRadius)
+        drawRoundRect(barColor, Offset((barWidth + spacing) * 3f, size.height - b4), Size(barWidth, b4), cornerRadius)
     }
 }
 
@@ -3272,10 +3269,6 @@ fun SongListItem(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
                     )
-                    if (isSelected) {
-                        Spacer(modifier = Modifier.width(6.dp))
-                        LiveEqualizerIndicator(barColor = MaterialTheme.colorScheme.primary)
-                    }
                     if (isFavorite) {
                         val heartScale by animateFloatAsState(
                             targetValue = if (isFavorite) 1.2f else 1.0f,

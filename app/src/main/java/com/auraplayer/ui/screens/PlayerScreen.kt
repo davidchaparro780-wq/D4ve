@@ -751,7 +751,7 @@ fun PlayerScreen(
 
     // Anti-Gravity Levitation Oscillation (RenderThread zero-recomposition animation)
     val infiniteTransition = rememberInfiniteTransition(label = "player_infinite")
-    val levitationPhase by infiniteTransition.animateFloat(
+    val levitationPhase = infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = (2 * Math.PI).toFloat(),
         animationSpec = infiniteRepeatable(
@@ -761,7 +761,7 @@ fun PlayerScreen(
         label = "levitationPhase"
     )
     val levitationModifier = Modifier.graphicsLayer {
-        translationY = kotlin.math.sin(levitationPhase) * 6.dp.toPx()
+        translationY = kotlin.math.sin(levitationPhase.value) * 6.dp.toPx()
     }
 
     val audioBadgeText = remember(currentMedia.path) {
@@ -835,97 +835,74 @@ fun PlayerScreen(
             },
         color = Color(0xFF070A12)
     ) {
-        AuraTouchSparks(
-            accentColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFF00E5FF) else (dynamicArtworkColor ?: MaterialTheme.colorScheme.primary),
-            secondaryColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFFE040FB) else MaterialTheme.colorScheme.secondary
+        val comfortBackground = when (eyeComfortMode) {
+            1 -> Brush.verticalGradient(listOf(Color(0xFF191108), Color(0xFF0D0804)))
+            2 -> Brush.verticalGradient(listOf(Color(0xFF000000), Color(0xFF000000)))
+            else -> if (isMysteriousTheme || centerVisualizerMode == 7) {
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF180A2E),
+                        Color(0xFF0C0418),
+                        Color(0xFF040108)
+                    ),
+                    radius = 1600f
+                )
+            } else {
+                rootBackgroundBrush
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(comfortBackground)
         ) {
-                val comfortBackground = when (eyeComfortMode) {
-                    1 -> Brush.verticalGradient(listOf(Color(0xFF191108), Color(0xFF0D0804)))
-                    2 -> Brush.verticalGradient(listOf(Color(0xFF000000), Color(0xFF000000)))
-                    else -> if (isMysteriousTheme || centerVisualizerMode == 7) {
-                        Brush.radialGradient(
-                            colors = listOf(
-                                Color(0xFF180A2E),
-                                Color(0xFF0C0418),
-                                Color(0xFF040108)
-                            ),
-                            radius = 1600f
+            if (eyeComfortMode == 0) {
+                // High-Performance Blurred Artwork Background (Cached Static RenderNode a 120 FPS)
+                if (currentMedia.artworkUri != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                scaleX = 1.06f
+                                scaleY = 1.06f
+                            }
+                    ) {
+                        AsyncImage(
+                            model = currentMedia.artworkUri,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        Modifier.blur(48.dp)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                                .alpha(if (isComfortView) 0.38f else 0.55f)
                         )
-                    } else {
-                        rootBackgroundBrush
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(comfortBackground)
-                ) {
-                if (eyeComfortMode == 0) {
-                    // Apple Music-Style Dynamic Blurred Artwork Background with Living Ambient Drift
-                    if (currentMedia.artworkUri != null) {
-                        val infiniteBgTransition = rememberInfiniteTransition(label = "apple_music_bg_drift")
-                        val bgDriftScale by infiniteBgTransition.animateFloat(
-                            initialValue = 1.05f,
-                            targetValue = 1.15f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(14000, easing = LinearEasing),
-                                repeatMode = AnimRepeatMode.Reverse
-                            ),
-                            label = "bgDriftScale"
-                        )
-                        val bgDriftRotation by infiniteBgTransition.animateFloat(
-                            initialValue = -2.5f,
-                            targetValue = 2.5f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(22000, easing = LinearEasing),
-                                repeatMode = AnimRepeatMode.Reverse
-                            ),
-                            label = "bgDriftRotation"
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    scaleX = if (isPlaying) bgDriftScale else 1.05f
-                                    scaleY = if (isPlaying) bgDriftScale else 1.05f
-                                    rotationZ = if (isPlaying) bgDriftRotation else 0f
-                                }
-                        ) {
-                            AsyncImage(
-                                model = currentMedia.artworkUri,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .then(
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            Modifier.blur(48.dp)
-                                        } else {
-                                            Modifier
-                                        }
-                                    )
-                                    .alpha(0.60f)
-                            )
-                        }
-
-                        // Gradient scrim for optimal contrast, readability, and glassmorphism depth
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        listOf(
-                                            Color.Black.copy(alpha = 0.45f),
-                                            Color.Black.copy(alpha = 0.60f),
-                                            Color(0xFF060913).copy(alpha = 0.88f)
-                                        )
+                    // Gradient scrim for optimal contrast, readability, and glassmorphism depth
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.Black.copy(alpha = 0.45f),
+                                        Color.Black.copy(alpha = 0.60f),
+                                        Color(0xFF060913).copy(alpha = 0.88f)
                                     )
                                 )
-                        )
-                    }
+                            )
+                    )
+                }
 
+                // Active Visualizer Overlay (Single active engine to eliminate overdraw and battery drain)
+                if (!isComfortView) {
                     if (isMysteriousTheme || centerVisualizerMode == 7) {
                         PhantomMistOverlay(
                             accentColor = activeAccent,
@@ -940,40 +917,26 @@ fun PlayerScreen(
                             isPlaying = isPlaying
                         )
                     }
-
-                    EdgeAuroraGlow(
-                        isPlaying = isPlaying,
-                        primaryColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary,
-                        secondaryColor = MaterialTheme.colorScheme.secondary,
-                        tertiaryColor = MaterialTheme.colorScheme.tertiary
-                    )
-                } else if (eyeComfortMode == 1) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(Color(0x22F59E0B), Color(0x0C78350F), Color.Transparent),
-                                    radius = 1200f
-                                )
-                            )
-                    )
                 }
-
-                HyperdriveWarpTunnel(
-                    isPlaying = isPlaying,
-                    accentColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary
+            } else if (eyeComfortMode == 1) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(Color(0x22F59E0B), Color(0x0C78350F), Color.Transparent),
+                                radius = 1200f
+                            )
+                        )
                 )
+            }
 
+            if (!isComfortView) {
                 CanvasLoopsOverlay(theme = currentCanvasLoop)
-                FloatingMusicParticles(
-                    isPlaying = isPlaying,
-                    accentColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary
-                )
-
                 if (isEdgeLightingEnabled) {
                     EdgeLighting(isPlaying = isPlaying)
                 }
+            }
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp.dp
             val screenHeight = configuration.screenHeightDp.dp
@@ -1065,62 +1028,51 @@ fun PlayerScreen(
                             )
                             if (isPlaying) {
                                 Spacer(modifier = Modifier.width(5.dp))
-                                Row(
-                                    verticalAlignment = Alignment.Bottom,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                    modifier = Modifier.height(11.dp)
+                                val bar1 by infiniteTransition.animateFloat(
+                                    initialValue = 0.25f,
+                                    targetValue = 0.95f,
+                                    animationSpec = infiniteRepeatable(
+                                        animation = tween(420, easing = FastOutSlowInEasing),
+                                        repeatMode = AnimRepeatMode.Reverse
+                                    ),
+                                    label = "eqBar1"
+                                )
+                                val bar2 by infiniteTransition.animateFloat(
+                                    initialValue = 0.85f,
+                                    targetValue = 0.30f,
+                                    animationSpec = infiniteRepeatable(
+                                        animation = tween(310, easing = FastOutSlowInEasing),
+                                        repeatMode = AnimRepeatMode.Reverse
+                                    ),
+                                    label = "eqBar2"
+                                )
+                                val bar3 by infiniteTransition.animateFloat(
+                                    initialValue = 0.40f,
+                                    targetValue = 1.0f,
+                                    animationSpec = infiniteRepeatable(
+                                        animation = tween(520, easing = FastOutSlowInEasing),
+                                        repeatMode = AnimRepeatMode.Reverse
+                                    ),
+                                    label = "eqBar3"
+                                )
+                                val eqColor = when {
+                                    isMysteriousTheme || centerVisualizerMode == 7 -> Color(0xFF00E5FF)
+                                    eyeComfortMode == 1 -> Color(0xFFF59E0B)
+                                    eyeComfortMode == 2 -> Color(0xFFE2E8F0)
+                                    else -> MaterialTheme.colorScheme.primary
+                                }
+                                Canvas(
+                                    modifier = Modifier.size(width = 12.dp, height = 11.dp)
                                 ) {
-                                    val bar1 by infiniteTransition.animateFloat(
-                                        initialValue = 0.25f,
-                                        targetValue = 0.95f,
-                                        animationSpec = infiniteRepeatable(
-                                            animation = tween(420, easing = FastOutSlowInEasing),
-                                            repeatMode = AnimRepeatMode.Reverse
-                                        ),
-                                        label = "eqBar1"
-                                    )
-                                    val bar2 by infiniteTransition.animateFloat(
-                                        initialValue = 0.85f,
-                                        targetValue = 0.30f,
-                                        animationSpec = infiniteRepeatable(
-                                            animation = tween(310, easing = FastOutSlowInEasing),
-                                            repeatMode = AnimRepeatMode.Reverse
-                                        ),
-                                        label = "eqBar2"
-                                    )
-                                    val bar3 by infiniteTransition.animateFloat(
-                                        initialValue = 0.40f,
-                                        targetValue = 1.0f,
-                                        animationSpec = infiniteRepeatable(
-                                            animation = tween(520, easing = FastOutSlowInEasing),
-                                            repeatMode = AnimRepeatMode.Reverse
-                                        ),
-                                        label = "eqBar3"
-                                    )
-                                    val eqColor = when {
-                                        isMysteriousTheme || centerVisualizerMode == 7 -> Color(0xFF00E5FF)
-                                        eyeComfortMode == 1 -> Color(0xFFF59E0B)
-                                        eyeComfortMode == 2 -> Color(0xFFE2E8F0)
-                                        else -> MaterialTheme.colorScheme.primary
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .width(2.5.dp)
-                                            .height(11.dp * bar1)
-                                            .background(eqColor, RoundedCornerShape(1.dp))
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .width(2.5.dp)
-                                            .height(11.dp * bar2)
-                                            .background(eqColor, RoundedCornerShape(1.dp))
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .width(2.5.dp)
-                                            .height(11.dp * bar3)
-                                            .background(eqColor, RoundedCornerShape(1.dp))
-                                    )
+                                    val barW = 2.5.dp.toPx()
+                                    val space = 2.dp.toPx()
+                                    val r = CornerRadius(1.dp.toPx(), 1.dp.toPx())
+                                    val h1 = (bar1 * size.height).coerceAtLeast(2.dp.toPx())
+                                    val h2 = (bar2 * size.height).coerceAtLeast(2.dp.toPx())
+                                    val h3 = (bar3 * size.height).coerceAtLeast(2.dp.toPx())
+                                    drawRoundRect(eqColor, Offset(0f, size.height - h1), Size(barW, h1), r)
+                                    drawRoundRect(eqColor, Offset(barW + space, size.height - h2), Size(barW, h2), r)
+                                    drawRoundRect(eqColor, Offset((barW + space) * 2f, size.height - h3), Size(barW, h3), r)
                                 }
                             }
                         }
@@ -1542,7 +1494,7 @@ fun PlayerScreen(
                             ) {
                                 if (isPlaying) {
                                     val bloomTransition = rememberInfiniteTransition(label = "ambient_stage_bloom")
-                                    val bloomPulse by bloomTransition.animateFloat(
+                                    val bloomPulse = bloomTransition.animateFloat(
                                         initialValue = 0.94f,
                                         targetValue = 1.06f,
                                         animationSpec = infiniteRepeatable(
@@ -1551,49 +1503,52 @@ fun PlayerScreen(
                                         ),
                                         label = "stage_bloom_pulse"
                                     )
-                                    val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse
-                                    val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
+                                    val outerBloomBrush = remember(activeAccent) {
+                                        androidx.compose.ui.graphics.Brush.radialGradient(
+                                            colors = listOf(
+                                                activeAccent,
+                                                Color(0xFF8B5CF6).copy(alpha = 0.25f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    }
+                                    val coreBloomBrush = remember(activeAccent) {
+                                        androidx.compose.ui.graphics.Brush.radialGradient(
+                                            colors = listOf(
+                                                activeAccent,
+                                                Color(0xFF38BDF8).copy(alpha = 0.4f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    }
 
                                     // Outer atmospheric diffusion halo (120 FPS GPU RenderNode)
                                     Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
                                             .graphicsLayer {
+                                                val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse.value
+                                                val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
                                                 scaleX = bloomScale * 1.15f
                                                 scaleY = bloomScale * 1.15f
                                                 alpha = (bloomAlpha * 0.45f).coerceIn(0f, 1f)
                                             }
                                             .clip(androidx.compose.foundation.shape.CircleShape)
-                                            .background(
-                                                androidx.compose.ui.graphics.Brush.radialGradient(
-                                                    colors = listOf(
-                                                        activeAccent,
-                                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                                                        Color(0xFF8B5CF6).copy(alpha = 0.25f),
-                                                        Color.Transparent
-                                                    )
-                                                )
-                                            )
+                                            .background(outerBloomBrush)
                                     )
                                     // Core glowing aura (120 FPS GPU RenderNode)
                                     Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
                                             .graphicsLayer {
+                                                val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse.value
+                                                val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
                                                 scaleX = bloomScale
                                                 scaleY = bloomScale
                                                 alpha = (bloomAlpha * 0.65f).coerceIn(0f, 1f)
                                             }
                                             .clip(androidx.compose.foundation.shape.CircleShape)
-                                            .background(
-                                                androidx.compose.ui.graphics.Brush.radialGradient(
-                                                    colors = listOf(
-                                                        activeAccent,
-                                                        Color(0xFF38BDF8).copy(alpha = 0.5f),
-                                                        Color.Transparent
-                                                    )
-                                                )
-                                            )
+                                            .background(coreBloomBrush)
                                     )
                                 }
 
@@ -2541,15 +2496,6 @@ fun PlayerScreen(
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
-                    val badgeShimmer by infiniteTransition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = 1f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(2400, easing = LinearEasing),
-                            repeatMode = AnimRepeatMode.Restart
-                        ),
-                        label = "badgeShimmer"
-                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -2567,20 +2513,7 @@ fun PlayerScreen(
                                 .bounceClick(),
                             color = badgeColor.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(12.dp),
-                            border = androidx.compose.foundation.BorderStroke(
-                                1.dp,
-                                if (isPlaying) {
-                                    Brush.horizontalGradient(
-                                        0.0f to badgeColor.copy(alpha = 0.30f),
-                                        badgeShimmer to badgeColor.copy(alpha = 0.95f),
-                                        1.0f to badgeColor.copy(alpha = 0.30f)
-                                    )
-                                } else {
-                                    Brush.horizontalGradient(
-                                        listOf(badgeColor.copy(alpha = 0.65f), badgeColor.copy(alpha = 0.20f))
-                                    )
-                                }
-                            )
+                            border = androidx.compose.foundation.BorderStroke(1.dp, badgeColor.copy(alpha = 0.50f))
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
@@ -2900,33 +2833,6 @@ fun PlayerScreen(
                         )
                     }
 
-                    // Tube Amp Analog Warmth Pill
-                    Box(
-                        modifier = Modifier
-                            .shadow(if (isTubeAmpActive) 4.dp else 2.5.dp, RoundedCornerShape(12.dp), spotColor = Color.Black.copy(alpha = 0.4f))
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                if (isTubeAmpActive) Brush.verticalGradient(listOf(Color(0xFFF59E0B), Color(0xFFB45309)))
-                                else Brush.verticalGradient(if (isMysteriousTheme) listOf(Color(0xFF190E30), Color(0xFF0A0414)) else listOf(Color(0xFF222B42), Color(0xFF131826)))
-                            )
-                            .clickable {
-                                isTubeAmpActive = !isTubeAmpActive
-                                tubeAmpManager.isTubeAmpEnabled = isTubeAmpActive
-                                if (isTubeAmpActive) {
-                                    EqualizerManager.instance.setBassBoostStrength(650.toShort())
-                                }
-                            }
-                            .padding(horizontal = 9.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = if (isTubeAmpActive) "🔥 TUBE AMP" else "💡 TUBE",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isTubeAmpActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 11.sp
-                        )
-                    }
-
                     // Night DRC Compressor Pill
                     Box(
                         modifier = Modifier
@@ -3187,74 +3093,6 @@ fun PlayerScreen(
                         },
                         colors = FilterChipDefaults.filterChipColors(
                             labelColor = Color(0xFF00E5FF)
-                        )
-                    )
-
-                    // Live Sleep Timer & Smart Sensor Chip
-                    val isTimerOn = sleepTimerManager?.isTimerActive?.collectAsState()?.value == true
-                    val sleepSec = sleepTimerManager?.remainingSeconds?.collectAsState()?.value ?: 0
-                    FilterChip(
-                        selected = isTimerOn,
-                        onClick = {
-                            AuraHaptic.click(view)
-                            onOpenSleepTimer()
-                        },
-                        label = {
-                            Text(
-                                text = if (isTimerOn && sleepSec > 0) "💤 ${sleepSec / 60}m ${sleepSec % 60}s" else "💤 Temporizador",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFA855F7).copy(alpha = 0.25f),
-                            selectedLabelColor = Color(0xFFA855F7),
-                            labelColor = Color(0xFFC084FC)
-                        )
-                    )
-
-                    // Super Booster 200% Chip
-                    FilterChip(
-                        selected = boostPercent > 100,
-                        onClick = { showVolumeBoosterDialog = true },
-                        label = {
-                            Text(
-                                text = if (boostPercent > 100) "🔊 Booster: $boostPercent%" else "🔊 Booster 200%",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFFF5722).copy(alpha = 0.25f),
-                            selectedLabelColor = Color(0xFFFF5722),
-                            labelColor = Color(0xFFFF7043)
-                        )
-                    )
-
-                    // Subwoofer Háptico Pro Chip
-                    FilterChip(
-                        selected = hapticIntensity != com.auraplayer.audio.HapticIntensity.OFF,
-                        onClick = {
-                            try {
-                                com.auraplayer.audio.BassHapticManager.instance.toggle(context)
-                                val curr = com.auraplayer.audio.BassHapticManager.instance.intensity.value
-                                val msg = if (curr != com.auraplayer.audio.HapticIntensity.OFF) "📳 Subwoofer: ${curr.label}" else "Subwoofer Háptico: Apagado"
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                            } catch (t: Throwable) {
-                                com.auraplayer.util.AppLog.e("PlayerScreen", "Error toggling haptics", t)
-                            }
-                        },
-                        label = {
-                            Text(
-                                text = if (hapticIntensity != com.auraplayer.audio.HapticIntensity.OFF) "📳 Subwoofer: ${hapticIntensity.label}" else "📳 Subwoofer Háptico",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFF59E0B).copy(alpha = 0.25f),
-                            selectedLabelColor = Color(0xFFF59E0B),
-                            labelColor = Color(0xFFFBBF24)
                         )
                     )
 
@@ -3766,18 +3604,6 @@ fun PlayerScreen(
                         )
                     )
 
-                    // Audífonos Hub Chip
-                    FilterChip(
-                        selected = isHeadphonesConnected,
-                        onClick = onOpenHeadphones,
-                        label = { Text(if (isHeadphonesConnected) "🎧 Audífonos" else "🔊 Salida de Audio", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF10B981).copy(alpha = 0.25f),
-                            selectedLabelColor = Color(0xFF10B981),
-                            labelColor = if (isHeadphonesConnected) Color(0xFF10B981) else Color(0xFF38BDF8)
-                        )
-                    )
-
                     // Quick EQ Chip
                     FilterChip(
                         selected = false,
@@ -3980,40 +3806,6 @@ fun PlayerScreen(
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    // Switch between Comfort and Pro View
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = if (isComfortView) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color(0xFF10B981).copy(alpha = 0.15f),
-                        border = BorderStroke(1.dp, if (isComfortView) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color(0xFF10B981).copy(alpha = 0.4f)),
-                        modifier = Modifier
-                            .clickable {
-                                AuraHaptic.click(view)
-                                setComfortView(!isComfortView)
-                            }
-                            .bounceClick()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = null,
-                                tint = if (isComfortView) MaterialTheme.colorScheme.primary else Color(0xFF10B981),
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Text(
-                                text = if (isComfortView) "🎛️ Vista Pro" else "🌿 Vista Cómoda",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isComfortView) MaterialTheme.colorScheme.primary else Color(0xFF10B981)
-                            )
-                        }
-                    }
                 }
 
                 // Next Track / Queue Quick-Peek Pill
@@ -4185,7 +3977,6 @@ fun PlayerScreen(
                     }
                 }
             }
-        }
         }
     }
 

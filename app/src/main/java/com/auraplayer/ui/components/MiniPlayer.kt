@@ -17,6 +17,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -56,6 +57,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -401,53 +405,44 @@ fun MiniPlayer(
                             }
                         }
 
-                        // Precision Progress Bar with Single Purposeful Accent
-                        Box(
+                        // Precision Progress Bar with Single Purposeful Accent (Zero-Recomposition GPU Draw)
+                        val primaryCol = MaterialTheme.colorScheme.primary
+                        val secondaryCol = MaterialTheme.colorScheme.secondary
+                        val progressBrush = remember(isMysterious, primaryCol, secondaryCol) {
+                            if (isMysterious) Brush.horizontalGradient(listOf(Color(0xFFB388FF), Color(0xFF00E5FF)))
+                            else Brush.horizontalGradient(listOf(primaryCol, secondaryCol))
+                        }
+                        val beaconColor = remember(isMysterious) { if (isMysterious) Color(0xFF00E5FF) else Color.White }
+
+                        Canvas(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(3.dp)
-                                .background(Color.White.copy(alpha = 0.08f))
                                 .semantics {
                                     contentDescription = "Progreso de reproducción"
                                     progressBarRangeInfo = ProgressBarRangeInfo(progress.coerceIn(0f, 1f), 0f..1f)
                                 }
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(progress.coerceIn(0f, 1f))
-                                    .fillMaxHeight()
-                                    .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            if (isMysterious) {
-                                                listOf(
-                                                    Color(0xFFB388FF),
-                                                    Color(0xFF00E5FF)
-                                                )
-                                            } else {
-                                                listOf(
-                                                    MaterialTheme.colorScheme.primary,
-                                                    MaterialTheme.colorScheme.secondary
-                                                )
-                                            }
-                                        )
-                                    )
-                            )
+                            val w = size.width
+                            val h = size.height
+                            // Track background
+                            drawRect(Color.White.copy(alpha = 0.08f))
+                            val barW = w * progress.coerceIn(0f, 1f)
+                            if (barW > 0f) {
+                                drawRoundRect(
+                                    brush = progressBrush,
+                                    topLeft = Offset.Zero,
+                                    size = Size(barW, h),
+                                    cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
+                                )
+                            }
                             // Beacon Spark Glow at the playback tip
                             if (progress > 0.01f && progress < 0.99f && isPlaying) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(progress.coerceIn(0f, 1f))
-                                        .fillMaxHeight(),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(5.dp)
-                                            .clip(CircleShape)
-                                            .background(if (isMysterious) Color(0xFF00E5FF) else Color.White)
-                                    )
-                                }
+                                drawCircle(
+                                    color = beaconColor,
+                                    radius = 2.5.dp.toPx(),
+                                    center = Offset(barW, h / 2f)
+                                )
                             }
                         }
                     }

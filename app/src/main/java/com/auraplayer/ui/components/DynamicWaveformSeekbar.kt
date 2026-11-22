@@ -243,23 +243,25 @@ fun DynamicWaveformSeekbar(
             val headX = currentPlayX.coerceIn(0f, w)
             val headCenterY = h / 2f
             val haloRadius = (16.dp.toPx() * (1f + liveBass * 0.30f)).coerceAtMost(22.dp.toPx())
+            val headCenter = Offset(headX, headCenterY)
 
-            // Sombra y halo de brillo
+            // Sombra y halo de brillo suave multicapa (Zero shader allocations a 120 FPS)
             drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(activeColor.copy(alpha = 0.85f), Color.Transparent),
-                    center = Offset(headX, headCenterY),
-                    radius = haloRadius
-                ),
+                color = activeColor.copy(alpha = 0.22f),
                 radius = haloRadius,
-                center = Offset(headX, headCenterY)
+                center = headCenter
+            )
+            drawCircle(
+                color = activeColor.copy(alpha = 0.55f),
+                radius = haloRadius * 0.60f,
+                center = headCenter
             )
 
             // Núcleo blanco nítido del cabezal
             drawCircle(
                 color = Color.White,
                 radius = if (isDragging) 6.dp.toPx() else (4.5.dp.toPx() + liveBass * 1.5.dp.toPx()),
-                center = Offset(headX, headCenterY)
+                center = headCenter
             )
         }
 
