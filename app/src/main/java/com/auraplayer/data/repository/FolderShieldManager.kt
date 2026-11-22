@@ -37,6 +37,10 @@ class FolderShieldManager(context: Context) {
         get() = prefs.getBoolean("filter_video_audios", true)
         set(value) = prefs.edit().putBoolean("filter_video_audios", value).apply()
 
+    var isCallRecordingsFilterEnabled: Boolean
+        get() = prefs.getBoolean("filter_call_recordings", true)
+        set(value) = prefs.edit().putBoolean("filter_call_recordings", value).apply()
+
     // Lista negra de carpetas personalizadas
     fun getBlacklistedFolders(): Set<String> {
         val json = prefs.getString("blacklisted_folders", "[]") ?: "[]"
@@ -126,6 +130,41 @@ class FolderShieldManager(context: Context) {
                     folderLower == "movies" ||
                     folderLower == "camera"
                 ) {
+                    return@filter false
+                }
+            }
+
+            // Filtro 7: Grabaciones de llamadas telefónicas y carpetas de llamadas
+            if (isCallRecordingsFilterEnabled) {
+                val fileNameLower = try { java.io.File(song.path).name.lowercase() } catch (_: Exception) { "" }
+                val titleLower = song.title.lowercase()
+                val isCall = pathLower.contains("/call") ||
+                             pathLower.contains("call_rec") ||
+                             pathLower.contains("callrec") ||
+                             pathLower.contains("call recording") ||
+                             pathLower.contains("call_recording") ||
+                             pathLower.contains("callrecorder") ||
+                             pathLower.contains("call_recorder") ||
+                             pathLower.contains("phonerecord") ||
+                             pathLower.contains("voicecall") ||
+                             pathLower.contains("autocallrecorder") ||
+                             pathLower.contains("cube_recorder") ||
+                             pathLower.contains("cubecallrecorder") ||
+                             pathLower.contains("/llamada") ||
+                             pathLower.contains("grabacion_llamada") ||
+                             folderLower.contains("call") ||
+                             folderLower.contains("llamada") ||
+                             fileNameLower.startsWith("call_") ||
+                             fileNameLower.startsWith("call-") ||
+                             fileNameLower.startsWith("callrec") ||
+                             fileNameLower.startsWith("call_rec") ||
+                             fileNameLower.startsWith("llamada") ||
+                             fileNameLower.startsWith("acr_") ||
+                             fileNameLower.startsWith("cube_") ||
+                             titleLower.startsWith("call_") ||
+                             titleLower.startsWith("call-") ||
+                             titleLower.startsWith("llamada")
+                if (isCall) {
                     return@filter false
                 }
             }

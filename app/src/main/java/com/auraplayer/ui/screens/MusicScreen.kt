@@ -369,7 +369,8 @@ fun MusicScreen(
         folderShield.isWhatsAppFilterEnabled,
         folderShield.isTelegramFilterEnabled,
         folderShield.isRingtonesFilterEnabled,
-        folderShield.isVideoAudioFilterEnabled
+        folderShield.isVideoAudioFilterEnabled,
+        folderShield.isCallRecordingsFilterEnabled
     ) {
         val shieldFiltered = folderShield.filterSongs(songs)
         val baseSongs = shieldFiltered

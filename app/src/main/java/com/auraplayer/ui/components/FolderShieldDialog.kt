@@ -64,6 +64,7 @@ fun FolderShieldDialog(
     var filterTelegram by remember { mutableStateOf(folderShieldManager.isTelegramFilterEnabled) }
     var filterRingtones by remember { mutableStateOf(folderShieldManager.isRingtonesFilterEnabled) }
     var filterVideoAudios by remember { mutableStateOf(folderShieldManager.isVideoAudioFilterEnabled) }
+    var filterCallRecordings by remember { mutableStateOf(folderShieldManager.isCallRecordingsFilterEnabled) }
 
     val hiddenCount = (totalSongsCount - filteredSongsCount).coerceAtLeast(0)
 
@@ -301,6 +302,37 @@ fun FolderShieldDialog(
                         )
                     )
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Switch 6: Grabaciones de llamadas
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Ocultar audios de llamadas",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Excluye grabaciones telefónicas automáticas y CallRecordings",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
+                    Switch(
+                        checked = filterCallRecordings,
+                        onCheckedChange = { filterCallRecordings = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF10B981)
+                        )
+                    )
+                }
             }
         },
         confirmButton = {
@@ -312,6 +344,7 @@ fun FolderShieldDialog(
                     folderShieldManager.isTelegramFilterEnabled = filterTelegram
                     folderShieldManager.isRingtonesFilterEnabled = filterRingtones
                     folderShieldManager.isVideoAudioFilterEnabled = filterVideoAudios
+                    folderShieldManager.isCallRecordingsFilterEnabled = filterCallRecordings
                     onApply()
                     onDismiss()
                 },

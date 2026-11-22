@@ -72,6 +72,7 @@ class MediaRepository(private val context: Context) {
 
                 // 2. Filter out video files and downloaded video audios from music library
                 val ext = if (data.contains('.')) data.substringAfterLast('.').lowercase() else ""
+                val fileNameLower = try { File(data).name.lowercase() } catch (_: Exception) { "" }
                 val isVideoExt = ext in setOf("mp4", "mkv", "webm", "avi", "3gp", "mov", "flv", "wmv", "ts", "m4v", "mpg", "mpeg")
                 val pathLower = data.lowercase()
                 val isVideoPath = pathLower.contains("whatsapp video") ||
@@ -82,6 +83,27 @@ class MediaRepository(private val context: Context) {
                                   pathLower.contains("/snaptube/download/video") ||
                                   (pathLower.contains("/tiktok") && isVideoExt)
                 if (isVideoExt || isVideoPath) {
+                    continue
+                }
+
+                // 3. Filter out call recordings / audios de llamadas telefónicas
+                val isCallRecording = pathLower.contains("/call") ||
+                                      pathLower.contains("call_rec") ||
+                                      pathLower.contains("callrec") ||
+                                      pathLower.contains("call recording") ||
+                                      pathLower.contains("callrecorder") ||
+                                      pathLower.contains("phonerecord") ||
+                                      pathLower.contains("voicecall") ||
+                                      pathLower.contains("autocallrecorder") ||
+                                      pathLower.contains("cube_recorder") ||
+                                      pathLower.contains("/llamada") ||
+                                      pathLower.contains("grabacion_llamada") ||
+                                      fileNameLower.startsWith("call_") ||
+                                      fileNameLower.startsWith("call-") ||
+                                      fileNameLower.startsWith("callrec") ||
+                                      fileNameLower.startsWith("llamada") ||
+                                      fileNameLower.startsWith("acr_")
+                if (isCallRecording) {
                     continue
                 }
 

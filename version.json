@@ -1,7 +1,7 @@
 {
-    "versionCode": 221,
-    "versionName": "5.0.21",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.21/app-release.apk",
-    "changelog": "v5.0.21 Exclusión Inteligente de Videos Descargados de la Biblioteca de Música:\n- Eliminación total de inyección de videos (.mp4, .mkv, .webm, etc.) en la biblioteca de canciones.\n- Filtro Folder Shield activado por defecto para excluir videos de WhatsApp Video, Telegram Video, Snaptube Video, TikTok y Movies de la lista de canciones.\n- Los videos permanecen organizados y accesibles exclusivamente en la pestaña dedicada de Videos.",
+    "versionCode": 222,
+    "versionName": "5.0.22",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.22/app-release.apk",
+    "changelog": "v5.0.22 Exclusión Inteligente de Grabaciones de Llamadas Telefónicas:\n- Detección y filtrado automático de audios de llamadas entrantes y salientes en MediaRepository.\n- Filtro Folder Shield para carpetas de grabación de llamadas (CallRecordings, Call_Recordings, PhoneRecord, VoiceCall, CubeCallRecorder, ACR y Llamadas).\n- Nuevo interruptor en el diálogo Folder Shield para activar/desactivar la exclusión de llamadas.\n- Biblioteca musical 100% limpia para disfrutar solo de música real.",
     "fileSizeMb": 6.38
 }
