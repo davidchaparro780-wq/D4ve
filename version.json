@@ -1,7 +1,7 @@
 {
-    "versionCode": 223,
-    "versionName": "5.0.23",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.23/app-release.apk",
-    "changelog": "v5.0.23 Experiencia Premium Integral & Ahorro de Batería:\n- Fast Scroller A-Z táctil y holográfico en la biblioteca de canciones con respuesta háptica y navegación alfabética fluida.\n- Limpiador de Títulos YouTube/Snaptube con 1-Toque (individual y masivo en selección múltiple) que remueve 'Official Video', calidad, extensiones y sitios de descarga.\n- AutoEQ Studio 🎧 en Ecualizador: Nuevos presets acústicos para audífonos populares (AirPods, Sony WH-1000XM, Galaxy Buds, Beats, Sennheiser, Moondrop, KZ IEM, Audio-Technica).\n- Smart Battery Saver: Suspensión automática del motor nativo FFT y visualizadores en segundo plano o con la pantalla apagada para máxima autonomía.\n- Waveform Seekbar interactivo con halo neón y tooltip de precisión temporal.",
+    "versionCode": 224,
+    "versionName": "5.0.24",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.24/app-release.apk",
+    "changelog": "v5.0.24 Control por Gestos Físicos & Modos Virales 1-Toque:\n- Voltear para Pausar (Flip to Pause): Pausa suavemente la música con respuesta háptica al colocar el celular boca abajo sobre una mesa.\n- Gestos Swipe en Carátula: Desliza la portada del reproductor a la izquierda o derecha para cambiar de pista con inclinación física 3D elástica.\n- Modos Virales 1-Toque (Slowed & Nightcore): Transforma cualquier canción de tu biblioteca en versión Slowed (0.85x) o Nightcore (1.25x) con un solo toque en el reproductor.\n- Filtro Inteligente '⏳ Olvidadas': Redescubre canciones de tu biblioteca con 0 reproducciones.\n- Doble toque interactivo de adelanto/retroceso en la skin de cassette vintage.",
     "fileSizeMb": 6.38
 }

@@ -44,6 +44,14 @@ class SettingsManager private constructor(context: Context) {
     var notifyUpdates by mutableStateOf(prefs.getBoolean(KEY_NOTIFY_UPDATES, true))
         private set
 
+    var flipToPause by mutableStateOf(prefs.getBoolean(KEY_FLIP_TO_PAUSE, false))
+        private set
+
+    fun setFlipToPauseEnabled(enabled: Boolean) {
+        flipToPause = enabled
+        prefs.edit().putBoolean(KEY_FLIP_TO_PAUSE, enabled).apply()
+    }
+
     fun setFadePlaybackEnabled(enabled: Boolean) {
         fadePlayback = enabled
         prefs.edit().putBoolean(KEY_FADE_PLAYBACK, enabled).apply()
@@ -107,6 +115,7 @@ class SettingsManager private constructor(context: Context) {
         private const val KEY_DYNAMIC_COLOR = "dynamic_color_enabled"
         private const val KEY_VISUALIZER_SENSITIVITY = "visualizer_sensitivity"
         private const val KEY_NOTIFY_UPDATES = "notify_updates"
+        private const val KEY_FLIP_TO_PAUSE = "flip_to_pause_enabled"
 
         @Volatile
         private var INSTANCE: SettingsManager? = null

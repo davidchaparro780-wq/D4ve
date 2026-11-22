@@ -1651,6 +1651,8 @@ fun PlayerScreen(
                                             onLongPress = {
                                                 Toast.makeText(context, "🖼️ Carátula Cuadrada Completa HD", Toast.LENGTH_SHORT).show()
                                             },
+                                            onSwipeNext = onNextClick,
+                                            onSwipePrevious = onPreviousClick,
                                             onDoubleTap = { offset ->
                                                 val w = artWidthPx
                                                 if (offset.x < w * 0.35f) {
@@ -1843,6 +1845,26 @@ fun PlayerScreen(
                                                 onTap = {
                                                     AuraHaptic.click(view)
                                                     cycleVisualizerSkin()
+                                                },
+                                                onDoubleTap = { offset ->
+                                                    val w = size.width
+                                                    if (offset.x < w * 0.35f) {
+                                                        onSeekRelative(-10000L)
+                                                        seekBadgeText = "-10s"
+                                                        seekBadgeIsForward = false
+                                                        showSeekBadge = true
+                                                        AuraHaptic.click(view)
+                                                    } else if (offset.x > w * 0.65f) {
+                                                        onSeekRelative(10000L)
+                                                        seekBadgeText = "+10s"
+                                                        seekBadgeIsForward = true
+                                                        showSeekBadge = true
+                                                        AuraHaptic.click(view)
+                                                    } else {
+                                                        onToggleFavorite()
+                                                        showHeartBurst = true
+                                                        AuraHaptic.heavy(view)
+                                                    }
                                                 }
                                             )
                                         }
@@ -3555,6 +3577,52 @@ fun PlayerScreen(
                         label = { Text("🎚️ Tono & Temp", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         colors = FilterChipDefaults.filterChipColors(
                             labelColor = Color(0xFF38BDF8)
+                        )
+                    )
+
+                    // 1-Tap Slowed Chip
+                    val isSlowedActive = playbackSpeed == 0.85f
+                    FilterChip(
+                        selected = isSlowedActive,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            if (isSlowedActive) {
+                                onAudioFxChange(1.0f, 1.0f)
+                                Toast.makeText(context, "Velocidad Normal (1.0x)", Toast.LENGTH_SHORT).show()
+                            } else {
+                                val pitchMultiplier = Math.pow(2.0, -2.0 / 12.0).toFloat()
+                                onAudioFxChange(0.85f, pitchMultiplier)
+                                Toast.makeText(context, "🌙 Modo Slowed Activado (0.85x)", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        label = { Text(if (isSlowedActive) "🌙 Slowed: ON" else "🌙 Slowed", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF8B5CF6).copy(alpha = 0.35f),
+                            selectedLabelColor = Color(0xFFA78BFA),
+                            labelColor = Color(0xFFA78BFA)
+                        )
+                    )
+
+                    // 1-Tap Nightcore Chip
+                    val isNightcoreActive = playbackSpeed == 1.25f
+                    FilterChip(
+                        selected = isNightcoreActive,
+                        onClick = {
+                            AuraHaptic.click(view)
+                            if (isNightcoreActive) {
+                                onAudioFxChange(1.0f, 1.0f)
+                                Toast.makeText(context, "Velocidad Normal (1.0x)", Toast.LENGTH_SHORT).show()
+                            } else {
+                                val pitchMultiplier = Math.pow(2.0, 2.0 / 12.0).toFloat()
+                                onAudioFxChange(1.25f, pitchMultiplier)
+                                Toast.makeText(context, "⚡ Modo Nightcore Activado (1.25x)", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        label = { Text(if (isNightcoreActive) "⚡ Nightcore: ON" else "⚡ Nightcore", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFEC4899).copy(alpha = 0.35f),
+                            selectedLabelColor = Color(0xFFF472B6),
+                            labelColor = Color(0xFFF472B6)
                         )
                     )
 

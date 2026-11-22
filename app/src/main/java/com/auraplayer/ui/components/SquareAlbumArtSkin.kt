@@ -1,8 +1,12 @@
 package com.auraplayer.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +23,8 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +32,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
@@ -39,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.auraplayer.audio.AuraHaptic
 import com.auraplayer.data.model.MediaModel
+import kotlinx.coroutines.launch
 
 /**
  * Skin de Carátula Cuadrada Completa HD (Full Square Album Art 1:1).
@@ -53,16 +61,24 @@ fun SquareAlbumArtSkin(
     onTap: () -> Unit,
     onDoubleTap: (Offset) -> Unit,
     onLongPress: (() -> Unit)? = null,
+    onSwipeNext: (() -> Unit)? = null,
+    onSwipePrevious: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
+    val dragOffset = remember { Animatable(0f) }
 
     Box(
         modifier = modifier
             .semantics(mergeDescendants = true) {
-                contentDescription = "Carátula Cuadrada Completa de ${song.title}. Toca para alternar skin."
+                contentDescription = "Carátula Cuadrada Completa de ${song.title}. Toca para alternar skin. Desliza para cambiar de canción."
             }
             .aspectRatio(1f)
+            .graphicsLayer {
+                translationX = dragOffset.value
+                rotationZ = (dragOffset.value / 32f).coerceIn(-6f, 6f)
+            }
             .shadow(
                 elevation = if (isPlaying) 18.dp else 8.dp,
                 shape = RoundedCornerShape(24.dp),
@@ -82,6 +98,37 @@ fun SquareAlbumArtSkin(
                 ),
                 RoundedCornerShape(24.dp)
             )
+            .pointerInput(onSwipeNext, onSwipePrevious) {
+                if (onSwipeNext != null || onSwipePrevious != null) {
+                    detectHorizontalDragGestures(
+                        onDragStart = {},
+                        onDragEnd = {
+                            val current = dragOffset.value
+                            coroutineScope.launch {
+                                if (current < -75f && onSwipeNext != null) {
+                                    AuraHaptic.click(view)
+                                    onSwipeNext()
+                                } else if (current > 75f && onSwipePrevious != null) {
+                                    AuraHaptic.click(view)
+                                    onSwipePrevious()
+                                }
+                                dragOffset.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                            }
+                        },
+                        onDragCancel = {
+                            coroutineScope.launch {
+                                dragOffset.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                            }
+                        },
+                        onHorizontalDrag = { change, dragAmount ->
+                            change.consume()
+                            coroutineScope.launch {
+                                dragOffset.snapTo((dragOffset.value + dragAmount * 0.72f).coerceIn(-130f, 130f))
+                            }
+                        }
+                    )
+                }
+            }
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = { onTap() },

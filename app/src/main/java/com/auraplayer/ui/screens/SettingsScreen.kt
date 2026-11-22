@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ScreenLockPortrait
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
@@ -248,6 +249,17 @@ fun SettingsScreen(
                                 isSilenceTrimmerEnabled = it
                                 silenceTrimmer.isEnabled = it
                                 com.auraplayer.service.PlaybackService.activePlayer?.skipSilenceEnabled = it
+                            }
+                        )
+                        SettingsDivider()
+                        SettingsToggleRow(
+                            title = "Voltear para Pausar (Flip to Pause)",
+                            subtitle = "Pone en pausa la música automáticamente al colocar el celular boca abajo sobre la mesa",
+                            icon = Icons.Default.ScreenRotation,
+                            checked = settings.flipToPause,
+                            onCheckedChange = {
+                                AuraHaptic.click(null)
+                                settings.setFlipToPauseEnabled(it)
                             }
                         )
                         SettingsDivider()

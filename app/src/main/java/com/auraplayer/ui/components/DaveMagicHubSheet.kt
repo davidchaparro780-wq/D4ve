@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shuffle
@@ -159,6 +160,8 @@ fun DaveMagicHubSheet(
     onToggleShake: () -> Unit = {},
     isSleepSensorActive: Boolean = false,
     onToggleSleepSensor: () -> Unit = {},
+    isFlipToPauseActive: Boolean = false,
+    onToggleFlipToPause: () -> Unit = {},
     onOpenThemes: () -> Unit,
     onOpenOledSaver: () -> Unit,
     dailySong: com.auraplayer.data.model.MediaModel? = null,
@@ -493,6 +496,16 @@ fun DaveMagicHubSheet(
                 color = Color(0xFF38BDF8),
                 isActive = isSleepSensorActive,
                 onClick = onToggleSleepSensor
+            ),
+            HubToolItem(
+                id = "flip_to_pause",
+                title = "Voltear para Pausar",
+                subtitle = "Pausa la música al colocar el móvil boca abajo",
+                icon = Icons.Default.ScreenRotation,
+                category = "🧰 Utilidades",
+                color = Color(0xFF00F0FF),
+                isActive = isFlipToPauseActive,
+                onClick = onToggleFlipToPause
             ),
             HubToolItem(
                 id = "themes",

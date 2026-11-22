@@ -407,8 +407,9 @@ fun MusicScreen(
                 val ext = File(it.path).extension.lowercase()
                 ext in listOf("flac", "wav", "m4a", "alac", "dsf", "dff")
             }
-            5 -> list.filter { it.duration in 1..150000L } // < 2.5 min
-            6 -> list.filter { it.duration >= 240000L } // > 4 min
+            5 -> list.filter { playlistManager.getPlayCount(it.id) == 0 } // Joyas Olvidadas
+            6 -> list.filter { it.duration in 1..150000L } // < 2.5 min
+            7 -> list.filter { it.duration >= 240000L } // > 4 min
             else -> list
         }
 
@@ -677,6 +678,13 @@ fun MusicScreen(
                                         Toast.makeText(context, "Sensor de acelerómetro no disponible", Toast.LENGTH_SHORT).show()
                                     }
                                 }
+                            },
+                            isFlipToPauseActive = settings.flipToPause,
+                            onToggleFlipToPause = {
+                                val nextState = !settings.flipToPause
+                                settings.setFlipToPauseEnabled(nextState)
+                                val msg = if (nextState) "📴 'Voltear para Pausar' activado" else "📴 'Voltear para Pausar' desactivado"
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                             },
                             onOpenThemes = { showToolsMenu = false; showMysteriousThemeDialog = true },
                             onOpenOledSaver = { showToolsMenu = false; showOledSaver = true },
@@ -1037,7 +1045,7 @@ fun MusicScreen(
                     .padding(horizontal = 14.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val filters = listOf("Todas", "📥 Descargas", "🕒 Recientes", "🔥 Más Escuchadas", "💎 Lossless", "⚡ Cortas", "☕ Largas")
+                val filters = listOf("Todas", "📥 Descargas", "🕒 Recientes", "🔥 Más Escuchadas", "💎 Lossless", "⏳ Olvidadas", "⚡ Cortas", "☕ Largas")
                 itemsIndexed(filters) { index, label ->
                     val isSelected = selectedFilterIndex == index
                     val chipScale by animateFloatAsState(

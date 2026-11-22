@@ -1066,6 +1066,32 @@ fun AuraApp(
         }
     }
 
+    // Flip to Pause Gesture (Placing phone face down on surface pauses playback)
+    val flipToPauseManager = remember {
+        com.auraplayer.audio.FlipToPauseManager(context) {
+            val ctrl = controller
+            if (ctrl?.isPlaying == true) {
+                com.auraplayer.audio.CrossfadeManager.getInstance(context).smoothPause(ctrl)
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator?.vibrate(VibrationEffect.createOneShot(70, VibrationEffect.DEFAULT_AMPLITUDE))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vibrator?.vibrate(70)
+                    }
+                } catch (_: Exception) {}
+                Toast.makeText(context, "📴 Pausado al colocar boca abajo", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    DisposableEffect(settingsManager.flipToPause) {
+        flipToPauseManager.isEnabled = settingsManager.flipToPause
+        onDispose {
+            flipToPauseManager.stop()
+        }
+    }
+
     // Auto-fetch lyrics and trigger DJ/achievement hooks whenever track changes
     LaunchedEffect(currentMedia?.id) {
         val song = currentMedia
