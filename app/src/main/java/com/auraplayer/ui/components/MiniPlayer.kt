@@ -287,12 +287,12 @@ fun MiniPlayer(
                                     if (isPlaying) {
                                         LiveEqualizerMini(
                                             isPlaying = true,
-                                            barColor = MaterialTheme.colorScheme.primary,
+                                            barColor = if (isMysterious) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.padding(end = 6.dp)
                                         )
                                     }
                                     Text(
-                                        text = currentMedia.title,
+                                        text = if (isMysterious) "ᛟ ${currentMedia.title}" else currentMedia.title,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1,
@@ -301,9 +301,9 @@ fun MiniPlayer(
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = currentMedia.artist,
+                                        text = if (isMysterious) "${currentMedia.artist} ᛉ" else currentMedia.artist,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = if (isMysterious) Color(0xFFCE93D8) else MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -352,10 +352,14 @@ fun MiniPlayer(
                                     .clip(CircleShape)
                                     .background(
                                         Brush.horizontalGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.secondary
-                                            )
+                                            if (isMysterious) {
+                                                listOf(Color(0xFFB388FF), Color(0xFF00E5FF))
+                                            } else {
+                                                listOf(
+                                                    MaterialTheme.colorScheme.primary,
+                                                    MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
                                         )
                                     )
                                     .bounceClick(scaleDown = 0.88f) { onPlayPauseClick() },

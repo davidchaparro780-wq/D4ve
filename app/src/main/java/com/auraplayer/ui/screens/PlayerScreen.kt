@@ -836,13 +836,24 @@ fun PlayerScreen(
         color = Color(0xFF070A12)
     ) {
         AuraTouchSparks(
-            accentColor = dynamicArtworkColor ?: MaterialTheme.colorScheme.primary,
-            secondaryColor = MaterialTheme.colorScheme.secondary
+            accentColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFF00E5FF) else (dynamicArtworkColor ?: MaterialTheme.colorScheme.primary),
+            secondaryColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFFE040FB) else MaterialTheme.colorScheme.secondary
         ) {
                 val comfortBackground = when (eyeComfortMode) {
                     1 -> Brush.verticalGradient(listOf(Color(0xFF191108), Color(0xFF0D0804)))
                     2 -> Brush.verticalGradient(listOf(Color(0xFF000000), Color(0xFF000000)))
-                    else -> rootBackgroundBrush
+                    else -> if (isMysteriousTheme || centerVisualizerMode == 7) {
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF180A2E),
+                                Color(0xFF0C0418),
+                                Color(0xFF040108)
+                            ),
+                            radius = 1600f
+                        )
+                    } else {
+                        rootBackgroundBrush
+                    }
                 }
 
                 Box(
@@ -1095,9 +1106,10 @@ fun PlayerScreen(
                                         ),
                                         label = "eqBar3"
                                     )
-                                    val eqColor = when (eyeComfortMode) {
-                                        1 -> Color(0xFFF59E0B)
-                                        2 -> Color(0xFFE2E8F0)
+                                    val eqColor = when {
+                                        isMysteriousTheme || centerVisualizerMode == 7 -> Color(0xFF00E5FF)
+                                        eyeComfortMode == 1 -> Color(0xFFF59E0B)
+                                        eyeComfortMode == 2 -> Color(0xFFE2E8F0)
                                         else -> MaterialTheme.colorScheme.primary
                                     }
                                     Box(
@@ -1594,13 +1606,29 @@ fun PlayerScreen(
                                     )
                                 }
 
+                                // Anillos de pulso acústico (Aura Ripple Rings) emanando detrás del arte
+                                if (isPlaying) {
+                                    AuraRippleRings(
+                                        isPlaying = isPlaying,
+                                        modifier = Modifier.size(maxArtSize * 1.12f),
+                                        accentColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFFB388FF) else activeAccent
+                                    )
+                                }
+
                                 if (isMysteriousTheme || centerVisualizerMode == 7) {
+                                    // Corona de Plasma Líquido 360° reactiva a bandas FFT en tiempo real
+                                    NeonPlasmaCrown(
+                                        isPlaying = isPlaying,
+                                        modifier = Modifier.size(maxArtSize * 1.14f),
+                                        primaryColor = Color(0xFFB388FF),
+                                        secondaryColor = Color(0xFF00E5FF)
+                                    )
                                     ArcaneRunicOrbit(
                                         accentColor = activeAccent,
-                                        secondaryColor = MaterialTheme.colorScheme.secondary,
+                                        secondaryColor = if (isMysteriousTheme) Color(0xFF00E5FF) else MaterialTheme.colorScheme.secondary,
                                         bassEnergy = liveBassEnergy,
                                         isPlaying = isPlaying,
-                                        size = maxArtSize * 1.15f
+                                        size = maxArtSize * 1.18f
                                     )
                                 }
 
@@ -2043,43 +2071,54 @@ fun PlayerScreen(
                                 )
                             } else {
                                 // Skin Monolito Arcano: Obelisco de Obsidiana Cuántica & Runas
-                                ArcaneMonolithSkin(
-                                    song = currentMedia,
-                                    isPlaying = isPlaying,
-                                    bassEnergy = liveBassEnergy,
-                                    accentColor = activeAccent,
-                                    secondaryColor = MaterialTheme.colorScheme.secondary,
-                                    onTap = {
-                                        AuraHaptic.click(view)
-                                        cycleVisualizerSkin()
-                                    },
-                                    onLongPress = {
-                                        showArcaneFrequencyDialog = true
-                                    },
-                                    onDoubleTap = { offset ->
-                                        val w = artWidthPx
-                                        if (offset.x < w * 0.35f) {
-                                            onSeekRelative(-10000L)
-                                            seekBadgeText = "-10s"
-                                            seekBadgeIsForward = false
-                                            showSeekBadge = true
-                                            AuraHaptic.click(view)
-                                        } else if (offset.x > w * 0.65f) {
-                                            onSeekRelative(10000L)
-                                            seekBadgeText = "+10s"
-                                            seekBadgeIsForward = true
-                                            showSeekBadge = true
-                                            AuraHaptic.click(view)
-                                        } else {
-                                            onToggleFavorite()
-                                            showHeartBurst = true
-                                            AuraHaptic.heavy(view)
-                                        }
-                                    },
+                                Box(
                                     modifier = Modifier
                                         .size(maxArtSize)
-                                        .then(levitationModifier)
-                                )
+                                        .then(levitationModifier),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    SupernovaShockwave(
+                                        trigger = supernovaTrigger,
+                                        accentColor = Color(0xFF00E5FF),
+                                        secondaryColor = Color(0xFFA855F7),
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    ArcaneMonolithSkin(
+                                        song = currentMedia,
+                                        isPlaying = isPlaying,
+                                        bassEnergy = liveBassEnergy,
+                                        accentColor = activeAccent,
+                                        secondaryColor = MaterialTheme.colorScheme.secondary,
+                                        onTap = {
+                                            AuraHaptic.click(view)
+                                            cycleVisualizerSkin()
+                                        },
+                                        onLongPress = {
+                                            showArcaneFrequencyDialog = true
+                                        },
+                                        onDoubleTap = { offset ->
+                                            val w = artWidthPx
+                                            if (offset.x < w * 0.35f) {
+                                                onSeekRelative(-10000L)
+                                                seekBadgeText = "-10s"
+                                                seekBadgeIsForward = false
+                                                showSeekBadge = true
+                                                AuraHaptic.click(view)
+                                            } else if (offset.x > w * 0.65f) {
+                                                onSeekRelative(10000L)
+                                                seekBadgeText = "+10s"
+                                                seekBadgeIsForward = true
+                                                showSeekBadge = true
+                                                AuraHaptic.click(view)
+                                            } else {
+                                                onToggleFavorite()
+                                                showHeartBurst = true
+                                                AuraHaptic.heavy(view)
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             }
                         }
                     }
@@ -2482,10 +2521,15 @@ fun PlayerScreen(
                         },
                         label = "artistAnim"
                     ) { a ->
+                        val artistDisplay = if (isMysteriousTheme || centerVisualizerMode == 7) {
+                            "$a • ${currentMedia.album.ifEmpty { "Aura Audio" }} ᛉ"
+                        } else {
+                            "$a • ${currentMedia.album.ifEmpty { "Aura Audio" }}"
+                        }
                         Text(
-                            text = "$a • ${currentMedia.album.ifEmpty { "Aura Audio" }}",
+                            text = artistDisplay,
                             fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                            color = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFFD8B4FE) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -2645,6 +2689,44 @@ fun PlayerScreen(
                                     softWrap = false,
                                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                                 )
+                            }
+                        }
+
+                        // Resonancia Arcana / Frecuencia Solfeggio Pill
+                        if (isMysteriousTheme || centerVisualizerMode == 7 || currentArcaneHz != 440) {
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        AuraHaptic.click(view)
+                                        showArcaneFrequencyDialog = true
+                                    }
+                                    .bounceClick(),
+                                color = Color(0xFF7C3AED).copy(alpha = 0.20f),
+                                shape = RoundedCornerShape(12.dp),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    Brush.horizontalGradient(
+                                        listOf(Color(0xFFA855F7).copy(alpha = 0.85f), Color(0xFF00E5FF).copy(alpha = 0.45f))
+                                    )
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text("🔮", fontSize = 10.sp)
+                                    Text(
+                                        text = "$currentArcaneHz Hz • Armonía Sagrada",
+                                        color = Color(0xFFE9D5FF),
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                    )
+                                }
                             }
                         }
                     }
@@ -3819,8 +3901,8 @@ fun PlayerScreen(
                         },
                         size = 76.dp,
                         iconSize = 42.dp,
-                        primaryColor = MaterialTheme.colorScheme.primary,
-                        secondaryColor = MaterialTheme.colorScheme.secondary
+                        primaryColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFFA855F7) else MaterialTheme.colorScheme.primary,
+                        secondaryColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFF00E5FF) else MaterialTheme.colorScheme.secondary
                     )
 
                     // Next

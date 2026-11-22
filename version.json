@@ -1,7 +1,7 @@
 {
-    "versionCode": 212,
-    "versionName": "5.0.12",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.12/app-release.apk",
-    "changelog": "v5.0.12 Dimensión Arcana & UI Misteriosa:\n- Nuevo chip de acceso directo '🔮 Enigma' en la cabecera para activar temas cósmicos y paletas arcanas (Misterio Arcano, Eclipse Enigmático, Espectro Abisal, Nebulosa).\n- Banner rúnico esotérico 'NecronomicScrollText' interactivo con rotación de runas cósmicas (ᛟ ᚢ ᛏ ᚱ ᛈ ᚨ ᛉ) sobre la barra de progreso.\n- Activación automática de la atmósfera mística completa (Bruma Espectral PhantomMist, Constelaciones Estelares reactivas al bajo y Anillos Orbitales Celestiales) en modo Arcano y en el Monolito de Obsidiana.\n- Chip y acceso en Pro Suite a Frecuencias Sagradas Solfeggio en vivo (432Hz, 528Hz ADN, 639Hz Cuántica).\n- Nuevo chip interactivo del Oráculo de DaVE con orbe místico 3D, predicción de escucha y lectura del destino sonoro.\n- Nuevas opciones de Dimensión Arcana, Frecuencias Sagradas y Oráculo en el menú 'Más herramientas'.",
+    "versionCode": 213,
+    "versionName": "5.0.13",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.13/app-release.apk",
+    "changelog": "v5.0.13 Master Polish Visual & Atmósfera Arcana Inmersiva:\n- Corona de Plasma Líquido 360° (NeonPlasmaCrown) reactiva a las 32 bandas del analizador FFT en tiempo real rodeando la portada central.\n- Anillos de Ondas Acústicas (AuraRippleRings) concéntricos emanando desde detrás del arte al reproducir música.\n- Fondo esotérico con gradiente radial de vacío obsidiano y partículas AuraTouchSparks en amatista y cyan al tocar la pantalla.\n- Nueva insignia de Resonancia Arcana Solfeggio en el carrusel de especificaciones de audio.\n- Efecto de onda de choque supernova al cambiar de pista en el Monolito Arcano.\n- Glifos nórdicos sutiles en los créditos de artista y álbum.\n- MiniPlayer con ecualizador cian y controles de reproducción en gradiente místico.",
     "fileSizeMb": 6.1
 }
