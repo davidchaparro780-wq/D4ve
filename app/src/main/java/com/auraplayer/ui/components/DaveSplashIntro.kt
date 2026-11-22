@@ -86,16 +86,26 @@ fun DaveSplashIntro(
 
     val lunarPhase = remember { LunarPhaseManager.getCurrentPhase() }
 
-    // Seeded background stars
+    // Seeded background stars (aligerado a 24 para máximo rendimiento)
     val stars = remember {
         val rng = kotlin.random.Random(1337)
-        List(50) {
+        List(24) {
             Triple(
                 rng.nextFloat(),
                 rng.nextFloat(),
                 rng.nextFloat() * 2.2f + 1f
             )
         }
+    }
+
+    val cachedPlasmaPath = remember { Path() }
+    val sweepBrushColors = remember {
+        listOf(
+            Color(0xFF00E5FF),
+            Color(0xFF8B5CF6),
+            Color(0xFFEC4899),
+            Color(0xFF00E5FF)
+        )
     }
 
     // Continuous infinite transitions
@@ -238,8 +248,8 @@ fun DaveSplashIntro(
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val center = Offset(size.width / 2f, size.height / 2f)
                     val maxDist = size.minDimension * 0.65f
-                    for (i in 0 until 24) {
-                        val baseAngle = (i * (360f / 24f) * (PI / 180f)).toFloat()
+                    for (i in 0 until 12) {
+                        val baseAngle = (i * (360f / 12f) * (PI / 180f)).toFloat()
                         val angle = baseAngle + (vortexProgress.value * 3.8f)
                         val currentDist = maxDist * invProg * (0.6f + (i % 5) * 0.1f)
                         val px = center.x + currentDist * cos(angle)
@@ -401,29 +411,25 @@ fun DaveSplashIntro(
             ) {
                 val center = Offset(size.width / 2f, size.height / 2f)
                 val baseR = size.minDimension * 0.44f
-                val plasmaPath = Path()
-                val numPoints = 16
+                cachedPlasmaPath.reset()
+                val numPoints = 14
                 for (i in 0 until numPoints) {
                     val angle = (i * (360f / numPoints) * (PI / 180f)).toFloat()
-                    val waveOffset = sin(i * 1.8f + plasmaRotation * 0.05f) * 5.dp.toPx()
+                    val waveOffset = sin(i * 1.8f + plasmaRotation * 0.05f) * 4.5.dp.toPx()
                     val r = baseR + waveOffset
                     val px = center.x + r * cos(angle)
                     val py = center.y + r * sin(angle)
-                    if (i == 0) plasmaPath.moveTo(px, py) else plasmaPath.lineTo(px, py)
+                    if (i == 0) cachedPlasmaPath.moveTo(px, py) else cachedPlasmaPath.lineTo(px, py)
                 }
-                plasmaPath.close()
+                cachedPlasmaPath.close()
 
                 drawPath(
-                    path = plasmaPath,
+                    path = cachedPlasmaPath,
                     brush = Brush.sweepGradient(
-                        colors = listOf(
-                            Color(0xFF00E5FF),
-                            Color(0xFF8B5CF6),
-                            Color(0xFFEC4899),
-                            Color(0xFF00E5FF)
-                        )
+                        colors = sweepBrushColors,
+                        center = center
                     ),
-                    style = Stroke(width = 2.8.dp.toPx(), cap = StrokeCap.Round)
+                    style = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
 

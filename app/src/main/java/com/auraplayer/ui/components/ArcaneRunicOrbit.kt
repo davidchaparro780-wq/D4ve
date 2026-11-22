@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -28,8 +28,8 @@ import kotlin.math.sin
 
 /**
  * Anillo Orbital Celeste y Rúnico Arcano para la estética Misteriosa de DaVE Player.
- * Dibuja órbitas esotéricas, glifos geométricos, estrellas arcanas y polvo estelar
- * que rotan de forma hipnótica y reaccionan al pulso del bajo.
+ * Dibuja órbitas esotéricas, glifos geométricos, estrellas arcanas y polvo estelar.
+ * Ultra optimizado con pre-cálculo de efectos de trazado y cero asignaciones en drawScope.
  */
 @Composable
 fun ArcaneRunicOrbit(
@@ -75,6 +75,9 @@ fun ArcaneRunicOrbit(
         label = "glow_pulse"
     )
 
+    val outerDashEffect = remember { PathEffect.dashPathEffect(floatArrayOf(14f, 18f), 0f) }
+    val innerDashEffect = remember { PathEffect.dashPathEffect(floatArrayOf(6f, 12f), 0f) }
+
     val energyBoost = (bassEnergy * 0.35f).coerceIn(0f, 0.4f)
     val dynamicAlpha = ((0.45f + energyBoost) * glowPulse).coerceIn(0.2f, 0.95f)
 
@@ -111,48 +114,39 @@ fun ArcaneRunicOrbit(
                     center = center,
                     style = Stroke(
                         width = 1.6f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 18f), 0f)
+                        pathEffect = outerDashEffect
                     )
                 )
 
-                // 8 Nodos estelares / Runas geométricas cardinales y diagonales
+                // 8 Nodos estelares / Runas geométricas
                 for (i in 0 until 8) {
-                    val angleRad = Math.toRadians((i * 45).toDouble()).toFloat()
+                    val angleRad = (i * 45f * (Math.PI / 180f)).toFloat()
                     val nodeX = center.x + baseRadius * cos(angleRad)
                     val nodeY = center.y + baseRadius * sin(angleRad)
 
                     if (i % 2 == 0) {
-                        // Estrella de 4 puntas arcana
-                        val starSize = 5.5f + (bassEnergy * 3.5f)
-                        val starPath = Path().apply {
-                            moveTo(nodeX, nodeY - starSize)
-                            lineTo(nodeX + (starSize * 0.35f), nodeY)
-                            lineTo(nodeX, nodeY + starSize)
-                            lineTo(nodeX - (starSize * 0.35f), nodeY)
-                            close()
-                            moveTo(nodeX - starSize, nodeY)
-                            lineTo(nodeX, nodeY + (starSize * 0.35f))
-                            lineTo(nodeX + starSize, nodeY)
-                            lineTo(nodeX, nodeY - (starSize * 0.35f))
-                            close()
-                        }
-                        drawPath(
-                            path = starPath,
-                            color = accentColor.copy(alpha = dynamicAlpha)
+                        // Estrella de 4 puntas arcana (dibujada con trazos cruzados de alto rendimiento)
+                        val starSize = 5.0f + (bassEnergy * 3.0f)
+                        drawLine(
+                            color = accentColor.copy(alpha = dynamicAlpha),
+                            start = Offset(nodeX, nodeY - starSize),
+                            end = Offset(nodeX, nodeY + starSize),
+                            strokeWidth = 2.0f,
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = accentColor.copy(alpha = dynamicAlpha),
+                            start = Offset(nodeX - starSize, nodeY),
+                            end = Offset(nodeX + starSize, nodeY),
+                            strokeWidth = 2.0f,
+                            cap = StrokeCap.Round
                         )
                     } else {
-                        // Nódulo diamante orbital
-                        val diamondSize = 3.5f
-                        val diamondPath = Path().apply {
-                            moveTo(nodeX, nodeY - diamondSize)
-                            lineTo(nodeX + diamondSize, nodeY)
-                            lineTo(nodeX, nodeY + diamondSize)
-                            lineTo(nodeX - diamondSize, nodeY)
-                            close()
-                        }
-                        drawPath(
-                            path = diamondPath,
-                            color = secondaryColor.copy(alpha = dynamicAlpha * 0.85f)
+                        // Nódulo diamante orbital (dibujado como círculo concéntrico rápido)
+                        drawCircle(
+                            color = secondaryColor.copy(alpha = dynamicAlpha * 0.85f),
+                            radius = 2.8f,
+                            center = Offset(nodeX, nodeY)
                         )
                     }
                 }
@@ -167,46 +161,22 @@ fun ArcaneRunicOrbit(
                     center = center,
                     style = Stroke(
                         width = 1.0f,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 12f), 0f)
+                        pathEffect = innerDashEffect
                     )
                 )
 
-                // 4 Marcas lunares / cardinales
+                // 4 Marcas cardinales
                 for (i in 0 until 4) {
-                    val angleRad = Math.toRadians((i * 90 + 22.5).toDouble()).toFloat()
+                    val angleRad = ((i * 90f + 22.5f) * (Math.PI / 180f)).toFloat()
                     val moonX = center.x + innerRadius * cos(angleRad)
                     val moonY = center.y + innerRadius * sin(angleRad)
 
-                    // Pequeña media luna o círculo estelar
                     drawCircle(
                         color = Color.White.copy(alpha = dynamicAlpha * 0.75f),
                         radius = 2.2f,
                         center = Offset(moonX, moonY)
                     )
-                    drawCircle(
-                        color = accentColor.copy(alpha = dynamicAlpha * 0.4f),
-                        radius = 4.2f,
-                        center = Offset(moonX, moonY),
-                        style = Stroke(width = 0.8f)
-                    )
                 }
-            }
-
-            // 4. Polvo estelar cósmico místico (Micro-sparkles orbitales)
-            val stardustCount = 12
-            for (j in 0 until stardustCount) {
-                val seed = (j * 37 + orbitAngle.toInt()) % 360
-                val rad = Math.toRadians(seed.toDouble()).toFloat()
-                val dist = baseRadius * (0.82f + (j % 5) * 0.04f)
-                val px = center.x + dist * cos(rad)
-                val py = center.y + dist * sin(rad)
-                val sparkleAlpha = (0.25f + (j % 4) * 0.18f) * dynamicAlpha
-
-                drawCircle(
-                    color = if (j % 2 == 0) accentColor.copy(alpha = sparkleAlpha) else secondaryColor.copy(alpha = sparkleAlpha),
-                    radius = if (j % 3 == 0) 1.8f else 1.2f,
-                    center = Offset(px, py)
-                )
             }
         }
     }

@@ -926,17 +926,6 @@ fun PlayerScreen(
                         )
                     }
 
-                    AuroraMeshBackground(
-                        palette = artworkPalette,
-                        isPlaying = isPlaying
-                    )
-
-                    FluidAmbilightGlow(
-                        primaryColor = dynamicBg.firstOrNull() ?: MaterialTheme.colorScheme.primary,
-                        secondaryColor = dynamicBg.getOrNull(1) ?: MaterialTheme.colorScheme.secondary,
-                        isPlaying = isPlaying
-                    )
-
                     if (isMysteriousTheme || centerVisualizerMode == 7) {
                         PhantomMistOverlay(
                             accentColor = activeAccent,
@@ -944,9 +933,11 @@ fun PlayerScreen(
                             bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying),
                             isPlaying = isPlaying
                         )
-                        StellarConstellationBanner(
-                            bassEnergy = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(isPlaying),
-                            accentColor = activeAccent
+                    } else {
+                        FluidAmbilightGlow(
+                            primaryColor = dynamicBg.firstOrNull() ?: MaterialTheme.colorScheme.primary,
+                            secondaryColor = dynamicBg.getOrNull(1) ?: MaterialTheme.colorScheme.secondary,
+                            isPlaying = isPlaying
                         )
                     }
 
@@ -1606,15 +1597,6 @@ fun PlayerScreen(
                                     )
                                 }
 
-                                // Anillos de pulso acústico (Aura Ripple Rings) emanando detrás del arte
-                                if (isPlaying) {
-                                    AuraRippleRings(
-                                        isPlaying = isPlaying,
-                                        modifier = Modifier.size(maxArtSize * 1.12f),
-                                        accentColor = if (isMysteriousTheme || centerVisualizerMode == 7) Color(0xFFB388FF) else activeAccent
-                                    )
-                                }
-
                                 if (isMysteriousTheme || centerVisualizerMode == 7) {
                                     // Corona de Plasma Líquido 360° reactiva a bandas FFT en tiempo real
                                     NeonPlasmaCrown(
@@ -1623,12 +1605,12 @@ fun PlayerScreen(
                                         primaryColor = Color(0xFFB388FF),
                                         secondaryColor = Color(0xFF00E5FF)
                                     )
-                                    ArcaneRunicOrbit(
-                                        accentColor = activeAccent,
-                                        secondaryColor = if (isMysteriousTheme) Color(0xFF00E5FF) else MaterialTheme.colorScheme.secondary,
-                                        bassEnergy = liveBassEnergy,
+                                } else if (isPlaying) {
+                                    // Anillos de pulso acústico en modo estándar
+                                    AuraRippleRings(
                                         isPlaying = isPlaying,
-                                        size = maxArtSize * 1.18f
+                                        modifier = Modifier.size(maxArtSize * 1.12f),
+                                        accentColor = activeAccent
                                     )
                                 }
 

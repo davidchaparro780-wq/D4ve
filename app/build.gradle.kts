@@ -14,8 +14,8 @@ android {
         applicationId = "com.auraplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 214
-        versionName = "5.0.14"
+        versionCode = 215
+        versionName = "5.0.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,7 +53,6 @@ android {
             )
         }
         debug {
-            applicationIdSuffix = ".debug"
             isDebuggable = true
             val daveSign = signingConfigs.getByName("daveConfig")
             if (daveSign.storeFile != null) {
