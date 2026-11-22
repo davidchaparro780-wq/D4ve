@@ -3,18 +3,19 @@ package com.auraplayer.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,19 +42,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.auraplayer.R
+import com.auraplayer.audio.AuraHaptic
+import com.auraplayer.audio.LunarPhaseManager
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun DaveSplashIntro(
@@ -61,82 +73,141 @@ fun DaveSplashIntro(
     modifier: Modifier = Modifier
 ) {
     var isVisible by remember { mutableStateOf(true) }
-    var startAnim by remember { mutableStateOf(false) }
+    val view = LocalView.current
 
-    LaunchedEffect(Unit) {
-        startAnim = true
-        delay(1300)
-        isVisible = false
-        delay(300) // allow fade out animation to finish
-        onFinish()
+    // Animators for cinematic sequences
+    val vortexProgress = remember { Animatable(0f) }
+    val shockwaveProgress = remember { Animatable(0f) }
+    val logoScaleAnim = remember { Animatable(0.25f) }
+    val logoAlphaAnim = remember { Animatable(0f) }
+    val logoRotationYAnim = remember { Animatable(70f) }
+    val textAlphaAnim = remember { Animatable(0f) }
+    val shimmerAnim = remember { Animatable(0f) }
+
+    val lunarPhase = remember { LunarPhaseManager.getCurrentPhase() }
+
+    // Seeded background stars
+    val stars = remember {
+        val rng = kotlin.random.Random(1337)
+        List(50) {
+            Triple(
+                rng.nextFloat(),
+                rng.nextFloat(),
+                rng.nextFloat() * 2.2f + 1f
+            )
+        }
     }
 
-    // Scale animation with smooth spring
-    val logoScale by animateFloatAsState(
-        targetValue = if (startAnim) 1f else 0.45f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "LogoScale"
-    )
+    // Continuous infinite transitions
+    val infiniteTransition = rememberInfiniteTransition(label = "IntroInfinite")
 
-    // Alpha animation
-    val logoAlpha by animateFloatAsState(
-        targetValue = if (startAnim) 1f else 0f,
-        animationSpec = tween(600, easing = FastOutSlowInEasing),
-        label = "LogoAlpha"
-    )
-
-    // Infinite breathing glow animation
-    val infiniteTransition = rememberInfiniteTransition(label = "AuraBreathing")
-    val auraScale by infiniteTransition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.25f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "AuraPulse"
-    )
-    val auraAlpha by infiniteTransition.animateFloat(
+    val starTwinkle by infiniteTransition.animateFloat(
         initialValue = 0.35f,
-        targetValue = 0.75f,
+        targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
+            animation = tween(1600, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "AuraAlpha"
+        label = "StarTwinkle"
     )
 
-    // Círculo de invocación: anillo rúnico rotatorio alrededor del logo
-    val invokeRotation by infiniteTransition.animateFloat(
+    val outerRingRotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(14000, easing = androidx.compose.animation.core.LinearEasing),
+            animation = tween(16000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "InvokeRotation"
+        label = "OuterRingRotation"
     )
 
-    val lunarPhase = remember { com.auraplayer.audio.LunarPhaseManager.getCurrentPhase() }
+    val plasmaRotation by infiniteTransition.animateFloat(
+        initialValue = 360f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(7000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "PlasmaRotation"
+    )
+
+    val auraBreathingScale by infiniteTransition.animateFloat(
+        initialValue = 0.92f,
+        targetValue = 1.22f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "AuraBreathingScale"
+    )
+
+    val auraBreathingAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.40f,
+        targetValue = 0.85f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "AuraBreathingAlpha"
+    )
+
+    // Master cinematic timeline
+    LaunchedEffect(Unit) {
+        // Phase 1: Inflow Quantum Vortex (0 - 400ms)
+        vortexProgress.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
+
+        // Phase 2: Supernova Detonation & Haptic Blast (400ms)
+        AuraHaptic.heavy(view)
+
+        launch {
+            shockwaveProgress.animateTo(1f, tween(650, easing = LinearOutSlowInEasing))
+        }
+        launch {
+            logoScaleAnim.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+        }
+        launch {
+            logoAlphaAnim.animateTo(1f, tween(300))
+        }
+        launch {
+            logoRotationYAnim.animateTo(0f, tween(550, easing = FastOutSlowInEasing))
+        }
+        launch {
+            delay(150)
+            textAlphaAnim.animateTo(1f, tween(450, easing = FastOutSlowInEasing))
+        }
+        launch {
+            delay(350)
+            shimmerAnim.animateTo(1f, tween(650, easing = FastOutSlowInEasing))
+        }
+
+        // Phase 3: Hold the sacred resonance & prepare exit
+        delay(1250)
+        isVisible = false
+        delay(360) // allow portal dissolve exit animation to conclude
+        onFinish()
+    }
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(tween(200)),
-        exit = fadeOut(tween(300)) + scaleOut(targetScale = 1.08f, animationSpec = tween(300)),
+        enter = fadeIn(tween(150)),
+        exit = fadeOut(tween(350)) + scaleOut(targetScale = 1.30f, animationSpec = tween(350, easing = FastOutSlowInEasing)),
         modifier = modifier
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
+                    Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFF030712), // Jet Black
-                            Color(0xFF090D1A), // Deep Midnight Navy
-                            Color(0xFF020408)  // Abyss
+                            Color(0xFF13092B), // Deep Amethyst Nebula Core
+                            Color(0xFF070314), // Midnight Void
+                            Color(0xFF010005)  // Absolute Space Abyss
                         )
                     )
                 )
@@ -144,144 +215,310 @@ fun DaveSplashIntro(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
+                    AuraHaptic.click(view)
                     onFinish()
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Ambient Neon Glow Aura behind logo
+            // Background Canvas: Twinkling Stardust Field
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                stars.forEachIndexed { idx, (xr, yr, sz) ->
+                    val alpha = if (idx % 2 == 0) starTwinkle else (1.35f - starTwinkle).coerceIn(0.2f, 1f)
+                    drawCircle(
+                        color = Color.White.copy(alpha = alpha * 0.75f),
+                        radius = sz.dp.toPx(),
+                        center = Offset(size.width * xr, size.height * yr)
+                    )
+                }
+            }
+
+            // Phase 1: Inflow Quantum Sparks Vortex
+            if (vortexProgress.value < 0.98f) {
+                val invProg = 1f - vortexProgress.value
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val center = Offset(size.width / 2f, size.height / 2f)
+                    val maxDist = size.minDimension * 0.65f
+                    for (i in 0 until 24) {
+                        val baseAngle = (i * (360f / 24f) * (PI / 180f)).toFloat()
+                        val angle = baseAngle + (vortexProgress.value * 3.8f)
+                        val currentDist = maxDist * invProg * (0.6f + (i % 5) * 0.1f)
+                        val px = center.x + currentDist * cos(angle)
+                        val py = center.y + currentDist * sin(angle)
+                        val particleAlpha = (vortexProgress.value * 1.5f).coerceIn(0f, 1f) * (1f - invProg * 0.3f)
+                        val pColor = if (i % 2 == 0) Color(0xFF00E5FF) else Color(0xFFE040FB)
+
+                        drawCircle(
+                            color = pColor.copy(alpha = particleAlpha.coerceIn(0f, 0.95f)),
+                            radius = (2.2f + (i % 3) * 1.3f).dp.toPx(),
+                            center = Offset(px, py)
+                        )
+                    }
+                }
+            }
+
+            // Phase 2: Expanding Supernova Shockwave Waves
+            if (shockwaveProgress.value > 0.01f && shockwaveProgress.value < 0.99f) {
+                val prog = shockwaveProgress.value
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val center = Offset(size.width / 2f, size.height / 2f)
+                    val maxR = size.minDimension * 0.95f
+                    val r1 = maxR * prog
+                    val alpha1 = (1f - prog).coerceIn(0f, 1f)
+
+                    // Wave 1: Celestial Cyan
+                    drawCircle(
+                        color = Color(0xFF00E5FF).copy(alpha = alpha1 * 0.65f),
+                        radius = r1,
+                        center = center,
+                        style = Stroke(width = (6.dp.toPx() * (1f - prog)).coerceAtLeast(1.5f))
+                    )
+                    // Wave 2: Radiant Amethyst
+                    if (prog > 0.15f) {
+                        val prog2 = (prog - 0.15f) / 0.85f
+                        val r2 = maxR * prog2
+                        val alpha2 = (1f - prog2).coerceIn(0f, 1f)
+                        drawCircle(
+                            color = Color(0xFFE040FB).copy(alpha = alpha2 * 0.5f),
+                            radius = r2,
+                            center = center,
+                            style = Stroke(width = (4.dp.toPx() * (1f - prog2)).coerceAtLeast(1.2f))
+                        )
+                    }
+                    // Central luminous burst flash
+                    if (prog < 0.5f) {
+                        val flashAlpha = (1f - (prog * 2f)).coerceIn(0f, 1f)
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = flashAlpha * 0.55f),
+                                    Color(0xFF00E5FF).copy(alpha = flashAlpha * 0.35f),
+                                    Color.Transparent
+                                ),
+                                center = center,
+                                radius = maxR * 0.45f
+                            ),
+                            radius = maxR * 0.45f,
+                            center = center
+                        )
+                    }
+                }
+            }
+
+            // Ambient Radiant Breathing Nebula Glow behind Logo
             Box(
                 modifier = Modifier
-                    .size(240.dp)
-                    .scale(auraScale)
-                    .alpha(auraAlpha)
+                    .size(260.dp)
+                    .scale(auraBreathingScale)
+                    .alpha(auraBreathingAlpha)
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                Color(0xFF38BDF8).copy(alpha = 0.45f), // Cyan glow
-                                Color(0xFF8B5CF6).copy(alpha = 0.30f), // Neon purple
+                                Color(0xFF00E5FF).copy(alpha = 0.40f),
+                                Color(0xFF8B5CF6).copy(alpha = 0.30f),
+                                Color(0xFFE040FB).copy(alpha = 0.15f),
                                 Color.Transparent
                             )
                         )
                     )
             )
 
-            // Círculo de invocación arcano: geometría esotérica rotando tras el badge
-            androidx.compose.foundation.Canvas(
+            // Outer Sacred Astrolabe & Runic Ring (250dp)
+            Box(
                 modifier = Modifier
-                    .size(230.dp)
-                    .graphicsLayer { rotationZ = invokeRotation }
+                    .size(250.dp)
+                    .graphicsLayer { rotationZ = outerRingRotation }
             ) {
-                val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
-                val radius = size.minDimension * 0.46f
-                val ringColor = Color(0xFF818CF8).copy(alpha = 0.5f)
+                // Astrolabe geometry canvas
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val center = Offset(size.width / 2f, size.height / 2f)
+                    val radius = size.minDimension / 2f - 6.dp.toPx()
 
-                // Anillo punteado exterior
-                drawCircle(
-                    color = ringColor,
-                    radius = radius,
-                    center = center,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(
-                        width = 1.2f,
-                        pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(16f, 22f), 0f)
-                    )
-                )
-
-                // 6 nodos rúnicos (circulitos) sobre el anillo
-                for (k in 0 until 6) {
-                    val rad = Math.toRadians((k * 60).toDouble()).toFloat()
-                    val nx = center.x + radius * kotlin.math.cos(rad)
-                    val ny = center.y + radius * kotlin.math.sin(rad)
+                    // Perimeter Ring
                     drawCircle(
-                        color = Color(0xFFC084FC).copy(alpha = 0.8f),
-                        radius = 3f,
-                        center = androidx.compose.ui.geometry.Offset(nx, ny)
+                        color = Color(0xFF00E5FF).copy(alpha = 0.45f),
+                        radius = radius,
+                        center = center,
+                        style = Stroke(width = 1.5.dp.toPx())
                     )
+                    // Inner Dotted Orbit
                     drawCircle(
-                        color = Color(0xFF38BDF8).copy(alpha = 0.4f),
-                        radius = 6f,
-                        center = androidx.compose.ui.geometry.Offset(nx, ny),
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f)
+                        color = Color(0xFF8B5CF6).copy(alpha = 0.35f),
+                        radius = radius * 0.88f,
+                        center = center,
+                        style = Stroke(
+                            width = 1.dp.toPx(),
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 16f), 0f)
+                        )
                     )
-                }
-
-                // Triángulo de invocación interior
-                val triPath = androidx.compose.ui.graphics.Path().apply {
-                    for (k in 0 until 3) {
-                        val rad = Math.toRadians((k * 120 - 90).toDouble()).toFloat()
-                        val px = center.x + radius * 0.72f * kotlin.math.cos(rad)
-                        val py = center.y + radius * 0.72f * kotlin.math.sin(rad)
-                        if (k == 0) moveTo(px, py) else lineTo(px, py)
+                    // 32 Precision Clockwork / Astrolabe Ticks
+                    for (step in 0 until 32) {
+                        val angleRad = (step * (360f / 32f) * (PI / 180f)).toFloat()
+                        val isMajor = step % 4 == 0
+                        val tickLen = if (isMajor) 8.dp.toPx() else 3.5.dp.toPx()
+                        val startR = radius - tickLen
+                        val startX = center.x + startR * cos(angleRad)
+                        val startY = center.y + startR * sin(angleRad)
+                        val endX = center.x + radius * cos(angleRad)
+                        val endY = center.y + radius * sin(angleRad)
+                        drawLine(
+                            color = if (isMajor) Color(0xFF00E5FF).copy(alpha = 0.7f) else Color(0xFF818CF8).copy(alpha = 0.35f),
+                            start = Offset(startX, startY),
+                            end = Offset(endX, endY),
+                            strokeWidth = if (isMajor) 1.6f else 1f,
+                            cap = StrokeCap.Round
+                        )
                     }
-                    close()
                 }
+
+                // 8 Arcane Nordic Runes around circumference
+                val runes = listOf("ᛟ", "ᚱ", "ᚦ", "ᛉ", "ᚲ", "ᛊ", "ᛗ", "ᛚ")
+                runes.forEachIndexed { i, rune ->
+                    val angleDeg = i * 45f
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { rotationZ = angleDeg },
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Text(
+                            text = rune,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFD8B4FE).copy(alpha = 0.90f),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                }
+            }
+
+            // Inner Liquid Plasma Orbit (175dp) in counter-rotation
+            Canvas(
+                modifier = Modifier
+                    .size(175.dp)
+                    .scale(auraBreathingScale)
+                    .graphicsLayer { rotationZ = plasmaRotation }
+            ) {
+                val center = Offset(size.width / 2f, size.height / 2f)
+                val baseR = size.minDimension * 0.44f
+                val plasmaPath = Path()
+                val numPoints = 16
+                for (i in 0 until numPoints) {
+                    val angle = (i * (360f / numPoints) * (PI / 180f)).toFloat()
+                    val waveOffset = sin(i * 1.8f + plasmaRotation * 0.05f) * 5.dp.toPx()
+                    val r = baseR + waveOffset
+                    val px = center.x + r * cos(angle)
+                    val py = center.y + r * sin(angle)
+                    if (i == 0) plasmaPath.moveTo(px, py) else plasmaPath.lineTo(px, py)
+                }
+                plasmaPath.close()
+
                 drawPath(
-                    triPath,
-                    color = Color(0xFF8B5CF6).copy(alpha = 0.30f),
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f)
+                    path = plasmaPath,
+                    brush = Brush.sweepGradient(
+                        colors = listOf(
+                            Color(0xFF00E5FF),
+                            Color(0xFF8B5CF6),
+                            Color(0xFFEC4899),
+                            Color(0xFF00E5FF)
+                        )
+                    ),
+                    style = Stroke(width = 2.8.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
 
+            // Central Branding Column with 3D Flip & Zoom Spring
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .scale(logoScale)
-                    .alpha(logoAlpha)
+                    .scale(logoScaleAnim.value)
+                    .alpha(logoAlphaAnim.value)
             ) {
-                // Outer Neon Ring Badge
+                // Holographic 3D Logo Badge
                 Box(
                     modifier = Modifier
-                        .size(115.dp)
+                        .size(118.dp)
+                        .graphicsLayer {
+                            rotationY = logoRotationYAnim.value
+                            cameraDistance = 16f * density
+                        }
                         .clip(CircleShape)
                         .background(
-                            Brush.linearGradient(
+                            Brush.sweepGradient(
                                 listOf(
-                                    Color(0xFF38BDF8),
+                                    Color(0xFF00E5FF),
                                     Color(0xFF818CF8),
-                                    Color(0xFFC084FC)
+                                    Color(0xFFEC4899),
+                                    Color(0xFF00E5FF)
                                 )
                             )
                         )
-                        .padding(3.dp), // Border thickness
+                        .padding(3.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Dark Inner Badge
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(CircleShape)
-                            .background(Color(0xFF0A0F1D)),
+                            .background(Color(0xFF070514)),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_dave_foreground),
                             contentDescription = "DaVE Logo",
                             modifier = Modifier
-                                .size(95.dp)
+                                .size(96.dp)
                                 .clip(CircleShape)
                         )
+
+                        // Shimmer Light Sweep across Logo
+                        if (shimmerAnim.value > 0.01f && shimmerAnim.value < 0.99f) {
+                            val shimmerX = shimmerAnim.value * 220.dp.toPx() - 60.dp.toPx()
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                drawLine(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.White.copy(alpha = 0.65f),
+                                            Color.Transparent
+                                        ),
+                                        startX = shimmerX - 35f,
+                                        endX = shimmerX + 35f
+                                    ),
+                                    start = Offset(shimmerX, 0f),
+                                    end = Offset(shimmerX, size.height),
+                                    strokeWidth = size.width
+                                )
+                            }
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(22.dp))
 
-                // Brand Name with Gradient
-                Text(
-                    text = "DaVE",
-                    fontSize = 38.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = FontFamily.SansSerif,
-                    style = androidx.compose.ui.text.TextStyle(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(0xFF38BDF8), // Electric Cyan
-                                Color(0xFFA78BFA), // Lavender Neon
-                                Color(0xFFF472B6)  // Pink Rose
+                // Brand Name with High-End Chromatic Gradient
+                Box(
+                    modifier = Modifier.alpha(textAlphaAnim.value),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "DaVE",
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = FontFamily.SansSerif,
+                        letterSpacing = 1.sp,
+                        style = androidx.compose.ui.text.TextStyle(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF00F0FF), // Electric Cyan
+                                    Color(0xFFC084FC), // Radiant Lavender
+                                    Color(0xFFF43F5E)  // Electric Rose
+                                )
                             )
                         )
                     )
-                )
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -290,55 +527,62 @@ fun DaveSplashIntro(
                     text = "S T U D I O   S O U N D",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 3.sp,
-                    color = Color(0xFF94A3B8)
+                    letterSpacing = 3.5.sp,
+                    color = Color(0xFF94A3B8),
+                    modifier = Modifier.alpha(textAlphaAnim.value)
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Fase lunar real del día: el cielo acompaña la invocación
+                // Sacred Lunar Resonance Indicator
                 Text(
-                    text = "${lunarPhase.phaseEmoji} ${lunarPhase.illuminationPercent}% · ᛟ",
+                    text = "✨ ${lunarPhase.phaseEmoji} ${lunarPhase.illuminationPercent}% · 432 Hz RESONANCIA ᛟ",
                     fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     letterSpacing = 2.sp,
-                    color = Color(0xFF818CF8)
+                    color = Color(0xFF818CF8),
+                    modifier = Modifier.alpha(textAlphaAnim.value)
                 )
 
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Animated Equalizer Frequency Bars
+                // 9-Band Harmonic Dancing Spectrum Equalizer
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.alpha(textAlphaAnim.value)
                 ) {
-                    val barHeights = listOf(14.dp, 24.dp, 34.dp, 20.dp, 12.dp)
+                    val barBaseHeights = listOf(10.dp, 18.dp, 26.dp, 36.dp, 44.dp, 36.dp, 26.dp, 18.dp, 10.dp)
                     val barColors = listOf(
+                        Color(0xFF00E5FF),
                         Color(0xFF38BDF8),
                         Color(0xFF818CF8),
                         Color(0xFFA855F7),
+                        Color(0xFFE040FB),
+                        Color(0xFFA855F7),
                         Color(0xFF818CF8),
-                        Color(0xFF38BDF8)
+                        Color(0xFF38BDF8),
+                        Color(0xFF00E5FF)
                     )
 
-                    barHeights.forEachIndexed { index, defaultHeight ->
-                        val animBarHeight by infiniteTransition.animateFloat(
-                            initialValue = 0.35f,
+                    barBaseHeights.forEachIndexed { index, baseHeight ->
+                        val animMultiplier by infiniteTransition.animateFloat(
+                            initialValue = 0.25f,
                             targetValue = 1.0f,
                             animationSpec = infiniteRepeatable(
                                 animation = tween(
-                                    durationMillis = 350 + (index * 110),
+                                    durationMillis = 320 + (index * 80),
                                     easing = FastOutSlowInEasing
                                 ),
                                 repeatMode = RepeatMode.Reverse
                             ),
-                            label = "BarHeight$index"
+                            label = "EqualizerBar$index"
                         )
 
                         Box(
                             modifier = Modifier
-                                .width(3.5.dp)
-                                .height(defaultHeight * animBarHeight)
+                                .width(3.2.dp)
+                                .height(baseHeight * animMultiplier)
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(barColors[index])
                         )
