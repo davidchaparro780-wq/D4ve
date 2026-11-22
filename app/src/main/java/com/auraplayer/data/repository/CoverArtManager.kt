@@ -24,6 +24,30 @@ class CoverArtManager(private val context: Context) {
         if (!exists()) mkdirs()
     }
 
+    // Fast in-memory caches to avoid blocking the main UI thread with repeated disk and SharedPreferences access
+    private val localCoverCache = java.util.concurrent.ConcurrentHashMap<String, Uri>()
+    private val knownCoverFiles = java.util.Collections.synchronizedSet(HashSet<String>())
+    @Volatile private var isFilesLoaded = false
+
+    private fun ensureKnownFilesLoaded() {
+        if (!isFilesLoaded) {
+            synchronized(knownCoverFiles) {
+                if (!isFilesLoaded) {
+                    try {
+                        coversDir.list()?.let { list ->
+                            for (item in list) {
+                                if (item.endsWith(".jpg", ignoreCase = true)) {
+                                    knownCoverFiles.add(item)
+                                }
+                            }
+                        }
+                    } catch (_: Throwable) {}
+                    isFilesLoaded = true
+                }
+            }
+        }
+    }
+
     /**
      * Returns a local saved cover Uri if available, otherwise null.
      */
@@ -38,16 +62,23 @@ class CoverArtManager(private val context: Context) {
             val namedFile = File(coversDir, "$cleanKey.jpg")
             FileOutputStream(namedFile).use { it.write(coverBytes) }
             val savedPath = namedFile.absolutePath
+            val uri = Uri.fromFile(namedFile)
+
+            ensureKnownFilesLoaded()
+            knownCoverFiles.add("$cleanKey.jpg")
+            localCoverCache[cleanKey] = uri
 
             // Enlazar alias y claves en SharedPreferences apuntando al archivo único para ahorrar almacenamiento
             val rawClean = cleanSearchTerm(title).lowercase().trim().replace(Regex("[^a-z0-9]"), "")
             if (rawClean.isNotBlank()) {
                 prefs.edit().putString("cover_raw_$rawClean", savedPath).apply()
+                knownCoverFiles.add("raw_$rawClean.jpg")
             }
 
             if (fileName.isNotBlank()) {
                 val nameNoExt = fileName.substringBeforeLast(".")
                 prefs.edit().putString("cover_file_${nameNoExt.lowercase().trim()}", savedPath).apply()
+                knownCoverFiles.add("$nameNoExt.jpg")
             }
 
             val searchKey = cleanSearchTerm("$artist $title").lowercase().trim()
@@ -63,10 +94,18 @@ class CoverArtManager(private val context: Context) {
      * Returns a local saved cover Uri if available, otherwise null.
      */
     fun getLocalCoverUri(id: Long, artist: String, title: String, path: String? = null): Uri? {
+        val cacheKey = "${id}_${artist}_${title}_${path ?: ""}"
+        val cached = localCoverCache[cacheKey]
+        if (cached != null) return cached
+
+        ensureKnownFilesLoaded()
+
         if (id > 0) {
-            val fileById = File(coversDir, "$id.jpg")
-            if (fileById.exists() && fileById.length() > 0) {
-                return Uri.fromFile(fileById)
+            val fName = "$id.jpg"
+            if (knownCoverFiles.contains(fName)) {
+                val uri = Uri.fromFile(File(coversDir, fName))
+                localCoverCache[cacheKey] = uri
+                return uri
             }
         }
 
@@ -74,46 +113,64 @@ class CoverArtManager(private val context: Context) {
         if (!path.isNullOrBlank()) {
             val file = File(path)
             val nameNoExt = file.nameWithoutExtension
-            val directFile = File(coversDir, "$nameNoExt.jpg")
-            if (directFile.exists() && directFile.length() > 0) {
-                return Uri.fromFile(directFile)
+            val directName = "$nameNoExt.jpg"
+            if (knownCoverFiles.contains(directName)) {
+                val uri = Uri.fromFile(File(coversDir, directName))
+                localCoverCache[cacheKey] = uri
+                return uri
             }
-            val sanitizedNameFile = File(coversDir, "${sanitize(nameNoExt)}.jpg")
-            if (sanitizedNameFile.exists() && sanitizedNameFile.length() > 0) {
-                return Uri.fromFile(sanitizedNameFile)
+            val sanitizedName = "${sanitize(nameNoExt)}.jpg"
+            if (knownCoverFiles.contains(sanitizedName)) {
+                val uri = Uri.fromFile(File(coversDir, sanitizedName))
+                localCoverCache[cacheKey] = uri
+                return uri
             }
             val savedPath = prefs.getString("cover_file_${nameNoExt.lowercase().trim()}", null)
             if (savedPath != null) {
                 val f = File(savedPath)
-                if (f.exists() && f.length() > 0) return Uri.fromFile(f)
+                if (f.exists() && f.length() > 0) {
+                    val uri = Uri.fromFile(f)
+                    localCoverCache[cacheKey] = uri
+                    return uri
+                }
             }
         }
 
         // 2. Check by exact artist + title
         val cleanKey = sanitize("${artist}_${title}")
-        val fileByName = File(coversDir, "$cleanKey.jpg")
-        if (fileByName.exists() && fileByName.length() > 0) {
-            return Uri.fromFile(fileByName)
+        val fileByName = "$cleanKey.jpg"
+        if (knownCoverFiles.contains(fileByName)) {
+            val uri = Uri.fromFile(File(coversDir, fileByName))
+            localCoverCache[cacheKey] = uri
+            return uri
         }
 
         // 3. Check by title only
         val cleanTitleKey = sanitize(title)
-        val fileByTitle = File(coversDir, "$cleanTitleKey.jpg")
-        if (fileByTitle.exists() && fileByTitle.length() > 0) {
-            return Uri.fromFile(fileByTitle)
+        val fileByTitle = "$cleanTitleKey.jpg"
+        if (knownCoverFiles.contains(fileByTitle)) {
+            val uri = Uri.fromFile(File(coversDir, fileByTitle))
+            localCoverCache[cacheKey] = uri
+            return uri
         }
 
         // 4. Check by raw alphanumeric key
         val rawClean = cleanSearchTerm(title).lowercase().trim().replace(Regex("[^a-z0-9]"), "")
         if (rawClean.isNotBlank()) {
-            val rawFile = File(coversDir, "raw_$rawClean.jpg")
-            if (rawFile.exists() && rawFile.length() > 0) {
-                return Uri.fromFile(rawFile)
+            val rawName = "raw_$rawClean.jpg"
+            if (knownCoverFiles.contains(rawName)) {
+                val uri = Uri.fromFile(File(coversDir, rawName))
+                localCoverCache[cacheKey] = uri
+                return uri
             }
             val regPath = prefs.getString("cover_raw_$rawClean", null)
             if (regPath != null) {
                 val f = File(regPath)
-                if (f.exists() && f.length() > 0) return Uri.fromFile(f)
+                if (f.exists() && f.length() > 0) {
+                    val uri = Uri.fromFile(f)
+                    localCoverCache[cacheKey] = uri
+                    return uri
+                }
             }
         }
 
@@ -122,22 +179,29 @@ class CoverArtManager(private val context: Context) {
         val regTermPath = prefs.getString("cover_term_$searchKey", null)
         if (regTermPath != null) {
             val f = File(regTermPath)
-            if (f.exists() && f.length() > 0) return Uri.fromFile(f)
+            if (f.exists() && f.length() > 0) {
+                val uri = Uri.fromFile(f)
+                localCoverCache[cacheKey] = uri
+                return uri
+            }
         }
 
-        // 6. Fuzzy match: check if any file in covers folder matches artist or title keywords
+        // 6. Fast memory-only fuzzy match over knownCoverFiles set (zero disk listFiles calls!)
         try {
-            val files = coversDir.listFiles { _, name -> name.endsWith(".jpg", ignoreCase = true) }
-            if (files != null) {
-                val cleanWords = cleanSearchTerm(title).lowercase().split(" ").filter { it.length > 3 }
-                for (f in files) {
-                    val fName = f.nameWithoutExtension.lowercase()
-                    if (cleanWords.isNotEmpty() && cleanWords.all { fName.contains(it) }) {
-                        return Uri.fromFile(f)
+            val cleanWords = cleanSearchTerm(title).lowercase().split(" ").filter { it.length > 3 }
+            if (cleanWords.isNotEmpty()) {
+                synchronized(knownCoverFiles) {
+                    for (fName in knownCoverFiles) {
+                        val noExt = fName.substringBeforeLast(".").lowercase()
+                        if (cleanWords.all { noExt.contains(it) }) {
+                            val uri = Uri.fromFile(File(coversDir, fName))
+                            localCoverCache[cacheKey] = uri
+                            return uri
+                        }
                     }
                 }
             }
-        } catch (e: Exception) { AppLog.d(TAG, "No se pudo listar la caché de carátulas para coincidencia difusa", e) }
+        } catch (_: Exception) {}
 
         return null
     }

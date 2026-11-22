@@ -23,7 +23,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -31,7 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,11 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -66,9 +62,15 @@ import com.auraplayer.audio.LunarPhaseManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * DaveSplashIntro: Introducción cinemática 120 FPS ultra-fluida.
+ * Arquitectura de CERO recomposiciones: todos los estados de animación se evalúan
+ * exclusivamente en RenderNode / graphicsLayer y DrawScope de hardware.
+ */
 @Composable
 fun DaveSplashIntro(
     onFinish: () -> Unit,
@@ -77,18 +79,18 @@ fun DaveSplashIntro(
     var isVisible by remember { mutableStateOf(true) }
     val view = LocalView.current
 
-    // Animators for cinematic sequences
+    // Animators for cinematic sequences (evaluated purely in graphicsLayer / DrawScope)
     val vortexProgress = remember { Animatable(0f) }
     val shockwaveProgress = remember { Animatable(0f) }
-    val logoScaleAnim = remember { Animatable(0.25f) }
+    val logoScaleAnim = remember { Animatable(0.35f) }
     val logoAlphaAnim = remember { Animatable(0f) }
-    val logoRotationYAnim = remember { Animatable(70f) }
+    val logoRotationYAnim = remember { Animatable(60f) }
     val textAlphaAnim = remember { Animatable(0f) }
     val shimmerAnim = remember { Animatable(0f) }
 
     val lunarPhase = remember { LunarPhaseManager.getCurrentPhase() }
 
-    // Seeded background stars (aligerado a 24 para máximo rendimiento)
+    // Seeded background stars (24 estrellas ligeras, 0 asignaciones por frame)
     val stars = remember {
         val rng = kotlin.random.Random(1337)
         List(24) {
@@ -123,10 +125,10 @@ fun DaveSplashIntro(
         )
     }
 
-    // Continuous infinite transitions
+    // Continuous infinite transitions (kept as State<Float> to avoid composition phase invalidation)
     val infiniteTransition = rememberInfiniteTransition(label = "IntroInfinite")
 
-    val starTwinkle by infiniteTransition.animateFloat(
+    val starTwinkle = infiniteTransition.animateFloat(
         initialValue = 0.35f,
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
@@ -136,7 +138,7 @@ fun DaveSplashIntro(
         label = "StarTwinkle"
     )
 
-    val outerRingRotation by infiniteTransition.animateFloat(
+    val outerRingRotation = infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
@@ -146,7 +148,7 @@ fun DaveSplashIntro(
         label = "OuterRingRotation"
     )
 
-    val plasmaRotation by infiniteTransition.animateFloat(
+    val plasmaRotation = infiniteTransition.animateFloat(
         initialValue = 360f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
@@ -156,36 +158,46 @@ fun DaveSplashIntro(
         label = "PlasmaRotation"
     )
 
-    val auraBreathingScale by infiniteTransition.animateFloat(
-        initialValue = 0.92f,
-        targetValue = 1.22f,
+    val auraBreathingScale = infiniteTransition.animateFloat(
+        initialValue = 0.94f,
+        targetValue = 1.18f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1300, easing = FastOutSlowInEasing),
+            animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "AuraBreathingScale"
     )
 
-    val auraBreathingAlpha by infiniteTransition.animateFloat(
+    val auraBreathingAlpha = infiniteTransition.animateFloat(
         initialValue = 0.40f,
         targetValue = 0.85f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1300, easing = FastOutSlowInEasing),
+            animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "AuraBreathingAlpha"
     )
 
-    // Master cinematic timeline (Optimizado: fluido, dinámico y sin bloqueos de inicio)
+    val eqPhase = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2 * PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "EqPhase"
+    )
+
+    // Master cinematic timeline (~900ms snappy and responsive)
     LaunchedEffect(Unit) {
-        // Phase 1: Inflow Quantum Vortex (260ms)
-        vortexProgress.animateTo(1f, tween(260, easing = FastOutSlowInEasing))
+        // Phase 1: Inflow Quantum Vortex (200ms)
+        vortexProgress.animateTo(1f, tween(200, easing = FastOutSlowInEasing))
 
         // Phase 2: Supernova Detonation & Haptic Blast
-        AuraHaptic.heavy(view)
+        AuraHaptic.click(view)
 
         launch {
-            shockwaveProgress.animateTo(1f, tween(420, easing = LinearOutSlowInEasing))
+            shockwaveProgress.animateTo(1f, tween(360, easing = LinearOutSlowInEasing))
         }
         launch {
             logoScaleAnim.animateTo(
@@ -197,31 +209,31 @@ fun DaveSplashIntro(
             )
         }
         launch {
-            logoAlphaAnim.animateTo(1f, tween(220))
+            logoAlphaAnim.animateTo(1f, tween(180))
         }
         launch {
-            logoRotationYAnim.animateTo(0f, tween(380, easing = FastOutSlowInEasing))
+            logoRotationYAnim.animateTo(0f, tween(300, easing = FastOutSlowInEasing))
         }
         launch {
-            delay(100)
-            textAlphaAnim.animateTo(1f, tween(320, easing = FastOutSlowInEasing))
+            delay(70)
+            textAlphaAnim.animateTo(1f, tween(240, easing = FastOutSlowInEasing))
         }
         launch {
-            delay(220)
-            shimmerAnim.animateTo(1f, tween(450, easing = FastOutSlowInEasing))
+            delay(150)
+            shimmerAnim.animateTo(1f, tween(340, easing = FastOutSlowInEasing))
         }
 
         // Phase 3: Hold and smooth portal transition
-        delay(650)
+        delay(550)
         isVisible = false
-        delay(200)
+        delay(180)
         onFinish()
     }
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(tween(150)),
-        exit = fadeOut(tween(350)) + scaleOut(targetScale = 1.30f, animationSpec = tween(350, easing = FastOutSlowInEasing)),
+        enter = fadeIn(tween(120)),
+        exit = fadeOut(tween(250)) + scaleOut(targetScale = 1.15f, animationSpec = tween(250, easing = FastOutSlowInEasing)),
         modifier = modifier
     ) {
         Box(
@@ -245,31 +257,30 @@ fun DaveSplashIntro(
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Background Canvas: Twinkling Stardust Field
+            // Unified Background Canvas: Stardust Field + Inflow Vortex + Supernova Shockwave (0 recompositions)
             Canvas(modifier = Modifier.fillMaxSize()) {
+                val twinkle = starTwinkle.value
                 stars.forEachIndexed { idx, (xr, yr, sz) ->
-                    val alpha = if (idx % 2 == 0) starTwinkle else (1.35f - starTwinkle).coerceIn(0.2f, 1f)
+                    val alpha = if (idx % 2 == 0) twinkle else (1.35f - twinkle).coerceIn(0.2f, 1f)
                     drawCircle(
                         color = Color.White.copy(alpha = alpha * 0.75f),
                         radius = sz.dp.toPx(),
                         center = Offset(size.width * xr, size.height * yr)
                     )
                 }
-            }
 
-            // Phase 1: Inflow Quantum Sparks Vortex
-            if (vortexProgress.value < 0.98f) {
-                val invProg = 1f - vortexProgress.value
-                Canvas(modifier = Modifier.fillMaxSize()) {
+                val vortexProg = vortexProgress.value
+                if (vortexProg < 0.98f) {
+                    val invProg = 1f - vortexProg
                     val center = Offset(size.width / 2f, size.height / 2f)
                     val maxDist = size.minDimension * 0.65f
                     for (i in 0 until 12) {
                         val baseAngle = (i * (360f / 12f) * (PI / 180f)).toFloat()
-                        val angle = baseAngle + (vortexProgress.value * 3.8f)
+                        val angle = baseAngle + (vortexProg * 3.8f)
                         val currentDist = maxDist * invProg * (0.6f + (i % 5) * 0.1f)
                         val px = center.x + currentDist * cos(angle)
                         val py = center.y + currentDist * sin(angle)
-                        val particleAlpha = (vortexProgress.value * 1.5f).coerceIn(0f, 1f) * (1f - invProg * 0.3f)
+                        val particleAlpha = (vortexProg * 1.5f).coerceIn(0f, 1f) * (1f - invProg * 0.3f)
                         val pColor = if (i % 2 == 0) Color(0xFF00E5FF) else Color(0xFFE040FB)
 
                         drawCircle(
@@ -279,39 +290,36 @@ fun DaveSplashIntro(
                         )
                     }
                 }
-            }
 
-            // Phase 2: Expanding Supernova Shockwave Waves
-            if (shockwaveProgress.value > 0.01f && shockwaveProgress.value < 0.99f) {
-                val prog = shockwaveProgress.value
-                Canvas(modifier = Modifier.fillMaxSize()) {
+                val shockProg = shockwaveProgress.value
+                if (shockProg in 0.01f..0.99f) {
                     val center = Offset(size.width / 2f, size.height / 2f)
                     val maxR = size.minDimension * 0.95f
-                    val r1 = maxR * prog
-                    val alpha1 = (1f - prog).coerceIn(0f, 1f)
+                    val r1 = maxR * shockProg
+                    val alpha1 = (1f - shockProg).coerceIn(0f, 1f)
 
                     // Wave 1: Celestial Cyan
                     drawCircle(
                         color = Color(0xFF00E5FF).copy(alpha = alpha1 * 0.65f),
                         radius = r1,
                         center = center,
-                        style = Stroke(width = (6.dp.toPx() * (1f - prog)).coerceAtLeast(1.5f))
+                        style = Stroke(width = (5.dp.toPx() * (1f - shockProg)).coerceAtLeast(1.5f))
                     )
                     // Wave 2: Radiant Amethyst
-                    if (prog > 0.15f) {
-                        val prog2 = (prog - 0.15f) / 0.85f
+                    if (shockProg > 0.15f) {
+                        val prog2 = (shockProg - 0.15f) / 0.85f
                         val r2 = maxR * prog2
                         val alpha2 = (1f - prog2).coerceIn(0f, 1f)
                         drawCircle(
                             color = Color(0xFFE040FB).copy(alpha = alpha2 * 0.5f),
                             radius = r2,
                             center = center,
-                            style = Stroke(width = (4.dp.toPx() * (1f - prog2)).coerceAtLeast(1.2f))
+                            style = Stroke(width = (3.5.dp.toPx() * (1f - prog2)).coerceAtLeast(1.2f))
                         )
                     }
                     // Central luminous burst flash
-                    if (prog < 0.5f) {
-                        val flashAlpha = (1f - (prog * 2f)).coerceIn(0f, 1f)
+                    if (shockProg < 0.5f) {
+                        val flashAlpha = (1f - (shockProg * 2f)).coerceIn(0f, 1f)
                         drawCircle(
                             brush = Brush.radialGradient(
                                 colors = listOf(
@@ -329,24 +337,24 @@ fun DaveSplashIntro(
                 }
             }
 
-            // Ambient Radiant Breathing Nebula Glow behind Logo (GPU zero-recomposition)
+            // Ambient Radiant Breathing Nebula Glow behind Logo (RenderNode GPU-accelerated)
             Box(
                 modifier = Modifier
                     .size(260.dp)
                     .graphicsLayer {
-                        scaleX = auraBreathingScale
-                        scaleY = auraBreathingScale
-                        alpha = auraBreathingAlpha
+                        scaleX = auraBreathingScale.value
+                        scaleY = auraBreathingScale.value
+                        alpha = auraBreathingAlpha.value
                     }
                     .clip(CircleShape)
                     .background(auraBreathingBrush)
             )
 
-            // Outer Sacred Astrolabe & Runic Ring (250dp)
+            // Outer Sacred Astrolabe & Runic Ring (250dp, Hardware Layer Rotation)
             Box(
                 modifier = Modifier
                     .size(250.dp)
-                    .graphicsLayer { rotationZ = outerRingRotation }
+                    .graphicsLayer { rotationZ = outerRingRotation.value }
             ) {
                 // Astrolabe geometry canvas
                 Canvas(modifier = Modifier.fillMaxSize()) {
@@ -390,8 +398,8 @@ fun DaveSplashIntro(
                     }
                 }
 
-                // 8 Arcane Nordic Runes around circumference
-                val runes = listOf("ᛟ", "ᚱ", "ᚦ", "ᛉ", "ᚲ", "ᛊ", "ᛗ", "ᛚ")
+                // 8 Arcane Nordic Runes around circumference (Static cached layout)
+                val runes = remember { listOf("ᛟ", "ᚱ", "ᚦ", "ᛉ", "ᚲ", "ᛊ", "ᛗ", "ᛚ") }
                 runes.forEachIndexed { i, rune ->
                     val angleDeg = i * 45f
                     Box(
@@ -416,18 +424,19 @@ fun DaveSplashIntro(
                 modifier = Modifier
                     .size(175.dp)
                     .graphicsLayer {
-                        scaleX = auraBreathingScale
-                        scaleY = auraBreathingScale
-                        rotationZ = plasmaRotation
+                        scaleX = auraBreathingScale.value
+                        scaleY = auraBreathingScale.value
+                        rotationZ = plasmaRotation.value
                     }
             ) {
                 val center = Offset(size.width / 2f, size.height / 2f)
                 val baseR = size.minDimension * 0.44f
+                val rot = plasmaRotation.value
                 cachedPlasmaPath.reset()
                 val numPoints = 14
                 for (i in 0 until numPoints) {
                     val angle = (i * (360f / numPoints) * (PI / 180f)).toFloat()
-                    val waveOffset = sin(i * 1.8f + plasmaRotation * 0.05f) * 4.5.dp.toPx()
+                    val waveOffset = sin(i * 1.8f + rot * 0.05f) * 4.5.dp.toPx()
                     val r = baseR + waveOffset
                     val px = center.x + r * cos(angle)
                     val py = center.y + r * sin(angle)
@@ -442,7 +451,7 @@ fun DaveSplashIntro(
                 )
             }
 
-            // Central Branding Column with 3D Flip & Zoom Spring (GPU zero-recomposition)
+            // Central Branding Column with 3D Flip & Zoom Spring (0 recompositions)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -489,10 +498,11 @@ fun DaveSplashIntro(
                                 .clip(CircleShape)
                         )
 
-                        // Shimmer Light Sweep across Logo
-                        if (shimmerAnim.value > 0.01f && shimmerAnim.value < 0.99f) {
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                val shimmerX = shimmerAnim.value * 220.dp.toPx() - 60.dp.toPx()
+                        // Shimmer Light Sweep across Logo (Hardware DrawScope, 0 recomposition)
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            val shim = shimmerAnim.value
+                            if (shim in 0.01f..0.99f) {
+                                val shimmerX = shim * 220.dp.toPx() - 60.dp.toPx()
                                 drawLine(
                                     brush = Brush.horizontalGradient(
                                         colors = listOf(
@@ -512,7 +522,7 @@ fun DaveSplashIntro(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Brand Name with High-End Chromatic Gradient
                 Box(
@@ -561,49 +571,39 @@ fun DaveSplashIntro(
                     modifier = Modifier.graphicsLayer { alpha = textAlphaAnim.value }
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                // 9-Band Harmonic Dancing Spectrum Equalizer (GPU zero-layout Canvas a 120 FPS)
-                val m0 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(320, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq0")
-                val m1 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq1")
-                val m2 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(480, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq2")
-                val m3 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(560, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq3")
-                val m4 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(640, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq4")
-                val m5 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(560, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq5")
-                val m6 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(480, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq6")
-                val m7 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq7")
-                val m8 by infiniteTransition.animateFloat(0.25f, 1.0f, infiniteRepeatable(tween(320, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "eq8")
-
+                // 9-Band Harmonic Dancing Spectrum Equalizer (GPU zero-layout Canvas a 120 FPS, 0 recomposiciones)
                 Canvas(
                     modifier = Modifier
-                        .size(width = 64.dp, height = 44.dp)
+                        .size(width = 68.dp, height = 44.dp)
                         .graphicsLayer { alpha = textAlphaAnim.value }
                 ) {
+                    val phase = eqPhase.value
                     val count = 9
-                    val barW = 3.2.dp.toPx()
-                    val totalW = size.width
-                    val gap = (totalW - (count * barW)) / (count - 1).coerceAtLeast(1)
+                    val barW = 3.5.dp.toPx()
+                    val gap = (size.width - (count * barW)) / (count - 1).coerceAtLeast(1)
                     val baseHeights = floatArrayOf(
-                        10.dp.toPx(), 18.dp.toPx(), 26.dp.toPx(), 36.dp.toPx(), 44.dp.toPx(),
-                        36.dp.toPx(), 26.dp.toPx(), 18.dp.toPx(), 10.dp.toPx()
+                        12.dp.toPx(), 20.dp.toPx(), 28.dp.toPx(), 38.dp.toPx(), 44.dp.toPx(),
+                        38.dp.toPx(), 28.dp.toPx(), 20.dp.toPx(), 12.dp.toPx()
                     )
-                    val multipliers = floatArrayOf(m0, m1, m2, m3, m4, m5, m6, m7, m8)
                     val barColors = arrayOf(
                         Color(0xFF00E5FF), Color(0xFF38BDF8), Color(0xFF818CF8),
                         Color(0xFFA855F7), Color(0xFFE040FB), Color(0xFFA855F7),
                         Color(0xFF818CF8), Color(0xFF38BDF8), Color(0xFF00E5FF)
                     )
-                    val cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
+                    val corner = CornerRadius(2.dp.toPx(), 2.dp.toPx())
 
                     for (i in 0 until count) {
-                        val barH = (baseHeights[i] * multipliers[i]).coerceIn(4.dp.toPx(), size.height)
+                        val harmonic = abs(sin(phase * 1.6f + i * 0.72f)).toFloat()
+                        val barH = (baseHeights[i] * (0.30f + 0.70f * harmonic)).coerceIn(5.dp.toPx(), size.height)
                         val left = i * (barW + gap)
                         val top = (size.height - barH) / 2f
                         drawRoundRect(
                             color = barColors[i],
                             topLeft = Offset(left, top),
                             size = Size(barW, barH),
-                            cornerRadius = cornerRadius
+                            cornerRadius = corner
                         )
                     }
                 }

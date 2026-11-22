@@ -1,7 +1,7 @@
 {
-    "versionCode": 213,
-    "versionName": "5.0.13",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.13/app-release.apk",
-    "changelog": "v5.0.13 Master Polish Visual & Atmósfera Arcana Inmersiva:\n- Corona de Plasma Líquido 360° (NeonPlasmaCrown) reactiva a las 32 bandas del analizador FFT en tiempo real rodeando la portada central.\n- Anillos de Ondas Acústicas (AuraRippleRings) concéntricos emanando desde detrás del arte al reproducir música.\n- Fondo esotérico con gradiente radial de vacío obsidiano y partículas AuraTouchSparks en amatista y cyan al tocar la pantalla.\n- Nueva insignia de Resonancia Arcana Solfeggio en el carrusel de especificaciones de audio.\n- Efecto de onda de choque supernova al cambiar de pista en el Monolito Arcano.\n- Glifos nórdicos sutiles en los créditos de artista y álbum.\n- MiniPlayer con ecualizador cian y controles de reproducción en gradiente místico.",
-    "fileSizeMb": 6.1
+    "versionCode": 220,
+    "versionName": "5.0.20",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.20/app-release.apk",
+    "changelog": "v5.0.20 Eliminación radical de lag al abrir la app (Instant Startup & 120 FPS Intro):\n- Cero recomposiciones en DaveSplashIntro: todas las animaciones (estrellas, vórtice cuántico, onda de choque, ecualizador de 9 bandas y destellos) corren exclusivamente en RenderNode y DrawScope por hardware.\n- Caché en memoria para CoverArtManager: eliminadas lecturas de disco repetitivas y escaneo de carpetas en el hilo principal.\n- Carga de biblioteca 100% asíncrona en Dispatchers.IO: la interfaz de usuario nunca se congela durante el arranque.\n- Sincronización proactiva de carátulas diferida para proteger la fluidez de inicio.",
+    "fileSizeMb": 6.38
 }

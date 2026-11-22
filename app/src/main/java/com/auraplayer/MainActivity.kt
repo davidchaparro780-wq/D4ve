@@ -730,9 +730,12 @@ fun AuraApp(
                 artworkUri = customCover
             )
         } else {
-            val persistentCover = mediaRepository.coverArtManager.getLocalCoverUri(s.id, s.artist, s.title, s.path)
-            if (persistentCover != null) {
-                s.copy(artworkUri = persistentCover)
+            // Solo buscar carátula persistente si la pista NO tiene ya carátula válida de MediaStore
+            if (s.artworkUri == null) {
+                val persistentCover = mediaRepository.coverArtManager.getLocalCoverUri(s.id, s.artist, s.title, s.path)
+                if (persistentCover != null) {
+                    s.copy(artworkUri = persistentCover)
+                } else s
             } else s
         }
     }
@@ -781,7 +784,7 @@ fun AuraApp(
         }
 
         downloadEngine.onDownloadCompleted = {
-            scope.launch {
+            scope.launch(Dispatchers.IO) {
                 mediaRepository.rescanDownloadDirectories()
                 val freshSongs = mediaRepository.loadAudioFiles()
                 val reloadedSongs = freshSongs.map(applyTagOverride)
@@ -790,10 +793,14 @@ fun AuraApp(
                 }
             }
         }
-        val info = updateManager.checkForUpdate()
-        if (info != null) {
-            updateInfo = info
-            showUpdateDialog = true
+        scope.launch(Dispatchers.IO) {
+            val info = updateManager.checkForUpdate()
+            if (info != null) {
+                withContext(Dispatchers.Main) {
+                    updateInfo = info
+                    showUpdateDialog = true
+                }
+            }
         }
     }
 
@@ -1378,18 +1385,24 @@ fun AuraApp(
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
             isLoading = true
-            val rawSongs = mediaRepository.loadAudioFiles()
-            songs = rawSongs.map(applyTagOverride)
-            videos = mediaRepository.loadVideoFiles()
+            val (mappedSongs, mappedVideos) = withContext(Dispatchers.IO) {
+                val rawSongs = mediaRepository.loadAudioFiles()
+                val processedSongs = rawSongs.map(applyTagOverride)
+                val rawVideos = mediaRepository.loadVideoFiles()
+                processedSongs to rawVideos
+            }
+            songs = mappedSongs
+            videos = mappedVideos
             isLoading = false
 
-            // Sincronización proactiva y extracción de carátulas en segundo plano 100% segura
+            // Sincronización proactiva y extracción de carátulas en segundo plano (diferida para proteger fluidez de arranque)
             scope.launch(Dispatchers.IO) {
                 try {
-                    val missing = songs.filter { !mediaRepository.coverArtManager.hasLocalCover(it.id, it.artist, it.title, it.path) }
+                    delay(3500)
+                    val missing = songs.filter { it.artworkUri == null }
                     if (missing.isNotEmpty()) {
                         var anySaved = false
-                        missing.take(15).forEach { song ->
+                        missing.take(10).forEach { song ->
                             try {
                                 val saved = mediaRepository.coverArtManager.autoFetchAndSaveCover(song)
                                 if (saved != null) anySaved = true
@@ -1414,11 +1427,14 @@ fun AuraApp(
     DisposableEffect(hasPermission) {
         MainActivity.onResumeCallback = {
             if (hasPermission) {
-                scope.launch {
+                scope.launch(Dispatchers.IO) {
                     mediaRepository.rescanDownloadDirectories()
                     val freshSongs = mediaRepository.loadAudioFiles()
                     if (freshSongs.size != songs.size || (freshSongs.isNotEmpty() && songs.isNotEmpty() && freshSongs.first().id != songs.first().id)) {
-                        songs = freshSongs.map(applyTagOverride)
+                        val mapped = freshSongs.map(applyTagOverride)
+                        withContext(Dispatchers.Main) {
+                            songs = mapped
+                        }
                     }
                 }
             }
@@ -1431,12 +1447,15 @@ fun AuraApp(
     val handleRefreshLibrary: () -> Unit = {
         scope.launch {
             isLoading = true
-            mediaRepository.rescanDownloadDirectories()
-            kotlinx.coroutines.delay(350)
-            val freshSongs = mediaRepository.loadAudioFiles()
-            songs = freshSongs.map(applyTagOverride)
+            val (freshMapped, count) = withContext(Dispatchers.IO) {
+                mediaRepository.rescanDownloadDirectories()
+                kotlinx.coroutines.delay(200)
+                val fresh = mediaRepository.loadAudioFiles()
+                fresh.map(applyTagOverride) to fresh.size
+            }
+            songs = freshMapped
             isLoading = false
-            Toast.makeText(context, "Biblioteca actualizada: ${freshSongs.size} canciones", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Biblioteca actualizada: $count canciones", Toast.LENGTH_SHORT).show()
         }
     }
 
