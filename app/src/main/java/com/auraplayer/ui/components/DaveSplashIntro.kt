@@ -474,8 +474,8 @@ fun DaveSplashIntro(
 
                         // Shimmer Light Sweep across Logo
                         if (shimmerAnim.value > 0.01f && shimmerAnim.value < 0.99f) {
-                            val shimmerX = shimmerAnim.value * 220.dp.toPx() - 60.dp.toPx()
                             Canvas(modifier = Modifier.fillMaxSize()) {
+                                val shimmerX = shimmerAnim.value * 220.dp.toPx() - 60.dp.toPx()
                                 drawLine(
                                     brush = Brush.horizontalGradient(
                                         colors = listOf(
