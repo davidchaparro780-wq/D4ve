@@ -405,7 +405,7 @@ fun MiniPlayer(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(2.5.dp)
+                                .height(3.dp)
                                 .background(Color.White.copy(alpha = 0.08f))
                                 .semantics {
                                     contentDescription = "Progreso de reproducción"
@@ -433,6 +433,22 @@ fun MiniPlayer(
                                         )
                                     )
                             )
+                            // Beacon Spark Glow at the playback tip
+                            if (progress > 0.01f && progress < 0.99f && isPlaying) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(progress.coerceIn(0f, 1f))
+                                        .fillMaxHeight(),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(5.dp)
+                                            .clip(CircleShape)
+                                            .background(if (isMysterious) Color(0xFF00E5FF) else Color.White)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

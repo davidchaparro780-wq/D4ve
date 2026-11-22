@@ -108,6 +108,9 @@ fun DynamicWaveformSeekbar(
         }
     }
 
+    val passedBarColors = remember(activeColor, secondaryColor) { listOf(activeColor, secondaryColor) }
+    val futureBarColor = remember { Color(0xFF242E42) }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -181,6 +184,8 @@ fun DynamicWaveformSeekbar(
             val cornerRadius = CornerRadius(barWidth / 2f, barWidth / 2f)
 
             val currentPlayX = progress * w
+            val barBrush = Brush.verticalGradient(passedBarColors, startY = 0f, endY = h)
+            val liveBass = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0f
 
             for (i in 0 until barCount) {
                 val barCenterX = i * totalBarSpace + (totalBarSpace / 2f)
@@ -190,7 +195,6 @@ fun DynamicWaveformSeekbar(
 
                 // Animación sutil de respiración armónica y reacción al bajo si está reproduciendo
                 if (isPlaying) {
-                    val liveBass = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true)
                     val proximityToPlayhead = (1f - abs(barCenterX - currentPlayX) / (w * 0.25f)).coerceIn(0f, 1f)
                     val flutter = (0.10f * sin(shimmerPhase + i * 0.35f)) + (liveBass * 0.22f * proximityToPlayhead)
                     normalizedHeight = (normalizedHeight + flutter).coerceIn(0.18f, 1.25f)
@@ -210,17 +214,9 @@ fun DynamicWaveformSeekbar(
                 val barTop = (h - barH) / 2f
 
                 if (isPassed) {
-                    // Barras ya reproducidas: Gradiente Neón brillante
-                    val barColor = Brush.verticalGradient(
-                        colors = listOf(
-                            activeColor,
-                            secondaryColor
-                        ),
-                        startY = barTop,
-                        endY = barTop + barH
-                    )
+                    // Barras ya reproducidas: Gradiente Neón brillante ultra-optimizado
                     drawRoundRect(
-                        brush = barColor,
+                        brush = barBrush,
                         topLeft = Offset(barCenterX - barWidth / 2f, barTop),
                         size = Size(barWidth, barH),
                         cornerRadius = cornerRadius
@@ -234,9 +230,8 @@ fun DynamicWaveformSeekbar(
                     )
                 } else {
                     // Barras futuras por reproducir
-                    val futureColor = Color(0xFF242E42)
                     drawRoundRect(
-                        color = futureColor,
+                        color = futureBarColor,
                         topLeft = Offset(barCenterX - barWidth / 2f, barTop),
                         size = Size(barWidth, barH),
                         cornerRadius = cornerRadius
@@ -244,25 +239,26 @@ fun DynamicWaveformSeekbar(
                 }
             }
 
-            // Cursor cabezal de reproducción (Glow Scrub Indicator)
+            // Cursor cabezal de reproducción (Glow Scrub Indicator) reactivo al ritmo
             val headX = currentPlayX.coerceIn(0f, w)
             val headCenterY = h / 2f
+            val haloRadius = (16.dp.toPx() * (1f + liveBass * 0.30f)).coerceAtMost(22.dp.toPx())
 
             // Sombra y halo de brillo
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(activeColor.copy(alpha = 0.85f), Color.Transparent),
                     center = Offset(headX, headCenterY),
-                    radius = 16.dp.toPx()
+                    radius = haloRadius
                 ),
-                radius = 16.dp.toPx(),
+                radius = haloRadius,
                 center = Offset(headX, headCenterY)
             )
 
             // Núcleo blanco nítido del cabezal
             drawCircle(
                 color = Color.White,
-                radius = if (isDragging) 6.dp.toPx() else 4.5.dp.toPx(),
+                radius = if (isDragging) 6.dp.toPx() else (4.5.dp.toPx() + liveBass * 1.5.dp.toPx()),
                 center = Offset(headX, headCenterY)
             )
         }
