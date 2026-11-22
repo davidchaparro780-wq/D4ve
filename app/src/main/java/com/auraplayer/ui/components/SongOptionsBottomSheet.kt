@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -75,7 +76,8 @@ fun SongOptionsBottomSheet(
     onShareSong: () -> Unit,
     onShareQr: () -> Unit,
     onSetAsRingtone: () -> Unit,
-    onDeleteSong: () -> Unit
+    onDeleteSong: () -> Unit,
+    onCleanTitle: (() -> Unit)? = null
 ) {
     val view = LocalView.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -263,6 +265,20 @@ fun SongOptionsBottomSheet(
                         .background(Color(0xFF131B2E).copy(alpha = 0.7f))
                         .border(BorderStroke(1.dp, Color(0xFF1E293B)), RoundedCornerShape(16.dp))
                 ) {
+                    GroupedOptionItem(
+                        icon = Icons.Default.AutoAwesome,
+                        iconTint = Color(0xFF38BDF8),
+                        title = "Limpiar Título (1-Toque)",
+                        subtitle = "Elimina 'Official Video', 'Letra' y sitios de YouTube/Snaptube",
+                        onClick = {
+                            AuraHaptic.heavy(view)
+                            onDismiss()
+                            onCleanTitle?.invoke()
+                        }
+                    )
+
+                    OptionDivider()
+
                     GroupedOptionItem(
                         icon = Icons.Default.Edit,
                         iconTint = Color(0xFFF59E0B),

@@ -241,6 +241,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         handleIncomingIntent(intent)
 
+        try {
+            val screenFilter = android.content.IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+            }
+            registerReceiver(screenStateReceiver, screenFilter)
+        } catch (e: Exception) {
+            AppLog.w(TAG, "No se pudo registrar screenStateReceiver", e)
+        }
+
         // Maximize display refresh rate (90Hz / 120Hz) for silky smooth 90 FPS rendering
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
@@ -286,9 +296,37 @@ class MainActivity : ComponentActivity() {
         handleIncomingIntent(intent)
     }
 
+    private val screenStateReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> com.auraplayer.audio.RealtimeVisualizerManager.instance.setSuspended(true)
+                Intent.ACTION_SCREEN_ON -> com.auraplayer.audio.RealtimeVisualizerManager.instance.setSuspended(false)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        com.auraplayer.audio.RealtimeVisualizerManager.instance.setSuspended(false)
+    }
+
     override fun onResume() {
         super.onResume()
         onResumeCallback?.invoke()
+        com.auraplayer.audio.RealtimeVisualizerManager.instance.setSuspended(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Battery Saver: suspende el muestreo FFT en segundo plano
+        com.auraplayer.audio.RealtimeVisualizerManager.instance.setSuspended(true)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            unregisterReceiver(screenStateReceiver)
+        } catch (_: Exception) {}
     }
 
     var isPipMode by mutableStateOf(false)

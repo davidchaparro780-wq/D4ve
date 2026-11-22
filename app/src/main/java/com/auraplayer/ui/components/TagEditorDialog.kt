@@ -375,6 +375,25 @@ fun TagEditorDialog(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Título de la canción") },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                val cleaned = com.auraplayer.util.MediaTitleCleaner.clean(title, artist)
+                                title = cleaned.title
+                                if (cleaned.artist != null) {
+                                    artist = cleaned.artist
+                                }
+                                android.widget.Toast.makeText(context, "✨ Título limpiado con 1 toque", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "Limpiar título con 1 toque",
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),

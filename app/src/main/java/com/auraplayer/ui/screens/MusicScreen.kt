@@ -1212,7 +1212,10 @@ fun MusicScreen(
                                 LazyColumn(
                                     state = songsListState,
                                     modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(bottom = 140.dp)
+                                    contentPadding = PaddingValues(
+                                        bottom = 140.dp,
+                                        end = if (searchQuery.isBlank() && filteredSongs.size > 10) 22.dp else 0.dp
+                                    )
                                 ) {
                                     item {
                                         if (isSelectionMode) {
@@ -1550,7 +1553,33 @@ fun MusicScreen(
                                                     )
                                                 }
 
-                                                // 5. Dismiss selection
+                                                // 5. Clean Titles (1-Touch)
+                                                IconButton(
+                                                    onClick = {
+                                                        AuraHaptic.heavy(view)
+                                                        var count = 0
+                                                        selectedSongs.forEach { s ->
+                                                            val cleaned = com.auraplayer.util.MediaTitleCleaner.clean(s.title, s.artist)
+                                                            if (cleaned.wasCleaned) {
+                                                                onSaveTags(s, cleaned.title, cleaned.artist ?: s.artist, s.album, null)
+                                                                count++
+                                                            }
+                                                        }
+                                                        Toast.makeText(context, "✨ $count títulos limpiados con 1 toque", Toast.LENGTH_SHORT).show()
+                                                        isSelectionMode = false
+                                                        selectedSongIds = emptySet()
+                                                    },
+                                                    modifier = Modifier.size(36.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.AutoAwesome,
+                                                        contentDescription = "Limpiar títulos 1-toque",
+                                                        tint = Color(0xFF38BDF8),
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+
+                                                // 6. Dismiss selection
                                                 IconButton(
                                                     onClick = {
                                                         AuraHaptic.click(view)
@@ -1571,26 +1600,36 @@ fun MusicScreen(
                                     }
                                 }
 
-                                if (searchQuery.isBlank() && selectedSortMode == 1 && filteredSongs.size > 10) {
+                                if (searchQuery.isBlank() && filteredSongs.size > 10) {
                                     AlphabetFastScroller(
                                         onLetterSelected = { char ->
-                                            val targetIdx = filteredSongs.indexOfFirst {
+                                            if (selectedSortMode != 1 && selectedSortMode != 2) {
+                                                selectedSortMode = 1
+                                            }
+                                            val currentList = if (selectedSortMode == 2) {
+                                                filteredSongs
+                                            } else {
+                                                filteredSongs.sortedBy { it.title.lowercase() }
+                                            }
+                                            val targetIdx = currentList.indexOfFirst {
+                                                val checkString = if (selectedSortMode == 2) it.artist else it.title
                                                 if (char == '#') {
-                                                    val firstChar = it.title.firstOrNull()
+                                                    val firstChar = checkString.firstOrNull()
                                                     firstChar == null || !firstChar.isLetter()
                                                 } else {
-                                                    it.title.startsWith(char, ignoreCase = true)
+                                                    checkString.startsWith(char, ignoreCase = true)
                                                 }
                                             }
                                             if (targetIdx >= 0) {
                                                 scope.launch {
-                                                    songsListState.scrollToItem(targetIdx + 1)
+                                                    val headerOffset = if (isSelectionMode) 2 else 1
+                                                    songsListState.scrollToItem(targetIdx + headerOffset)
                                                 }
                                             }
                                         },
                                         modifier = Modifier
                                             .align(Alignment.CenterEnd)
-                                            .padding(end = 4.dp)
+                                            .padding(end = 2.dp)
                                     )
                                 }
                             }
@@ -2576,7 +2615,12 @@ fun MusicScreen(
             },
             onShareQr = { songForQrShare = song },
             onSetAsRingtone = { setAsRingtone(context, song) },
-            onDeleteSong = { songToDelete = song }
+            onDeleteSong = { songToDelete = song },
+            onCleanTitle = {
+                val cleaned = com.auraplayer.util.MediaTitleCleaner.clean(song.title, song.artist)
+                onSaveTags(song, cleaned.title, cleaned.artist ?: song.artist, song.album, null)
+                Toast.makeText(context, "✨ Título limpiado: '${cleaned.title}'", Toast.LENGTH_SHORT).show()
+            }
         )
     }
 

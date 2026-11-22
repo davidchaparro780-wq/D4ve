@@ -1,7 +1,7 @@
 {
-    "versionCode": 222,
-    "versionName": "5.0.22",
-    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.22/app-release.apk",
-    "changelog": "v5.0.22 Exclusión Inteligente de Grabaciones de Llamadas Telefónicas:\n- Detección y filtrado automático de audios de llamadas entrantes y salientes en MediaRepository.\n- Filtro Folder Shield para carpetas de grabación de llamadas (CallRecordings, Call_Recordings, PhoneRecord, VoiceCall, CubeCallRecorder, ACR y Llamadas).\n- Nuevo interruptor en el diálogo Folder Shield para activar/desactivar la exclusión de llamadas.\n- Biblioteca musical 100% limpia para disfrutar solo de música real.",
+    "versionCode": 223,
+    "versionName": "5.0.23",
+    "downloadUrl": "https://github.com/davidchaparro780-wq/D4ve/releases/download/v5.0.23/app-release.apk",
+    "changelog": "v5.0.23 Experiencia Premium Integral & Ahorro de Batería:\n- Fast Scroller A-Z táctil y holográfico en la biblioteca de canciones con respuesta háptica y navegación alfabética fluida.\n- Limpiador de Títulos YouTube/Snaptube con 1-Toque (individual y masivo en selección múltiple) que remueve 'Official Video', calidad, extensiones y sitios de descarga.\n- AutoEQ Studio 🎧 en Ecualizador: Nuevos presets acústicos para audífonos populares (AirPods, Sony WH-1000XM, Galaxy Buds, Beats, Sennheiser, Moondrop, KZ IEM, Audio-Technica).\n- Smart Battery Saver: Suspensión automática del motor nativo FFT y visualizadores en segundo plano o con la pantalla apagada para máxima autonomía.\n- Waveform Seekbar interactivo con halo neón y tooltip de precisión temporal.",
     "fileSizeMb": 6.38
 }

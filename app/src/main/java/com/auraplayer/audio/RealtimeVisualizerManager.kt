@@ -28,6 +28,22 @@ class RealtimeVisualizerManager private constructor() {
     private var visualizer: Visualizer? = null
     private var currentSessionId: Int = -1
 
+    @Volatile
+    private var isSuspended: Boolean = false
+
+    @Synchronized
+    fun setSuspended(suspended: Boolean) {
+        if (isSuspended == suspended) return
+        isSuspended = suspended
+        try {
+            visualizer?.enabled = !suspended
+        } catch (t: Throwable) {
+            AppLog.w(TAG, "Error alternando estado del visualizador: ${t.message}")
+        }
+    }
+
+    fun isSuspended(): Boolean = isSuspended
+
     // 32 frequency bands (0.0f .. 1.0f) representing Sub-bass, Bass, Mids, Highs
     private val bandEnergies = FloatArray(NUM_BANDS) { 0.05f }
     // 64 raw waveform points (-1.0f .. 1.0f)
@@ -103,7 +119,7 @@ class RealtimeVisualizerManager private constructor() {
                 )
             }
             createdVis = vis
-            vis.enabled = true
+            vis.enabled = !isSuspended
             visualizer = vis
         } catch (e: Throwable) {
             AppLog.w(TAG, "No se pudo iniciar el visualizador nativo para sesión $audioSessionId: ${e.message}")
@@ -118,6 +134,7 @@ class RealtimeVisualizerManager private constructor() {
     }
 
     private fun processWaveform(bytes: ByteArray) {
+        if (isSuspended) return
         lastDataTime = SystemClock.uptimeMillis()
         val step = (bytes.size / WAVEFORM_POINTS).coerceAtLeast(1)
         for (i in 0 until WAVEFORM_POINTS) {
@@ -130,6 +147,7 @@ class RealtimeVisualizerManager private constructor() {
     }
 
     private fun processFft(bytes: ByteArray) {
+        if (isSuspended) return
         lastDataTime = SystemClock.uptimeMillis()
         val n = bytes.size
         val binCount = (n / 2).coerceIn(1, reusableMagnitudes.size)

@@ -83,7 +83,8 @@ fun EqualizerScreen(
     val presets = listOf(
         "Aura Flat", "Cyber Bass", "Vocal Glow", "Neon Pop",
         "Rock Velvet", "Lo-Fi Lounge", "Electronic", "Audiófilo Hi-Fi",
-        "AirPods Pro", "Sony 1000XM", "Galaxy Buds", "JBL Bass Tune", "IEM Monitor KZ"
+        "AirPods Pro", "Sony 1000XM", "Galaxy Buds", "JBL Bass Tune", "IEM Monitor KZ",
+        "Beats Studio", "Sennheiser HD", "Altavoz BT Party", "Moondrop Harman", "Audio-Technica M50x"
     )
 
     val deviceProfiles = listOf(
