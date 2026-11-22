@@ -27,9 +27,9 @@ import kotlin.math.sin
  */
 @Composable
 fun StellarConstellationBanner(
-    bassEnergy: Float,
     accentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bassEnergy: Float = 0.08f
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "constellation")
 

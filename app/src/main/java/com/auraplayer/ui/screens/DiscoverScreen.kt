@@ -422,11 +422,9 @@ fun DiscoverScreen(
                 }
             }
 
-            // Nebulosa de constelación arcano reactiva al audio (Suite Misteriosa)
+            // Nebulosa de constelación arcano (Suite Misteriosa)
             if (isMysterious) {
-                val liveBass by com.auraplayer.audio.RealtimeVisualizerManager.instance.bassEnergyState.collectAsState()
                 com.auraplayer.ui.components.StellarConstellationBanner(
-                    bassEnergy = if (isPlaying) liveBass else 0.05f,
                     accentColor = MaterialTheme.colorScheme.primary
                 )
             }

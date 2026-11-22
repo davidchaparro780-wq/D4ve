@@ -109,6 +109,7 @@ fun DynamicWaveformSeekbar(
     }
 
     val passedBarColors = remember(activeColor, secondaryColor) { listOf(activeColor, secondaryColor) }
+    val passedBarBrush = remember(passedBarColors) { Brush.verticalGradient(passedBarColors) }
     val futureBarColor = remember { Color(0xFF242E42) }
 
     Box(
@@ -184,7 +185,7 @@ fun DynamicWaveformSeekbar(
             val cornerRadius = CornerRadius(barWidth / 2f, barWidth / 2f)
 
             val currentPlayX = progress * w
-            val barBrush = Brush.verticalGradient(passedBarColors, startY = 0f, endY = h)
+            val barBrush = passedBarBrush
             val liveBass = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0f
 
             for (i in 0 until barCount) {

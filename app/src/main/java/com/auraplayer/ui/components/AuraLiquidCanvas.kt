@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -69,6 +70,53 @@ fun AuraLiquidCanvas(
         label = "breathing_pulse"
     )
 
+    val colorsNode1 = remember(primaryColor) {
+        listOf(
+            primaryColor,
+            primaryColor.copy(alpha = 0.60f),
+            primaryColor.copy(alpha = 0.18f),
+            Color.Transparent
+        )
+    }
+    val colorsNode2 = remember(secondaryColor) {
+        listOf(
+            secondaryColor,
+            secondaryColor.copy(alpha = 0.52f),
+            secondaryColor.copy(alpha = 0.14f),
+            Color.Transparent
+        )
+    }
+    val colorsNode3 = remember(tertiaryColor) {
+        listOf(
+            tertiaryColor,
+            tertiaryColor.copy(alpha = 0.50f),
+            Color.Transparent
+        )
+    }
+    val colorsNode4 = remember(primaryColor, secondaryColor) {
+        listOf(
+            primaryColor,
+            secondaryColor.copy(alpha = 0.40f),
+            Color.Transparent
+        )
+    }
+    val colorsNode5 = remember(tertiaryColor) {
+        listOf(
+            Color(0xFF00F0FF),
+            tertiaryColor.copy(alpha = 0.35f),
+            Color.Transparent
+        )
+    }
+    val contrastBrush = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.Black.copy(alpha = 0.30f),
+                Color.Black.copy(alpha = 0.15f),
+                Color.Black.copy(alpha = 0.60f)
+            )
+        )
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
@@ -87,17 +135,13 @@ fun AuraLiquidCanvas(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0.0f to primaryColor.copy(alpha = n1A),
-                        0.45f to primaryColor.copy(alpha = n1A * 0.60f),
-                        0.80f to primaryColor.copy(alpha = n1A * 0.18f),
-                        1.0f to Color.Transparent
-                    ),
+                    colors = colorsNode1,
                     center = Offset(n1X, n1Y),
                     radius = n1R
                 ),
                 radius = n1R,
-                center = Offset(n1X, n1Y)
+                center = Offset(n1X, n1Y),
+                alpha = n1A
             )
 
             // Nodo 2: Mancha Líquida Secundaria en Órbita
@@ -108,17 +152,13 @@ fun AuraLiquidCanvas(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0.0f to secondaryColor.copy(alpha = n2A),
-                        0.50f to secondaryColor.copy(alpha = n2A * 0.52f),
-                        0.85f to secondaryColor.copy(alpha = n2A * 0.14f),
-                        1.0f to Color.Transparent
-                    ),
+                    colors = colorsNode2,
                     center = Offset(n2X, n2Y),
                     radius = n2R
                 ),
                 radius = n2R,
-                center = Offset(n2X, n2Y)
+                center = Offset(n2X, n2Y),
+                alpha = n2A
             )
 
             // Nodo 3: Aurora Terciaria Flotante (Efecto Místico Violeta / Cian)
@@ -129,16 +169,13 @@ fun AuraLiquidCanvas(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0.0f to tertiaryColor.copy(alpha = n3A),
-                        0.40f to tertiaryColor.copy(alpha = n3A * 0.50f),
-                        1.0f to Color.Transparent
-                    ),
+                    colors = colorsNode3,
                     center = Offset(n3X, n3Y),
                     radius = n3R
                 ),
                 radius = n3R,
-                center = Offset(n3X, n3Y)
+                center = Offset(n3X, n3Y),
+                alpha = n3A
             )
 
             // Nodo 4: Bombo Sub-Bass Deep Pulse (Centro inferior)
@@ -149,16 +186,13 @@ fun AuraLiquidCanvas(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0.0f to primaryColor.copy(alpha = n4A),
-                        0.50f to secondaryColor.copy(alpha = n4A * 0.40f),
-                        1.0f to Color.Transparent
-                    ),
+                    colors = colorsNode4,
                     center = Offset(n4X, n4Y),
                     radius = n4R
                 ),
                 radius = n4R,
-                center = Offset(n4X, n4Y)
+                center = Offset(n4X, n4Y),
+                alpha = n4A
             )
 
             // Nodo 5: Destello de Alta Frecuencia / Shimmer en Agudos
@@ -169,28 +203,17 @@ fun AuraLiquidCanvas(
 
             drawCircle(
                 brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0.0f to Color(0xFF00F0FF).copy(alpha = n5A),
-                        0.55f to tertiaryColor.copy(alpha = n5A * 0.35f),
-                        1.0f to Color.Transparent
-                    ),
+                    colors = colorsNode5,
                     center = Offset(n5X, n5Y),
                     radius = n5R
                 ),
                 radius = n5R,
-                center = Offset(n5X, n5Y)
+                center = Offset(n5X, n5Y),
+                alpha = n5A
             )
 
             // Capa 6: Velo de Contraste Profundo para Legibilidad de Textos
-            drawRect(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Black.copy(alpha = 0.30f),
-                        Color.Black.copy(alpha = 0.15f),
-                        Color.Black.copy(alpha = 0.60f)
-                    )
-                )
-            )
+            drawRect(brush = contrastBrush)
         }
     }
 }

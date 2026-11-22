@@ -149,7 +149,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -442,7 +441,6 @@ fun MusicScreen(
     val themeSecondary = MaterialTheme.colorScheme.secondary
     val themeTertiary = MaterialTheme.colorScheme.tertiary
     val isMysterious = com.auraplayer.ui.theme.isMysteriousAccent(currentAccent)
-    val liveMistBass by com.auraplayer.audio.RealtimeVisualizerManager.instance.bassEnergyState.collectAsState()
 
     // Canción destinada por el azar cósmico: cambia cada día del año
     val dailyArcaneSong = remember(songs) {
@@ -451,16 +449,6 @@ fun MusicScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Niebla espectral flotando detrás de todo el contenido de la biblioteca (Suite Misteriosa)
-        if (isMysterious) {
-            com.auraplayer.ui.components.PhantomMistOverlay(
-                accentColor = themePrimary,
-                secondaryColor = themeSecondary,
-                bassEnergy = liveMistBass,
-                isPlaying = com.auraplayer.service.PlaybackService.isCurrentlyPlaying
-            )
-        }
-
     Column(
         modifier = Modifier
             .fillMaxSize()

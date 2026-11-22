@@ -56,6 +56,9 @@ fun NeonPlasmaCrown(
             primaryColor.copy(alpha = 0.65f)
         )
     }
+    val sweepBrush = remember(brushColors) {
+        Brush.sweepGradient(brushColors)
+    }
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val centerX = size.width / 2f
@@ -89,7 +92,7 @@ fun NeonPlasmaCrown(
 
         drawPath(
             path = cachedPath,
-            brush = Brush.sweepGradient(brushColors, center = center),
+            brush = sweepBrush,
             style = Stroke(
                 width = if (isPlaying) 3.0f else 1.2f,
                 cap = StrokeCap.Round

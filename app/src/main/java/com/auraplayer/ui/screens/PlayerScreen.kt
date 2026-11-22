@@ -1485,10 +1485,6 @@ fun PlayerScreen(
                             },
                             label = "visualizer_song_transition"
                         ) { _ ->
-                                // Bajo fluido: recolectado del FFT real (~20 Hz) en vez del tick de posición (400 ms)
-                                val rawBassEnergy by com.auraplayer.audio.RealtimeVisualizerManager.instance.bassEnergyState.collectAsState()
-                                val liveBassEnergy = if (isPlaying) rawBassEnergy else 0.05f
-
                             // Audiophile Stage: Dynamic Ambient Bloom multi-layer halo
                             Box(
                                 modifier = Modifier.fillMaxWidth(),
@@ -1524,13 +1520,14 @@ fun PlayerScreen(
                                         )
                                     }
 
-                                    // Outer atmospheric diffusion halo (120 FPS GPU RenderNode)
+                                    // Outer atmospheric diffusion halo (120 FPS GPU RenderNode - zero recomposition)
                                     Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
                                             .graphicsLayer {
-                                                val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse.value
-                                                val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
+                                                val liveBass = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true)
+                                                val bloomScale = (0.95f + (liveBass * 0.22f)) * bloomPulse.value
+                                                val bloomAlpha = (0.35f + (liveBass * 0.45f)).coerceIn(0.2f, 0.88f)
                                                 scaleX = bloomScale * 1.15f
                                                 scaleY = bloomScale * 1.15f
                                                 alpha = (bloomAlpha * 0.45f).coerceIn(0f, 1f)
@@ -1538,13 +1535,14 @@ fun PlayerScreen(
                                             .clip(androidx.compose.foundation.shape.CircleShape)
                                             .background(outerBloomBrush)
                                     )
-                                    // Core glowing aura (120 FPS GPU RenderNode)
+                                    // Core glowing aura (120 FPS GPU RenderNode - zero recomposition)
                                     Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
                                             .graphicsLayer {
-                                                val bloomScale = (0.95f + (liveBassEnergy * 0.22f)) * bloomPulse.value
-                                                val bloomAlpha = (0.35f + (liveBassEnergy * 0.45f)).coerceIn(0.2f, 0.88f)
+                                                val liveBass = com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true)
+                                                val bloomScale = (0.95f + (liveBass * 0.22f)) * bloomPulse.value
+                                                val bloomAlpha = (0.35f + (liveBass * 0.45f)).coerceIn(0.2f, 0.88f)
                                                 scaleX = bloomScale
                                                 scaleY = bloomScale
                                                 alpha = (bloomAlpha * 0.65f).coerceIn(0f, 1f)
@@ -1573,10 +1571,6 @@ fun PlayerScreen(
 
                                 if (centerVisualizerMode == 0) {
                                     // Skin Carátula Cuadrada Completa (Full Square Album Art Hi-Fi)
-                                    val bassEnergy = liveBassEnergy
-                                    val dynamicElevation = if (isPlaying) (16.dp + (18.dp * bassEnergy)) else 10.dp
-                                    val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
-
                                     Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
@@ -1608,12 +1602,14 @@ fun PlayerScreen(
                                             .padding(vertical = 4.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        // Halo ambiental cuadrado
+                                        // Halo ambiental cuadrado (120 FPS GPU RenderNode - zero recomposition)
                                         Box(
                                             modifier = Modifier
                                                 .size(maxArtSize * 1.06f)
                                                 .graphicsLayer {
-                                                    alpha = dynamicGlowAlpha * 0.70f
+                                                    val liveBass = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0.05f
+                                                    val glowAlpha = (0.35f + (liveBass * 0.55f)).coerceIn(0.2f, 0.95f)
+                                                    alpha = glowAlpha * 0.70f
                                                 }
                                                 .background(
                                                     Brush.radialGradient(
@@ -1697,10 +1693,6 @@ fun PlayerScreen(
                                     }
                                 } else if (centerVisualizerMode == 1) {
                                     // Glowing Ambient Aura Disc with Vinyl Record Grooves (Dynamic Palette Glow)
-                                    val bassEnergy = liveBassEnergy
-                                    val dynamicElevation = if (isPlaying) (18.dp + (22.dp * bassEnergy)) else 12.dp
-                                    val dynamicGlowAlpha = if (isPlaying) (0.35f + (bassEnergy * 0.55f)).coerceIn(0.2f, 0.95f) else 0.2f
-
                                      Box(
                                         modifier = Modifier
                                             .size(maxArtSize)
@@ -1737,7 +1729,9 @@ fun PlayerScreen(
                                             modifier = Modifier
                                                 .size(maxArtSize * 1.08f)
                                                 .graphicsLayer {
-                                                    alpha = dynamicGlowAlpha * 0.70f
+                                                    val liveBass = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0.05f
+                                                    val glowAlpha = (0.35f + (liveBass * 0.55f)).coerceIn(0.2f, 0.95f)
+                                                    alpha = glowAlpha * 0.70f
                                                 }
                                                 .background(
                                                     Brush.radialGradient(
@@ -1979,7 +1973,7 @@ fun PlayerScreen(
                                 AnalogVuMetersSkin(
                                     song = currentMedia,
                                     isPlaying = isPlaying,
-                                    bassEnergy = liveBassEnergy,
+                                    bassEnergy = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0.05f,
                                     onTap = {
                                         AuraHaptic.click(view)
                                         cycleVisualizerSkin()
@@ -2025,7 +2019,7 @@ fun PlayerScreen(
                                     ArcaneMonolithSkin(
                                         song = currentMedia,
                                         isPlaying = isPlaying,
-                                        bassEnergy = liveBassEnergy,
+                                        bassEnergy = if (isPlaying) com.auraplayer.audio.RealtimeVisualizerManager.instance.getBassEnergy(true) else 0.05f,
                                         accentColor = activeAccent,
                                         secondaryColor = MaterialTheme.colorScheme.secondary,
                                         onTap = {
